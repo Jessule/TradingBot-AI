@@ -354,7 +354,7 @@
   }
 
   /* STATS */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); }
+  .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); }
   .stat-cell { background: var(--surface); padding: 7px 12px; }
   .stat-cell-label { font-size: 0.56rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
   .stat-cell-value { font-family: var(--mono); font-size: 0.85rem; font-weight: 600; }
@@ -437,6 +437,41 @@
     cursor: pointer; font-size: 0.63rem; font-family: var(--font); font-weight: 600;
   }
   .close-btn:hover { background: rgba(255,77,106,0.25); }
+
+  /* HISTORIAL DE MOVIMIENTOS */
+  .movements-panel {
+    height: 130px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; flex-direction: column;
+  }
+  .movements-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 14px; border-bottom: 1px solid var(--border);
+  }
+  .movements-body { overflow-y: auto; flex: 1; padding: 2px 0; }
+  .clear-all-btn {
+    background: var(--red-dim); color: var(--red);
+    border: 1px solid rgba(255,77,106,0.25);
+    padding: 3px 9px; border-radius: 5px;
+    cursor: pointer; font-size: 0.62rem; font-family: var(--font); font-weight: 600;
+  }
+  .clear-all-btn:hover { background: rgba(255,77,106,0.22); }
+  .mov-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 4px 14px; border-bottom: 1px solid rgba(30,42,58,0.4);
+  }
+  .mov-row:hover { background: rgba(255,255,255,0.02); }
+  .mov-text { font-family: var(--mono); font-size: 0.68rem; line-height: 1.4; }
+  .mov-time { color: var(--text3); margin-right: 4px; }
+  .mov-del {
+    flex-shrink: 0;
+    background: transparent; color: var(--text3);
+    border: 1px solid var(--border); border-radius: 4px;
+    width: 18px; height: 18px; line-height: 1;
+    cursor: pointer; font-size: 0.62rem; transition: all 0.15s;
+  }
+  .mov-del:hover { color: var(--red); border-color: var(--red); background: var(--red-dim); }
 
   /* LOG */
   .log-panel {

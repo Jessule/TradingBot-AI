@@ -170,12 +170,13 @@
 
     <!-- QUANTITY CONTROL -->
     <div class="section">
-      <div class="section-title">Tamaño de posición</div>
+      <div class="section-title">Tamaño de posición · Bot y Manual</div>
+      <div style="font-size:0.6rem;color:var(--text3);margin-bottom:7px;line-height:1.4;">El bot y las órdenes manuales usan este tamaño. Las acciones pueden ser fraccionarias (ej. 1.3).</div>
       <div style="margin-bottom:10px;">
         <select class="risk-input" id="qty-mode-select" onchange="setQtyMode(this.value)">
           <option value="pct">% del Capital</option>
           <option value="usd">Cantidad USD</option>
-          <option value="shares">Acciones Manuales</option>
+          <option value="shares">Nº de Acciones</option>
         </select>
       </div>
       <div id="qty-pct-row">
@@ -191,8 +192,8 @@
         <input type="number" id="qty-usd-input" class="risk-input" value="1000" min="10" step="10" onchange="syncQtyInput()">
       </div>
       <div id="qty-shares-row" style="display:none;">
-        <label style="font-size:0.58rem;color:var(--text2);text-transform:uppercase;margin-bottom:3px;display:block;">Número de acciones</label>
-        <input type="number" id="qty-shares-input" class="risk-input" value="1" min="1" max="10000" onchange="syncQtyInput()">
+        <label style="font-size:0.58rem;color:var(--text2);text-transform:uppercase;margin-bottom:3px;display:block;">Nº de acciones (admite decimales)</label>
+        <input type="number" id="qty-shares-input" class="risk-input" value="1" min="0.01" max="100000" step="0.01" placeholder="ej. 1.3" onchange="syncQtyInput()">
       </div>
     </div>
 
@@ -231,6 +232,11 @@
     <!-- STATS -->
     <div class="stats-grid" id="stats-grid">
       <div class="stat-cell">
+        <div class="stat-cell-label">Valor Total Cuenta</div>
+        <div class="stat-cell-value" id="stat-account-value">$10,000.00</div>
+        <div class="stat-cell-sub" id="stat-account-value-pct">0.00%</div>
+      </div>
+      <div class="stat-cell">
         <div class="stat-cell-label">Capital disponible</div>
         <div class="stat-cell-value" id="stat-capital">$10,000.00</div>
       </div>
@@ -250,10 +256,11 @@
       </div>
     </div>
 
-    <!-- CHART TABS hidden, only TradingView -->
-    <div style="display:none;">
+    <!-- CHART TABS -->
+    <div style="display:flex;align-items:center;border-bottom:1px solid var(--border);background:var(--surface);">
       <button class="chart-tab active" onclick="switchChartView('tradingview')" id="tab-tradingview">TradingView</button>
-      <button class="chart-tab" onclick="switchChartView('realtime')" id="tab-realtime">Live</button>
+      <button class="chart-tab" onclick="switchChartView('realtime')" id="tab-realtime">⚡ En Vivo</button>
+      <span style="margin-left:auto;padding:0 12px;font-size:0.6rem;color:var(--text3);">TradingView (acciones) ~15min retraso · "En Vivo" = precio real sin retraso</span>
     </div>
 
     <!-- TRADINGVIEW CHART -->
@@ -291,18 +298,11 @@
 
     <!-- REALTIME CHART -->
     <div id="chart-realtime-view" style="flex:1;display:none;flex-direction:column;background:var(--bg);">
-      <div style="padding:10px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:0.7rem;color:var(--text2);">Actualización en vivo cada 1 segundo</div>
-        <select class="risk-input" id="realtime-tf" onchange="updateRealtimeChart()" style="width:100px;padding:4px;font-size:0.7rem;">
-          <option value="1m">1 minuto</option>
-          <option value="5m">5 minutos</option>
-          <option value="15m">15 minutos</option>
-          <option value="1h">1 hora</option>
-          <option value="1d">1 día</option>
-          <option value="1w" selected>1 semana</option>
-        </select>
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:0.7rem;color:var(--accent);font-weight:600;">⚡ Precio real en vivo — sin retraso (Yahoo / Binance)</div>
+        <div style="font-size:0.62rem;color:var(--text2);">Se actualiza cada 3-5s</div>
       </div>
-      <canvas id="realtime-canvas" style="flex:1;"></canvas>
+      <div style="flex:1;position:relative;min-height:0;"><canvas id="realtime-canvas" style="position:absolute;inset:0;"></canvas></div>
     </div>
 
     <!-- POSITIONS -->
@@ -332,6 +332,20 @@
             <tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px;font-size:0.7rem;">No hay posiciones abiertas</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- HISTORIAL DE MOVIMIENTOS -->
+    <div class="movements-panel">
+      <div class="movements-header">
+        <div class="positions-title">Historial de movimientos</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="movements-count" style="font-family:var(--mono);font-size:0.66rem;color:var(--text2);">0 mov.</span>
+          <button class="clear-all-btn" onclick="clearMovements()" title="Vaciar todo el historial">Vaciar todo</button>
+        </div>
+      </div>
+      <div class="movements-body" id="movements-body">
+        <div style="text-align:center;color:var(--text3);padding:14px;font-size:0.7rem;">Sin movimientos todavía</div>
       </div>
     </div>
 
