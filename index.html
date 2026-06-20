@@ -62,7 +62,7 @@
 </head>
 <body>
 <style>
-  /* ---- Añadidos Circle Essence sobre FLUX ---- */
+  /* ---- Circle Essence additions over FLUX ---- */
   #topbar{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
   .tb-time{flex:1;min-width:0;}
   .tb-time .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
@@ -87,12 +87,25 @@
   .ov-bd{font-size:.74rem;color:var(--text);line-height:1.8;background:rgba(0,212,255,.05);border:1px solid var(--bord);border-radius:12px;padding:12px 16px;max-width:300px;width:100%;}
   .ov-bd b{color:var(--p);}
   .ov-bd .neg{color:var(--acc);}
+  .ov-bd .pos{color:var(--grn);}
   .row-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
   button.alt{border-color:var(--dim);color:var(--text);min-width:150px;animation:none;}
   button.danger{border-color:var(--acc);color:var(--acc);min-width:150px;animation:none;}
   button.small{min-width:0;padding:11px 22px;font-size:.72rem;letter-spacing:2px;}
 
-  /* árbol de mejoras */
+  /* in-run upgrade cards */
+  #runup-ov{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:rgba(5,8,16,.93);backdrop-filter:blur(8px);font-family:var(--font);}
+  #runup-ov.show{display:flex;}
+  .ru-title{font-size:.66rem;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--dim);}
+  .ru-lv{font-size:1.6rem;font-weight:800;letter-spacing:4px;text-transform:uppercase;background:linear-gradient(135deg,var(--p),var(--grn));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .ru-cards{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
+  .ru-card{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--bord);border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .12s;text-align:left;}
+  .ru-card:active{transform:scale(.97);border-color:var(--p);background:rgba(0,212,255,.1);}
+  .ru-card .ic{font-size:1.7rem;flex-shrink:0;}
+  .ru-card .nm{font-size:.95rem;font-weight:800;color:var(--text);}
+  .ru-card .ds{font-size:.7rem;color:var(--dim);font-weight:600;margin-top:2px;}
+
+  /* upgrade tree */
   #tree-ov{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;background:rgba(5,8,16,.97);backdrop-filter:blur(10px);font-family:var(--font);}
   #tree-ov.show{display:flex;}
   .tree-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:max(14px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--bord);}
@@ -126,11 +139,11 @@
 <div id="hud">
   <div id="topbar">
     <div class="tb-time">
-      <div class="row"><span class="lbl">Tiempo</span><span class="clk" id="clk">2:00</span></div>
+      <div class="row"><span class="lbl">Time</span><span class="clk" id="clk">2:00</span></div>
       <div class="tb-bar"><div class="fill" id="time-fill"></div></div>
     </div>
     <div class="tb-ess"><div class="coin"></div><div><div class="amt" id="ess-amt">0</div><div class="l">Essence</div></div></div>
-    <button id="exit-btn" onclick="requestExit()">⏏ Salir</button>
+    <button id="exit-btn" onclick="requestExit()">⏏ Quit</button>
   </div>
   <div class="hud-row">
     <div class="hud-cell"><div class="hud-val" id="flux-el">0</div><div class="hud-lbl">FLUX</div></div>
@@ -140,7 +153,7 @@
   </div>
   <div class="xp-wrap">
     <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
-    <div class="xp-text" id="xp-text">0 / 10 orbs to level up</div>
+    <div class="xp-text" id="xp-text">Level 1 · 0 / 10 orbs</div>
   </div>
 </div>
 <canvas id="canvas"></canvas>
@@ -151,7 +164,7 @@
 <div id="overlay">
   <div class="ov-eye">Circle Essence Challenge</div>
   <div class="ov-title">FLUX</div>
-  <p class="ov-hint">Tienes <b style="color:var(--gold)">2 minutos</b>. Toca los círculos antes de que escapen — cada fallo cuesta una vida.<br>Con el tiempo salen más círculos y van más rápido.<br>Al acabar ganas <b style="color:var(--p)">Circle Essence</b> según tus circles.</p>
+  <p class="ov-hint">You have <b style="color:var(--gold)">2 minutes</b>. Tap the circles before they escape — every miss costs a life.<br>It gets harder over time: more circles, faster.<br>Level up to pick <b style="color:var(--grn)">in-run upgrades</b>, then earn <b style="color:var(--p)">Circle Essence</b>.</p>
   <div class="orb-legend">
     <div class="orb-pip"><div class="orb-dot" style="background:#00d4ff;box-shadow:0 0 6px #00d4ff"></div><span style="color:#00d4ff">Normal</span></div>
     <div class="orb-pip"><div class="orb-dot" style="background:#ffcc00;box-shadow:0 0 6px #ffcc00"></div><span style="color:#ffcc00">Boost ×5</span></div>
@@ -160,17 +173,24 @@
   <div class="stats-grid" id="start-stats" style="display:none"></div>
   <div class="row-btns">
     <button id="btn">START</button>
-    <button class="alt small" onclick="openTree()">🌳 Mejoras</button>
+    <button class="alt small" onclick="openTree()">🌳 Upgrades</button>
   </div>
 </div>
 
-<!-- Árbol de mejoras -->
+<!-- In-run upgrade picker -->
+<div id="runup-ov">
+  <div class="ru-title">Level Up — Choose an upgrade</div>
+  <div class="ru-lv" id="ru-lv">LEVEL 2</div>
+  <div class="ru-cards" id="ru-cards"></div>
+</div>
+
+<!-- Upgrade tree -->
 <div id="tree-ov">
   <div class="tree-top">
-    <h2>Árbol de mejoras</h2>
+    <h2>Upgrade Tree</h2>
     <div style="display:flex;gap:8px;align-items:center;">
       <div class="wal"><div class="coin"></div><span class="amt" id="tree-wal">0</span></div>
-      <button class="alt small" onclick="closeTree()">Volver</button>
+      <button class="alt small" onclick="closeTree()">Back</button>
     </div>
   </div>
   <div class="tree-scroll"><div class="tree-grid" id="tree-grid"></div></div>
@@ -190,36 +210,51 @@ function fmtNum(n){if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1
 const KEY='flux_v3';
 const stor={load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch{return{};}},save(d){try{const c=this.load();localStorage.setItem(KEY,JSON.stringify({...c,...d}));}catch{}}};
 
-/* ===== ÁRBOL DE MEJORAS ===== */
+/* ===== PERSISTENT UPGRADE TREE ===== */
 const TREE=[
-  {id:'abundancia',icon:'⭕',title:'Abundancia',desc:'Más círculos a la vez.',levels:[
-    {cost:6,label:'+1 círculo'},{cost:14,label:'+1 círculo'},{cost:26,label:'+1 círculo'},{cost:42,label:'+1 círculo'},{cost:65,label:'+1 círculo'}]},
-  {id:'esencia',icon:'💎',title:'Esencia',desc:'Más Essence por círculo (XP).',levels:[
+  {id:'abundance',icon:'⭕',title:'Abundance',desc:'More circles on screen at once.',levels:[
+    {cost:6,label:'+1 circle'},{cost:14,label:'+1 circle'},{cost:26,label:'+1 circle'},{cost:42,label:'+1 circle'},{cost:65,label:'+1 circle'}]},
+  {id:'essence',icon:'💎',title:'Essence',desc:'More Essence per circle (XP).',levels:[
     {cost:10,label:'+15% essence'},{cost:22,label:'+15% essence'},{cost:40,label:'+20% essence'},{cost:68,label:'+20% essence'},{cost:110,label:'+25% essence'}]},
-  {id:'calma',icon:'🐢',title:'Calma',desc:'Círculos más lentos y duran más.',levels:[
-    {cost:14,label:'-9% velocidad'},{cost:28,label:'-9% velocidad'},{cost:50,label:'-9% velocidad'},{cost:82,label:'-12% velocidad'}]},
-  {id:'tiempo',icon:'⏳',title:'Tiempo',desc:'Más segundos de reto.',levels:[
-    {cost:22,label:'+15 segundos'},{cost:48,label:'+15 segundos'},{cost:90,label:'+20 segundos'}]},
-  {id:'fortuna',icon:'🌟',title:'Fortuna',desc:'Más círculos Boost ×5.',levels:[
+  {id:'calm',icon:'🐢',title:'Calm',desc:'Circles move slower & last longer.',levels:[
+    {cost:14,label:'-9% speed'},{cost:28,label:'-9% speed'},{cost:50,label:'-9% speed'},{cost:82,label:'-12% speed'}]},
+  {id:'time',icon:'⏳',title:'Time',desc:'More seconds per challenge.',levels:[
+    {cost:22,label:'+15 seconds'},{cost:48,label:'+15 seconds'},{cost:90,label:'+20 seconds'}]},
+  {id:'fortune',icon:'🌟',title:'Fortune',desc:'More Boost ×5 circles appear.',levels:[
     {cost:35,label:'+4% boost'},{cost:75,label:'+4% boost'},{cost:130,label:'+5% boost'}]},
 ];
 function lvl(id){const u=stor.load().up||{};return u[id]||0;}
 function setLvl(id,v){const s=stor.load();const u=s.up||{};u[id]=v;stor.save({up:u});}
 function branchUnlocked(i){if(i===0)return true;return lvl(TREE[i-1].id)>=1;}
 const EFF={
-  baseTarget(){return 1+lvl('abundancia');},
-  essMult(){const inc=[.15,.15,.20,.20,.25];let m=1;for(let i=0;i<lvl('esencia');i++)m+=inc[i];return m;},
-  speedFactor(){const d=[.09,.09,.09,.12];let f=1;for(let i=0;i<lvl('calma');i++)f*=(1-d[i]);return f;},
-  lifeFactor(){return 1+lvl('calma')*0.08;},
-  rateFactor(){return Math.max(.5,1-lvl('abundancia')*0.07);},
-  duration(){const a=[15,15,20];let d=120;for(let i=0;i<lvl('tiempo');i++)d+=a[i];return d;},
-  boostChance(){return .07+lvl('fortuna')*.04;}
+  baseTarget(){return 1+lvl('abundance');},
+  essMult(){const inc=[.15,.15,.20,.20,.25];let m=1;for(let i=0;i<lvl('essence');i++)m+=inc[i];return m;},
+  speedFactor(){const d=[.09,.09,.09,.12];let f=1;for(let i=0;i<lvl('calm');i++)f*=(1-d[i]);return f;},
+  lifeFactor(){return 1+lvl('calm')*0.08;},
+  rateFactor(){return Math.max(.5,1-lvl('abundance')*0.07);},
+  duration(){const a=[15,15,20];let d=120;for(let i=0;i<lvl('time');i++)d+=a[i];return d;},
+  boostChance(){return lvl('fortune')*.04;}
 };
-function pickType(){const r=Math.random();if(r<.03)return 'SHIELD';if(r<.03+EFF.boostChance())return 'BOOST';return 'NORMAL';}
+
+/* ===== IN-RUN UPGRADES (roguelite cards) ===== */
+const RUN_UPGRADES=[
+  {ic:'🐢',nm:'Time Warp',ds:'Circles move 12% slower',ap:()=>{runMods.speed*=0.88;}},
+  {ic:'⭕',nm:'Big Circles',ds:'Circles are 16% bigger',ap:()=>{runMods.radius*=1.16;}},
+  {ic:'⚡',nm:'Overcharge',ds:'+25% Flux per tap',ap:()=>{runMods.flux*=1.25;}},
+  {ic:'💎',nm:'Essence Surge',ds:'+20% Essence gain',ap:()=>{runMods.ess*=1.20;}},
+  {ic:'⏳',nm:'Lingering',ds:'Circles last 18% longer',ap:()=>{runMods.life*=1.18;}},
+  {ic:'❤️',nm:'Repair',ds:'Restore 1 life',ap:()=>{lives=Math.min(3,lives+1);updateHUD();}},
+  {ic:'🌟',nm:'Lucky',ds:'+6% Boost circles this run',ap:()=>{runMods.boost+=0.06;}},
+  {ic:'🎯',nm:'Combo Master',ds:'Stronger streak essence',ap:()=>{runMods.streak+=0.012;}},
+];
+
+let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streak:0.015};
+
+function pickType(){const r=Math.random();const boost=.07+EFF.boostChance()+(running?runMods.boost:0);if(r<.03)return 'SHIELD';if(r<.03+boost)return 'BOOST';return 'NORMAL';}
 
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
 const overlay=document.getElementById('overlay'),banner=document.getElementById('banner'),popup=document.getElementById('popup'),flashOv=document.getElementById('flash-overlay');
-const fluxEl=document.getElementById('flux-el'),levelEl=document.getElementById('level-el')||{textContent:''},multEl=document.getElementById('mult-el'),xpFill=document.getElementById('xp-fill'),xpText=document.getElementById('xp-text');
+const fluxEl=document.getElementById('flux-el'),multEl=document.getElementById('mult-el'),xpFill=document.getElementById('xp-fill'),xpText=document.getElementById('xp-text');
 const circlesEl=document.getElementById('circles-el'),essAmt=document.getElementById('ess-amt'),clkEl=document.getElementById('clk'),timeFill=document.getElementById('time-fill');
 const hearts=['h1','h2','h3'].map(id=>document.getElementById(id));
 const startStats=document.getElementById('start-stats');
@@ -234,13 +269,13 @@ function rand(a,b){return Math.random()*(b-a)+a;}
 function progress(){return Math.min(1,(DURATION-timeLeft)/DURATION);}
 function getConf(){
   const t=progress();
-  const speedMul=(1+t*0.9)*EFF.speedFactor();
+  const speedMul=(1+t*1.7)*EFF.speedFactor()*runMods.speed;
   return {
     speed:(1.2+(level-1)*.2)*speedMul,
-    life:Math.max(1400,4800-(level-1)*160)*EFF.lifeFactor(),
-    rate:Math.max(280,(2400-(level-1)*120))*EFF.rateFactor(),
-    radius:Math.max(18,32-Math.floor((level-1)/3)*2),
-    target:EFF.baseTarget()+Math.floor(t*4)
+    life:Math.max(900,(4800-(level-1)*160)*(1-t*0.45))*EFF.lifeFactor()*runMods.life,
+    rate:Math.max(200,(2400-(level-1)*120)*(1-t*0.5))*EFF.rateFactor(),
+    radius:Math.max(15,(32-Math.floor((level-1)/3)*2)*(1-t*0.22))*runMods.radius,
+    target:EFF.baseTarget()+Math.floor(t*6)
   };
 }
 function spawnOrb(ft){
@@ -261,6 +296,18 @@ function flash(el,dur=220){if(!el||!el.classList)return;el.classList.add('flash'
 function showPopup(x,y,text,color){popup.textContent=text;popup.style.cssText=`left:${x-16}px;top:${y-48}px;opacity:1;color:${color};text-shadow:0 0 14px ${color}`;clearTimeout(popup._t);popup._t=setTimeout(()=>popup.style.opacity='0',750);}
 function showBanner(text){banner.textContent=text;banner.classList.add('show');clearTimeout(banner._t);banner._t=setTimeout(()=>banner.classList.remove('show'),2000);}
 function screenFlash(){flashOv.classList.add('show');clearTimeout(flashOv._t);flashOv._t=setTimeout(()=>flashOv.classList.remove('show'),180);}
+
+/* ===== COMPLEX BALANCED ESSENCE FORMULA =====
+   Per circle tapped: base value scales with current level (rewards leveling)
+   and with the current streak (rewards no misses), capped for balance, times
+   in-run Essence modifiers. At the end it's multiplied by the persistent
+   Essence multiplier. Early exit applies a separate time-based penalty. */
+function orbEssence(type){
+  const base=ORB[type].ess;
+  const lvBonus=1+0.06*(level-1);                 // +6% per level
+  const streakBonus=1+runMods.streak*Math.min(streak,30); // capped streak reward
+  return base*lvBonus*streakBonus*runMods.ess;
+}
 function projEssence(){return Math.floor(runEssRaw*essMultRun);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));const m=Math.floor(s/60),sec=s%60;return m+':'+(sec<10?'0':'')+sec;}
 function updateHUD(){
@@ -269,7 +316,7 @@ function updateHUD(){
   if(circlesEl)circlesEl.textContent=circles;
   multEl.textContent=fmtMult(level);
   xpFill.style.width=Math.min(xp/needed*100,100).toFixed(1)+'%';
-  xpText.textContent=`Nivel ${level} · ${xp} / ${needed} orbs · Essence proy. ${projEssence()}`;
+  xpText.textContent=`Level ${level} · ${xp} / ${needed} orbs · ${projEssence()} ess proj.`;
   hearts.forEach((h,i)=>h.classList.toggle('lost',i>=lives));
 }
 function updateWallet(){const e=Math.floor(stor.load().essence||0);if(essAmt)essAmt.textContent=fmtNum(e);const tw=document.getElementById('tree-wal');if(tw)tw.textContent=fmtNum(e);}
@@ -279,14 +326,14 @@ function handleTap(ex,ey){
   for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];if(o.popped||o.escaped)continue;const dx=ex-o.x,dy=ey-o.y;if(dx*dx+dy*dy<=o.r*o.r){
     o.popped=true;const col=ORB[o.type].color||lvCol(level);
     if(o.type==='SHIELD'){
-      if(lives<3){lives++;showBanner('SHIELD — ♥ RESTAURADA');burst(o.x,o.y,'#00f5a0',22);showPopup(o.x,o.y,'+♥','#00f5a0');}
-      else{const bonus=multAt(level)*2;flux+=bonus;showBanner('SHIELD — VIDA LLENA — BONUS!');burst(o.x,o.y,'#00f5a0',18);showPopup(o.x,o.y,'+'+fmtNum(bonus),'#00f5a0');}
+      if(lives<3){lives++;showBanner('SHIELD — LIFE RESTORED');burst(o.x,o.y,'#00f5a0',22);showPopup(o.x,o.y,'+♥','#00f5a0');}
+      else{const bonus=multAt(level)*2;flux+=bonus;showBanner('SHIELD — FULL HP — BONUS!');burst(o.x,o.y,'#00f5a0',18);showPopup(o.x,o.y,'+'+fmtNum(bonus),'#00f5a0');}
     }else{
-      const gained=fluxGain(level,o.type);flux+=gained;streak++;circles++;runEssRaw+=ORB[o.type].ess;
+      const gained=fluxGain(level,o.type)*runMods.flux;flux+=gained;streak++;circles++;runEssRaw+=orbEssence(o.type);
       burst(o.x,o.y,col,o.type==='BOOST'?26:18);showPopup(o.x,o.y,(o.type==='BOOST'?'BOOST! ':'')+'+'+fmtNum(gained),col);flash(fluxEl);flash(circlesEl);
-      if(streak>0&&streak%10===0)showBanner(`🔥 ${streak} RACHA!`);
+      if(streak>0&&streak%10===0)showBanner(`🔥 ${streak} STREAK!`);
       xp++;
-      if(xp>=xpToNext(level)){xp=0;level++;const extra=Math.min(Math.floor(level/4),3);for(let j=0;j<extra;j++)setTimeout(spawnOrb,j*160);showBanner(`▲ NIVEL ${level} — MULT ${fmtMult(level)}`);flash(multEl,300);}
+      if(xp>=xpToNext(level)){xp=0;level++;flash(multEl,300);offerRunUpgrade();}
     }
     const s=stor.load();stor.save({best:Math.max(flux,s.best||0)});
     updateHUD();break;
@@ -294,6 +341,24 @@ function handleTap(ex,ey){
 }
 canvas.addEventListener('touchstart',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();for(const t of e.changedTouches)handleTap(t.clientX-r.left,t.clientY-r.top);},{passive:false});
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleTap(e.clientX-r.left,e.clientY-r.top);});
+
+/* in-run upgrade picker */
+function offerRunUpgrade(){
+  if(!running)return;
+  paused=true;
+  const pool=RUN_UPGRADES.slice();const pick=[];
+  for(let i=0;i<3&&pool.length;i++){pick.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
+  document.getElementById('ru-lv').textContent='LEVEL '+level;
+  const wrap=document.getElementById('ru-cards');wrap.innerHTML='';
+  pick.forEach(u=>{
+    const c=document.createElement('div');c.className='ru-card';
+    c.innerHTML=`<div class="ic">${u.ic}</div><div><div class="nm">${u.nm}</div><div class="ds">${u.ds}</div></div>`;
+    c.onclick=()=>{u.ap();closeRunUpgrade();showBanner(`▲ LEVEL ${level} · ${u.nm}`);};
+    wrap.appendChild(c);
+  });
+  document.getElementById('runup-ov').classList.add('show');
+}
+function closeRunUpgrade(){document.getElementById('runup-ov').classList.remove('show');paused=false;lastTime=performance.now();}
 
 function update(now){
   const realDt=(now-lastTime)/1000;const dt=Math.min((now-lastTime)/16.67,3);lastTime=now;
@@ -312,7 +377,6 @@ function update(now){
     const fadeAt=o.life*.62;o.alpha=age>fadeAt?1-(age-fadeAt)/(o.life-fadeAt):1;o.phase=(o.phase+.052*dt)%(Math.PI*2);
   }
   for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.08*dt;p.alpha-=.02*dt;if(p.alpha<=0)particles.splice(i,1);}
-  // reloj
   clkEl.textContent=fmtTime(timeLeft);clkEl.classList.toggle('low',timeLeft<=15);
   timeFill.style.width=(timeLeft/DURATION*100)+'%';
 }
@@ -323,8 +387,10 @@ function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame
 
 function startGame(){
   orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;
+  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streak:0.015};
   DURATION=EFF.duration();timeLeft=DURATION;essMultRun=EFF.essMult();
   running=true;paused=false;
+  document.getElementById('runup-ov').classList.remove('show');
   clkEl.textContent=fmtTime(timeLeft);clkEl.classList.remove('low');timeFill.style.width='100%';
   updateHUD();updateWallet();
   overlay.style.display='none';resize();
@@ -335,32 +401,36 @@ function startGame(){
 function endGame(early,forced){
   if(!running)return;
   running=false;paused=false;cancelAnimationFrame(animId);
-  const reward=early?forced:projEssence();
+  document.getElementById('runup-ov').classList.remove('show');
+  const full=projEssence();
+  const reward=early?forced:full;
+  const pct=full>0?reward/full:1;
+  const effMult=essMultRun*pct;
   const s=stor.load();
   stor.save({essence:(s.essence||0)+reward,games:(s.games||0)+1,best:Math.max(flux,s.best||0)});
   updateWallet();
   const newEss=Math.floor(stor.load().essence||0);
   overlay.innerHTML=`
-    <div class="ov-eye">${early?'Salida anticipada':'¡Reto completado!'}</div>
+    <div class="ov-eye">${early?'Early exit':'Challenge complete!'}</div>
     <div class="ov-title">FLUX</div>
     <div class="ess-reward"><div class="coin"></div><div class="n">+${fmtNum(reward)}</div></div>
-    <div class="ess-cap">Circle Essence ganada</div>
+    <div class="ess-cap">Circle Essence earned</div>
     <div class="ov-bd">
-      Circles tocados: <b>${circles}</b><br>
-      Multiplicador essence: <b>×${essMultRun.toFixed(2)}</b><br>
-      ${early?'<span class="neg">Penalización por salir aplicada</span><br>':''}
-      Flux del run: <b>${fmtNum(flux)}</b> · Nivel <b>${level}</b><br>
-      Essence total: <b>${fmtNum(newEss)}</b>
+      Circles tapped: <b>${circles}</b><br>
+      Essence multiplier: <b>×${essMultRun.toFixed(2)}</b><br>
+      ${early?`Early-exit penalty: <span class="neg">−${fmtNum(full-reward)}</span><br>Effective multiplier: <b class="neg">×${effMult.toFixed(2)}</b><br>`:''}
+      Run Flux: <b>${fmtNum(flux)}</b> · Level <b>${level}</b><br>
+      Total Essence: <b class="pos">${fmtNum(newEss)}</b>
     </div>
     <div class="row-btns">
-      <button id="btn">▶ Jugar otra vez</button>
-      <button class="alt small" onclick="openTree()">🌳 Mejoras</button>
+      <button id="btn">▶ Play again</button>
+      <button class="alt small" onclick="openTree()">🌳 Upgrades</button>
     </div>`;
   overlay.style.display='flex';
   document.getElementById('btn').addEventListener('click',startGame);
 }
 
-/* ===== SALIR ANTES DE TIEMPO ===== */
+/* ===== EARLY EXIT ===== */
 function requestExit(){
   if(!running||paused)return;
   paused=true;
@@ -369,31 +439,31 @@ function requestExit(){
   const full=projEssence();const payout=Math.floor(full*penalty);
   window._exitPayout=payout;
   overlay.innerHTML=`
-    <div class="ov-eye">¿Salir antes de tiempo?</div>
-    <div class="ov-title" style="font-size:1.8rem">⏏ Salir</div>
-    <p class="ov-warn">Llevas <b>${fmtTime(elapsed)}</b> jugados. Si sales ahora cobras solo el <b>${Math.round(penalty*100)}%</b> de tu Essence.</p>
+    <div class="ov-eye">Quit early?</div>
+    <div class="ov-title" style="font-size:1.8rem">⏏ QUIT</div>
+    <p class="ov-warn">You've played <b>${fmtTime(elapsed)}</b>. Quit now and you only collect <b>${Math.round(penalty*100)}%</b> of your Essence.</p>
     <div class="ov-bd">
       Circles: <b>${circles}</b><br>
-      Essence completa: <b>${full}</b><br>
-      Penalización: <span class="neg">-${full-payout}</span><br>
-      Cobrarías: <b>${payout}</b> 🪙
+      Full Essence: <b>${full}</b><br>
+      Penalty: <span class="neg">−${full-payout}</span><br>
+      You'd collect: <b>${payout}</b> 🪙
     </div>
     <div class="row-btns">
-      <button class="alt small" onclick="cancelExit()">Seguir jugando</button>
-      <button class="danger small" onclick="confirmExit()">Salir y cobrar</button>
+      <button class="alt small" onclick="cancelExit()">Keep playing</button>
+      <button class="danger small" onclick="confirmExit()">Quit & collect</button>
     </div>`;
   overlay.style.display='flex';
 }
 function cancelExit(){overlay.style.display='none';paused=false;lastTime=performance.now();}
 function confirmExit(){overlay.style.display='none';endGame(true,window._exitPayout||0);}
 
-/* ===== ÁRBOL DE MEJORAS UI ===== */
+/* ===== UPGRADE TREE UI ===== */
 function openTree(){document.getElementById('tree-ov').classList.add('show');renderTree();updateWallet();}
 function closeTree(){document.getElementById('tree-ov').classList.remove('show');}
 function buyNode(bid,ni){
   const b=TREE.find(x=>x.id===bid);const owned=lvl(bid);if(ni!==owned)return;
   const node=b.levels[ni];const ess=stor.load().essence||0;
-  if(ess<node.cost){showBanner('Te falta Circle Essence');return;}
+  if(ess<node.cost){showBanner('Not enough Circle Essence');return;}
   stor.save({essence:ess-node.cost});setLvl(bid,owned+1);
   updateWallet();renderTree();
 }
@@ -412,17 +482,17 @@ function renderTree(){
       const el=document.createElement('div');
       let cls='node';if(purchased)cls+=' owned';else if(!unlocked||!isNext)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';
       el.className=cls;
-      el.innerHTML=`<div class="nl">Nivel ${ni+1}</div><div class="ne">${node.label}</div>`+
-        (purchased?'<span class="nc" style="border-color:transparent;color:var(--grn);background:rgba(0,245,160,.1)">Adquirido</span>':`<span class="nc"><span class="mc"></span>${node.cost}</span>`);
+      el.innerHTML=`<div class="nl">Level ${ni+1}</div><div class="ne">${node.label}</div>`+
+        (purchased?'<span class="nc" style="border-color:transparent;color:var(--grn);background:rgba(0,245,160,.1)">Owned</span>':`<span class="nc"><span class="mc"></span>${node.cost}</span>`);
       if(isNext&&unlocked){const btn=el.querySelector('.nc');btn.onclick=()=>buyNode(b.id,ni);}
       col.appendChild(el);
     });
-    if(!unlocked){const ln=document.createElement('div');ln.className='ln';ln.textContent=`🔒 Mejora "${TREE[bi-1].title}" para desbloquear`;col.appendChild(ln);}
+    if(!unlocked){const ln=document.createElement('div');ln.className='ln';ln.textContent=`🔒 Upgrade "${TREE[bi-1].title}" to unlock`;col.appendChild(ln);}
     grid.appendChild(col);
   });
 }
 
-function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtNum(s.best||0)}</div><div class="l">Mejor Flux</div></div><div class="sc"><div class="v">${fmtNum(Math.floor(s.essence||0))}</div><div class="l">Essence</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Retos</div></div>`;}
+function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtNum(s.best||0)}</div><div class="l">Best Flux</div></div><div class="sc"><div class="v">${fmtNum(Math.floor(s.essence||0))}</div><div class="l">Essence</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Runs</div></div>`;}
 
 renderStartStats();updateWallet();
 document.getElementById('btn').addEventListener('click',startGame);
