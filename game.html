@@ -17,13 +17,13 @@
     --yellow: #f5c542;
     --yellow-dim: rgba(245,197,66,0.1);
     --purple: #9d7bff;
-    --text: #eef3fa;
-    --text2: #b3c4d8;
-    --text3: #8597ad;
-    --font: 'Space Grotesk', system-ui, sans-serif;
-    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --text: #e8edf5;
+    --text2: #7a8fa8;
+    --text3: #3d5068;
+    --font: 'Quicksand', system-ui, sans-serif;
+    --mono: 'Quicksand', ui-monospace, monospace;
   }
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
 
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height:100%; overflow:hidden; }
@@ -125,39 +125,26 @@
   .branch-title { font-weight:700; font-size:0.92rem; margin-bottom:4px; text-align:center; }
   .branch-icon { font-size:1.4rem; margin-bottom:2px; }
   .branch-desc { font-size:0.62rem; color:var(--text2); text-align:center; margin-bottom:12px; line-height:1.4; min-height:26px; }
-  /* nodos circulares estilo árbol de habilidades */
   .node {
-    width:160px; display:flex; flex-direction:column; align-items:center; gap:7px;
-    text-align:center; transition:all .18s; position:relative;
+    width:160px; background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:11px 12px; text-align:center; transition:all .18s; position:relative;
   }
   .node + .node { margin-top:0; }
-  .connector { width:3px; height:22px; background:var(--border); }
+  .connector { width:3px; height:18px; background:var(--border); }
   .connector.filled { background:var(--accent); box-shadow:0 0 8px rgba(0,212,160,0.4); }
-  .node-circle {
-    width:62px; height:62px; border-radius:50%; flex-shrink:0;
-    background:var(--surface); border:2px solid var(--border);
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--mono); font-weight:700; font-size:1.05rem; color:var(--text2);
-    transition:all .18s; position:relative;
-  }
   .node .nlvl { font-size:0.55rem; color:var(--text2); text-transform:uppercase; letter-spacing:1px; }
-  .node .neffect { font-size:0.78rem; font-weight:600; line-height:1.3; color:var(--text); }
+  .node .neffect { font-size:0.8rem; font-weight:600; margin:3px 0 7px; line-height:1.3; }
   .node .ncost {
-    display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-weight:700; font-size:0.8rem;
-    background:var(--surface2); padding:4px 10px; border-radius:20px; border:1px solid var(--border); transition:all .15s;
+    display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-weight:700; font-size:0.82rem;
+    background:var(--surface2); padding:4px 10px; border-radius:20px; cursor:pointer; border:1px solid var(--border); transition:all .15s;
   }
   .node .ncost .mini-coin { width:12px; height:12px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #6ffdd6, var(--accent)); }
-  .node.owned .node-circle {
-    border-color:var(--accent); color:var(--accent);
-    background:radial-gradient(circle at 32% 28%, var(--accent-dim), var(--surface));
-    box-shadow:0 0 16px rgba(0,212,160,0.32);
-  }
-  .node.affordable .node-circle { border-color:var(--accent); color:var(--accent); cursor:pointer; box-shadow:0 0 10px rgba(0,212,160,0.2); }
-  .node.affordable .node-circle:hover { background:var(--accent); color:#04150f; box-shadow:0 0 20px rgba(0,212,160,0.55); transform:scale(1.06); }
-  .node.affordable .ncost { border-color:var(--accent); color:var(--accent); cursor:pointer; }
+  .node.owned { border-color:rgba(0,212,160,0.5); background:linear-gradient(160deg, var(--accent-dim), var(--surface)); }
+  .node.owned::after { content:"✓"; position:absolute; top:7px; right:9px; color:var(--accent); font-weight:700; font-size:0.8rem; }
+  .node.affordable .ncost { border-color:var(--accent); color:var(--accent); }
   .node.affordable .ncost:hover { background:var(--accent); color:#04150f; }
   .node.locked { opacity:0.4; filter:grayscale(0.6); }
-  .node.cantafford .node-circle { opacity:0.85; }
+  .node.maxed .ncost { background:var(--accent-dim); color:var(--accent); cursor:default; border-color:transparent; }
   .node.cantafford .ncost { opacity:0.6; cursor:not-allowed; }
   .branch.locked-branch { opacity:0.45; }
   .branch-lock-note { font-size:0.6rem; color:var(--text3); margin-top:8px; text-align:center; max-width:150px; }
@@ -195,45 +182,6 @@
     padding:10px 18px; border-radius:12px; font-size:0.82rem; opacity:0; transition:all .3s; z-index:60; pointer-events:none;
   }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* ---- ANIMACIONES GENERALES ---- */
-  button, .icon-link, .ncost, .node-circle, .lev-btn { transition: transform .12s, box-shadow .2s, background .15s, color .15s, border-color .15s; }
-  button:active, .icon-link:active { transform:scale(0.93); }
-  .view.active { animation: viewIn .32s ease; }
-  @keyframes viewIn { from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
-  .big-btn.play { animation: glowPulse 2.4s ease-in-out infinite; }
-  @keyframes glowPulse {
-    0%,100%{ box-shadow:0 8px 30px rgba(0,212,160,0.35); }
-    50%{ box-shadow:0 8px 42px rgba(0,212,160,0.6); }
-  }
-
-  /* ---- TÍTULO EN OLA ---- */
-  .home-title { font-size:2.6rem; font-weight:700; letter-spacing:-1px; display:inline-flex; justify-content:center; }
-  .home-title .ltr { display:inline-block; animation: wave 2.2s ease-in-out infinite; will-change:transform; }
-  .home-title .ltr.sp { width:0.45em; }
-  .home-title .ltr.accent { color:var(--accent); text-shadow:0 0 18px rgba(0,212,160,0.4); }
-  @keyframes wave { 0%,100%{ transform:translateY(0); } 30%{ transform:translateY(-14px); } 60%{ transform:translateY(2px); } }
-
-  /* ---- CONFIG ---- */
-  .cfg-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
-  .cfg-col { display:flex; flex-direction:column; gap:8px; padding:12px 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
-  .cfg-col input[type=range], .cfg-row input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; }
-  .cfg-select { background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:9px 10px; font-family:var(--font); font-size:0.85rem; cursor:pointer; outline:none; }
-  .cfg-select:focus { border-color:var(--accent); }
-  .cfg-reset-btn { width:100%; margin-top:16px; background:var(--red-dim); color:var(--red); border:1px solid rgba(255,77,106,0.4); border-radius:11px; padding:12px; font-weight:700; font-size:0.9rem; cursor:pointer; font-family:var(--font); transition:all .15s; }
-  .cfg-reset-btn:hover { background:rgba(255,77,106,0.22); }
-  .switch { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
-  .switch input { opacity:0; width:0; height:0; }
-  .switch .sl { position:absolute; inset:0; background:var(--surface2); border:1px solid var(--border); border-radius:24px; transition:.2s; cursor:pointer; }
-  .switch .sl::before { content:''; position:absolute; height:16px; width:16px; left:3px; top:3px; background:var(--text2); border-radius:50%; transition:.2s; }
-  .switch input:checked + .sl { background:var(--accent-dim); border-color:var(--accent); }
-  .switch input:checked + .sl::before { transform:translateX(19px); background:var(--accent); }
-
-  /* ---- CUENTA ATRÁS ---- */
-  .countdown { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(5,8,12,0.72); backdrop-filter:blur(4px); z-index:55; }
-  .countdown.show { display:flex; }
-  .cd-num { font-family:var(--mono); font-weight:700; font-size:6.5rem; color:var(--accent); text-shadow:0 0 36px rgba(0,212,160,0.6); animation: cdPop .8s ease; }
-  @keyframes cdPop { 0%{ transform:scale(0.4); opacity:0; } 35%{ transform:scale(1.12); opacity:1; } 100%{ transform:scale(1); opacity:0.85; } }
 </style>
 </head>
 <body>
@@ -249,7 +197,6 @@
         <div class="lbl">Circle Essence</div>
       </div>
     </div>
-    <button class="icon-link" onclick="UI.openSettings()" title="Configuración">⚙</button>
     <a class="icon-link" href="index.html">← TradeBot</a>
   </div>
 </div>
@@ -258,7 +205,7 @@
 
   <!-- HOME -->
   <div class="view active" id="view-home">
-    <div class="home-title" id="home-title"></div>
+    <div class="home-title">Circle <span>Essence</span></div>
     <div class="home-sub">Tienes <b>2 minutos</b>. Toca todos los círculos que puedas: cuantos más cierres, más Circle Essence ganarás. Pero cuidado — con el tiempo aparecen más círculos y se mueven cada vez más rápido.</div>
     <div class="home-actions">
       <button class="big-btn play" onclick="Game.start()">▶ Empezar reto</button>
@@ -323,54 +270,17 @@
     </div>
   </div>
 
-  <!-- SETTINGS -->
-  <div class="overlay" id="overlay-settings">
-    <div class="modal" style="text-align:left;">
-      <h3 style="text-align:center;">⚙ Configuración</h3>
-      <div class="cfg-row">
-        <span>🔊 Efectos de sonido</span>
-        <label class="switch"><input type="checkbox" id="cfg-sfx"><span class="sl"></span></label>
-      </div>
-      <div class="cfg-row">
-        <span>🎵 Música</span>
-        <label class="switch"><input type="checkbox" id="cfg-music"><span class="sl"></span></label>
-      </div>
-      <div class="cfg-col">
-        <span>Volumen</span>
-        <input type="range" id="cfg-vol" min="0" max="1" step="0.05">
-      </div>
-      <div class="cfg-col">
-        <span>Fuente del texto</span>
-        <select id="cfg-font" class="cfg-select">
-          <option value="'Space Grotesk', system-ui, sans-serif">Space Grotesk</option>
-          <option value="system-ui, -apple-system, sans-serif">Sistema</option>
-          <option value="Georgia, 'Times New Roman', serif">Serif</option>
-          <option value="'JetBrains Mono', ui-monospace, monospace">Monospace</option>
-          <option value="'Trebuchet MS', 'Segoe UI', sans-serif">Trebuchet</option>
-          <option value="'Comic Sans MS', 'Comic Sans', cursive">Redondeada</option>
-        </select>
-      </div>
-      <button class="cfg-reset-btn" id="cfg-reset">↺ Reiniciar progreso</button>
-      <div class="modal-actions"><button class="btn-go" id="cfg-close">Listo</button></div>
-    </div>
-  </div>
-
-  <!-- COUNTDOWN AL REANUDAR -->
-  <div class="countdown" id="countdown"><div class="cd-num" id="cd-num">3</div></div>
-
   <div class="toast" id="toast"></div>
 </div>
 
 <script>
 /* ====================== STATE / PERSISTENCE ====================== */
 const SAVE_KEY = 'circleEssenceSave_v1';
-const ESSENCE_RATE = 0.45;   // nerf de la fórmula de essence
 const State = {
   essence: 0,
   bestCircles: 0,
   runs: 0,
   upgrades: {}, // id -> level
-  settings: {}, // sfx, music, volume, font
 };
 function loadState(){
   try {
@@ -378,12 +288,6 @@ function loadState(){
     if (raw){ Object.assign(State, JSON.parse(raw)); }
   } catch(e){}
   if (!State.upgrades) State.upgrades = {};
-  if (!State.settings) State.settings = {};
-  const s = State.settings;
-  if (s.sfx === undefined)    s.sfx = true;
-  if (s.music === undefined)  s.music = false;
-  if (s.volume === undefined) s.volume = 0.85;
-  if (s.font === undefined)   s.font = "'Space Grotesk', system-ui, sans-serif";
 }
 function saveState(){
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(State)); } catch(e){}
@@ -488,104 +392,6 @@ const Effects = {
   goldenValue(){ return lvl('fortuna') >= 3 ? 6 : 5; }
 };
 
-/* ====================== AUDIO (SFX + MÚSICA SINTÉTICA) ====================== */
-const Sound = {
-  ctx:null, master:null, musicTimer:null,
-  enabledSfx:true, enabledMusic:false, volume:0.85,
-  ensure(){
-    if (!this.ctx){
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return false;
-      this.ctx = new AC();
-      this.master = this.ctx.createGain();
-      this.master.gain.value = this.volume;
-      this.master.connect(this.ctx.destination);
-    }
-    if (this.ctx.state === 'suspended') this.ctx.resume();
-    return true;
-  },
-  // un tono con envolvente; gain alto para que se oiga bien
-  blip(freq, dur, type, gain, slideTo){
-    if (!this.enabledSfx) return;
-    if (!this.ensure()) return;
-    const t = this.ctx.currentTime;
-    const o = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    o.type = type || 'sine';
-    o.frequency.setValueAtTime(freq, t);
-    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(gain || 0.6, t + 0.012);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(this.master);
-    o.start(t); o.stop(t + dur + 0.03);
-  },
-  click(){ this.blip(430, 0.07, 'square', 0.45, 620); },
-  pop(){ this.blip(680, 0.16, 'triangle', 0.85, 1040); },   // click al círculo, bien audible
-  gold(){ this.blip(900, 0.18, 'triangle', 0.85, 1380); setTimeout(()=>this.blip(1240,0.16,'sine',0.7),55); },
-  buy(){ this.blip(540, 0.1, 'sine', 0.7, 820); setTimeout(()=>this.blip(820,0.13,'sine',0.7),90); },
-  beep(){ this.blip(560, 0.14, 'sine', 0.7); },
-  go(){ this.blip(720, 0.28, 'sawtooth', 0.7, 1180); },
-  startMusic(){
-    if (!this.enabledMusic) return;
-    if (!this.ensure()) return;
-    if (this.musicTimer) return;
-    const scale = [196, 233.08, 261.63, 293.66, 349.23, 392, 466.16];
-    const step = ()=>{
-      if (!this.enabledMusic){ this.stopMusic(); return; }
-      if (!this.ctx) return;
-      const t = this.ctx.currentTime;
-      const f = scale[Math.floor(Math.random()*scale.length)] * (Math.random()<0.3?2:1);
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = 'sine'; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.1, t + 0.06);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
-      o.connect(g); g.connect(this.master);
-      o.start(t); o.stop(t + 0.65);
-    };
-    this.musicTimer = setInterval(step, 430);
-  },
-  stopMusic(){ if (this.musicTimer){ clearInterval(this.musicTimer); this.musicTimer = null; } }
-};
-
-function applySettings(){
-  const s = State.settings;
-  Sound.enabledSfx = s.sfx;
-  Sound.enabledMusic = s.music;
-  Sound.volume = s.volume;
-  if (Sound.master) Sound.master.gain.value = s.volume;
-  document.body.style.setProperty('--font', s.font);
-  if (s.music) Sound.startMusic(); else Sound.stopMusic();
-}
-
-function bindSettings(){
-  const s = State.settings;
-  const $ = id => document.getElementById(id);
-  $('cfg-sfx').onchange   = e => { s.sfx = e.target.checked; saveState(); applySettings(); if (s.sfx) Sound.click(); };
-  $('cfg-music').onchange = e => { s.music = e.target.checked; saveState(); applySettings(); };
-  $('cfg-vol').oninput    = e => { s.volume = parseFloat(e.target.value); applySettings(); };
-  $('cfg-vol').onchange   = () => { saveState(); Sound.pop(); };
-  $('cfg-font').onchange  = e => { s.font = e.target.value; saveState(); applySettings(); };
-  $('cfg-reset').onclick  = () => UI.resetProgress();
-  $('cfg-close').onclick  = () => $('overlay-settings').classList.remove('show');
-}
-
-function buildTitle(){
-  const el = document.getElementById('home-title');
-  if (!el) return;
-  const text = 'Circle Essence';
-  const accentStart = text.indexOf('Essence');
-  el.innerHTML = '';
-  [...text].forEach((ch, i)=>{
-    const sp = document.createElement('span');
-    sp.className = 'ltr' + (ch === ' ' ? ' sp' : '') + (i >= accentStart ? ' accent' : '');
-    sp.textContent = ch === ' ' ? ' ' : ch;
-    sp.style.animationDelay = (i * 0.08) + 's';
-    el.appendChild(sp);
-  });
-}
-
 /* ====================== UI ====================== */
 const UI = {
   show(name){
@@ -602,26 +408,6 @@ const UI = {
     document.getElementById('home-runs').textContent = State.runs;
   },
   closeModals(){ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show')); },
-  openSettings(){
-    const s = State.settings;
-    document.getElementById('cfg-sfx').checked = s.sfx;
-    document.getElementById('cfg-music').checked = s.music;
-    document.getElementById('cfg-vol').value = s.volume;
-    document.getElementById('cfg-font').value = s.font;
-    document.getElementById('overlay-settings').classList.add('show');
-  },
-  resetProgress(){
-    if (!confirm('¿Seguro que quieres reiniciar TODO tu progreso? Se borrará tu Essence y todas las mejoras.')) return;
-    State.essence = 0;
-    State.bestCircles = 0;
-    State.runs = 0;
-    State.upgrades = {};
-    saveState();   // conserva los ajustes (audio/fuente)
-    this.renderWallet();
-    this.renderHome();
-    document.getElementById('overlay-settings').classList.remove('show');
-    this.toast('Progreso reiniciado');
-  },
   toast(msg){
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
@@ -661,17 +447,14 @@ const UI = {
         else cls += ' cantafford';
         el.className = cls;
 
-        el.innerHTML = `<div class="node-circle">${purchased ? '✓' : (ni+1)}</div>
-                        <div class="nlvl">Nivel ${ni+1}</div>
+        el.innerHTML = `<div class="nlvl">Nivel ${ni+1}</div>
                         <div class="neffect">${node.label}</div>
                         ${purchased
-                          ? '<span class="ncost" style="background:var(--accent-dim);color:var(--accent);border-color:transparent;">Adquirido</span>'
+                          ? '<span class="ncost" style="background:var(--accent-dim);color:var(--accent);border-color:transparent;cursor:default">Adquirido</span>'
                           : `<span class="ncost"><span class="mini-coin"></span>${node.cost}</span>`}`;
 
         if (isNext && unlocked){
-          const doBuy = ()=> UI.buy(branch.id, ni, node);
-          el.querySelector('.node-circle').onclick = doBuy;
-          el.querySelector('.ncost').onclick = doBuy;
+          el.querySelector('.ncost').onclick = ()=> UI.buy(branch.id, ni, node);
         }
         col.appendChild(el);
       });
@@ -693,7 +476,6 @@ const UI = {
     State.essence -= node.cost;
     State.upgrades[branchId] = owned + 1;
     saveState();
-    Sound.buy();
     UI.renderWallet();
     UI.renderTree();
     const branch = TREE[branchIndex(branchId)];
@@ -797,7 +579,6 @@ const Game = {
     this.circlesPopped++;
     const units = c.gold ? this.goldenValue : 1;
     this.scoreUnits += units;
-    if (c.gold) Sound.gold(); else Sound.pop();
     this.flash(x, y, c.gold ? `+${units}★` : '+1', c.gold);
     // respawn manteniendo el número objetivo
     this.spawn();
@@ -809,13 +590,12 @@ const Game = {
     el.className = 'combo-flash';
     el.textContent = txt;
     el.style.left = x+'px'; el.style.top = y+'px';
-    el.style.color = gold ? 'var(--yellow)' : '#ffffff';   // blanco al recoger círculo normal
+    if (gold) el.style.color = 'var(--yellow)';
     document.getElementById('view-game').appendChild(el);
     setTimeout(()=>el.remove(), 800);
   },
 
-  // nerf: cada círculo rinde menos essence base (rate 0.45)
-  projectedEssence(){ return Math.floor(this.scoreUnits * this.essenceMult * ESSENCE_RATE); },
+  projectedEssence(){ return Math.floor(this.scoreUnits * this.essenceMult); },
 
   updateHud(){
     document.getElementById('hud-circles').textContent = this.circlesPopped;
@@ -863,7 +643,7 @@ const Game = {
     const ctx = this.ctx;
     ctx.clearRect(0,0,this.W,this.H);
     for (const c of this.circles){
-      const pr = c.r;   // el aro no se mueve: radio fijo, sin pulso
+      const pr = c.r + Math.sin(c.pulse)*1.5;
       const g = ctx.createRadialGradient(c.x-pr*0.3, c.y-pr*0.3, pr*0.1, c.x, c.y, pr);
       if (c.gold){
         g.addColorStop(0,'#fff3b0'); g.addColorStop(0.5,'#f5c542'); g.addColorStop(1,'#b88a00');
@@ -906,34 +686,10 @@ const Game = {
   },
   cancelExit(){
     document.getElementById('overlay-exit').classList.remove('show');
-    // cuenta atrás de preparación antes de reanudar
-    this.runCountdown(()=>{
-      this.running = true; this._last = performance.now();
-      // reanudar manteniendo el tiempo transcurrido antes del modal/cuenta atrás
-      this.startTime = performance.now() - (this._pausedElapsed||0);
-      this.raf = requestAnimationFrame(()=>this.loop());
-    });
-  },
-
-  // pantalla 3-2-1-¡YA! para darte margen de prepararte
-  runCountdown(cb){
-    const ov = document.getElementById('countdown');
-    const num = document.getElementById('cd-num');
-    ov.classList.add('show');
-    const show = (txt, go)=>{
-      num.textContent = txt;
-      num.style.animation = 'none'; void num.offsetWidth; num.style.animation = 'cdPop .8s ease';
-      if (go) Sound.go(); else Sound.beep();
-    };
-    let n = 3;
-    show(n);
-    const tick = ()=>{
-      n--;
-      if (n > 0){ show(n); setTimeout(tick, 800); }
-      else if (n === 0){ show('¡YA!', true); setTimeout(tick, 800); }
-      else { ov.classList.remove('show'); cb(); }
-    };
-    setTimeout(tick, 800);
+    this.running = true; this._last = performance.now();
+    // reanudar manteniendo el tiempo transcurrido antes del modal
+    this.startTime = performance.now() - (this._pausedElapsed||0);
+    this.raf = requestAnimationFrame(()=>this.loop());
   },
   confirmExit(){
     document.getElementById('overlay-exit').classList.remove('show');
@@ -966,19 +722,8 @@ const Game = {
 /* ====================== INIT ====================== */
 loadState();
 Game.init();
-buildTitle();
-bindSettings();
-applySettings();
 UI.renderWallet();
 UI.renderHome();
-
-// SFX en cada click (excepto el lienzo del juego, que usa su propio sonido al tocar círculo)
-document.addEventListener('pointerdown', (e)=>{
-  if (e.target.closest('#game-canvas')) return;
-  Sound.click();
-  // arrancar la música tras el primer gesto si está activada
-  if (State.settings.music) Sound.startMusic();
-}, true);
 </script>
 </body>
 </html>
