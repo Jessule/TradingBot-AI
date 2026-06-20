@@ -1,358 +1,459 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradeBot AI v4</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Círculos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #0a0a14;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #fff;
+      touch-action: none;
+    }
+
+    #hud {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 12px 16px;
+      padding-top: max(12px, env(safe-area-inset-top));
+      background: rgba(10,10,20,0.95);
+      border-bottom: 1px solid #1e293b;
+      z-index: 10;
+      gap: 4px;
+    }
+
+    .hud-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .hud-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #e2e8f0;
+      line-height: 1;
+    }
+
+    .hud-lbl {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #475569;
+    }
+
+    #lives-row {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      height: 1.5rem;
+    }
+
+    .heart {
+      width: 14px; height: 14px;
+      background: #ef4444;
+      border-radius: 50% 50% 0 0;
+      transform: rotate(-45deg);
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .heart::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      background: inherit;
+      border-radius: 50%;
+      left: 50%; top: 0;
+      transform: translateX(-50%);
+    }
+    .heart.lost { background: #1e293b; }
+
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10,10,20,0.93);
+      z-index: 20;
+      gap: 14px;
+      padding: 24px;
+      padding-top: max(24px, env(safe-area-inset-top));
+    }
+
+    #overlay h2 {
+      font-size: 1.8rem;
+      color: #38bdf8;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-shadow: 0 0 20px #38bdf855;
+    }
+
+    .ov-big {
+      font-size: 5rem;
+      font-weight: 900;
+      color: #e2e8f0;
+      line-height: 1;
+    }
+
+    .ov-lbl {
+      font-size: 0.75rem;
+      color: #475569;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .ov-sub {
+      font-size: 0.95rem;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .stat-box {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .stat-box .v { font-size: 1.4rem; font-weight: 800; color: #38bdf8; }
+    .stat-box .l { font-size: 0.6rem; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    button {
+      padding: 16px 48px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      border: 1.5px solid #38bdf8;
+      border-radius: 50px;
+      cursor: pointer;
+      background: transparent;
+      color: #38bdf8;
+      text-transform: uppercase;
+      transition: all 0.15s;
+      min-width: 200px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:active { background: #38bdf8; color: #0a0a14; transform: scale(0.97); }
+
+    #banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      text-align: center;
+      padding: 10px;
+      padding-top: max(10px, env(safe-area-inset-top));
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #0a0a14;
+      background: #38bdf8;
+      z-index: 30;
+      opacity: 0;
+      transform: translateY(-100%);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    #banner.show { opacity: 1; transform: translateY(0); }
+
+    #popup {
+      position: fixed;
+      pointer-events: none;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #38bdf8;
+      text-shadow: 0 0 12px #38bdf8;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 15;
+    }
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">
-    <div class="logo-dot" id="live-dot"></div>
-    TradeBot AI
-    <span style="font-size:0.58rem;color:var(--text2);font-weight:400;margin-left:4px;">Paper Trading</span>
+<div id="hud">
+  <div class="hud-col">
+    <div class="hud-val" id="score">0</div>
+    <div class="hud-lbl">recolectados</div>
   </div>
-
-  <!-- BOT CONTROLS -->
-  <div class="bot-toggle-wrap">
-    <span class="bot-label">Auto-Bot</span>
-    <label class="toggle-switch">
-      <input type="checkbox" id="bot-toggle" onchange="toggleBot()">
-      <span class="toggle-slider"></span>
-    </label>
-    <span class="bot-status off" id="bot-status">OFF</span>
-    <select id="bot-mode-select" onchange="setBotMode(this.value)" title="Modo del bot" style="background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:5px;padding:2px 5px;font-size:0.62rem;font-family:var(--mono);cursor:pointer;outline:none;margin-left:2px;">
-      <option value="combined">Combinado</option>
-      <option value="macd">Solo MACD</option>
-    </select>
-    <button id="bot-info-btn" onclick="toggleBotInfoPanel()" title="Ver análisis del bot" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:2px 7px;cursor:pointer;font-size:0.65rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">📋</button>
+  <div class="hud-col">
+    <div class="hud-val" id="level">1</div>
+    <div class="hud-lbl">nivel</div>
   </div>
-
-  <!-- BOT INFO PANEL -->
-  <div id="bot-info-panel" style="display:none;position:fixed;top:54px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;min-width:320px;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.6);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div style="font-weight:700;font-size:0.85rem;color:var(--accent);">🤖 Análisis del Bot</div>
-      <button onclick="toggleBotInfoPanel()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;">✕</button>
+  <div class="hud-col">
+    <div id="lives-row">
+      <div class="heart" id="h1"></div>
+      <div class="heart" id="h2"></div>
+      <div class="heart" id="h3"></div>
     </div>
-    <div id="bot-info-content" style="font-size:0.75rem;color:var(--text2);line-height:1.7;">
-      <div style="color:var(--text3);text-align:center;padding:10px;">Analiza un ticker para ver el análisis aquí.</div>
-    </div>
+    <div class="hud-lbl">vidas</div>
   </div>
-
-  <!-- PRICE & SIGNAL INFO -->
-  <div class="header-signal-info">
-    <div class="signal-ticker-display" id="signal-ticker-display" style="display:none;">
-      <div class="signal-price-item">
-        <div class="signal-price-label">Precio</div>
-        <div class="signal-price-value" id="hdr-price" style="font-family:var(--mono);font-weight:700;font-size:1.1rem;">—</div>
-      </div>
-      <div class="signal-trend-item">
-        <div class="signal-trend-label">Tendencia</div>
-        <div class="signal-trend-value" id="hdr-trend" style="font-weight:700;font-size:1rem;color:var(--accent);">—</div>
-      </div>
-      <div class="signal-conf-item">
-        <div class="signal-conf-label">Confianza</div>
-        <div class="signal-conf-value" id="hdr-confidence" style="font-family:var(--mono);font-weight:700;font-size:1rem;">—</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="header-portfolio">
-    <div class="portfolio-item">
-      <div class="portfolio-label">Capital</div>
-      <div class="portfolio-value" id="hdr-capital">$10,000.00</div>
-    </div>
-    <div class="hdr-divider"></div>
-    <div class="portfolio-item">
-      <div class="portfolio-label">PyG Hoy</div>
-      <div class="portfolio-value" id="hdr-pnl-day">$0.00</div>
-      <div class="portfolio-sub" id="hdr-pnl-day-pct">0.00%</div>
-    </div>
-    <div class="hdr-divider"></div>
-    <div class="portfolio-item">
-      <div class="portfolio-label">PyG Total</div>
-      <div class="portfolio-value" id="hdr-pnl">$0.00</div>
-      <div class="portfolio-sub" id="hdr-pnl-pct">0.00%</div>
-    </div>
-    <div class="hdr-divider"></div>
-    <div class="portfolio-item">
-      <div class="portfolio-label">Operaciones</div>
-      <div class="portfolio-value" id="hdr-trades">0</div>
-    </div>
-    <div class="portfolio-item">
-      <div class="portfolio-label">Win Rate</div>
-      <div class="portfolio-value" id="hdr-winrate">—</div>
-    </div>
-    <div class="hdr-divider"></div>
-    <div class="save-indicator" id="save-indicator">
-      <div class="save-dot" id="save-dot"></div>
-      <span id="save-text">Sin guardar</span>
-    </div>
-    <button onclick="saveState()" class="btn" style="padding:4px 10px;font-size:0.65rem;background:var(--surface2);border:1px solid var(--border);color:var(--text2);">💾 Guardar</button>
-    <button onclick="resetState()" class="btn" style="padding:4px 10px;font-size:0.65rem;background:var(--red-dim);border:1px solid rgba(255,77,106,0.2);color:var(--red);">↺ Reset</button>
+  <div class="hud-col">
+    <div class="hud-val" id="best-hud">0</div>
+    <div class="hud-lbl">récord</div>
   </div>
 </div>
 
-<!-- AUTO-BOT STATUS BAR -->
-<div class="auto-trade-bar" id="auto-bar">
-  <span style="color:var(--accent);font-weight:700;">🤖 BOT ACTIVO</span>
-  <span id="auto-bar-msg">Analizando mercado...</span>
-  <div class="auto-progress"><div class="auto-progress-fill" id="auto-fill" style="width:0%"></div></div>
-  <span id="auto-countdown" style="font-family:var(--mono);color:var(--accent);">—</span>
+<canvas id="canvas"></canvas>
+<div id="banner"></div>
+<div id="popup"></div>
+
+<div id="overlay">
+  <h2>Círculos</h2>
+  <p class="ov-sub">
+    Toca los círculos antes de que desaparezcan.<br>
+    Cada 10 recolectados sube el nivel.<br>
+    3 vidas — ¡que no se escapen!
+  </p>
+  <div class="stats-grid" id="start-stats"></div>
+  <button id="btn">Empezar</button>
 </div>
 
-<!-- MAIN -->
-<div class="main">
+<script>
+const SAVE_KEY = 'circulos_save';
+function loadSave() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch { return {}; } }
+function writeSave(data) { try { const c = loadSave(); localStorage.setItem(SAVE_KEY, JSON.stringify({ ...c, ...data })); } catch {} }
 
-  <!-- LEFT PANEL -->
-  <div class="panel-left">
+const canvas  = document.getElementById('canvas');
+const ctx     = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const banner  = document.getElementById('banner');
+const popup   = document.getElementById('popup');
+const scoreEl = document.getElementById('score');
+const levelEl = document.getElementById('level');
+const bestHud = document.getElementById('best-hud');
+const hearts  = [document.getElementById('h1'), document.getElementById('h2'), document.getElementById('h3')];
+const startStats = document.getElementById('start-stats');
 
-    <!-- TICKER -->
-    <div class="section">
-      <div class="section-title">Activo a analizar</div>
-      <div class="ticker-row">
-        <input type="text" class="ticker-input" id="ticker-input" placeholder="AAPL, TSLA, ZEC-USD..." maxlength="12">
-        <button class="btn btn-primary" id="analyze-btn" onclick="analyzeWithAI()">Analizar</button>
-      </div>
-      <div class="preset-tickers">
-        <span class="preset-btn" onclick="setTicker('AAPL')">AAPL</span>
-        <span class="preset-btn" onclick="setTicker('TSLA')">TSLA</span>
-        <span class="preset-btn" onclick="setTicker('NVDA')">NVDA</span>
-        <span class="preset-btn" onclick="setTicker('BTC-USD')">BTC</span>
-        <span class="preset-btn" onclick="setTicker('ETH-USD')">ETH</span>
-        <span class="preset-btn" onclick="setTicker('SOL-USD')">SOL</span>
-        <span class="preset-btn" onclick="setTicker('ZECUSDT')">ZEC</span>
-        <span class="preset-btn" onclick="setTicker('SPY')">SPY</span>
-        <span class="preset-btn" onclick="setTicker('AMZN')">AMZN</span>
-        <span class="preset-btn" onclick="setTicker('MSFT')">MSFT</span>
-      </div>
+let HUD_H = 0, W = 0, H = 0;
+
+function resize() {
+  const hudEl = document.getElementById('hud');
+  HUD_H = hudEl.getBoundingClientRect().height;
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  W = canvas.width; H = canvas.height;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let circles = [], particles = [];
+let score = 0, level = 1, lives = 3, collected = 0;
+let running = false, animId = null, spawnTimer = null, lastTime = 0;
+
+function getConfig() {
+  return {
+    spd:  1.4 + (level - 1) * 0.25,
+    life: Math.max(1400, 4200 - (level - 1) * 200),
+    rate: Math.max(550,  2000 - (level - 1) * 130),
+    r:    Math.max(18,   32   - Math.floor((level - 1) / 2) * 2),
+  };
+}
+
+function rand(a, b) { return Math.random() * (b - a) + a; }
+
+function spawnCircle() {
+  if (!running) return;
+  const { spd, life, r } = getConfig();
+  const angle = Math.random() * Math.PI * 2;
+  circles.push({ x: rand(r+8, W-r-8), y: rand(HUD_H+r+8, H-r-8), r,
+    vx: Math.cos(angle)*spd, vy: Math.sin(angle)*spd,
+    born: performance.now(), life, alpha: 1, pulse: rand(0, Math.PI*2), popped: false });
+  scheduleSpawn();
+}
+
+function scheduleSpawn() {
+  clearTimeout(spawnTimer);
+  spawnTimer = setTimeout(spawnCircle, getConfig().rate + rand(-80, 80));
+}
+
+function spawnParticles(x, y) {
+  for (let i = 0; i < 14; i++) {
+    const a = (Math.PI*2*i)/14 + rand(-0.2,0.2), s = rand(2.5,6);
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, alpha: 1, r: rand(2,5) });
+  }
+}
+
+function showPopup(x, y, text) {
+  popup.textContent = text;
+  popup.style.left = (x-12)+'px'; popup.style.top = (y-40)+'px';
+  popup.style.opacity = '1';
+  clearTimeout(popup._t);
+  popup._t = setTimeout(() => { popup.style.opacity = '0'; }, 650);
+}
+
+function showBanner(text) {
+  banner.textContent = text; banner.classList.add('show');
+  clearTimeout(banner._t);
+  banner._t = setTimeout(() => { banner.classList.remove('show'); }, 1600);
+}
+
+function loseLife() {
+  lives = Math.max(0, lives - 1);
+  hearts.forEach((h, i) => h.classList.toggle('lost', i >= lives));
+  if (lives <= 0) endGame();
+}
+
+function handleTap(ex, ey) {
+  if (!running) return;
+  for (let i = circles.length - 1; i >= 0; i--) {
+    const c = circles[i];
+    if (c.popped) continue;
+    const dx = ex - c.x, dy = ey - c.y;
+    if (dx*dx + dy*dy <= c.r*c.r) {
+      c.popped = true; collected++; score = collected;
+      scoreEl.textContent = score;
+      spawnParticles(c.x, c.y);
+      showPopup(c.x, c.y, '+1');
+      const save = loadSave();
+      const best = Math.max(score, save.best || 0);
+      writeSave({ best, total: (save.total||0)+1 });
+      bestHud.textContent = best;
+      const nl = Math.floor(collected/10)+1;
+      if (nl > level) { level = nl; levelEl.textContent = level; showBanner(`¡NIVEL ${level}! — Más rápido`); }
+      break;
+    }
+  }
+}
+
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  for (const t of e.changedTouches) handleTap(t.clientX - rect.left, t.clientY - rect.top);
+}, { passive: false });
+
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  handleTap(e.clientX - rect.left, e.clientY - rect.top);
+});
+
+function update(now) {
+  const dt = Math.min((now - lastTime) / 16.67, 3);
+  lastTime = now;
+  for (let i = circles.length - 1; i >= 0; i--) {
+    const c = circles[i];
+    if (c.popped) { circles.splice(i,1); continue; }
+    c.x += c.vx*dt; c.y += c.vy*dt;
+    if (c.x-c.r < 0)     { c.x = c.r;    c.vx *= -1; }
+    if (c.x+c.r > W)     { c.x = W-c.r;  c.vx *= -1; }
+    if (c.y-c.r < HUD_H) { c.y = HUD_H+c.r; c.vy *= -1; }
+    if (c.y+c.r > H)     { c.y = H-c.r;  c.vy *= -1; }
+    const age = now - c.born;
+    if (age >= c.life) { circles.splice(i,1); loseLife(); continue; }
+    const fadeAt = c.life * 0.62;
+    c.alpha = age > fadeAt ? 1-(age-fadeAt)/(c.life-fadeAt) : 1;
+    c.pulse = (c.pulse + 0.055*dt) % (Math.PI*2);
+  }
+  for (let i = particles.length-1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 0.1*dt; p.alpha -= 0.025*dt;
+    if (p.alpha <= 0) particles.splice(i,1);
+  }
+}
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0a0a14'; ctx.fillRect(0,0,W,H);
+  for (const p of particles) {
+    ctx.save(); ctx.globalAlpha = Math.max(0,p.alpha);
+    ctx.shadowColor='#38bdf8'; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle='#7dd3fc'; ctx.fill(); ctx.restore();
+  }
+  for (const c of circles) {
+    const pulse = 1+Math.sin(c.pulse)*0.06, pr = c.r*pulse;
+    const ratio = Math.min((performance.now()-c.born)/c.life,1);
+    ctx.save(); ctx.globalAlpha = c.alpha;
+    ctx.shadowColor='#38bdf8'; ctx.shadowBlur=20*pulse;
+    const g = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,pr);
+    g.addColorStop(0,'#bae6fd'); g.addColorStop(0.5,'#38bdf8'); g.addColorStop(1,'#0284c7');
+    ctx.beginPath(); ctx.arc(c.x,c.y,pr,0,Math.PI*2);
+    ctx.fillStyle=g; ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle=`rgba(255,255,255,${0.2*c.alpha})`; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(c.x,c.y,pr+6,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-ratio));
+    ctx.strokeStyle=`rgba(56,189,248,${0.55*c.alpha})`; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function loop(now) { update(now); draw(); if (running) animId = requestAnimationFrame(loop); }
+
+function startGame() {
+  circles=[]; particles=[]; score=0; level=1; lives=3; collected=0;
+  running=true;
+  scoreEl.textContent='0'; levelEl.textContent='1';
+  bestHud.textContent = loadSave().best || 0;
+  hearts.forEach((h,i) => h.classList.toggle('lost', i >= lives));
+  overlay.style.display='none';
+  resize(); scheduleSpawn();
+  lastTime=performance.now();
+  animId=requestAnimationFrame(loop);
+}
+
+function endGame() {
+  running=false; clearTimeout(spawnTimer); cancelAnimationFrame(animId);
+  const save=loadSave();
+  const isRecord = score > 0 && score >= (save.best||0);
+  if (isRecord) writeSave({ best: score });
+  overlay.innerHTML = `
+    <h2>${isRecord && score>0 ? '¡Récord!' : 'Juego terminado'}</h2>
+    <div class="ov-big">${score}</div>
+    <div class="ov-lbl">recolectados · nivel ${level}</div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="v">${save.best||score}</div><div class="l">Récord</div></div>
+      <div class="stat-box"><div class="v">${(save.total||0)+score}</div><div class="l">Total histórico</div></div>
+      <div class="stat-box"><div class="v">${(save.games||0)+1}</div><div class="l">Partidas</div></div>
     </div>
+    <button id="btn">Jugar de nuevo</button>
+  `;
+  writeSave({ games: (save.games||0)+1 });
+  overlay.style.display='flex';
+  document.getElementById('btn').addEventListener('click', startGame);
+}
 
-    <!-- RISK CONFIG -->
-    <div class="section">
-      <div class="section-title">Gestión de riesgo</div>
-      <div class="risk-grid">
-        <div class="risk-item">
-          <label>Capital inicial ($)</label>
-          <input type="number" class="risk-input" id="capital-input" value="10000" min="100">
-        </div>
-        <div class="risk-item">
-          <label>Riesgo por op. (%)</label>
-          <input type="number" class="risk-input" id="risk-pct" value="2" min="0.1" max="100" step="0.1">
-        </div>
-        <div class="risk-item">
-          <label>Ratio R:R mín</label>
-          <input type="number" class="risk-input" id="rr-min" value="2" min="0.5" step="0.1">
-        </div>
-        <div class="risk-item">
-          <label>Timeframe análisis</label>
-          <select class="risk-input" id="timeframe-select" onchange="syncTimeframeToChart()">
-            <option value="intraday">Intraday</option>
-            <option value="swing" selected>Swing (días)</option>
-            <option value="positional">Posicional</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-top:7px;">
-        <div style="font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Apalancamiento</div>
-        <div class="leverage-row">
-          <div class="lev-btn active" onclick="setLeverage(1,this)">x1</div>
-          <div class="lev-btn" onclick="setLeverage(2,this)">x2</div>
-          <div class="lev-btn" onclick="setLeverage(5,this)">x5</div>
-          <div class="lev-btn" onclick="setLeverage(10,this)">x10</div>
-          <div class="lev-btn" onclick="setLeverage(20,this)">x20</div>
-        </div>
-      </div>
-    </div>
+function renderStartStats() {
+  const s = loadSave();
+  if (!s.best && !s.total && !s.games) { startStats.style.display='none'; return; }
+  startStats.style.display='grid';
+  startStats.innerHTML = `
+    <div class="stat-box"><div class="v">${s.best||0}</div><div class="l">Récord</div></div>
+    <div class="stat-box"><div class="v">${s.total||0}</div><div class="l">Recolectados</div></div>
+    <div class="stat-box"><div class="v">${s.games||0}</div><div class="l">Partidas</div></div>
+  `;
+}
 
-    <!-- QUANTITY CONTROL -->
-    <div class="section">
-      <div class="section-title">Tamaño de posición</div>
-      <div style="margin-bottom:10px;">
-        <select class="risk-input" id="qty-mode-select" onchange="setQtyMode(this.value)">
-          <option value="pct">% del Capital</option>
-          <option value="usd">Cantidad USD</option>
-          <option value="shares">Acciones Manuales</option>
-        </select>
-      </div>
-      <div id="qty-pct-row">
-        <label style="font-size:0.58rem;color:var(--text2);text-transform:uppercase;margin-bottom:3px;display:block;">Porcentaje del Capital</label>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input type="number" id="qty-pct-input" class="risk-input" value="10" min="0.1" max="100" step="0.1" onchange="syncQtyInput()" style="flex:1;text-align:center;font-size:1rem;font-weight:700;padding:8px 10px;">
-          <span style="padding:8px 5px;font-size:0.8rem;color:var(--text2);font-weight:600;">%</span>
-        </div>
-      </div>
-      <input type="range" id="qty-pct-slider" style="display:none;" value="10" min="0.1" max="100" step="0.1">
-      <div id="qty-usd-row" style="display:none;">
-        <label style="font-size:0.58rem;color:var(--text2);text-transform:uppercase;margin-bottom:3px;display:block;">USD a invertir</label>
-        <input type="number" id="qty-usd-input" class="risk-input" value="1000" min="10" step="10" onchange="syncQtyInput()">
-      </div>
-      <div id="qty-shares-row" style="display:none;">
-        <label style="font-size:0.58rem;color:var(--text2);text-transform:uppercase;margin-bottom:3px;display:block;">Número de acciones</label>
-        <input type="number" id="qty-shares-input" class="risk-input" value="1" min="1" max="10000" onchange="syncQtyInput()">
-      </div>
-    </div>
-
-    <!-- SIGNAL -->
-    <div class="section" style="flex:1">
-      <div class="section-title">Señal de trading</div>
-      <div style="position:relative;">
-        <div class="signal-card" id="signal-card">
-          <div class="empty-state">
-            <div class="empty-icon">📊</div>
-            <div class="empty-text">Introduce un ticker y pulsa Analizar</div>
-          </div>
-        </div>
-        <div class="loading-overlay" id="signal-loading">
-          <div class="spinner"></div>
-          <div class="loading-text" id="loading-msg">Analizando mercado...</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- EXECUTE -->
-    <div class="section">
-      <div class="section-title">Ejecutar en paper trading</div>
-      <div class="execute-row" id="execute-row">
-        <button class="btn btn-buy" id="exec-buy-btn" onclick="buyNow()" style="flex:1;font-size:0.85rem;font-weight:700;padding:10px 0;letter-spacing:1px;">▲ LONG</button>
-        <button class="btn btn-sell" id="exec-sell-btn" onclick="sellNow()" style="flex:1;font-size:0.85rem;font-weight:700;padding:10px 0;letter-spacing:1px;">▼ SHORT</button>
-      </div>
-      <div id="exec-info" style="font-size:0.66rem;color:var(--text2);margin-top:5px;line-height:1.5;"></div>
-    </div>
-
-  </div>
-
-  <!-- RIGHT PANEL -->
-  <div class="panel-right">
-
-    <!-- STATS -->
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-cell">
-        <div class="stat-cell-label">Capital disponible</div>
-        <div class="stat-cell-value" id="stat-capital">$10,000.00</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-cell-label">PyG Realizado</div>
-        <div class="stat-cell-value" id="stat-realized">$0.00</div>
-        <div class="stat-cell-sub" id="stat-realized-pct">0.00%</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-cell-label">PyG No Realizado</div>
-        <div class="stat-cell-value" id="stat-unrealized">$0.00</div>
-        <div class="stat-cell-sub" id="stat-unrealized-pct">0.00%</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-cell-label">Ops. Cerradas</div>
-        <div class="stat-cell-value" id="stat-closed">0</div>
-      </div>
-    </div>
-
-    <!-- CHART TABS hidden, only TradingView -->
-    <div style="display:none;">
-      <button class="chart-tab active" onclick="switchChartView('tradingview')" id="tab-tradingview">TradingView</button>
-      <button class="chart-tab" onclick="switchChartView('realtime')" id="tab-realtime">Live</button>
-    </div>
-
-    <!-- TRADINGVIEW CHART -->
-    <div id="chart-tradingview-view" style="flex:1;display:flex;flex-direction:column;">
-      <!-- CHART CONTROLS -->
-      <div class="chart-controls">
-        <button class="tf-btn" onclick="setChartTF('1',this)" id="tf-1m">1m</button>
-        <button class="tf-btn" onclick="setChartTF('5',this)" id="tf-5m">5m</button>
-        <button class="tf-btn" onclick="setChartTF('15',this)" id="tf-15m">15m</button>
-        <button class="tf-btn" onclick="setChartTF('30',this)" id="tf-30m">30m</button>
-        <div class="tf-divider"></div>
-        <button class="tf-btn" onclick="setChartTF('60',this)" id="tf-1h">1H</button>
-        <button class="tf-btn" onclick="setChartTF('240',this)" id="tf-4h">4H</button>
-        <button class="tf-btn active" onclick="setChartTF('D',this)" id="tf-1d">1D</button>
-        <button class="tf-btn" onclick="setChartTF('W',this)" id="tf-1w">1W</button>
-        <div class="tf-divider"></div>
-        <div class="chart-price-display">
-          <span id="chart-name" style="font-size:0.78rem;color:var(--text2);font-weight:700;margin-right:6px;"></span>
-          <span id="chart-price" style="font-size:0.95rem;font-weight:700;"></span>
-          <span id="chart-change" style="font-size:0.72rem;margin-left:6px;"></span>
-          <span class="live-badge" id="data-badge">LIVE</span>
-        </div>
-      </div>
-
-      <div class="chart-area" id="chart-area">
-        <div id="tv-widget-container">
-          <div class="chart-empty" id="chart-empty">
-            <div style="font-size:1.5rem">📈</div>
-            <div>El gráfico aparecerá tras el análisis</div>
-            <div style="font-size:0.68rem;color:var(--text3);">Powered by TradingView</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- REALTIME CHART -->
-    <div id="chart-realtime-view" style="flex:1;display:none;flex-direction:column;background:var(--bg);">
-      <div style="padding:10px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:0.7rem;color:var(--text2);">Actualización en vivo cada 1 segundo</div>
-        <select class="risk-input" id="realtime-tf" onchange="updateRealtimeChart()" style="width:100px;padding:4px;font-size:0.7rem;">
-          <option value="1m">1 minuto</option>
-          <option value="5m">5 minutos</option>
-          <option value="15m">15 minutos</option>
-          <option value="1h">1 hora</option>
-          <option value="1d">1 día</option>
-          <option value="1w" selected>1 semana</option>
-        </select>
-      </div>
-      <canvas id="realtime-canvas" style="flex:1;"></canvas>
-    </div>
-
-    <!-- POSITIONS -->
-    <div class="positions-panel">
-      <div class="positions-header">
-        <div class="positions-title">Posiciones abiertas</div>
-        <div id="open-count" style="font-family:var(--mono);font-size:0.7rem;color:var(--text2);">0 posiciones</div>
-      </div>
-      <div class="positions-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Ticker</th>
-              <th>Lado</th>
-              <th>Lev</th>
-              <th>Entrada</th>
-              <th>Actual</th>
-              <th>Qty</th>
-              <th>SL</th>
-              <th>TP</th>
-              <th>PyG $</th>
-              <th>PyG %</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="positions-body">
-            <tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px;font-size:0.7rem;">No hay posiciones abiertas</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- LOG -->
-    <div class="log-panel">
-      <div class="log-header">Log de operaciones</div>
-      <div class="log-content" id="log-content"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- TradingView Widget Script -->
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/chart.js"></script>
-<script src="js/trading.js"></script>
-<script src="js/ai.js"></script>
-<script src="js/app.js"></script>
-
-
-
+renderStartStats();
+document.getElementById('btn').addEventListener('click', startGame);
+ctx.fillStyle='#0a0a14'; ctx.fillRect(0,0,W,H);
+</script>
 </body>
 </html>
