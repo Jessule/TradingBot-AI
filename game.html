@@ -3,221 +3,372 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Círculos</title>
+  <title>FLUX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg:       #050810;
+      --panel:    rgba(0,212,255,0.05);
+      --border:   rgba(0,212,255,0.22);
+      --p:        #00d4ff;
+      --s:        #9b5de5;
+      --acc:      #ff0066;
+      --green:    #00f5a0;
+      --text:     #c8e8f8;
+      --muted:    #263d52;
+      --font:     'Quicksand', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     html, body {
       width: 100%; height: 100%;
-      background: #0a0a14;
+      background: var(--bg);
       overflow: hidden;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      color: #fff;
+      font-family: var(--font);
+      color: var(--text);
       touch-action: none;
     }
 
+    /* ─── HUD ─────────────────────────────────────────────────── */
     #hud {
       position: fixed;
       top: 0; left: 0; right: 0;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      padding: 12px 16px;
-      padding-top: max(12px, env(safe-area-inset-top));
-      background: rgba(10,10,20,0.95);
-      border-bottom: 1px solid #1e293b;
       z-index: 10;
-      gap: 4px;
+      padding: max(10px, env(safe-area-inset-top)) 10px 0;
+      background: linear-gradient(to bottom, rgba(5,8,16,.98) 75%, transparent);
     }
 
-    .hud-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
+    .hud-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 7px;
     }
+
+    .hud-cell {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 4px 6px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Corner brackets */
+    .hud-cell::before, .hud-cell::after {
+      content: '';
+      position: absolute;
+      width: 7px; height: 7px;
+      border-color: var(--p);
+      border-style: solid;
+      opacity: .55;
+    }
+    .hud-cell::before { top: 2px; left: 2px;   border-width: 1.5px 0 0 1.5px; }
+    .hud-cell::after  { bottom: 2px; right: 2px; border-width: 0 1.5px 1.5px 0; }
 
     .hud-val {
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       font-weight: 800;
-      color: #e2e8f0;
+      color: var(--p);
       line-height: 1;
+      letter-spacing: -.5px;
+      transition: color .18s, text-shadow .18s;
+    }
+    .hud-val.flash {
+      color: #fff;
+      text-shadow: 0 0 14px var(--p), 0 0 30px var(--p);
     }
 
     .hud-lbl {
-      font-size: 0.62rem;
+      font-size: .55rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: #475569;
+      color: var(--muted);
+      margin-top: 3px;
     }
 
     #lives-row {
       display: flex;
-      gap: 5px;
+      justify-content: center;
       align-items: center;
-      height: 1.5rem;
+      gap: 4px;
+      height: 1.35rem;
     }
-
     .heart {
-      width: 14px; height: 14px;
-      background: #ef4444;
-      border-radius: 50% 50% 0 0;
-      transform: rotate(-45deg);
-      position: relative;
-      transition: background 0.2s;
-      flex-shrink: 0;
+      font-size: .9rem;
+      line-height: 1;
+      transition: all .2s;
+      filter: drop-shadow(0 0 5px #ff0066);
     }
-    .heart::after {
+    .heart.lost { filter: none; opacity: .18; }
+
+    /* Progress bar */
+    .hud-bar {
+      height: 3px;
+      background: rgba(0,212,255,.08);
+      border-radius: 99px;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: visible;
+    }
+    .hud-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--s), var(--p));
+      transition: width .3s ease;
+      box-shadow: 0 0 8px var(--p);
+      position: relative;
+    }
+    .hud-bar-fill::after {
       content: '';
       position: absolute;
-      width: 14px; height: 14px;
-      background: inherit;
+      right: -3px; top: 50%;
+      transform: translateY(-50%);
+      width: 8px; height: 8px;
+      background: var(--p);
       border-radius: 50%;
-      left: 50%; top: 0;
-      transform: translateX(-50%);
+      box-shadow: 0 0 10px var(--p), 0 0 20px var(--p);
     }
-    .heart.lost { background: #1e293b; }
 
-    canvas {
+    /* ─── Canvas ──────────────────────────────────────────────── */
+    canvas { position: fixed; top: 0; left: 0; touch-action: none; }
+
+    /* ─── Level banner ────────────────────────────────────────── */
+    #banner {
       position: fixed;
-      top: 0; left: 0;
-      touch-action: none;
-      cursor: crosshair;
+      top: 0; left: 0; right: 0;
+      z-index: 30;
+      text-align: center;
+      padding: max(8px, env(safe-area-inset-top)) 12px 12px;
+      font-family: var(--font);
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: linear-gradient(90deg, var(--s), var(--p), var(--green));
+      opacity: 0;
+      transform: translateY(-110%);
+      transition: all .3s cubic-bezier(.34,1.56,.64,1);
+      pointer-events: none;
+    }
+    #banner.show { opacity: 1; transform: translateY(0); }
+
+    /* ─── Tap popup ───────────────────────────────────────────── */
+    #popup {
+      position: fixed;
+      z-index: 15;
+      pointer-events: none;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--p);
+      text-shadow: 0 0 12px var(--p);
+      opacity: 0;
+      transition: opacity .15s;
     }
 
+    /* ─── Overlay ─────────────────────────────────────────────── */
     #overlay {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0; z-index: 20;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(10,10,20,0.93);
-      z-index: 20;
       gap: 14px;
-      padding: 24px;
-      padding-top: max(24px, env(safe-area-inset-top));
+      padding: max(28px, env(safe-area-inset-top)) 20px 24px;
+      background: rgba(5,8,16,.94);
+      backdrop-filter: blur(10px);
+      font-family: var(--font);
+      overflow: hidden;
     }
 
-    #overlay h2 {
-      font-size: 1.8rem;
-      color: #38bdf8;
-      letter-spacing: 4px;
+    /* Animated scan line */
+    #overlay::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--p) 50%, transparent 100%);
+      animation: scanline 4s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes scanline {
+      0%   { top: 0;    opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    /* Decorative corner brackets on overlay */
+    #overlay::after {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(0,212,255,.1);
+      border-radius: 16px;
+      pointer-events: none;
+    }
+
+    .ov-eyebrow {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: 5px;
       text-transform: uppercase;
-      text-shadow: 0 0 20px #38bdf855;
+      color: var(--muted);
     }
 
-    .ov-big {
-      font-size: 5rem;
-      font-weight: 900;
-      color: #e2e8f0;
+    .ov-title {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: 10px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--p) 0%, var(--s) 60%, var(--acc) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: -6px;
       line-height: 1;
     }
 
-    .ov-lbl {
-      font-size: 0.75rem;
-      color: #475569;
-      letter-spacing: 3px;
-      text-transform: uppercase;
+    .ov-big {
+      font-size: 4.5rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, var(--p), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 12px rgba(0,212,255,.4));
     }
 
-    .ov-sub {
-      font-size: 0.95rem;
-      color: #64748b;
+    .ov-lbl {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: -8px;
+    }
+
+    .ov-hint {
+      font-size: .85rem;
+      color: #3a5a72;
       text-align: center;
-      line-height: 1.8;
+      line-height: 1.95;
+      max-width: 260px;
+      font-weight: 600;
     }
 
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 8px;
       width: 100%;
-      max-width: 340px;
+      max-width: 310px;
     }
 
-    .stat-box {
-      background: #0f172a;
-      border: 1px solid #1e293b;
+    .stat-card {
+      background: rgba(0,212,255,.04);
+      border: 1px solid rgba(0,212,255,.2);
       border-radius: 12px;
-      padding: 12px 8px;
+      padding: 12px 6px;
       text-align: center;
+      position: relative;
     }
+    .stat-card::before, .stat-card::after {
+      content: '';
+      position: absolute;
+      width: 5px; height: 5px;
+      border-color: var(--p);
+      border-style: solid;
+      opacity: .4;
+    }
+    .stat-card::before { top: 3px; left: 3px;   border-width: 1px 0 0 1px; }
+    .stat-card::after  { bottom:3px; right: 3px; border-width: 0 1px 1px 0; }
+    .stat-card .v { font-size: 1.2rem; font-weight: 800; color: var(--p); }
+    .stat-card .l { font-size: .55rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
 
-    .stat-box .v { font-size: 1.4rem; font-weight: 800; color: #38bdf8; }
-    .stat-box .l { font-size: 0.6rem; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    .record-pill {
+      padding: 6px 22px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--s), var(--acc));
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      animation: glow-pill 1.2s ease infinite alternate;
+    }
+    @keyframes glow-pill {
+      from { box-shadow: 0 0 10px var(--s); }
+      to   { box-shadow: 0 0 24px var(--s), 0 0 40px var(--acc); }
+    }
 
     button {
-      padding: 16px 48px;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      border: 1.5px solid #38bdf8;
-      border-radius: 50px;
-      cursor: pointer;
-      background: transparent;
-      color: #38bdf8;
-      text-transform: uppercase;
-      transition: all 0.15s;
-      min-width: 200px;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button:active { background: #38bdf8; color: #0a0a14; transform: scale(0.97); }
-
-    #banner {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      text-align: center;
-      padding: 10px;
-      padding-top: max(10px, env(safe-area-inset-top));
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: #0a0a14;
-      background: #38bdf8;
-      z-index: 30;
-      opacity: 0;
-      transform: translateY(-100%);
-      transition: opacity 0.25s, transform 0.25s;
-      pointer-events: none;
-    }
-    #banner.show { opacity: 1; transform: translateY(0); }
-
-    #popup {
-      position: fixed;
-      pointer-events: none;
-      font-size: 1.2rem;
+      padding: 15px 44px;
+      font-family: var(--font);
+      font-size: .88rem;
       font-weight: 800;
-      color: #38bdf8;
-      text-shadow: 0 0 12px #38bdf8;
-      opacity: 0;
-      transition: opacity 0.15s;
-      z-index: 15;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      border: 1.5px solid var(--p);
+      border-radius: 99px;
+      background: transparent;
+      color: var(--p);
+      cursor: pointer;
+      min-width: 190px;
+      position: relative;
+      transition: all .15s;
+      animation: pulse-btn 2.5s ease infinite;
+    }
+    @keyframes pulse-btn {
+      0%,100% { box-shadow: 0 0 8px rgba(0,212,255,.25); }
+      50%     { box-shadow: 0 0 22px rgba(0,212,255,.55), 0 0 44px rgba(0,212,255,.15); }
+    }
+    button:active {
+      background: var(--p);
+      color: var(--bg);
+      transform: scale(.97);
+      box-shadow: none;
     }
   </style>
 </head>
 <body>
 
+<!-- HUD -->
 <div id="hud">
-  <div class="hud-col">
-    <div class="hud-val" id="score">0</div>
-    <div class="hud-lbl">recolectados</div>
-  </div>
-  <div class="hud-col">
-    <div class="hud-val" id="level">1</div>
-    <div class="hud-lbl">nivel</div>
-  </div>
-  <div class="hud-col">
-    <div id="lives-row">
-      <div class="heart" id="h1"></div>
-      <div class="heart" id="h2"></div>
-      <div class="heart" id="h3"></div>
+  <div class="hud-row">
+    <div class="hud-cell">
+      <div class="hud-val" id="flux-el">0</div>
+      <div class="hud-lbl">FLUX</div>
     </div>
-    <div class="hud-lbl">vidas</div>
+    <div class="hud-cell">
+      <div class="hud-val" id="level-el">1</div>
+      <div class="hud-lbl">NIVEL</div>
+    </div>
+    <div class="hud-cell">
+      <div id="lives-row">
+        <span class="heart" id="h1">♥</span>
+        <span class="heart" id="h2">♥</span>
+        <span class="heart" id="h3">♥</span>
+      </div>
+      <div class="hud-lbl">VIDAS</div>
+    </div>
+    <div class="hud-cell">
+      <div class="hud-val" id="mult-el">×1</div>
+      <div class="hud-lbl">FLUX/TAP</div>
+    </div>
   </div>
-  <div class="hud-col">
-    <div class="hud-val" id="best-hud">0</div>
-    <div class="hud-lbl">récord</div>
+  <div class="hud-bar">
+    <div class="hud-bar-fill" id="bar-fill" style="width:0%"></div>
   </div>
 </div>
 
@@ -225,265 +376,334 @@
 <div id="banner"></div>
 <div id="popup"></div>
 
+<!-- Overlay -->
 <div id="overlay">
-  <h2>Círculos</h2>
-  <p class="ov-sub">
-    Toca los círculos antes de que desaparezcan.<br>
-    Cada 10 recolectados sube el nivel.<br>
-    3 vidas — ¡que no se escapen!
+  <div class="ov-eyebrow">Sistema de Orbes</div>
+  <div class="ov-title">FLUX</div>
+  <p class="ov-hint">
+    Toca los orbes antes de que expiren.<br>
+    Cada nivel multiplica el FLUX por toque.<br>
+    3 vidas — ¡que no escape ninguno!
   </p>
-  <div class="stats-grid" id="start-stats"></div>
-  <button id="btn">Empezar</button>
+  <div class="stats-grid" id="start-stats" style="display:none"></div>
+  <button id="btn">INICIAR</button>
 </div>
 
-<div id="popup"></div>
-
 <script>
-// ── Guardado ──────────────────────────────────────────────────────────────
-const SAVE_KEY = 'circulos_save';
+// ── Paleta de colores por nivel ───────────────────────────────────────────
+const LEVEL_COLORS = [
+  '#00d4ff','#00b8ff','#3b9fff','#6b7bff',
+  '#9b5de5','#c040d0','#ff0099','#ff0055',
+  '#ff4422','#ff7700','#ffcc00','#00f5a0',
+];
+function levelColor(l) { return LEVEL_COLORS[Math.min(l-1, LEVEL_COLORS.length-1)]; }
 
-function loadSave() {
-  try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch { return {}; }
-}
+// ── Partículas multicolor ─────────────────────────────────────────────────
+const PAR_COLS = ['#00d4ff','#9b5de5','#ff0066','#00f5a0','#fff','#ffcc00'];
 
-function writeSave(data) {
-  try {
-    const current = loadSave();
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...current, ...data }));
-  } catch {}
-}
+// ── Save ──────────────────────────────────────────────────────────────────
+const KEY = 'flux_v2';
+const stor = {
+  load() { try { return JSON.parse(localStorage.getItem(KEY))||{}; } catch { return {}; } },
+  save(d) { try { const c=this.load(); localStorage.setItem(KEY,JSON.stringify({...c,...d})); } catch {} },
+};
 
-// ── Canvas setup ──────────────────────────────────────────────────────────
-const canvas  = document.getElementById('canvas');
-const ctx     = canvas.getContext('2d');
-const overlay = document.getElementById('overlay');
-const banner  = document.getElementById('banner');
-const popup   = document.getElementById('popup');
-const scoreEl = document.getElementById('score');
-const levelEl = document.getElementById('level');
-const bestHud = document.getElementById('best-hud');
-const hearts  = [document.getElementById('h1'), document.getElementById('h2'), document.getElementById('h3')];
+// ── DOM ───────────────────────────────────────────────────────────────────
+const canvas    = document.getElementById('canvas');
+const ctx       = canvas.getContext('2d');
+const overlay   = document.getElementById('overlay');
+const banner    = document.getElementById('banner');
+const popup     = document.getElementById('popup');
+const fluxEl    = document.getElementById('flux-el');
+const levelEl   = document.getElementById('level-el');
+const multEl    = document.getElementById('mult-el');
+const barFill   = document.getElementById('bar-fill');
+const hearts    = ['h1','h2','h3'].map(id => document.getElementById(id));
 const startStats = document.getElementById('start-stats');
 
-let HUD_H = 0;
-let W = 0, H = 0;
-
+// ── Tamaño ────────────────────────────────────────────────────────────────
+let HUD_H=0, W=0, H=0;
 function resize() {
-  const hudEl = document.getElementById('hud');
-  HUD_H = hudEl.getBoundingClientRect().height;
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
-  W = canvas.width;
-  H = canvas.height;
+  HUD_H = document.getElementById('hud').getBoundingClientRect().height;
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
 }
 resize();
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => { resize(); if (running) spawnCircle(); });
 
-// ── Estado del juego ──────────────────────────────────────────────────────
-let circles = [], particles = [];
-let score = 0, level = 1, lives = 3, collected = 0;
-let running = false;
-let animId = null, spawnTimer = null, lastTime = 0;
+// ── Estado ────────────────────────────────────────────────────────────────
+let circles=[], particles=[];
+let flux=0, collected=0, level=1, lives=3;
+let running=false, animId=null, spawnTimer=null, lastTime=0;
+
+// ─ Incremento: nivel² flux por toque
+function fluxPerTap()   { return level * level; }
+function curLevel()     { return Math.floor(collected/10)+1; }
+function levelProgress(){ return (collected%10)/10; }
 
 function getConfig() {
-  const spd  = 1.4 + (level - 1) * 0.25;
-  const life = Math.max(1400, 4200 - (level - 1) * 200);
-  const rate = Math.max(550,  2000 - (level - 1) * 130);
-  const r    = Math.max(18,   32   - Math.floor((level - 1) / 2) * 2);
-  return { spd, life, rate, r };
+  const lv = level;
+  return {
+    speed:  1.25 + (lv-1)*0.22,
+    life:   Math.max(1500, 4600-(lv-1)*170),
+    rate:   Math.max(580,  2300-(lv-1)*130),
+    radius: Math.max(18, 32-Math.floor((lv-1)/3)*2),
+  };
 }
+
+// ── Spawn ─────────────────────────────────────────────────────────────────
+function rand(a,b){ return Math.random()*(b-a)+a; }
 
 function spawnCircle() {
   if (!running) return;
-  const { spd, life, r } = getConfig();
-  const angle = Math.random() * Math.PI * 2;
+  const { speed, life, radius: r } = getConfig();
+  const a = Math.random()*Math.PI*2;
   circles.push({
-    x: rand(r + 8, W - r - 8),
-    y: rand(HUD_H + r + 8, H - r - 8),
+    x: rand(r+12, W-r-12),
+    y: rand(HUD_H+r+12, H-r-12),
     r,
-    vx: Math.cos(angle) * spd,
-    vy: Math.sin(angle) * spd,
+    vx: Math.cos(a)*speed,
+    vy: Math.sin(a)*speed,
     born: performance.now(),
     life,
     alpha: 1,
-    pulse: rand(0, Math.PI * 2),
+    phase: rand(0, Math.PI*2),
     popped: false,
+    escaped: false,
+    escapeT: 0,
   });
   scheduleSpawn();
 }
 
 function scheduleSpawn() {
   clearTimeout(spawnTimer);
-  const { rate } = getConfig();
-  spawnTimer = setTimeout(spawnCircle, rate + rand(-80, 80));
+  spawnTimer = setTimeout(spawnCircle, getConfig().rate + rand(-90,90));
 }
 
-function rand(a, b) { return Math.random() * (b - a) + a; }
-
-function spawnParticles(x, y) {
-  for (let i = 0; i < 14; i++) {
-    const a = (Math.PI * 2 * i) / 14 + rand(-0.2, 0.2);
-    const s = rand(2.5, 6);
-    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, alpha: 1, r: rand(2, 5) });
+// ── Partículas ────────────────────────────────────────────────────────────
+function burst(x, y, color) {
+  for (let i=0; i<18; i++) {
+    const a=(Math.PI*2*i)/18+rand(-.15,.15), s=rand(3,8);
+    const c = Math.random()<.5 ? color : PAR_COLS[Math.floor(Math.random()*PAR_COLS.length)];
+    particles.push({ x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, alpha:1, r:rand(2,5.5), color:c });
   }
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+function flash(el) {
+  el.classList.add('flash');
+  clearTimeout(el._ft);
+  el._ft = setTimeout(()=>el.classList.remove('flash'), 220);
 }
 
 function showPopup(x, y, text) {
   popup.textContent = text;
-  popup.style.left = (x - 12) + 'px';
-  popup.style.top  = (y - 40) + 'px';
-  popup.style.opacity = '1';
+  popup.style.cssText = `left:${x-14}px;top:${y-46}px;opacity:1;color:${levelColor(level)};text-shadow:0 0 12px ${levelColor(level)}`;
   clearTimeout(popup._t);
-  popup._t = setTimeout(() => { popup.style.opacity = '0'; }, 650);
+  popup._t = setTimeout(()=>popup.style.opacity='0', 720);
 }
 
 function showBanner(text) {
   banner.textContent = text;
   banner.classList.add('show');
   clearTimeout(banner._t);
-  banner._t = setTimeout(() => { banner.classList.remove('show'); }, 1600);
+  banner._t = setTimeout(()=>banner.classList.remove('show'), 2000);
 }
 
-function loseLife() {
-  lives = Math.max(0, lives - 1);
-  updateHearts();
-  if (lives <= 0) endGame();
+function updateHUD() {
+  fluxEl.textContent  = flux >= 1000 ? (flux/1000).toFixed(1)+'K' : flux;
+  levelEl.textContent = level;
+  multEl.textContent  = '×'+fluxPerTap();
+  barFill.style.width = (levelProgress()*100).toFixed(1)+'%';
+  hearts.forEach((h,i)=>h.classList.toggle('lost', i>=lives));
 }
 
-function updateHearts() {
-  hearts.forEach((h, i) => h.classList.toggle('lost', i >= lives));
-}
-
-// ── Input (toque y clic) ──────────────────────────────────────────────────
+// ── Input ─────────────────────────────────────────────────────────────────
 function handleTap(ex, ey) {
   if (!running) return;
-  for (let i = circles.length - 1; i >= 0; i--) {
+  for (let i=circles.length-1; i>=0; i--) {
     const c = circles[i];
-    if (c.popped) continue;
-    const dx = ex - c.x, dy = ey - c.y;
-    if (dx*dx + dy*dy <= c.r*c.r) {
+    if (c.popped || c.escaped) continue;
+    const dx=ex-c.x, dy=ey-c.y;
+    if (dx*dx+dy*dy <= c.r*c.r) {
       c.popped = true;
+      const gained = fluxPerTap();
+      flux += gained;
       collected++;
-      score = collected;
-      scoreEl.textContent = score;
-      spawnParticles(c.x, c.y);
-      showPopup(c.x, c.y, '+1');
+      burst(c.x, c.y, levelColor(level));
+      showPopup(c.x, c.y, '+'+gained);
+      flash(fluxEl);
 
-      const save = loadSave();
-      const best = Math.max(score, save.best || 0);
-      const total = (save.total || 0) + 1;
-      writeSave({ best, total });
-      bestHud.textContent = best;
+      const s = stor.load();
+      stor.save({ best: Math.max(flux, s.best||0), totalFlux: (s.totalFlux||0)+gained });
 
-      const newLevel = Math.floor(collected / 10) + 1;
-      if (newLevel > level) {
-        level = newLevel;
-        levelEl.textContent = level;
-        showBanner(`¡NIVEL ${level}! — Más rápido`);
+      const nl = curLevel();
+      if (nl > level) {
+        level = nl;
+        const extra = Math.min(Math.floor(level/4), 3);
+        for (let j=0; j<extra; j++) setTimeout(spawnCircle, j*180);
+        showBanner(`▲ NIVEL ${level}  —  ×${fluxPerTap()} FLUX/TAP`);
+        flash(levelEl); flash(multEl);
       }
+      updateHUD();
       break;
     }
   }
 }
 
-canvas.addEventListener('touchstart', (e) => {
+canvas.addEventListener('touchstart', e => {
   e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  for (const t of e.changedTouches) {
-    handleTap(t.clientX - rect.left, t.clientY - rect.top);
-  }
-}, { passive: false });
-
-canvas.addEventListener('click', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  handleTap(e.clientX - rect.left, e.clientY - rect.top);
+  const r = canvas.getBoundingClientRect();
+  for (const t of e.changedTouches) handleTap(t.clientX-r.left, t.clientY-r.top);
+}, { passive:false });
+canvas.addEventListener('click', e => {
+  const r = canvas.getBoundingClientRect();
+  handleTap(e.clientX-r.left, e.clientY-r.top);
 });
 
-// ── Loop principal ────────────────────────────────────────────────────────
+// ── Update ────────────────────────────────────────────────────────────────
 function update(now) {
-  const dt = Math.min((now - lastTime) / 16.67, 3);
+  const dt = Math.min((now-lastTime)/16.67, 3);
   lastTime = now;
 
-  for (let i = circles.length - 1; i >= 0; i--) {
+  for (let i=circles.length-1; i>=0; i--) {
     const c = circles[i];
-    if (c.popped) { circles.splice(i, 1); continue; }
 
-    c.x += c.vx * dt;
-    c.y += c.vy * dt;
-
-    if (c.x - c.r < 0)      { c.x = c.r;   c.vx *= -1; }
-    if (c.x + c.r > W)      { c.x = W-c.r; c.vx *= -1; }
-    if (c.y - c.r < HUD_H)  { c.y = HUD_H + c.r; c.vy *= -1; }
-    if (c.y + c.r > H)      { c.y = H-c.r; c.vy *= -1; }
-
-    const age = now - c.born;
-    if (age >= c.life) {
-      circles.splice(i, 1);
-      loseLife();
+    if (c.escaped) {
+      if (now-c.escapeT > 420) circles.splice(i,1);
       continue;
     }
-    const fadeAt = c.life * 0.62;
-    c.alpha = age > fadeAt ? 1 - (age - fadeAt) / (c.life - fadeAt) : 1;
-    c.pulse = (c.pulse + 0.055 * dt) % (Math.PI * 2);
+    if (c.popped) { circles.splice(i,1); continue; }
+
+    c.x+=c.vx*dt; c.y+=c.vy*dt;
+    if (c.x-c.r<0)      { c.x=c.r;      c.vx*=-1; }
+    if (c.x+c.r>W)      { c.x=W-c.r;    c.vx*=-1; }
+    if (c.y-c.r<HUD_H)  { c.y=HUD_H+c.r; c.vy*=-1; }
+    if (c.y+c.r>H)      { c.y=H-c.r;    c.vy*=-1; }
+
+    const age = now-c.born;
+    if (age >= c.life) {
+      c.escaped = true; c.escapeT = now;
+      lives = Math.max(0, lives-1);
+      updateHUD();
+      if (lives<=0) { endGame(); return; }
+      continue;
+    }
+    const fadeAt = c.life*.65;
+    c.alpha = age>fadeAt ? 1-(age-fadeAt)/(c.life-fadeAt) : 1;
+    c.phase = (c.phase+.052*dt)%(Math.PI*2);
   }
 
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.x  += p.vx * dt;
-    p.y  += p.vy * dt;
-    p.vy += 0.1 * dt;
-    p.alpha -= 0.025 * dt;
-    if (p.alpha <= 0) particles.splice(i, 1);
+  for (let i=particles.length-1; i>=0; i--) {
+    const p=particles[i];
+    p.x+=p.vx*dt; p.y+=p.vy*dt;
+    p.vy+=.08*dt;
+    p.alpha-=.021*dt;
+    if (p.alpha<=0) particles.splice(i,1);
   }
 }
 
-function draw() {
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#0a0a14';
-  ctx.fillRect(0, 0, W, H);
+// ── Draw ──────────────────────────────────────────────────────────────────
+function drawDotGrid(color) {
+  const STEP = 30;
+  ctx.fillStyle = color+'12';
+  for (let x=STEP/2; x<W; x+=STEP) {
+    for (let y=HUD_H+STEP/2; y<H; y+=STEP) {
+      ctx.beginPath();
+      ctx.arc(x, y, .9, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+}
 
+function draw(now) {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#050810';
+  ctx.fillRect(0,0,W,H);
+
+  const col = levelColor(level);
+  drawDotGrid(col);
+
+  // Particles
   for (const p of particles) {
     ctx.save();
-    ctx.globalAlpha = Math.max(0, p.alpha);
-    ctx.shadowColor = '#38bdf8';
-    ctx.shadowBlur = 6;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = '#7dd3fc';
+    ctx.globalAlpha = Math.max(0,p.alpha);
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = p.color;
     ctx.fill();
     ctx.restore();
   }
 
+  // Circles
   for (const c of circles) {
-    const pulse = 1 + Math.sin(c.pulse) * 0.06;
-    const pr = c.r * pulse;
-    const age = performance.now() - c.born;
-    const ratio = Math.min(age / c.life, 1);
+    const t = now - c.born;
+
+    // Escape flash
+    if (c.escaped) {
+      const p2 = (now-c.escapeT)/420;
+      ctx.save();
+      ctx.globalAlpha = (1-p2)*.6;
+      ctx.strokeStyle = '#ff0066';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#ff0066';
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r*(1+p2*.8), 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+      continue;
+    }
+
+    const pulse = 1+Math.sin(c.phase)*.055;
+    const pr = c.r*pulse;
+    const ratio = Math.min(t/c.life, 1);
+    const cc = col;
 
     ctx.save();
     ctx.globalAlpha = c.alpha;
 
-    ctx.shadowColor = '#38bdf8';
-    ctx.shadowBlur  = 20 * pulse;
-    const grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, pr);
-    grad.addColorStop(0,   '#bae6fd');
-    grad.addColorStop(0.5, '#38bdf8');
-    grad.addColorStop(1,   '#0284c7');
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, pr, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
+    // Glow
+    ctx.shadowColor = cc;
+    ctx.shadowBlur  = 26*pulse;
+
+    // Radial gradient fill
+    const g = ctx.createRadialGradient(c.x,c.y,0, c.x,c.y,pr);
+    g.addColorStop(0, '#fff');
+    g.addColorStop(.3, cc);
+    g.addColorStop(1, cc+'00');
+    ctx.beginPath(); ctx.arc(c.x,c.y,pr,0,Math.PI*2);
+    ctx.fillStyle = g;
     ctx.fill();
 
+    // Outer ring
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = `rgba(255,255,255,${0.2 * c.alpha})`;
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = cc+'55';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
+    // Timer arc
+    const start = -Math.PI/2;
+    const end   = start + Math.PI*2*(1-ratio);
     ctx.beginPath();
-    ctx.arc(c.x, c.y, pr + 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - ratio));
-    ctx.strokeStyle = `rgba(56,189,248,${0.55 * c.alpha})`;
-    ctx.lineWidth = 2.5;
+    ctx.arc(c.x, c.y, pr+7, start, end);
+    ctx.strokeStyle = cc;
+    ctx.lineWidth = 2.2;
+    ctx.shadowColor = cc;
+    ctx.shadowBlur  = 8;
     ctx.stroke();
+
+    // Flux value inside
+    const fp = fluxPerTap();
+    if (fp > 1 && c.r >= 20) {
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = '#fff';
+      ctx.font = `800 ${Math.round(c.r*.62)}px Quicksand,sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('+'+fp, c.x, c.y);
+    }
 
     ctx.restore();
   }
@@ -491,81 +711,86 @@ function draw() {
 
 function loop(now) {
   update(now);
-  draw();
+  draw(now);
   if (running) animId = requestAnimationFrame(loop);
 }
 
-// ── Inicio / fin ──────────────────────────────────────────────────────────
+// ── Inicio / Fin ───────────────────────────────────────────────────────────
 function startGame() {
-  circles = []; particles = [];
-  score = 0; level = 1; lives = 3; collected = 0;
-  running = true;
-  scoreEl.textContent = '0';
-  levelEl.textContent = '1';
-  const save = loadSave();
-  bestHud.textContent = save.best || 0;
-  updateHearts();
-  overlay.style.display = 'none';
-  resize();
-  scheduleSpawn();
+  circles=[]; particles=[];
+  flux=0; collected=0; level=1; lives=3;
+  running=true;
+  updateHUD();
+  overlay.style.display='none';
+  resize(); scheduleSpawn();
   lastTime = performance.now();
   animId = requestAnimationFrame(loop);
 }
 
 function endGame() {
-  running = false;
+  running=false;
   clearTimeout(spawnTimer);
   cancelAnimationFrame(animId);
 
-  const save = loadSave();
-  const isRecord = score > 0 && score >= (save.best || 0);
-  if (isRecord) writeSave({ best: score });
+  const s = stor.load();
+  const isRec = flux>0 && flux>=(s.best||0);
+  if (isRec) stor.save({ best:flux });
+  const games = (s.games||0)+1;
+  stor.save({ games });
+
+  const totalFlux = (s.totalFlux||0);
 
   overlay.innerHTML = `
-    <h2>${isRecord && score > 0 ? '¡Récord!' : 'Juego terminado'}</h2>
-    <div class="ov-big">${score}</div>
-    <div class="ov-lbl">recolectados · nivel ${level}</div>
+    <div class="ov-eyebrow">Fin de partida</div>
+    <div class="ov-title">FLUX</div>
+    ${isRec && flux>0 ? '<div class="record-pill">▲ NUEVO RÉCORD</div>' : ''}
+    <div class="ov-big">${flux>=1000?(flux/1000).toFixed(2)+'K':flux}</div>
+    <div class="ov-lbl">FLUX · Nivel ${level} · ×${fluxPerTap()} /tap</div>
     <div class="stats-grid">
-      <div class="stat-box">
-        <div class="v">${save.best || score}</div>
+      <div class="stat-card">
+        <div class="v">${(s.best||flux)>=1000?((s.best||flux)/1000).toFixed(1)+'K':(s.best||flux)}</div>
         <div class="l">Récord</div>
       </div>
-      <div class="stat-box">
-        <div class="v">${(save.total || 0) + score}</div>
-        <div class="l">Total histórico</div>
+      <div class="stat-card">
+        <div class="v">${totalFlux>=1000?(totalFlux/1000).toFixed(1)+'K':totalFlux}</div>
+        <div class="l">FLUX Total</div>
       </div>
-      <div class="stat-box">
-        <div class="v">${(save.games || 0) + 1}</div>
+      <div class="stat-card">
+        <div class="v">${games}</div>
         <div class="l">Partidas</div>
       </div>
     </div>
-    <button id="btn">Jugar de nuevo</button>
+    <button id="btn">JUGAR DE NUEVO</button>
   `;
-  writeSave({ games: (save.games || 0) + 1 });
-  overlay.style.display = 'flex';
+  overlay.style.display='flex';
   document.getElementById('btn').addEventListener('click', startGame);
 }
 
-// ── Pantalla de inicio ────────────────────────────────────────────────────
+// ── Pantalla inicio ────────────────────────────────────────────────────────
 function renderStartStats() {
-  const s = loadSave();
-  if (!s.best && !s.total && !s.games) {
-    startStats.style.display = 'none';
-    return;
-  }
-  startStats.style.display = 'grid';
+  const s = stor.load();
+  if (!s.best && !s.games) return;
+  const tf = s.totalFlux||0;
+  startStats.style.display='grid';
   startStats.innerHTML = `
-    <div class="stat-box"><div class="v">${s.best || 0}</div><div class="l">Récord</div></div>
-    <div class="stat-box"><div class="v">${s.total || 0}</div><div class="l">Recolectados</div></div>
-    <div class="stat-box"><div class="v">${s.games || 0}</div><div class="l">Partidas</div></div>
+    <div class="stat-card">
+      <div class="v">${(s.best||0)>=1000?((s.best||0)/1000).toFixed(1)+'K':(s.best||0)}</div>
+      <div class="l">Récord</div>
+    </div>
+    <div class="stat-card">
+      <div class="v">${tf>=1000?(tf/1000).toFixed(1)+'K':tf}</div>
+      <div class="l">FLUX Total</div>
+    </div>
+    <div class="stat-card">
+      <div class="v">${s.games||0}</div>
+      <div class="l">Partidas</div>
+    </div>
   `;
 }
 
 renderStartStats();
 document.getElementById('btn').addEventListener('click', startGame);
-
-ctx.fillStyle = '#0a0a14';
-ctx.fillRect(0, 0, W, H);
+ctx.fillStyle='#050810'; ctx.fillRect(0,0,W,H);
 </script>
 </body>
 </html>
