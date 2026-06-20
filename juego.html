@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recoge las Bolas 🎮</title>
+<style>
+  :root{
+    --bg1:#0f2027; --bg2:#203a43; --bg3:#2c5364;
+    --accent:#ffd54f; --good:#4caf50; --bad:#e53935;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    color:#fff; min-height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    user-select:none; -webkit-user-select:none; overflow:hidden;
+  }
+  h1{font-size:1.5rem; margin-bottom:8px; text-shadow:0 2px 8px rgba(0,0,0,.5);}
+  .hud{
+    display:flex; gap:24px; margin-bottom:10px; font-size:1.05rem; font-weight:600;
+  }
+  .hud span{background:rgba(0,0,0,.25); padding:6px 14px; border-radius:20px;}
+  #score{color:var(--accent);}
+  #lives{color:var(--bad);}
+  .wrap{position:relative;}
+  canvas{
+    background:linear-gradient(180deg,#1b2a3a 0%, #16212e 100%);
+    border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,.5);
+    touch-action:none; display:block;
+  }
+  .overlay{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px;
+    background:rgba(8,16,24,.78); border-radius:14px; text-align:center; padding:20px;
+  }
+  .overlay h2{font-size:1.8rem;}
+  .overlay p{opacity:.85; max-width:320px; line-height:1.4;}
+  button{
+    font-size:1.1rem; font-weight:700; cursor:pointer; border:none;
+    padding:12px 30px; border-radius:30px; color:#1b2a3a;
+    background:var(--accent); box-shadow:0 6px 18px rgba(255,213,79,.4);
+    transition:transform .1s ease;
+  }
+  button:active{transform:scale(.94);}
+  .hidden{display:none !important;}
+  .tip{font-size:.8rem; opacity:.6; margin-top:10px;}
+</style>
+</head>
+<body>
+  <h1>🧺 Recoge las Bolas</h1>
+  <div class="hud">
+    <span id="score">Puntos: 0</span>
+    <span id="lives">Vidas: ❤️❤️❤️</span>
+  </div>
+  <div class="wrap">
+    <canvas id="game" width="420" height="560"></canvas>
+    <div class="overlay" id="startScreen">
+      <h2>🎮 ¡A jugar!</h2>
+      <p>Mueve la cesta para atrapar las bolas que caen.<br>
+         Atrapa las <b style="color:var(--accent)">doradas</b> (+1) y evita las
+         <b style="color:var(--bad)">bombas</b> 💣.</p>
+      <button id="startBtn">Empezar</button>
+    </div>
+    <div class="overlay hidden" id="endScreen">
+      <h2>💀 ¡Fin del juego!</h2>
+      <p id="finalScore">Puntos: 0</p>
+      <p id="bestScore" style="color:var(--accent)"></p>
+      <button id="retryBtn">Jugar de nuevo</button>
+    </div>
+  </div>
+  <p class="tip">⌨️ Flechas ← → / A D &nbsp;·&nbsp; 📱 Arrastra o inclina</p>
+
+<script>
+(function(){
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const scoreEl = document.getElementById('score');
+  const livesEl = document.getElementById('lives');
+  const startScreen = document.getElementById('startScreen');
+  const endScreen = document.getElementById('endScreen');
+  const finalScore = document.getElementById('finalScore');
+  const bestScoreEl = document.getElementById('bestScore');
+
+  // Estado del juego
+  let basket, balls, score, lives, spawnTimer, spawnEvery, fallSpeed, running, lastTime;
+
+  function reset(){
+    basket = { w:84, h:22, x:(W-84)/2, y:H-40, speed:7, vx:0 };
+    balls = [];
+    score = 0;
+    lives = 3;
+    spawnTimer = 0;
+    spawnEvery = 900;      // ms entre bolas
+    fallSpeed = 1.8;       // velocidad base de caída
+    running = true;
+    lastTime = performance.now();
+    updateHud();
+  }
+
+  function updateHud(){
+    scoreEl.textContent = 'Puntos: ' + score;
+    livesEl.textContent = 'Vidas: ' + (lives>0 ? '❤️'.repeat(lives) : '—');
+  }
+
+  function spawnBall(){
+    const r = 13 + Math.random()*5;
+    const isBomb = Math.random() < 0.22;
+    balls.push({
+      x: r + Math.random()*(W-2*r),
+      y: -r,
+      r,
+      bomb: isBomb,
+      vy: fallSpeed + Math.random()*1.2
+    });
+  }
+
+  function update(dt){
+    // dificultad progresiva
+    fallSpeed = 1.8 + score*0.05;
+    spawnEvery = Math.max(380, 900 - score*12);
+
+    // mover cesta
+    basket.x += basket.vx;
+    if(basket.x < 0) basket.x = 0;
+    if(basket.x + basket.w > W) basket.x = W - basket.w;
+
+    // generar bolas
+    spawnTimer += dt;
+    if(spawnTimer >= spawnEvery){
+      spawnTimer = 0;
+      spawnBall();
+    }
+
+    // mover y comprobar bolas
+    for(let i = balls.length-1; i>=0; i--){
+      const b = balls[i];
+      b.y += b.vy;
+
+      const caught =
+        b.y + b.r >= basket.y &&
+        b.y - b.r <= basket.y + basket.h &&
+        b.x >= basket.x - b.r &&
+        b.x <= basket.x + basket.w + b.r;
+
+      if(caught){
+        if(b.bomb){
+          lives--; flash('#e53935');
+          if(lives <= 0){ running=false; endGame(); }
+        } else {
+          score++;
+        }
+        balls.splice(i,1);
+        updateHud();
+        continue;
+      }
+
+      if(b.y - b.r > H){
+        if(!b.bomb){            // dejar caer una buena cuesta una vida
+          lives--; flash('#ff9800');
+          if(lives <= 0){ running=false; endGame(); }
+          updateHud();
+        }
+        balls.splice(i,1);
+      }
+    }
+  }
+
+  let flashColor = null, flashAlpha = 0;
+  function flash(c){ flashColor = c; flashAlpha = 0.5; }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // bolas
+    for(const b of balls){
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+      if(b.bomb){
+        ctx.fillStyle = '#37474f';
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = (b.r*1.3)+'px serif';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('💣', b.x, b.y+1);
+      } else {
+        const g = ctx.createRadialGradient(b.x-b.r/3,b.y-b.r/3,2,b.x,b.y,b.r);
+        g.addColorStop(0,'#fff59d'); g.addColorStop(1,'#fbc02d');
+        ctx.fillStyle = g; ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,.15)'; ctx.lineWidth=2; ctx.stroke();
+      }
+    }
+
+    // cesta
+    const bx=basket.x, by=basket.y, bw=basket.w, bh=basket.h;
+    ctx.fillStyle = '#8d5524';
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(bx+bw, by);
+    ctx.lineTo(bx+bw-10, by+bh);
+    ctx.lineTo(bx+10, by+bh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#a9744f';
+    ctx.fillRect(bx, by-4, bw, 6);
+
+    // flash de feedback
+    if(flashAlpha > 0){
+      ctx.fillStyle = flashColor;
+      ctx.globalAlpha = flashAlpha;
+      ctx.fillRect(0,0,W,H);
+      ctx.globalAlpha = 1;
+      flashAlpha -= 0.03;
+    }
+  }
+
+  function loop(now){
+    if(!running) return;
+    const dt = now - lastTime;
+    lastTime = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function startGame(){
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    reset();
+    requestAnimationFrame(loop);
+  }
+
+  function endGame(){
+    draw();
+    finalScore.textContent = 'Puntos: ' + score;
+    const best = Math.max(score, +(localStorage.getItem('ballGameBest')||0));
+    localStorage.setItem('ballGameBest', best);
+    bestScoreEl.textContent = '🏆 Mejor: ' + best;
+    endScreen.classList.remove('hidden');
+  }
+
+  // ---- Controles ----
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') basket && (basket.vx = -basket.speed);
+    if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') basket && (basket.vx = basket.speed);
+  });
+  document.addEventListener('keyup', e=>{
+    if(['ArrowLeft','ArrowRight','a','A','d','D'].includes(e.key)) basket && (basket.vx = 0);
+  });
+
+  // puntero / táctil: la cesta sigue al dedo o ratón
+  function pointerMove(clientX){
+    if(!basket) return;
+    const rect = canvas.getBoundingClientRect();
+    const scale = W / rect.width;
+    const x = (clientX - rect.left) * scale;
+    basket.x = x - basket.w/2;
+    basket.vx = 0;
+  }
+  canvas.addEventListener('pointermove', e=>{ if(e.buttons || e.pointerType!=='mouse') pointerMove(e.clientX); });
+  canvas.addEventListener('pointerdown', e=>pointerMove(e.clientX));
+
+  // inclinación del móvil (opcional)
+  window.addEventListener('deviceorientation', e=>{
+    if(!basket || e.gamma==null) return;
+    basket.vx = Math.max(-basket.speed, Math.min(basket.speed, e.gamma/6));
+  });
+})();
+</script>
+</body>
+</html>
