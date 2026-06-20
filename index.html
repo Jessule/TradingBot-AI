@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{--bg:#050810;--panel:rgba(0,212,255,.05);--bord:rgba(0,212,255,.2);--p:#00d4ff;--s:#9b5de5;--acc:#ff0066;--gold:#ffcc00;--grn:#00f5a0;--text:#c8e8f8;--dim:#7693aa;--font:'Quicksand',system-ui,sans-serif;}
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
     html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-family:var(--font);color:var(--text);touch-action:none;}
     #hud{position:fixed;top:0;left:0;right:0;z-index:10;padding:max(10px,env(safe-area-inset-top)) 10px 0;background:linear-gradient(to bottom,rgba(5,8,16,.98) 70%,transparent);}
     .hud-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px;}
@@ -194,6 +194,14 @@
   .ov-title.wave .wl{display:inline-block;background:linear-gradient(135deg,var(--p),var(--s),var(--acc));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:wlwave 2.2s ease-in-out infinite;will-change:transform;}
   @keyframes wlwave{0%,100%{transform:translateY(0)}30%{transform:translateY(-13px)}60%{transform:translateY(2px)}}
 
+  /* ---- COMBO con letras temblando ---- */
+  #combo{position:fixed;top:34%;left:0;right:0;z-index:28;text-align:center;pointer-events:none;opacity:0;}
+  #combo.show{animation:comboIn 1s ease forwards;}
+  @keyframes comboIn{0%{opacity:0;transform:scale(.5)}14%{opacity:1;transform:scale(1.18)}82%{opacity:1;transform:scale(1.02)}100%{opacity:0;transform:scale(1)}}
+  #combo .ct{display:inline-block;font-size:2.6rem;font-weight:800;letter-spacing:1px;}
+  #combo .cl{display:inline-block;background:linear-gradient(135deg,var(--gold),var(--acc),var(--s));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 14px rgba(255,0,102,.5));animation:cshake .22s ease-in-out infinite;}
+  @keyframes cshake{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-3px,1px) rotate(-5deg)}40%{transform:translate(3px,-2px) rotate(4deg)}60%{transform:translate(-2px,2px) rotate(-3deg)}80%{transform:translate(2px,-1px) rotate(3deg)}}
+
   /* ---- árbol in-run como grafo de nodos circulares ---- */
   .rt-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 34px;min-width:max-content;margin:0 auto;}
   .rt-branch{display:flex;flex-direction:column;align-items:center;}
@@ -231,7 +239,7 @@
     <div class="hud-cell"><div class="hud-val" id="flux-el">0</div><div class="hud-lbl">FLUX</div></div>
     <div class="hud-cell"><div class="hud-val" id="circles-el">0</div><div class="hud-lbl">CIRCLES</div></div>
     <div class="hud-cell"><div id="lives-row"><span class="heart" id="h1">♥</span><span class="heart" id="h2">♥</span><span class="heart" id="h3">♥</span></div><div class="hud-lbl">LIVES</div></div>
-    <div class="hud-cell"><div class="hud-val" id="mult-el">×1</div><div class="hud-lbl">STREAK</div></div>
+    <div class="hud-cell"><div class="hud-val" id="mult-el">×1.00</div><div class="hud-lbl">MULTI</div></div>
   </div>
   <div class="spawn-wrap">
     <div class="spawn-info"><span>On field <b id="field-count">0 / 4</b></span><span>Next circle · <b id="cps">0.0</b>/s</span></div>
@@ -244,6 +252,7 @@
 </div>
 <canvas id="canvas"></canvas>
 <div id="banner"></div>
+<div id="combo"></div>
 <div id="flash-overlay"></div>
 <button id="sound-btn" onclick="toggleSound()"><span class="ring"></span><span class="core"></span><span class="eq"><i></i><i></i><i></i><i></i></span></button>
 <button id="runtree-btn" onclick="openRunTree()">🌳 Upgrades</button>
@@ -296,9 +305,8 @@
     <button class="alt small" onclick="closeSettings()">Done</button>
   </div>
   <div class="set-scroll">
-    <div class="set-row"><span>🔊 Sound effects</span><label class="sw"><input type="checkbox" id="set-sfx"><span class="sl"></span></label></div>
-    <div class="set-row"><span>🎵 Music</span><label class="sw"><input type="checkbox" id="set-music"><span class="sl"></span></label></div>
-    <div class="set-col"><span>Volume</span><input type="range" id="set-vol" min="0" max="1.5" step="0.05"></div>
+    <div class="set-col"><span>🔊 SFX volume</span><input type="range" id="set-sfxvol" min="0" max="1.5" step="0.05"></div>
+    <div class="set-col"><span>🎵 Music volume</span><input type="range" id="set-musicvol" min="0" max="1.5" step="0.05"></div>
     <div class="set-col"><span>Text font</span>
       <select id="set-font" class="set-select">
         <option value="'Quicksand',system-ui,sans-serif">Quicksand</option>
@@ -331,10 +339,11 @@ const KEY='flux_v3';
 const stor={load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch{return{};}},save(d){try{const c=this.load();localStorage.setItem(KEY,JSON.stringify({...c,...d}));}catch{}}};
 
 /* ===== SOUND (Web Audio, no files) ===== */
-const Sound={ctx:null,master:null,on:true,music:false,musicTimer:null,vol:1,
-  init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=this.vol;this.master.connect(this.ctx.destination);}catch(e){}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();},
-  setVol(v){this.vol=v;if(this.master)this.master.gain.value=v;},
-  tone(freq,dur,type,vol,when){if(!this.ctx||!this.on)return;const t=this.ctx.currentTime+(when||0);const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.3,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(this.master||this.ctx.destination);o.start(t);o.stop(t+dur+0.02);},
+const Sound={ctx:null,master:null,sfxGain:null,musicGain:null,on:true,sfxVol:1,musicVol:0.9,musicTimer:null,
+  init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=this.on?1:0;this.master.connect(this.ctx.destination);this.sfxGain=this.ctx.createGain();this.sfxGain.gain.value=this.sfxVol;this.sfxGain.connect(this.master);this.musicGain=this.ctx.createGain();this.musicGain.gain.value=this.musicVol;this.musicGain.connect(this.master);}catch(e){}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();},
+  setSfx(v){this.sfxVol=v;if(this.sfxGain)this.sfxGain.gain.value=v;},
+  setMusic(v){this.musicVol=v;if(this.musicGain)this.musicGain.gain.value=v;if(v>0)this.startMusic();else this.stopMusic();},
+  tone(freq,dur,type,vol,when){if(!this.ctx||!this.on||this.sfxVol<=0)return;const t=this.ctx.currentTime+(when||0);const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.3,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(this.sfxGain||this.ctx.destination);o.start(t);o.stop(t+dur+0.02);},
   tap(streak){const f=620+Math.min(streak,30)*14;this.tone(f,0.11,'triangle',0.42);},
   boost(){this.tone(880,0.11,'square',0.36);this.tone(1320,0.17,'square',0.28,0.05);},
   shield(){this.tone(523,0.17,'sine',0.38);this.tone(784,0.23,'sine',0.30,0.06);},
@@ -345,10 +354,17 @@ const Sound={ctx:null,master:null,on:true,music:false,musicTimer:null,vol:1,
   ui(){this.tone(560,0.06,'square',0.26);this.tone(840,0.05,'square',0.18,0.03);},
   count(){this.tone(560,0.14,'sine',0.40);},
   go(){this.tone(740,0.26,'sawtooth',0.40);this.tone(1100,0.30,'sawtooth',0.30,0.04);},
-  startMusic(){if(!this.music)return;this.init();if(!this.ctx||this.musicTimer)return;const scale=[196,233.08,261.63,293.66,349.23,392,466.16];const step=()=>{if(!this.music){this.stopMusic();return;}if(!this.ctx)return;const t=this.ctx.currentTime;const f=scale[Math.floor(Math.random()*scale.length)]*(Math.random()<0.3?2:1);const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.09,t+0.06);g.gain.exponentialRampToValueAtTime(0.0001,t+0.6);o.connect(g);g.connect(this.master||this.ctx.destination);o.start(t);o.stop(t+0.65);};this.musicTimer=setInterval(step,440);},
+  combo(){[660,990,1320,1760,1320].forEach((f,i)=>this.tone(f,0.16,'square',0.34,i*0.05));this.tone(180,0.22,'sawtooth',0.30);},
+  startMusic(){if(this.musicVol<=0)return;this.init();if(!this.ctx||this.musicTimer)return;const scale=[196,233.08,261.63,293.66,349.23,392,466.16];const step=()=>{if(this.musicVol<=0){this.stopMusic();return;}if(!this.ctx)return;const t=this.ctx.currentTime;const f=scale[Math.floor(Math.random()*scale.length)]*(Math.random()<0.3?2:1);const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.16,t+0.06);g.gain.exponentialRampToValueAtTime(0.0001,t+0.6);o.connect(g);g.connect(this.musicGain||this.ctx.destination);o.start(t);o.stop(t+0.65);};this.musicTimer=setInterval(step,440);},
   stopMusic(){if(this.musicTimer){clearInterval(this.musicTimer);this.musicTimer=null;}}
 };
-function toggleSound(){Sound.on=!Sound.on;Sound.init();document.getElementById('sound-btn').classList.toggle('off',!Sound.on);if(Sound.on)Sound.pick();stor.save({sound:Sound.on});}
+function toggleSound(){Sound.on=!Sound.on;Sound.init();if(Sound.master)Sound.master.gain.value=Sound.on?1:0;document.getElementById('sound-btn').classList.toggle('off',!Sound.on);if(Sound.on)Sound.pick();stor.save({sound:Sound.on});}
+function showCombo(){
+  const c=document.getElementById('combo');const txt='COMBO '+fmtStreak()+'!!';
+  c.innerHTML='<span class="ct"></span>';const ct=c.querySelector('.ct');
+  [...txt].forEach((ch,i)=>{const s=document.createElement('span');s.className='cl';s.textContent=ch===' '?' ':ch;s.style.animationDelay=(i*0.035)+'s';ct.appendChild(s);});
+  c.classList.remove('show');void c.offsetWidth;c.classList.add('show');Sound.combo();
+}
 
 /* ===== PERSISTENT ESSENCE TREE ===== */
 const TREE=[
@@ -381,7 +397,7 @@ const EFF={
 const RUN_TREE=[
   {id:'power', parent:null,    icon:'⚡',title:'×1.3 Flux',       desc:'+30% flux per tap',   step:'×1.3 flux',     levels:[15,35,75,150,300], eff:()=>{runMods.flux*=1.30;}},
   {id:'slow',  parent:'power', icon:'🐢',title:'Slower circles', desc:'circles move slower', step:'-5% speed',     levels:[20,45,90],          eff:()=>{runMods.speed*=0.95;}},
-  {id:'limit', parent:'slow',  icon:'⭕',title:'+1 Circle limit',desc:'+1 circle on field',  step:'+1 circle',     levels:[80],                eff:()=>{runMods.target+=1;}},
+  {id:'limit', parent:'slow',  icon:'⭕',title:'+1 Circle limit',desc:'+1 circle on field',  step:'+1 circle',     levels:[80,160,320,600,1000], eff:()=>{runMods.target+=1;}},
   {id:'life',  parent:'slow',  icon:'⏳',title:'+5% Lifetime',   desc:'circles last longer', step:'+5% lifetime',  levels:[40,90,160],         eff:()=>{runMods.life*=1.05;}},
 ];
 let runUp={};
@@ -392,7 +408,7 @@ function childrenOf(id){return RUN_TREE.filter(x=>x.parent===id);}
 
 let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0};
 
-function pickType(){const r=Math.random();const boost=.07+EFF.boostChance()+(running?runMods.boost:0);if(r<.03)return 'SHIELD';if(r<.03+boost)return 'BOOST';return 'NORMAL';}
+function pickType(){const r=Math.random();const boost=.04+EFF.boostChance()+(running?runMods.boost:0);if(r<.015)return 'SHIELD';if(r<.015+boost)return 'BOOST';return 'NORMAL';}
 
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
 const overlay=document.getElementById('overlay'),banner=document.getElementById('banner'),flashOv=document.getElementById('flash-overlay');
@@ -467,9 +483,9 @@ function handleTap(ex,ey){
       burst(o.x,o.y,col,o.type==='BOOST'?26:18);
       floatText(o.x,o.y,(o.type==='BOOST'?'BOOST ':'+')+fmtSig(gained),o.type==='BOOST'?col:'#ffffff');
       bump(fluxEl);bump(circlesEl);bump(multEl);
-      if(streak>0&&streak%10===0)showBanner(`🔥 ${streak} STREAK ${fmtStreak()}`);
+      if(streak>0&&streak%10===0)showCombo();
       xp++;
-      if(xp>=xpToNext(level)){xp=0;level++;Sound.level();flash(multEl,300);showBanner(`▲ LEVEL ${level}`);}
+      if(xp>=xpToNext(level)){xp=0;level++;Sound.level();flash(multEl,300);}
     }
     const s=stor.load();stor.save({best:Math.max(flux,s.best||0)});
     updateHUD();break;
@@ -478,9 +494,15 @@ function handleTap(ex,ey){
 canvas.addEventListener('touchstart',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();for(const t of e.changedTouches)handleTap(t.clientX-r.left,t.clientY-r.top);},{passive:false});
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleTap(e.clientX-r.left,e.clientY-r.top);});
 
+/* pausa/reanudar: desplaza el "nacimiento" de los orbes el tiempo en pausa
+   para que NO caduquen de golpe (ni te quiten vidas) al reanudar */
+let pauseAt=0;
+function pauseGame(){paused=true;pauseAt=performance.now();}
+function resumeGame(){const d=performance.now()-pauseAt;for(const o of orbs){o.born+=d;if(o.escapeT)o.escapeT+=d;}lastTime=performance.now();paused=false;}
+
 /* in-run upgrade tree UI (spend Flux) */
-function openRunTree(){if(!running)return;paused=true;renderRunTree();document.getElementById('runtree-ov').classList.add('show');}
-function closeRunTree(){document.getElementById('runtree-ov').classList.remove('show');runCountdown(()=>{paused=false;lastTime=performance.now();});}
+function openRunTree(){if(!running)return;pauseGame();renderRunTree();document.getElementById('runtree-ov').classList.add('show');}
+function closeRunTree(){document.getElementById('runtree-ov').classList.remove('show');runCountdown(()=>{resumeGame();});}
 /* cuenta atrás 3-2-1-GO para darte margen al reanudar */
 function runCountdown(cb){
   const ov=document.getElementById('cdown'),n=document.getElementById('cdn');
@@ -619,7 +641,7 @@ function endGame(early,forced){
 /* ===== EARLY EXIT ===== */
 function requestExit(){
   if(!running||paused)return;
-  paused=true;
+  pauseGame();
   const elapsed=DURATION-timeLeft;const frac=Math.min(1,elapsed/DURATION);
   const penalty=0.35+0.65*frac;
   const full=projEssence();const payout=Math.floor(full*penalty);
@@ -640,7 +662,7 @@ function requestExit(){
     </div>`;
   overlay.style.display='flex';
 }
-function cancelExit(){overlay.style.display='none';runCountdown(()=>{paused=false;lastTime=performance.now();});}
+function cancelExit(){overlay.style.display='none';runCountdown(()=>{resumeGame();});}
 function confirmExit(){overlay.style.display='none';endGame(true,window._exitPayout||0);}
 
 /* ===== PERSISTENT ESSENCE TREE UI ===== */
@@ -681,26 +703,25 @@ function renderTree(){
 /* ===== SETTINGS ===== */
 function openSettings(){
   const s=stor.load();
-  document.getElementById('set-sfx').checked=Sound.on;
-  document.getElementById('set-music').checked=Sound.music;
-  document.getElementById('set-vol').value=Sound.vol;
+  document.getElementById('set-sfxvol').value=Sound.sfxVol;
+  document.getElementById('set-musicvol').value=Sound.musicVol;
   document.getElementById('set-font').value=s.font||"'Quicksand',system-ui,sans-serif";
   document.getElementById('settings-ov').classList.add('show');
 }
 function closeSettings(){document.getElementById('settings-ov').classList.remove('show');}
 function resetProgress(){
   if(!confirm('Reset ALL progress? This wipes your Essence, upgrades and stats.'))return;
-  const keep={sound:Sound.on,music:Sound.music,vol:Sound.vol,font:stor.load().font};
+  const keep={sfxVol:Sound.sfxVol,musicVol:Sound.musicVol,font:stor.load().font};
   try{localStorage.removeItem(KEY);}catch(e){}
   stor.save(keep);
   updateWallet();startStats.style.display='none';renderStartStats();
   showBanner('Progress reset');closeSettings();
 }
 function bindSettings(){
-  document.getElementById('set-sfx').onchange=e=>{Sound.on=e.target.checked;Sound.init();document.getElementById('sound-btn').classList.toggle('off',!Sound.on);stor.save({sound:Sound.on});if(Sound.on)Sound.pick();};
-  document.getElementById('set-music').onchange=e=>{Sound.music=e.target.checked;stor.save({music:Sound.music});Sound.init();if(Sound.music)Sound.startMusic();else Sound.stopMusic();};
-  document.getElementById('set-vol').oninput=e=>{Sound.setVol(parseFloat(e.target.value));};
-  document.getElementById('set-vol').onchange=e=>{stor.save({vol:parseFloat(e.target.value)});if(Sound.on)Sound.pick();};
+  document.getElementById('set-sfxvol').oninput=e=>{Sound.init();Sound.setSfx(parseFloat(e.target.value));};
+  document.getElementById('set-sfxvol').onchange=e=>{stor.save({sfxVol:parseFloat(e.target.value)});Sound.pick();};
+  document.getElementById('set-musicvol').oninput=e=>{Sound.init();Sound.setMusic(parseFloat(e.target.value));};
+  document.getElementById('set-musicvol').onchange=e=>{stor.save({musicVol:parseFloat(e.target.value)});};
   document.getElementById('set-font').onchange=e=>{document.documentElement.style.setProperty('--font',e.target.value);stor.save({font:e.target.value});};
 }
 /* título FLUX: cada letra se mueve sola en ola */
@@ -716,15 +737,15 @@ function waveTitle(){
 function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtSig(s.best||0)}</div><div class="l">Best Flux</div></div><div class="sc"><div class="v">${fmtNum(Math.floor(s.essence||0))}</div><div class="l">Essence</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Runs</div></div>`;}
 
 const SET=stor.load();
-if(SET.sound===false){Sound.on=false;document.getElementById('sound-btn').classList.add('off');}
-if(SET.vol!==undefined)Sound.vol=SET.vol;
-Sound.music=!!SET.music;
+if(SET.sfxVol!==undefined)Sound.sfxVol=SET.sfxVol;
+if(SET.sfxVol===undefined&&SET.vol!==undefined)Sound.sfxVol=SET.vol; // migración
+if(SET.musicVol!==undefined)Sound.musicVol=SET.musicVol;
 if(SET.font)document.documentElement.style.setProperty('--font',SET.font);
 bindSettings();waveTitle();
 renderStartStats();updateWallet();
 document.getElementById('btn').addEventListener('click',startGame);
 // SFX en cada botón + desbloquear audio / música tras el primer gesto
-document.addEventListener('pointerdown',e=>{Sound.init();if(e.target.closest('button'))Sound.ui();if(Sound.music)Sound.startMusic();},true);
+document.addEventListener('pointerdown',e=>{Sound.init();if(e.target.closest('button'))Sound.ui();if(Sound.musicVol>0)Sound.startMusic();},true);
 ctx.fillStyle='#050810';ctx.fillRect(0,0,W,H);
 </script>
 </body>
