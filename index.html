@@ -100,25 +100,32 @@
   button.alt{border-color:var(--dim);color:var(--text);min-width:150px;animation:none;}
   button.danger{border-color:var(--acc);color:var(--acc);min-width:150px;animation:none;}
   button.small{min-width:0;padding:11px 22px;font-size:.72rem;letter-spacing:2px;}
-  #sound-btn{position:fixed;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:35;background:var(--panel);border:1px solid var(--bord);color:var(--p);border-radius:50%;width:38px;height:38px;font-size:1rem;cursor:pointer;animation:none;}
 
-  /* in-run upgrade cards */
-  #runup-ov{position:fixed;inset:0;z-index:45;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;background:rgba(5,8,16,.93);backdrop-filter:blur(8px);font-family:var(--font);}
-  #runup-ov.show{display:flex;}
-  .ru-title{font-size:.66rem;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--dim);}
-  .ru-lv{font-size:1.6rem;font-weight:800;letter-spacing:4px;text-transform:uppercase;background:linear-gradient(135deg,var(--p),var(--grn));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .ru-cards{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
-  .ru-card{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--bord);border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .12s;text-align:left;}
-  .ru-card:active{transform:scale(.97);border-color:var(--p);background:rgba(0,212,255,.1);}
-  .ru-card .ic{font-size:1.7rem;flex-shrink:0;}
-  .ru-card .nm{font-size:.95rem;font-weight:800;color:var(--text);}
-  .ru-card .ds{font-size:.7rem;color:var(--dim);font-weight:600;margin-top:2px;}
+  /* futuristic floating buttons (audio + in-run upgrades) */
+  .fbtn{position:fixed;bottom:max(12px,env(safe-area-inset-bottom));z-index:35;display:flex;align-items:center;gap:7px;padding:9px 14px;font-family:var(--font);font-weight:800;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--p);background:linear-gradient(135deg,rgba(0,212,255,.14),rgba(0,212,255,.02));border:1px solid var(--bord);border-radius:12px;cursor:pointer;backdrop-filter:blur(4px);overflow:hidden;animation:fbtnglow 2.6s ease infinite;}
+  .fbtn::before,.fbtn::after{content:'';position:absolute;width:8px;height:8px;border-color:var(--p);border-style:solid;opacity:.7;}
+  .fbtn::before{top:3px;left:3px;border-width:1.5px 0 0 1.5px;}
+  .fbtn::after{bottom:3px;right:3px;border-width:0 1.5px 1.5px 0;}
+  @keyframes fbtnglow{0%,100%{box-shadow:0 0 6px rgba(0,212,255,.22)}50%{box-shadow:0 0 16px rgba(0,212,255,.5),0 0 30px rgba(0,212,255,.12)}}
+  .fbtn:active{transform:scale(.94);}
+  #sound-btn{right:12px;}
+  #sound-btn.off{color:var(--acc);border-color:rgba(255,0,102,.4);animation:none;box-shadow:none;}
+  #runtree-btn{left:12px;display:none;}
+  .eq{display:inline-flex;align-items:flex-end;gap:2px;height:13px;}
+  .eq i{width:3px;background:var(--p);border-radius:1px;height:90%;transform-origin:bottom;box-shadow:0 0 6px var(--p);animation:eqb .85s ease infinite;}
+  .eq i:nth-child(1){animation-delay:0s;}
+  .eq i:nth-child(2){animation-delay:.18s;}
+  .eq i:nth-child(3){animation-delay:.36s;}
+  .eq i:nth-child(4){animation-delay:.54s;}
+  @keyframes eqb{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+  #sound-btn.off .eq i{animation:none;background:var(--acc);box-shadow:none;height:35%;transform:scaleY(.5);}
 
-  /* upgrade tree */
-  #tree-ov{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;background:rgba(5,8,16,.97);backdrop-filter:blur(10px);font-family:var(--font);}
-  #tree-ov.show{display:flex;}
+  /* upgrade trees (persistent + in-run share styles) */
+  .tree-ov{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;background:rgba(5,8,16,.97);backdrop-filter:blur(10px);font-family:var(--font);}
+  .tree-ov.show{display:flex;}
   .tree-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:max(14px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--bord);}
-  .tree-top h2{font-size:1.1rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(135deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .tree-top h2{font-size:1.05rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(135deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .tree-top h2 small{display:block;-webkit-text-fill-color:var(--dim);color:var(--dim);font-size:.5rem;letter-spacing:1px;margin-top:2px;}
   .tree-top .wal{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--bord);border-radius:10px;padding:6px 12px;}
   .tree-top .wal .coin{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#bff6ff,var(--p));box-shadow:0 0 8px var(--p);}
   .tree-top .wal .amt{font-weight:800;color:var(--p);}
@@ -168,12 +175,13 @@
 <canvas id="canvas"></canvas>
 <div id="banner"></div>
 <div id="flash-overlay"></div>
-<button id="sound-btn" onclick="toggleSound()" title="Sound">🔊</button>
+<button id="sound-btn" class="fbtn" onclick="toggleSound()"><span class="eq"><i></i><i></i><i></i><i></i></span> Audio</button>
+<button id="runtree-btn" class="fbtn" onclick="openRunTree()">🌳 Upgrades</button>
 
 <div id="overlay">
   <div class="ov-eye">Circle Essence Challenge</div>
   <div class="ov-title">FLUX</div>
-  <p class="ov-hint">You have <b style="color:var(--gold)">2 minutes</b>. Tap the circles before they escape — every miss costs a life.<br>It gets harder over time: more circles, faster.<br>Level up to pick <b style="color:var(--grn)">in-run upgrades</b>, then earn <b style="color:var(--p)">Circle Essence</b>.</p>
+  <p class="ov-hint">You have <b style="color:var(--gold)">2 minutes</b>. Tap the circles before they escape — every miss costs a life.<br>It gets harder over time: more circles, faster.<br>Spend <b style="color:#fff">Flux</b> mid-run on the <b style="color:var(--grn)">in-run upgrade tree</b>, then earn <b style="color:var(--p)">Circle Essence</b>.</p>
   <div class="orb-legend">
     <div class="orb-pip"><div class="orb-dot" style="background:#00d4ff;box-shadow:0 0 6px #00d4ff"></div><span style="color:#00d4ff">Normal</span></div>
     <div class="orb-pip"><div class="orb-dot" style="background:#ffcc00;box-shadow:0 0 6px #ffcc00"></div><span style="color:#ffcc00">Boost ×5</span></div>
@@ -182,21 +190,26 @@
   <div class="stats-grid" id="start-stats" style="display:none"></div>
   <div class="row-btns">
     <button id="btn">START</button>
-    <button class="alt small" onclick="openTree()">🌳 Upgrades</button>
+    <button class="alt small" onclick="openTree()">🌳 Essence Tree</button>
   </div>
 </div>
 
-<!-- In-run upgrade picker -->
-<div id="runup-ov">
-  <div class="ru-title">Level Up — Choose an upgrade</div>
-  <div class="ru-lv" id="ru-lv">LEVEL 2</div>
-  <div class="ru-cards" id="ru-cards"></div>
+<!-- In-run upgrade tree (spend Flux) -->
+<div id="runtree-ov" class="tree-ov">
+  <div class="tree-top">
+    <h2>In-Run Upgrades<small>Spend Flux · lasts this run only</small></h2>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="wal"><span style="color:#fff;font-weight:800">⚡</span><span class="amt" id="runtree-flux" style="color:#fff">0</span></div>
+      <button class="alt small" onclick="closeRunTree()">Resume</button>
+    </div>
+  </div>
+  <div class="tree-scroll"><div class="tree-grid" id="runtree-grid"></div></div>
 </div>
 
-<!-- Upgrade tree -->
-<div id="tree-ov">
+<!-- Persistent Essence upgrade tree -->
+<div id="tree-ov" class="tree-ov">
   <div class="tree-top">
-    <h2>Upgrade Tree</h2>
+    <h2>Essence Tree<small>Permanent · spend Circle Essence</small></h2>
     <div style="display:flex;gap:8px;align-items:center;">
       <div class="wal"><div class="coin"></div><span class="amt" id="tree-wal">0</span></div>
       <button class="alt small" onclick="closeTree()">Back</button>
@@ -213,7 +226,10 @@ const BASE_XP=10,XP_SCALE=1.4,MPL=1.25;
 function xpToNext(lv){return Math.ceil(BASE_XP*Math.pow(XP_SCALE,lv-1));}
 function multAt(lv){return Math.pow(MPL,lv-1);}
 function fluxGain(lv,t){return multAt(lv)*ORB[t].fluxMult;}
+// integer-grouped format (K/M/B)
 function fmtNum(n){if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1e6).toFixed(2)+'M';if(n>=1e3)return (n/1e3).toFixed(1)+'K';return Math.floor(n).toString();}
+// 3 significant digits: <10 -> 2 dec, <100 -> 1 dec, <1000 -> 0 dec, then K/M/B
+function fmtSig(n){if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1e6).toFixed(2)+'M';if(n>=1e3)return (n/1e3).toFixed(2)+'K';if(n>=100)return Math.round(n).toString();if(n>=10)return n.toFixed(1);return n.toFixed(2);}
 
 const KEY='flux_v3';
 const stor={load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch{return{};}},save(d){try{const c=this.load();localStorage.setItem(KEY,JSON.stringify({...c,...d}));}catch{}}};
@@ -230,9 +246,9 @@ const Sound={ctx:null,on:true,
   reward(){[784,988,1319,1568,2093].forEach((f,i)=>this.tone(f,0.26,'sine',0.15,i*0.07));},
   pick(){this.tone(700,0.09,'square',0.16);this.tone(1050,0.12,'square',0.12,0.05);}
 };
-function toggleSound(){Sound.on=!Sound.on;Sound.init();document.getElementById('sound-btn').textContent=Sound.on?'🔊':'🔇';if(Sound.on)Sound.pick();stor.save({sound:Sound.on});}
+function toggleSound(){Sound.on=!Sound.on;Sound.init();const b=document.getElementById('sound-btn');b.classList.toggle('off',!Sound.on);if(Sound.on)Sound.pick();stor.save({sound:Sound.on});}
 
-/* ===== PERSISTENT UPGRADE TREE ===== */
+/* ===== PERSISTENT ESSENCE TREE ===== */
 const TREE=[
   {id:'abundance',icon:'⭕',title:'Abundance',desc:'More circles on screen at once.',levels:[
     {cost:6,label:'+1 circle'},{cost:14,label:'+1 circle'},{cost:26,label:'+1 circle'},{cost:42,label:'+1 circle'},{cost:65,label:'+1 circle'}]},
@@ -258,17 +274,17 @@ const EFF={
   boostChance(){return lvl('fortune')*.04;}
 };
 
-/* ===== IN-RUN UPGRADES (roguelite cards) ===== */
-const RUN_UPGRADES=[
-  {ic:'🐢',nm:'Time Warp',ds:'Circles move 12% slower',ap:()=>{runMods.speed*=0.88;}},
-  {ic:'⭕',nm:'Big Circles',ds:'Circles are 16% bigger',ap:()=>{runMods.radius*=1.16;}},
-  {ic:'⚡',nm:'Overcharge',ds:'+25% Flux per tap',ap:()=>{runMods.flux*=1.25;}},
-  {ic:'💎',nm:'Essence Surge',ds:'+20% Essence gain',ap:()=>{runMods.ess*=1.20;}},
-  {ic:'⏳',nm:'Lingering',ds:'Circles last 18% longer',ap:()=>{runMods.life*=1.18;}},
-  {ic:'❤️',nm:'Repair',ds:'Restore 1 life',ap:()=>{lives=Math.min(3,lives+1);updateHUD();}},
-  {ic:'🌟',nm:'Lucky',ds:'+6% Boost circles this run',ap:()=>{runMods.boost+=0.06;}},
-  {ic:'🎯',nm:'Combo Master',ds:'Streak multiplier grows faster',ap:()=>{runMods.streakInc+=0.006;}},
+/* ===== IN-RUN UPGRADE TREE (spend Flux, resets each run) ===== */
+const RUN_TREE=[
+  {id:'slow',icon:'🐢',title:'Slow',desc:'Circles move slower.',step:'-10% speed',levels:[8,20,45,90],eff:()=>{runMods.speed*=0.90;}},
+  {id:'grow',icon:'⭕',title:'Grow',desc:'Bigger circles, easier to hit.',step:'+12% size',levels:[12,28,60,120],eff:()=>{runMods.radius*=1.12;}},
+  {id:'power',icon:'⚡',title:'Power',desc:'More Flux per tap.',step:'+20% flux',levels:[15,35,75,150,300],eff:()=>{runMods.flux*=1.20;}},
+  {id:'linger',icon:'⏳',title:'Linger',desc:'Circles last longer before escaping.',step:'+15% life',levels:[25,60,140],eff:()=>{runMods.life*=1.15;}},
+  {id:'combo',icon:'🎯',title:'Combo',desc:'Streak multiplier grows faster.',step:'streak +',levels:[30,80,180],eff:()=>{runMods.streakInc+=0.006;}},
 ];
+let runUp={};
+function runLvl(id){return runUp[id]||0;}
+function runBranchUnlocked(i){if(i===0)return true;return runLvl(RUN_TREE[i-1].id)>=1;}
 
 let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0};
 
@@ -289,7 +305,7 @@ let circles=0,runEssRaw=0,DURATION=120,timeLeft=120,lastSpawn=0,essMultRun=1,las
 
 function rand(a,b){return Math.random()*(b-a)+a;}
 function progress(){return Math.min(1,(DURATION-timeLeft)/DURATION);}
-function streakMult(){return 1+(0.01+runMods.streakInc)*streak;}   // +×0.01 per circle → ~×1.20 at 20
+function streakMult(){return 1+(0.01+runMods.streakInc)*streak;}
 function getConf(){
   const t=progress();
   const speedMul=(1+t*1.7)*EFF.speedFactor()*runMods.speed;
@@ -321,15 +337,13 @@ function floatText(x,y,text,color){const el=document.createElement('div');el.cla
 function showBanner(text){banner.textContent=text;banner.classList.add('show');clearTimeout(banner._t);banner._t=setTimeout(()=>banner.classList.remove('show'),2000);}
 function screenFlash(){flashOv.classList.add('show');clearTimeout(flashOv._t);flashOv._t=setTimeout(()=>flashOv.classList.remove('show'),180);}
 
-/* per-circle essence: scales with level only (streak removed), × in-run mods.
-   Final reward multiplies by the persistent essence multiplier. */
 function orbEssence(type){return ORB[type].ess*(1+0.06*(level-1))*runMods.ess;}
 function projEssence(){return Math.floor(runEssRaw*essMultRun);}
 function fmtTime(s){s=Math.max(0,Math.ceil(s));const m=Math.floor(s/60),sec=s%60;return m+':'+(sec<10?'0':'')+sec;}
 function fmtStreak(){const m=streakMult();return '×'+(m>=10?m.toFixed(1):m.toFixed(2));}
 function updateHUD(){
   const needed=xpToNext(level);
-  fluxEl.textContent=fmtNum(flux);
+  fluxEl.textContent=fmtSig(flux);
   if(circlesEl)circlesEl.textContent=circles;
   multEl.textContent=streak>0?fmtStreak():'×1.00';
   xpFill.style.width=Math.min(xp/needed*100,100).toFixed(1)+'%';
@@ -345,17 +359,17 @@ function handleTap(ex,ey){
     if(o.type==='SHIELD'){
       Sound.shield();
       if(lives<3){lives++;showBanner('SHIELD — LIFE RESTORED');burst(o.x,o.y,'#00f5a0',22);floatText(o.x,o.y,'+♥','#00f5a0');}
-      else{const bonus=multAt(level)*2;flux+=bonus;showBanner('SHIELD — FULL HP — BONUS!');burst(o.x,o.y,'#00f5a0',18);floatText(o.x,o.y,'+'+fmtNum(bonus),'#00f5a0');bump(fluxEl);}
+      else{const bonus=multAt(level)*2;flux+=bonus;showBanner('SHIELD — FULL HP — BONUS!');burst(o.x,o.y,'#00f5a0',18);floatText(o.x,o.y,'+'+fmtSig(bonus),'#00f5a0');bump(fluxEl);}
     }else{
       streak++;circles++;
       const gained=fluxGain(level,o.type)*runMods.flux*streakMult();flux+=gained;runEssRaw+=orbEssence(o.type);
       if(o.type==='BOOST')Sound.boost();else Sound.tap(streak);
       burst(o.x,o.y,col,o.type==='BOOST'?26:18);
-      floatText(o.x,o.y,(o.type==='BOOST'?'BOOST ':'+')+fmtNum(gained),col);
+      floatText(o.x,o.y,(o.type==='BOOST'?'BOOST ':'+')+fmtSig(gained),col);
       bump(fluxEl);bump(circlesEl);bump(multEl);
       if(streak>0&&streak%10===0)showBanner(`🔥 ${streak} STREAK ${fmtStreak()}`);
       xp++;
-      if(xp>=xpToNext(level)){xp=0;level++;Sound.level();flash(multEl,300);offerRunUpgrade();}
+      if(xp>=xpToNext(level)){xp=0;level++;Sound.level();flash(multEl,300);showBanner(`▲ LEVEL ${level}`);}
     }
     const s=stor.load();stor.save({best:Math.max(flux,s.best||0)});
     updateHUD();break;
@@ -364,23 +378,37 @@ function handleTap(ex,ey){
 canvas.addEventListener('touchstart',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();for(const t of e.changedTouches)handleTap(t.clientX-r.left,t.clientY-r.top);},{passive:false});
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleTap(e.clientX-r.left,e.clientY-r.top);});
 
-/* in-run upgrade picker */
-function offerRunUpgrade(){
-  if(!running)return;
-  paused=true;
-  const pool=RUN_UPGRADES.slice();const pick=[];
-  for(let i=0;i<3&&pool.length;i++){pick.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
-  document.getElementById('ru-lv').textContent='LEVEL '+level;
-  const wrap=document.getElementById('ru-cards');wrap.innerHTML='';
-  pick.forEach(u=>{
-    const c=document.createElement('div');c.className='ru-card';
-    c.innerHTML=`<div class="ic">${u.ic}</div><div><div class="nm">${u.nm}</div><div class="ds">${u.ds}</div></div>`;
-    c.onclick=()=>{Sound.pick();u.ap();closeRunUpgrade();showBanner(`▲ LEVEL ${level} · ${u.nm}`);};
-    wrap.appendChild(c);
-  });
-  document.getElementById('runup-ov').classList.add('show');
+/* in-run upgrade tree UI (spend Flux) */
+function openRunTree(){if(!running)return;paused=true;renderRunTree();document.getElementById('runtree-ov').classList.add('show');}
+function closeRunTree(){document.getElementById('runtree-ov').classList.remove('show');paused=false;lastTime=performance.now();}
+function buyRunNode(bid,ni){
+  const b=RUN_TREE.find(x=>x.id===bid);const owned=runLvl(bid);if(ni!==owned)return;
+  const cost=b.levels[ni];
+  if(flux<cost){showBanner('Not enough Flux');return;}
+  flux-=cost;runUp[bid]=owned+1;b.eff();Sound.pick();updateHUD();renderRunTree();
 }
-function closeRunUpgrade(){document.getElementById('runup-ov').classList.remove('show');paused=false;lastTime=performance.now();}
+function renderRunTree(){
+  document.getElementById('runtree-flux').textContent=fmtSig(flux);
+  const grid=document.getElementById('runtree-grid');grid.innerHTML='';
+  RUN_TREE.forEach((b,bi)=>{
+    const unlocked=runBranchUnlocked(bi);const owned=runLvl(b.id);
+    const col=document.createElement('div');col.className='branch'+(unlocked?'':' lock');
+    const head=document.createElement('div');head.style.cssText='display:flex;flex-direction:column;align-items:center;';
+    head.innerHTML=`<div class="bi">${b.icon}</div><div class="bt">${b.title}</div><div class="bd">${b.desc}</div>`;
+    col.appendChild(head);
+    b.levels.forEach((cost,ni)=>{
+      if(ni>0){const c=document.createElement('div');c.className='conn'+(owned>=ni?' on':'');col.appendChild(c);}
+      const purchased=owned>=(ni+1);const isNext=!purchased&&owned===ni;const afford=isNext&&unlocked&&flux>=cost;
+      const el=document.createElement('div');let cls='node';if(purchased)cls+=' owned';else if(!unlocked||!isNext)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';el.className=cls;
+      el.innerHTML=`<div class="nl">Level ${ni+1}</div><div class="ne">${b.step}</div>`+
+        (purchased?'<span class="nc" style="border-color:transparent;color:var(--grn);background:rgba(0,245,160,.1)">Owned</span>':`<span class="nc"><span style="color:#fff">⚡</span>${cost}</span>`);
+      if(isNext&&unlocked){el.querySelector('.nc').onclick=()=>buyRunNode(b.id,ni);}
+      col.appendChild(el);
+    });
+    if(!unlocked){const ln=document.createElement('div');ln.className='ln';ln.textContent=`🔒 Buy "${RUN_TREE[bi-1].title}" to unlock`;col.appendChild(ln);}
+    grid.appendChild(col);
+  });
+}
 
 function update(now){
   const realDt=(now-lastTime)/1000;const dt=Math.min((now-lastTime)/16.67,3);lastTime=now;
@@ -411,10 +439,11 @@ function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame
 function startGame(){
   Sound.init();
   orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;lastSec=-1;
-  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0};
+  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0};runUp={};
   DURATION=EFF.duration();timeLeft=DURATION;essMultRun=EFF.essMult();
   running=true;paused=false;
-  document.getElementById('runup-ov').classList.remove('show');
+  document.getElementById('runtree-ov').classList.remove('show');
+  document.getElementById('runtree-btn').style.display='flex';
   clkEl.textContent=fmtTime(timeLeft);clkEl.classList.remove('low');timeFill.style.width='100%';
   updateHUD();updateWallet();
   overlay.style.display='none';resize();
@@ -425,7 +454,8 @@ function startGame(){
 function endGame(early,forced){
   if(!running)return;
   running=false;paused=false;cancelAnimationFrame(animId);
-  document.getElementById('runup-ov').classList.remove('show');
+  document.getElementById('runtree-ov').classList.remove('show');
+  document.getElementById('runtree-btn').style.display='none';
   const full=projEssence();
   const reward=early?forced:full;
   const pct=full>0?reward/full:1;
@@ -444,12 +474,12 @@ function endGame(early,forced){
       Circles tapped: <b>${circles}</b><br>
       Essence multiplier: <b>×${essMultRun.toFixed(2)}</b><br>
       ${early?`Early-exit penalty: <span class="neg">−${fmtNum(full-reward)}</span><br>Effective multiplier: <b class="neg">×${effMult.toFixed(2)}</b><br>`:''}
-      Run Flux: <b>${fmtNum(flux)}</b> · Level <b>${level}</b><br>
+      Run Flux: <b>${fmtSig(flux)}</b> · Level <b>${level}</b><br>
       Total Essence: <b class="pos">${fmtNum(newEss)}</b>
     </div>
     <div class="row-btns">
       <button id="btn">▶ Play again</button>
-      <button class="alt small" onclick="openTree()">🌳 Upgrades</button>
+      <button class="alt small" onclick="openTree()">🌳 Essence Tree</button>
     </div>`;
   overlay.style.display='flex';
   document.getElementById('btn').addEventListener('click',startGame);
@@ -482,7 +512,7 @@ function requestExit(){
 function cancelExit(){overlay.style.display='none';paused=false;lastTime=performance.now();}
 function confirmExit(){overlay.style.display='none';endGame(true,window._exitPayout||0);}
 
-/* ===== UPGRADE TREE UI ===== */
+/* ===== PERSISTENT ESSENCE TREE UI ===== */
 function openTree(){document.getElementById('tree-ov').classList.add('show');renderTree();updateWallet();}
 function closeTree(){document.getElementById('tree-ov').classList.remove('show');}
 function buyNode(bid,ni){
@@ -517,9 +547,9 @@ function renderTree(){
   });
 }
 
-function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtNum(s.best||0)}</div><div class="l">Best Flux</div></div><div class="sc"><div class="v">${fmtNum(Math.floor(s.essence||0))}</div><div class="l">Essence</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Runs</div></div>`;}
+function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtSig(s.best||0)}</div><div class="l">Best Flux</div></div><div class="sc"><div class="v">${fmtNum(Math.floor(s.essence||0))}</div><div class="l">Essence</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Runs</div></div>`;}
 
-if(stor.load().sound===false){Sound.on=false;document.getElementById('sound-btn').textContent='🔇';}
+if(stor.load().sound===false){Sound.on=false;document.getElementById('sound-btn').classList.add('off');}
 renderStartStats();updateWallet();
 document.getElementById('btn').addEventListener('click',startGame);
 ctx.fillStyle='#050810';ctx.fillRect(0,0,W,H);
