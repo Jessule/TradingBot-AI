@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#050810;--panel:rgba(0,212,255,.05);--bord:rgba(0,212,255,.2);--p:#00d4ff;--s:#9b5de5;--acc:#ff0066;--gold:#ffcc00;--grn:#00f5a0;--text:#c8e8f8;--dim:#263d52;--font:'Quicksand',system-ui,sans-serif;}
+    :root{--bg:#050810;--panel:rgba(0,212,255,.05);--bord:rgba(0,212,255,.2);--p:#00d4ff;--s:#9b5de5;--acc:#ff0066;--gold:#ffcc00;--grn:#00f5a0;--text:#c8e8f8;--dim:#7693aa;--font:'Quicksand',system-ui,sans-serif;}
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-family:var(--font);color:var(--text);touch-action:none;}
     #hud{position:fixed;top:0;left:0;right:0;z-index:10;padding:max(10px,env(safe-area-inset-top)) 10px 0;background:linear-gradient(to bottom,rgba(5,8,16,.98) 70%,transparent);}
@@ -40,7 +40,7 @@
     .ov-title{font-size:3rem;font-weight:800;letter-spacing:10px;text-transform:uppercase;line-height:1;margin-top:-4px;background:linear-gradient(135deg,var(--p),var(--s),var(--acc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
     .ov-big{font-size:4.5rem;font-weight:800;line-height:1;letter-spacing:-2px;margin-top:2px;background:linear-gradient(135deg,var(--p),var(--grn));-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 14px rgba(0,212,255,.4));}
     .ov-sub{font-size:.7rem;font-weight:700;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-top:-6px;}
-    .ov-hint{font-size:.85rem;color:#3a5a72;text-align:center;line-height:2;max-width:272px;font-weight:600;}
+    .ov-hint{font-size:.85rem;color:#9fbace;text-align:center;line-height:2;max-width:272px;font-weight:600;}
     .orb-legend{display:flex;gap:12px;align-items:center;}
     .orb-pip{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;}
     .orb-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
@@ -159,6 +159,40 @@
   .node.lockn{opacity:.6;}
   .node.poor .nc{opacity:.55;}
   .branch .ln{font-size:.58rem;color:#9fbace;text-align:center;margin-top:8px;max-width:140px;font-weight:600;}
+
+  /* ---- nodos circulares (árbol como nodo) ---- */
+  .node{width:150px;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;padding:0;text-align:center;position:relative;}
+  .ncirc{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem;color:#9fbace;background:var(--panel);border:2px solid var(--bord);transition:all .16s;}
+  .node.owned::after{content:'';display:none;}
+  .node.owned .ncirc{border-color:var(--grn);color:var(--grn);background:rgba(0,245,160,.12);box-shadow:0 0 14px rgba(0,245,160,.35);}
+  .node.buy .ncirc{border-color:var(--p);color:var(--p);box-shadow:0 0 12px rgba(0,212,255,.3);cursor:pointer;}
+  .node.buy .ncirc:active{background:var(--p);color:var(--bg);transform:scale(.94);}
+  .node.poor .ncirc{opacity:.8;}
+
+  /* ---- settings ---- */
+  .set-scroll{flex:1;overflow:auto;padding:18px;max-width:460px;width:100%;margin:0 auto;-webkit-overflow-scrolling:touch;}
+  .set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 2px;border-bottom:1px solid var(--bord);font-size:.92rem;font-weight:700;}
+  .set-col{display:flex;flex-direction:column;gap:9px;padding:14px 2px;border-bottom:1px solid var(--bord);font-size:.92rem;font-weight:700;}
+  .set-col input[type=range],.set-row input[type=range]{width:100%;accent-color:var(--p);cursor:pointer;}
+  .set-select{background:var(--panel);border:1px solid var(--bord);color:var(--text);border-radius:10px;padding:11px 12px;font-family:var(--font);font-size:.85rem;font-weight:700;cursor:pointer;outline:none;}
+  .set-select:focus{border-color:var(--p);}
+  .sw{position:relative;display:inline-block;width:46px;height:25px;flex-shrink:0;}
+  .sw input{opacity:0;width:0;height:0;}
+  .sw .sl{position:absolute;inset:0;background:var(--panel);border:1px solid var(--bord);border-radius:25px;transition:.2s;cursor:pointer;}
+  .sw .sl::before{content:'';position:absolute;height:17px;width:17px;left:3px;top:3px;background:var(--dim);border-radius:50%;transition:.2s;}
+  .sw input:checked + .sl{background:rgba(0,212,255,.18);border-color:var(--p);}
+  .sw input:checked + .sl::before{transform:translateX(20px);background:var(--p);box-shadow:0 0 8px var(--p);}
+
+  /* ---- cuenta atrás al reanudar ---- */
+  #cdown{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(5,8,16,.55);backdrop-filter:blur(3px);}
+  #cdown.show{display:flex;}
+  #cdn{font-weight:800;font-size:7rem;letter-spacing:-2px;background:linear-gradient(135deg,var(--p),var(--grn));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 22px rgba(0,212,255,.5));}
+  @keyframes cdpop{0%{transform:scale(.4);opacity:0}35%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:.85}}
+
+  /* ---- título FLUX en ola ---- */
+  .ov-title.wave{background:none;-webkit-text-fill-color:initial;}
+  .ov-title.wave .wl{display:inline-block;background:linear-gradient(135deg,var(--p),var(--s),var(--acc));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:wlwave 2.2s ease-in-out infinite;will-change:transform;}
+  @keyframes wlwave{0%,100%{transform:translateY(0)}30%{transform:translateY(-13px)}60%{transform:translateY(2px)}}
 </style>
 
 <div id="hud">
@@ -204,6 +238,7 @@
   <div class="row-btns">
     <button id="btn">START</button>
     <button class="alt small" onclick="openTree()">🌳 Essence Tree</button>
+    <button class="alt small" onclick="openSettings()">⚙ Settings</button>
   </div>
 </div>
 
@@ -231,12 +266,38 @@
   <div class="tree-scroll"><div class="tree-grid" id="tree-grid"></div></div>
 </div>
 
+<!-- Settings -->
+<div id="settings-ov" class="tree-ov">
+  <div class="tree-top">
+    <h2>Settings<small>Audio · font · progress</small></h2>
+    <button class="alt small" onclick="closeSettings()">Done</button>
+  </div>
+  <div class="set-scroll">
+    <div class="set-row"><span>🔊 Sound effects</span><label class="sw"><input type="checkbox" id="set-sfx"><span class="sl"></span></label></div>
+    <div class="set-row"><span>🎵 Music</span><label class="sw"><input type="checkbox" id="set-music"><span class="sl"></span></label></div>
+    <div class="set-col"><span>Volume</span><input type="range" id="set-vol" min="0" max="1.5" step="0.05"></div>
+    <div class="set-col"><span>Text font</span>
+      <select id="set-font" class="set-select">
+        <option value="'Quicksand',system-ui,sans-serif">Quicksand</option>
+        <option value="system-ui,-apple-system,sans-serif">System</option>
+        <option value="Georgia,'Times New Roman',serif">Serif</option>
+        <option value="ui-monospace,'Courier New',monospace">Monospace</option>
+        <option value="'Trebuchet MS','Segoe UI',sans-serif">Trebuchet</option>
+      </select>
+    </div>
+    <button class="danger" style="width:100%;margin-top:18px" onclick="resetProgress()">↺ Reset progress</button>
+  </div>
+</div>
+
+<!-- Countdown al reanudar -->
+<div id="cdown"><span id="cdn">3</span></div>
+
 <script>
 const LV_COLORS=['#00d4ff','#00b8ff','#4499ff','#7b6fff','#9b5de5','#c040d0','#ff0099','#ff0055','#ff3311','#ff7700','#ffcc00','#00f5a0'];
 function lvCol(l){return LV_COLORS[Math.min(l-1,LV_COLORS.length-1)];}
 const ORB={NORMAL:{fluxMult:1,color:null,glyph:null,shield:false,lifeScale:1,ess:1},BOOST:{fluxMult:5,color:'#ffcc00',glyph:'×5',shield:false,lifeScale:.75,ess:3},SHIELD:{fluxMult:0,color:'#00f5a0',glyph:'♥',shield:true,lifeScale:.85,ess:0}};
 const BASE_XP=10,XP_SCALE=1.4,MPL=1.25;
-const ESS_DIV=4;  // essence nerf: divide raw essence so progression is slower
+const ESS_DIV=5;  // essence nerf: divide raw essence so progression is slower
 function xpToNext(lv){return Math.ceil(BASE_XP*Math.pow(XP_SCALE,lv-1));}
 function multAt(lv){return Math.pow(MPL,lv-1);}
 function fluxGain(lv,t){return multAt(lv)*ORB[t].fluxMult;}
@@ -247,16 +308,22 @@ const KEY='flux_v3';
 const stor={load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch{return{};}},save(d){try{const c=this.load();localStorage.setItem(KEY,JSON.stringify({...c,...d}));}catch{}}};
 
 /* ===== SOUND (Web Audio, no files) ===== */
-const Sound={ctx:null,on:true,
-  init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();},
-  tone(freq,dur,type,vol,when){if(!this.ctx||!this.on)return;const t=this.ctx.currentTime+(when||0);const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.18,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(this.ctx.destination);o.start(t);o.stop(t+dur+0.02);},
-  tap(streak){const f=620+Math.min(streak,30)*14;this.tone(f,0.10,'triangle',0.16);},
-  boost(){this.tone(880,0.10,'square',0.15);this.tone(1320,0.16,'square',0.12,0.05);},
-  shield(){this.tone(523,0.16,'sine',0.18);this.tone(784,0.22,'sine',0.15,0.06);},
-  miss(){this.tone(190,0.28,'sawtooth',0.2);this.tone(120,0.3,'sawtooth',0.15,0.02);},
-  level(){[523,659,784,1047].forEach((f,i)=>this.tone(f,0.18,'triangle',0.16,i*0.06));},
-  reward(){[784,988,1319,1568,2093].forEach((f,i)=>this.tone(f,0.26,'sine',0.15,i*0.07));},
-  pick(){this.tone(700,0.09,'square',0.16);this.tone(1050,0.12,'square',0.12,0.05);}
+const Sound={ctx:null,master:null,on:true,music:false,musicTimer:null,vol:1,
+  init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=this.vol;this.master.connect(this.ctx.destination);}catch(e){}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();},
+  setVol(v){this.vol=v;if(this.master)this.master.gain.value=v;},
+  tone(freq,dur,type,vol,when){if(!this.ctx||!this.on)return;const t=this.ctx.currentTime+(when||0);const o=this.ctx.createOscillator();const g=this.ctx.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.3,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(this.master||this.ctx.destination);o.start(t);o.stop(t+dur+0.02);},
+  tap(streak){const f=620+Math.min(streak,30)*14;this.tone(f,0.11,'triangle',0.42);},
+  boost(){this.tone(880,0.11,'square',0.36);this.tone(1320,0.17,'square',0.28,0.05);},
+  shield(){this.tone(523,0.17,'sine',0.38);this.tone(784,0.23,'sine',0.30,0.06);},
+  miss(){this.tone(190,0.28,'sawtooth',0.40);this.tone(120,0.3,'sawtooth',0.30,0.02);},
+  level(){[523,659,784,1047].forEach((f,i)=>this.tone(f,0.18,'triangle',0.32,i*0.06));},
+  reward(){[784,988,1319,1568,2093].forEach((f,i)=>this.tone(f,0.26,'sine',0.30,i*0.07));},
+  pick(){this.tone(700,0.09,'square',0.34);this.tone(1050,0.12,'square',0.26,0.05);},
+  ui(){this.tone(560,0.06,'square',0.26);this.tone(840,0.05,'square',0.18,0.03);},
+  count(){this.tone(560,0.14,'sine',0.40);},
+  go(){this.tone(740,0.26,'sawtooth',0.40);this.tone(1100,0.30,'sawtooth',0.30,0.04);},
+  startMusic(){if(!this.music)return;this.init();if(!this.ctx||this.musicTimer)return;const scale=[196,233.08,261.63,293.66,349.23,392,466.16];const step=()=>{if(!this.music){this.stopMusic();return;}if(!this.ctx)return;const t=this.ctx.currentTime;const f=scale[Math.floor(Math.random()*scale.length)]*(Math.random()<0.3?2:1);const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.09,t+0.06);g.gain.exponentialRampToValueAtTime(0.0001,t+0.6);o.connect(g);g.connect(this.master||this.ctx.destination);o.start(t);o.stop(t+0.65);};this.musicTimer=setInterval(step,440);},
+  stopMusic(){if(this.musicTimer){clearInterval(this.musicTimer);this.musicTimer=null;}}
 };
 function toggleSound(){Sound.on=!Sound.on;Sound.init();document.getElementById('sound-btn').classList.toggle('off',!Sound.on);if(Sound.on)Sound.pick();stor.save({sound:Sound.on});}
 
@@ -373,7 +440,7 @@ function handleTap(ex,ey){
       const gained=fluxGain(level,o.type)*runMods.flux*streakMult();flux+=gained;runEssRaw+=orbEssence(o.type);
       if(o.type==='BOOST')Sound.boost();else Sound.tap(streak);
       burst(o.x,o.y,col,o.type==='BOOST'?26:18);
-      floatText(o.x,o.y,(o.type==='BOOST'?'BOOST ':'+')+fmtSig(gained),col);
+      floatText(o.x,o.y,(o.type==='BOOST'?'BOOST ':'+')+fmtSig(gained),o.type==='BOOST'?col:'#ffffff');
       bump(fluxEl);bump(circlesEl);bump(multEl);
       if(streak>0&&streak%10===0)showBanner(`🔥 ${streak} STREAK ${fmtStreak()}`);
       xp++;
@@ -388,7 +455,16 @@ canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handl
 
 /* in-run upgrade tree UI (spend Flux) */
 function openRunTree(){if(!running)return;paused=true;renderRunTree();document.getElementById('runtree-ov').classList.add('show');}
-function closeRunTree(){document.getElementById('runtree-ov').classList.remove('show');paused=false;lastTime=performance.now();}
+function closeRunTree(){document.getElementById('runtree-ov').classList.remove('show');runCountdown(()=>{paused=false;lastTime=performance.now();});}
+/* cuenta atrás 3-2-1-GO para darte margen al reanudar */
+function runCountdown(cb){
+  const ov=document.getElementById('cdown'),n=document.getElementById('cdn');
+  ov.classList.add('show');
+  const show=(t,go)=>{n.textContent=t;n.style.animation='none';void n.offsetWidth;n.style.animation='cdpop .8s ease';Sound.init();go?Sound.go():Sound.count();};
+  let k=3;show(3);
+  const tick=()=>{k--;if(k>0){show(k);setTimeout(tick,800);}else if(k===0){show('GO',true);setTimeout(tick,800);}else{ov.classList.remove('show');cb();}};
+  setTimeout(tick,800);
+}
 function buyRunNode(bid,ni){
   const b=RUN_TREE.find(x=>x.id===bid);const owned=runLvl(bid);if(ni!==owned)return;
   const cost=b.levels[ni];
@@ -408,9 +484,9 @@ function renderRunTree(){
       if(ni>0){const c=document.createElement('div');c.className='conn'+(owned>=ni?' on':'');col.appendChild(c);}
       const purchased=owned>=(ni+1);const isNext=!purchased&&owned===ni;const afford=isNext&&unlocked&&flux>=cost;
       const el=document.createElement('div');let cls='node';if(purchased)cls+=' owned';else if(!unlocked||!isNext)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';el.className=cls;
-      el.innerHTML=`<div class="nl">Level ${ni+1}</div><div class="ne">${b.step}</div>`+
+      el.innerHTML=`<div class="ncirc">${purchased?'✓':(ni+1)}</div><div class="nl">Level ${ni+1}</div><div class="ne">${b.step}</div>`+
         (purchased?'<span class="nc" style="border-color:transparent;color:var(--grn);background:rgba(0,245,160,.12)">Owned</span>':`<span class="nc"><span style="color:#fff">⚡</span>${cost}</span>`);
-      if(isNext&&unlocked){el.querySelector('.nc').onclick=()=>buyRunNode(b.id,ni);}
+      if(isNext&&unlocked){const fn=()=>buyRunNode(b.id,ni);el.querySelector('.nc').onclick=fn;el.querySelector('.ncirc').onclick=fn;}
       col.appendChild(el);
     });
     if(!unlocked){const ln=document.createElement('div');ln.className='ln';ln.textContent=`🔒 Buy "${RUN_TREE[bi-1].title}" to unlock`;col.appendChild(ln);}
@@ -445,7 +521,7 @@ function update(now){
   timeFill.style.width=(timeLeft/DURATION*100)+'%';
 }
 function drawGrid(color){const S=32;ctx.fillStyle=color+'10';for(let x=S/2;x<W;x+=S)for(let y=HUD_H+S/2;y<H;y+=S){ctx.beginPath();ctx.arc(x,y,.85,0,Math.PI*2);ctx.fill();}}
-function drawOrb(o,now){const col=ORB[o.type].color||lvCol(level);const pulse=1+Math.sin(o.phase)*.055;const pr=o.r*pulse;const ratio=Math.min((now-o.born)/o.life,1);if(o.escaped){const p2=(now-o.escapeT)/440;ctx.save();ctx.globalAlpha=(1-p2)*.65;ctx.strokeStyle='#ff0066';ctx.lineWidth=3;ctx.shadowColor='#ff0066';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(o.x,o.y,o.r*(1+p2*.9),0,Math.PI*2);ctx.stroke();ctx.restore();return;}ctx.save();ctx.globalAlpha=o.alpha;ctx.shadowColor=col;ctx.shadowBlur=28*pulse;const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,pr);g.addColorStop(0,'#fff');g.addColorStop(.28,col);g.addColorStop(1,col+'00');ctx.beginPath();ctx.arc(o.x,o.y,pr,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=col+'55';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(o.x,o.y,pr+8,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-ratio));ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.shadowColor=col;ctx.shadowBlur=10;ctx.stroke();const glyph=ORB[o.type].glyph;if(glyph&&o.r>=18){ctx.shadowBlur=8;ctx.fillStyle='#fff';ctx.font=`800 ${Math.round(o.r*.58)}px Quicksand,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(glyph,o.x,o.y);}ctx.restore();}
+function drawOrb(o,now){const col=ORB[o.type].color||lvCol(level);const pulse=1;const pr=o.r;const ratio=Math.min((now-o.born)/o.life,1);if(o.escaped){const p2=(now-o.escapeT)/440;ctx.save();ctx.globalAlpha=(1-p2)*.65;ctx.strokeStyle='#ff0066';ctx.lineWidth=3;ctx.shadowColor='#ff0066';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(o.x,o.y,o.r*(1+p2*.9),0,Math.PI*2);ctx.stroke();ctx.restore();return;}ctx.save();ctx.globalAlpha=o.alpha;ctx.shadowColor=col;ctx.shadowBlur=28*pulse;const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,pr);g.addColorStop(0,'#fff');g.addColorStop(.28,col);g.addColorStop(1,col+'00');ctx.beginPath();ctx.arc(o.x,o.y,pr,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=col+'55';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(o.x,o.y,pr+8,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-ratio));ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.shadowColor=col;ctx.shadowBlur=10;ctx.stroke();const glyph=ORB[o.type].glyph;if(glyph&&o.r>=18){ctx.shadowBlur=8;ctx.fillStyle='#fff';ctx.font=`800 ${Math.round(o.r*.58)}px Quicksand,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(glyph,o.x,o.y);}ctx.restore();}
 function draw(now){ctx.clearRect(0,0,W,H);ctx.fillStyle='#050810';ctx.fillRect(0,0,W,H);drawGrid(lvCol(level));for(const p of particles){ctx.save();ctx.globalAlpha=Math.max(0,p.alpha);ctx.shadowColor=p.color;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();ctx.restore();}for(const o of orbs)drawOrb(o,now);}
 function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame(loop);}
 
@@ -493,8 +569,10 @@ function endGame(early,forced){
     <div class="row-btns">
       <button id="btn">▶ Play again</button>
       <button class="alt small" onclick="openTree()">🌳 Essence Tree</button>
+      <button class="alt small" onclick="openSettings()">⚙ Settings</button>
     </div>`;
   overlay.style.display='flex';
+  waveTitle();
   document.getElementById('btn').addEventListener('click',startGame);
 }
 
@@ -522,7 +600,7 @@ function requestExit(){
     </div>`;
   overlay.style.display='flex';
 }
-function cancelExit(){overlay.style.display='none';paused=false;lastTime=performance.now();}
+function cancelExit(){overlay.style.display='none';runCountdown(()=>{paused=false;lastTime=performance.now();});}
 function confirmExit(){overlay.style.display='none';endGame(true,window._exitPayout||0);}
 
 /* ===== PERSISTENT ESSENCE TREE UI ===== */
@@ -550,9 +628,9 @@ function renderTree(){
       const el=document.createElement('div');
       let cls='node';if(purchased)cls+=' owned';else if(!unlocked||!isNext)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';
       el.className=cls;
-      el.innerHTML=`<div class="nl">Level ${ni+1}</div><div class="ne">${node.label}</div>`+
+      el.innerHTML=`<div class="ncirc">${purchased?'✓':(ni+1)}</div><div class="nl">Level ${ni+1}</div><div class="ne">${node.label}</div>`+
         (purchased?'<span class="nc" style="border-color:transparent;color:var(--grn);background:rgba(0,245,160,.12)">Owned</span>':`<span class="nc"><span class="mc"></span>${node.cost}</span>`);
-      if(isNext&&unlocked){const btn=el.querySelector('.nc');btn.onclick=()=>buyNode(b.id,ni);}
+      if(isNext&&unlocked){const fn=()=>buyNode(b.id,ni);el.querySelector('.nc').onclick=fn;el.querySelector('.ncirc').onclick=fn;}
       col.appendChild(el);
     });
     if(!unlocked){const ln=document.createElement('div');ln.className='ln';ln.textContent=`🔒 Upgrade "${TREE[bi-1].title}" to unlock`;col.appendChild(ln);}
@@ -560,11 +638,53 @@ function renderTree(){
   });
 }
 
+/* ===== SETTINGS ===== */
+function openSettings(){
+  const s=stor.load();
+  document.getElementById('set-sfx').checked=Sound.on;
+  document.getElementById('set-music').checked=Sound.music;
+  document.getElementById('set-vol').value=Sound.vol;
+  document.getElementById('set-font').value=s.font||"'Quicksand',system-ui,sans-serif";
+  document.getElementById('settings-ov').classList.add('show');
+}
+function closeSettings(){document.getElementById('settings-ov').classList.remove('show');}
+function resetProgress(){
+  if(!confirm('Reset ALL progress? This wipes your Essence, upgrades and stats.'))return;
+  const keep={sound:Sound.on,music:Sound.music,vol:Sound.vol,font:stor.load().font};
+  try{localStorage.removeItem(KEY);}catch(e){}
+  stor.save(keep);
+  updateWallet();startStats.style.display='none';renderStartStats();
+  showBanner('Progress reset');closeSettings();
+}
+function bindSettings(){
+  document.getElementById('set-sfx').onchange=e=>{Sound.on=e.target.checked;Sound.init();document.getElementById('sound-btn').classList.toggle('off',!Sound.on);stor.save({sound:Sound.on});if(Sound.on)Sound.pick();};
+  document.getElementById('set-music').onchange=e=>{Sound.music=e.target.checked;stor.save({music:Sound.music});Sound.init();if(Sound.music)Sound.startMusic();else Sound.stopMusic();};
+  document.getElementById('set-vol').oninput=e=>{Sound.setVol(parseFloat(e.target.value));};
+  document.getElementById('set-vol').onchange=e=>{stor.save({vol:parseFloat(e.target.value)});if(Sound.on)Sound.pick();};
+  document.getElementById('set-font').onchange=e=>{document.documentElement.style.setProperty('--font',e.target.value);stor.save({font:e.target.value});};
+}
+/* título FLUX: cada letra se mueve sola en ola */
+function waveTitle(){
+  document.querySelectorAll('.ov-title').forEach(el=>{
+    if(el.dataset.waved)return;
+    const txt=el.textContent;el.textContent='';el.classList.add('wave');
+    [...txt].forEach((ch,i)=>{const sp=document.createElement('span');sp.className='wl';sp.textContent=ch===' '?' ':ch;sp.style.animationDelay=(i*0.09)+'s';el.appendChild(sp);});
+    el.dataset.waved='1';
+  });
+}
+
 function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtSig(s.best||0)}</div><div class="l">Best Flux</div></div><div class="sc"><div class="v">${fmtNum(Math.floor(s.essence||0))}</div><div class="l">Essence</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Runs</div></div>`;}
 
-if(stor.load().sound===false){Sound.on=false;document.getElementById('sound-btn').classList.add('off');}
+const SET=stor.load();
+if(SET.sound===false){Sound.on=false;document.getElementById('sound-btn').classList.add('off');}
+if(SET.vol!==undefined)Sound.vol=SET.vol;
+Sound.music=!!SET.music;
+if(SET.font)document.documentElement.style.setProperty('--font',SET.font);
+bindSettings();waveTitle();
 renderStartStats();updateWallet();
 document.getElementById('btn').addEventListener('click',startGame);
+// SFX en cada botón + desbloquear audio / música tras el primer gesto
+document.addEventListener('pointerdown',e=>{Sound.init();if(e.target.closest('button'))Sound.ui();if(Sound.music)Sound.startMusic();},true);
 ctx.fillStyle='#050810';ctx.fillRect(0,0,W,H);
 </script>
 </body>
