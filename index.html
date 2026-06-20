@@ -61,10 +61,80 @@
   </style>
 </head>
 <body>
+<style>
+  /* ---- Añadidos Circle Essence sobre FLUX ---- */
+  #topbar{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+  .tb-time{flex:1;min-width:0;}
+  .tb-time .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+  .tb-time .lbl{font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);}
+  .tb-time .clk{font-size:1rem;font-weight:800;color:var(--gold);letter-spacing:-.5px;}
+  .tb-time .clk.low{color:var(--acc);animation:lowpulse .6s ease infinite alternate;}
+  @keyframes lowpulse{from{opacity:.55}to{opacity:1}}
+  .tb-bar{height:4px;border-radius:99px;background:rgba(0,212,255,.1);overflow:hidden;}
+  .tb-bar .fill{height:100%;width:100%;background:linear-gradient(90deg,var(--grn),var(--gold),var(--acc));transition:width .25s linear;}
+  .tb-ess{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--bord);border-radius:10px;padding:6px 10px;flex-shrink:0;}
+  .tb-ess .coin{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#bff6ff,var(--p));box-shadow:0 0 8px var(--p);flex-shrink:0;}
+  .tb-ess .amt{font-size:.95rem;font-weight:800;color:var(--p);line-height:1;}
+  .tb-ess .l{font-size:.42rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+  #exit-btn{flex-shrink:0;background:rgba(255,0,102,.1);border:1px solid rgba(255,0,102,.4);color:var(--acc);border-radius:10px;padding:7px 11px;font-family:var(--font);font-weight:800;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;animation:none;min-width:0;}
+  #exit-btn:active{background:rgba(255,0,102,.3);}
+
+  .ess-reward{display:flex;align-items:center;justify-content:center;gap:10px;margin:2px 0;}
+  .ess-reward .coin{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#bff6ff,var(--p));box-shadow:0 0 22px var(--p);flex-shrink:0;}
+  .ess-reward .n{font-size:2.4rem;font-weight:800;color:var(--p);line-height:1;letter-spacing:-1px;}
+  .ess-cap{font-size:.6rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-top:-4px;}
+  .ov-warn{font-size:.78rem;color:var(--gold);line-height:1.6;max-width:300px;text-align:center;font-weight:600;}
+  .ov-bd{font-size:.74rem;color:var(--text);line-height:1.8;background:rgba(0,212,255,.05);border:1px solid var(--bord);border-radius:12px;padding:12px 16px;max-width:300px;width:100%;}
+  .ov-bd b{color:var(--p);}
+  .ov-bd .neg{color:var(--acc);}
+  .row-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  button.alt{border-color:var(--dim);color:var(--text);min-width:150px;animation:none;}
+  button.danger{border-color:var(--acc);color:var(--acc);min-width:150px;animation:none;}
+  button.small{min-width:0;padding:11px 22px;font-size:.72rem;letter-spacing:2px;}
+
+  /* árbol de mejoras */
+  #tree-ov{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;background:rgba(5,8,16,.97);backdrop-filter:blur(10px);font-family:var(--font);}
+  #tree-ov.show{display:flex;}
+  .tree-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:max(14px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--bord);}
+  .tree-top h2{font-size:1.1rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(135deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .tree-top .wal{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--bord);border-radius:10px;padding:6px 12px;}
+  .tree-top .wal .coin{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#bff6ff,var(--p));box-shadow:0 0 8px var(--p);}
+  .tree-top .wal .amt{font-weight:800;color:var(--p);}
+  .tree-scroll{flex:1;overflow:auto;padding:18px;-webkit-overflow-scrolling:touch;}
+  .tree-grid{display:flex;gap:18px;align-items:flex-start;min-width:min-content;padding-bottom:24px;}
+  .branch{display:flex;flex-direction:column;align-items:center;min-width:158px;}
+  .branch.lock{opacity:.4;}
+  .branch .bi{font-size:1.4rem;}
+  .branch .bt{font-weight:800;font-size:.85rem;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+  .branch .bd{font-size:.6rem;color:var(--dim);text-align:center;margin:4px 0 10px;line-height:1.4;min-height:24px;font-weight:600;}
+  .node{width:150px;background:var(--panel);border:1px solid var(--bord);border-radius:12px;padding:10px;text-align:center;position:relative;}
+  .conn{width:3px;height:14px;background:var(--bord);}
+  .conn.on{background:var(--p);box-shadow:0 0 6px var(--p);}
+  .node .nl{font-size:.5rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+  .node .ne{font-size:.74rem;font-weight:700;margin:3px 0 8px;line-height:1.3;}
+  .node .nc{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:.76rem;background:rgba(0,212,255,.08);border:1px solid var(--bord);padding:5px 11px;border-radius:99px;cursor:pointer;}
+  .node .nc .mc{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#bff6ff,var(--p));}
+  .node.owned{border-color:var(--grn);background:rgba(0,245,160,.06);}
+  .node.owned::after{content:'✓';position:absolute;top:6px;right:8px;color:var(--grn);font-weight:800;font-size:.75rem;}
+  .node.buy .nc{border-color:var(--p);color:var(--p);}
+  .node.buy .nc:active{background:var(--p);color:var(--bg);}
+  .node.lockn{opacity:.35;}
+  .node.poor .nc{opacity:.5;}
+  .branch .ln{font-size:.55rem;color:var(--dim);text-align:center;margin-top:8px;max-width:140px;font-weight:600;}
+</style>
+
 <div id="hud">
+  <div id="topbar">
+    <div class="tb-time">
+      <div class="row"><span class="lbl">Tiempo</span><span class="clk" id="clk">2:00</span></div>
+      <div class="tb-bar"><div class="fill" id="time-fill"></div></div>
+    </div>
+    <div class="tb-ess"><div class="coin"></div><div><div class="amt" id="ess-amt">0</div><div class="l">Essence</div></div></div>
+    <button id="exit-btn" onclick="requestExit()">⏏ Salir</button>
+  </div>
   <div class="hud-row">
     <div class="hud-cell"><div class="hud-val" id="flux-el">0</div><div class="hud-lbl">FLUX</div></div>
-    <div class="hud-cell"><div class="hud-val" id="level-el">1</div><div class="hud-lbl">LEVEL</div></div>
+    <div class="hud-cell"><div class="hud-val" id="circles-el">0</div><div class="hud-lbl">CIRCLES</div></div>
     <div class="hud-cell"><div id="lives-row"><span class="heart" id="h1">♥</span><span class="heart" id="h2">♥</span><span class="heart" id="h3">♥</span></div><div class="hud-lbl">LIVES</div></div>
     <div class="hud-cell"><div class="hud-val" id="mult-el">×1</div><div class="hud-lbl">MULT</div></div>
   </div>
@@ -77,63 +147,284 @@
 <div id="banner"></div>
 <div id="popup"></div>
 <div id="flash-overlay"></div>
+
 <div id="overlay">
-  <div class="ov-eye">Orb Collection System</div>
+  <div class="ov-eye">Circle Essence Challenge</div>
   <div class="ov-title">FLUX</div>
-  <p class="ov-hint">Tap orbs before they expire — each miss costs a life.<br>Every level: ×1.25 more flux per tap.<br>Each level requires ×1.4 more orbs than the last.</p>
+  <p class="ov-hint">Tienes <b style="color:var(--gold)">2 minutos</b>. Toca los círculos antes de que escapen — cada fallo cuesta una vida.<br>Con el tiempo salen más círculos y van más rápido.<br>Al acabar ganas <b style="color:var(--p)">Circle Essence</b> según tus circles.</p>
   <div class="orb-legend">
     <div class="orb-pip"><div class="orb-dot" style="background:#00d4ff;box-shadow:0 0 6px #00d4ff"></div><span style="color:#00d4ff">Normal</span></div>
     <div class="orb-pip"><div class="orb-dot" style="background:#ffcc00;box-shadow:0 0 6px #ffcc00"></div><span style="color:#ffcc00">Boost ×5</span></div>
     <div class="orb-pip"><div class="orb-dot" style="background:#00f5a0;box-shadow:0 0 6px #00f5a0"></div><span style="color:#00f5a0">Shield +♥</span></div>
   </div>
   <div class="stats-grid" id="start-stats" style="display:none"></div>
-  <button id="btn">START</button>
+  <div class="row-btns">
+    <button id="btn">START</button>
+    <button class="alt small" onclick="openTree()">🌳 Mejoras</button>
+  </div>
 </div>
+
+<!-- Árbol de mejoras -->
+<div id="tree-ov">
+  <div class="tree-top">
+    <h2>Árbol de mejoras</h2>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="wal"><div class="coin"></div><span class="amt" id="tree-wal">0</span></div>
+      <button class="alt small" onclick="closeTree()">Volver</button>
+    </div>
+  </div>
+  <div class="tree-scroll"><div class="tree-grid" id="tree-grid"></div></div>
+</div>
+
 <script>
 const LV_COLORS=['#00d4ff','#00b8ff','#4499ff','#7b6fff','#9b5de5','#c040d0','#ff0099','#ff0055','#ff3311','#ff7700','#ffcc00','#00f5a0'];
 function lvCol(l){return LV_COLORS[Math.min(l-1,LV_COLORS.length-1)];}
-const ORB={NORMAL:{fluxMult:1,color:null,glyph:null,shield:false,lifeScale:1},BOOST:{fluxMult:5,color:'#ffcc00',glyph:'×5',shield:false,lifeScale:.75},SHIELD:{fluxMult:0,color:'#00f5a0',glyph:'♥',shield:true,lifeScale:.85}};
-function pickType(){const r=Math.random();if(r<.03)return 'SHIELD';if(r<.10)return 'BOOST';return 'NORMAL';}
+const ORB={NORMAL:{fluxMult:1,color:null,glyph:null,shield:false,lifeScale:1,ess:1},BOOST:{fluxMult:5,color:'#ffcc00',glyph:'×5',shield:false,lifeScale:.75,ess:3},SHIELD:{fluxMult:0,color:'#00f5a0',glyph:'♥',shield:true,lifeScale:.85,ess:0}};
 const BASE_XP=10,XP_SCALE=1.4,MPL=1.25;
 function xpToNext(lv){return Math.ceil(BASE_XP*Math.pow(XP_SCALE,lv-1));}
 function multAt(lv){return Math.pow(MPL,lv-1);}
 function fluxGain(lv,t){return multAt(lv)*ORB[t].fluxMult;}
 function fmtMult(lv){const m=multAt(lv);if(m>=1000)return '×'+(m/1000).toFixed(1)+'K';if(m>=100)return '×'+Math.round(m);if(m>=10)return '×'+m.toFixed(1);return '×'+m.toFixed(2);}
 function fmtNum(n){if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1e6).toFixed(2)+'M';if(n>=1e3)return (n/1e3).toFixed(1)+'K';return Math.floor(n).toString();}
+
 const KEY='flux_v3';
 const stor={load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch{return{};}},save(d){try{const c=this.load();localStorage.setItem(KEY,JSON.stringify({...c,...d}));}catch{}}};
+
+/* ===== ÁRBOL DE MEJORAS ===== */
+const TREE=[
+  {id:'abundancia',icon:'⭕',title:'Abundancia',desc:'Más círculos a la vez.',levels:[
+    {cost:6,label:'+1 círculo'},{cost:14,label:'+1 círculo'},{cost:26,label:'+1 círculo'},{cost:42,label:'+1 círculo'},{cost:65,label:'+1 círculo'}]},
+  {id:'esencia',icon:'💎',title:'Esencia',desc:'Más Essence por círculo (XP).',levels:[
+    {cost:10,label:'+15% essence'},{cost:22,label:'+15% essence'},{cost:40,label:'+20% essence'},{cost:68,label:'+20% essence'},{cost:110,label:'+25% essence'}]},
+  {id:'calma',icon:'🐢',title:'Calma',desc:'Círculos más lentos y duran más.',levels:[
+    {cost:14,label:'-9% velocidad'},{cost:28,label:'-9% velocidad'},{cost:50,label:'-9% velocidad'},{cost:82,label:'-12% velocidad'}]},
+  {id:'tiempo',icon:'⏳',title:'Tiempo',desc:'Más segundos de reto.',levels:[
+    {cost:22,label:'+15 segundos'},{cost:48,label:'+15 segundos'},{cost:90,label:'+20 segundos'}]},
+  {id:'fortuna',icon:'🌟',title:'Fortuna',desc:'Más círculos Boost ×5.',levels:[
+    {cost:35,label:'+4% boost'},{cost:75,label:'+4% boost'},{cost:130,label:'+5% boost'}]},
+];
+function lvl(id){const u=stor.load().up||{};return u[id]||0;}
+function setLvl(id,v){const s=stor.load();const u=s.up||{};u[id]=v;stor.save({up:u});}
+function branchUnlocked(i){if(i===0)return true;return lvl(TREE[i-1].id)>=1;}
+const EFF={
+  baseTarget(){return 1+lvl('abundancia');},
+  essMult(){const inc=[.15,.15,.20,.20,.25];let m=1;for(let i=0;i<lvl('esencia');i++)m+=inc[i];return m;},
+  speedFactor(){const d=[.09,.09,.09,.12];let f=1;for(let i=0;i<lvl('calma');i++)f*=(1-d[i]);return f;},
+  lifeFactor(){return 1+lvl('calma')*0.08;},
+  rateFactor(){return Math.max(.5,1-lvl('abundancia')*0.07);},
+  duration(){const a=[15,15,20];let d=120;for(let i=0;i<lvl('tiempo');i++)d+=a[i];return d;},
+  boostChance(){return .07+lvl('fortuna')*.04;}
+};
+function pickType(){const r=Math.random();if(r<.03)return 'SHIELD';if(r<.03+EFF.boostChance())return 'BOOST';return 'NORMAL';}
+
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
 const overlay=document.getElementById('overlay'),banner=document.getElementById('banner'),popup=document.getElementById('popup'),flashOv=document.getElementById('flash-overlay');
-const fluxEl=document.getElementById('flux-el'),levelEl=document.getElementById('level-el'),multEl=document.getElementById('mult-el'),xpFill=document.getElementById('xp-fill'),xpText=document.getElementById('xp-text');
+const fluxEl=document.getElementById('flux-el'),levelEl=document.getElementById('level-el')||{textContent:''},multEl=document.getElementById('mult-el'),xpFill=document.getElementById('xp-fill'),xpText=document.getElementById('xp-text');
+const circlesEl=document.getElementById('circles-el'),essAmt=document.getElementById('ess-amt'),clkEl=document.getElementById('clk'),timeFill=document.getElementById('time-fill');
 const hearts=['h1','h2','h3'].map(id=>document.getElementById(id));
 const startStats=document.getElementById('start-stats');
 let HUD_H=0,W=0,H=0;
 function resize(){HUD_H=document.getElementById('hud').getBoundingClientRect().height;W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
-resize();window.addEventListener('resize',()=>{resize();if(running)spawnOrb();});
-let orbs=[],particles=[],flux=0,xp=0,level=1,lives=3,running=false,animId=null,spawnTimer=null,lastTime=0,streak=0;
-function getConf(){return{speed:1.2+(level-1)*.2,life:Math.max(1400,4800-(level-1)*160),rate:Math.max(550,2400-(level-1)*120),radius:Math.max(18,32-Math.floor((level-1)/3)*2)};}
+resize();window.addEventListener('resize',()=>{resize();});
+
+let orbs=[],particles=[],flux=0,xp=0,level=1,lives=3,running=false,paused=false,animId=null,lastTime=0,streak=0;
+let circles=0,runEssRaw=0,DURATION=120,timeLeft=120,lastSpawn=0,essMultRun=1;
+
 function rand(a,b){return Math.random()*(b-a)+a;}
-function spawnOrb(ft){if(!running)return;const type=ft||pickType();const cfg=getConf();const R=cfg.radius*(type==='BOOST'?1.25:type==='SHIELD'?1.15:1);const a=Math.random()*Math.PI*2;orbs.push({x:rand(R+12,W-R-12),y:rand(HUD_H+R+12,H-R-12),r:R,vx:Math.cos(a)*cfg.speed*(type==='BOOST'?1.3:1),vy:Math.sin(a)*cfg.speed*(type==='BOOST'?1.3:1),born:performance.now(),life:cfg.life*ORB[type].lifeScale,alpha:1,phase:rand(0,Math.PI*2),type,popped:false,escaped:false,escapeT:0});scheduleSpawn();}
-function scheduleSpawn(){clearTimeout(spawnTimer);spawnTimer=setTimeout(spawnOrb,getConf().rate+rand(-80,80));}
+function progress(){return Math.min(1,(DURATION-timeLeft)/DURATION);}
+function getConf(){
+  const t=progress();
+  const speedMul=(1+t*0.9)*EFF.speedFactor();
+  return {
+    speed:(1.2+(level-1)*.2)*speedMul,
+    life:Math.max(1400,4800-(level-1)*160)*EFF.lifeFactor(),
+    rate:Math.max(280,(2400-(level-1)*120))*EFF.rateFactor(),
+    radius:Math.max(18,32-Math.floor((level-1)/3)*2),
+    target:EFF.baseTarget()+Math.floor(t*4)
+  };
+}
+function spawnOrb(ft){
+  if(!running)return;
+  const type=ft||pickType();const cfg=getConf();
+  const R=cfg.radius*(type==='BOOST'?1.25:type==='SHIELD'?1.15:1);const a=Math.random()*Math.PI*2;
+  orbs.push({x:rand(R+12,W-R-12),y:rand(HUD_H+R+12,H-R-12),r:R,vx:Math.cos(a)*cfg.speed*(type==='BOOST'?1.3:1),vy:Math.sin(a)*cfg.speed*(type==='BOOST'?1.3:1),born:performance.now(),life:cfg.life*ORB[type].lifeScale,alpha:1,phase:rand(0,Math.PI*2),type,popped:false,escaped:false,escapeT:0});
+  lastSpawn=performance.now();
+}
+function maintainOrbs(now){
+  const cfg=getConf();
+  const alive=orbs.filter(o=>!o.popped&&!o.escaped).length;
+  if(alive<cfg.target&&now-lastSpawn>cfg.rate*0.5){spawnOrb();}
+}
 const PAR_POOL=['#00d4ff','#9b5de5','#ff0066','#00f5a0','#fff','#ffcc00'];
 function burst(x,y,color,count=18){for(let i=0;i<count;i++){const a=(Math.PI*2*i)/count+rand(-.2,.2),s=rand(3,8);const c=Math.random()<.5?color:PAR_POOL[Math.floor(Math.random()*PAR_POOL.length)];particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,alpha:1,r:rand(2,5.5),color:c});}}
-function flash(el,dur=220){el.classList.add('flash');clearTimeout(el._ft);el._ft=setTimeout(()=>el.classList.remove('flash'),dur);}
+function flash(el,dur=220){if(!el||!el.classList)return;el.classList.add('flash');clearTimeout(el._ft);el._ft=setTimeout(()=>el.classList.remove('flash'),dur);}
 function showPopup(x,y,text,color){popup.textContent=text;popup.style.cssText=`left:${x-16}px;top:${y-48}px;opacity:1;color:${color};text-shadow:0 0 14px ${color}`;clearTimeout(popup._t);popup._t=setTimeout(()=>popup.style.opacity='0',750);}
 function showBanner(text){banner.textContent=text;banner.classList.add('show');clearTimeout(banner._t);banner._t=setTimeout(()=>banner.classList.remove('show'),2000);}
 function screenFlash(){flashOv.classList.add('show');clearTimeout(flashOv._t);flashOv._t=setTimeout(()=>flashOv.classList.remove('show'),180);}
-function updateHUD(){const needed=xpToNext(level);fluxEl.textContent=fmtNum(flux);levelEl.textContent=level;multEl.textContent=fmtMult(level);xpFill.style.width=Math.min(xp/needed*100,100).toFixed(1)+'%';xpText.textContent=`${xp} / ${needed} orbs to level up`;hearts.forEach((h,i)=>h.classList.toggle('lost',i>=lives));}
-function handleTap(ex,ey){if(!running)return;for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];if(o.popped||o.escaped)continue;const dx=ex-o.x,dy=ey-o.y;if(dx*dx+dy*dy<=o.r*o.r){o.popped=true;const col=ORB[o.type].color||lvCol(level);if(o.type==='SHIELD'){if(lives<3){lives++;showBanner('SHIELD COLLECTED — ♥ RESTORED');burst(o.x,o.y,'#00f5a0',22);showPopup(o.x,o.y,'+♥','#00f5a0');}else{const bonus=multAt(level)*2;flux+=bonus;showBanner('SHIELD — FULL HP — BONUS FLUX!');burst(o.x,o.y,'#00f5a0',18);showPopup(o.x,o.y,'+'+fmtNum(bonus),'#00f5a0');}flash(levelEl);}else{const gained=fluxGain(level,o.type);flux+=gained;streak++;burst(o.x,o.y,col,o.type==='BOOST'?26:18);showPopup(o.x,o.y,(o.type==='BOOST'?'BOOST! ':'')+'+'+fmtNum(gained),col);flash(fluxEl);if(streak>0&&streak%10===0)showBanner(`🔥 ${streak} STREAK!`);xp++;if(xp>=xpToNext(level)){xp=0;level++;const extra=Math.min(Math.floor(level/4),3);for(let j=0;j<extra;j++)setTimeout(spawnOrb,j*160);showBanner(`▲ LEVEL ${level} — MULT ${fmtMult(level)}`);flash(levelEl,300);flash(multEl,300);}}const s=stor.load();stor.save({best:Math.max(flux,s.best||0),totalFlux:(s.totalFlux||0)+(flux-(s._lastFlux||0))});stor.save({_lastFlux:flux});updateHUD();break;}}}
+function projEssence(){return Math.floor(runEssRaw*essMultRun);}
+function fmtTime(s){s=Math.max(0,Math.ceil(s));const m=Math.floor(s/60),sec=s%60;return m+':'+(sec<10?'0':'')+sec;}
+function updateHUD(){
+  const needed=xpToNext(level);
+  fluxEl.textContent=fmtNum(flux);
+  if(circlesEl)circlesEl.textContent=circles;
+  multEl.textContent=fmtMult(level);
+  xpFill.style.width=Math.min(xp/needed*100,100).toFixed(1)+'%';
+  xpText.textContent=`Nivel ${level} · ${xp} / ${needed} orbs · Essence proy. ${projEssence()}`;
+  hearts.forEach((h,i)=>h.classList.toggle('lost',i>=lives));
+}
+function updateWallet(){const e=Math.floor(stor.load().essence||0);if(essAmt)essAmt.textContent=fmtNum(e);const tw=document.getElementById('tree-wal');if(tw)tw.textContent=fmtNum(e);}
+
+function handleTap(ex,ey){
+  if(!running||paused)return;
+  for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];if(o.popped||o.escaped)continue;const dx=ex-o.x,dy=ey-o.y;if(dx*dx+dy*dy<=o.r*o.r){
+    o.popped=true;const col=ORB[o.type].color||lvCol(level);
+    if(o.type==='SHIELD'){
+      if(lives<3){lives++;showBanner('SHIELD — ♥ RESTAURADA');burst(o.x,o.y,'#00f5a0',22);showPopup(o.x,o.y,'+♥','#00f5a0');}
+      else{const bonus=multAt(level)*2;flux+=bonus;showBanner('SHIELD — VIDA LLENA — BONUS!');burst(o.x,o.y,'#00f5a0',18);showPopup(o.x,o.y,'+'+fmtNum(bonus),'#00f5a0');}
+    }else{
+      const gained=fluxGain(level,o.type);flux+=gained;streak++;circles++;runEssRaw+=ORB[o.type].ess;
+      burst(o.x,o.y,col,o.type==='BOOST'?26:18);showPopup(o.x,o.y,(o.type==='BOOST'?'BOOST! ':'')+'+'+fmtNum(gained),col);flash(fluxEl);flash(circlesEl);
+      if(streak>0&&streak%10===0)showBanner(`🔥 ${streak} RACHA!`);
+      xp++;
+      if(xp>=xpToNext(level)){xp=0;level++;const extra=Math.min(Math.floor(level/4),3);for(let j=0;j<extra;j++)setTimeout(spawnOrb,j*160);showBanner(`▲ NIVEL ${level} — MULT ${fmtMult(level)}`);flash(multEl,300);}
+    }
+    const s=stor.load();stor.save({best:Math.max(flux,s.best||0)});
+    updateHUD();break;
+  }}
+}
 canvas.addEventListener('touchstart',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();for(const t of e.changedTouches)handleTap(t.clientX-r.left,t.clientY-r.top);},{passive:false});
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleTap(e.clientX-r.left,e.clientY-r.top);});
-function update(now){const dt=Math.min((now-lastTime)/16.67,3);lastTime=now;for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];if(o.escaped){if(now-o.escapeT>440)orbs.splice(i,1);continue;}if(o.popped){orbs.splice(i,1);continue;}o.x+=o.vx*dt;o.y+=o.vy*dt;if(o.x-o.r<0){o.x=o.r;o.vx*=-1;}if(o.x+o.r>W){o.x=W-o.r;o.vx*=-1;}if(o.y-o.r<HUD_H){o.y=HUD_H+o.r;o.vy*=-1;}if(o.y+o.r>H){o.y=H-o.r;o.vy*=-1;}const age=now-o.born;if(age>=o.life){o.escaped=true;o.escapeT=now;streak=0;lives=Math.max(0,lives-1);screenFlash();updateHUD();if(lives<=0){endGame();return;}continue;}const fadeAt=o.life*.62;o.alpha=age>fadeAt?1-(age-fadeAt)/(o.life-fadeAt):1;o.phase=(o.phase+.052*dt)%(Math.PI*2);}for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.08*dt;p.alpha-=.02*dt;if(p.alpha<=0)particles.splice(i,1);}}
+
+function update(now){
+  const realDt=(now-lastTime)/1000;const dt=Math.min((now-lastTime)/16.67,3);lastTime=now;
+  if(paused){return;}
+  timeLeft-=realDt;
+  if(timeLeft<=0){timeLeft=0;endGame(false);return;}
+  maintainOrbs(now);
+  for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];
+    if(o.escaped){if(now-o.escapeT>440)orbs.splice(i,1);continue;}
+    if(o.popped){orbs.splice(i,1);continue;}
+    o.x+=o.vx*dt;o.y+=o.vy*dt;
+    if(o.x-o.r<0){o.x=o.r;o.vx*=-1;}if(o.x+o.r>W){o.x=W-o.r;o.vx*=-1;}
+    if(o.y-o.r<HUD_H){o.y=HUD_H+o.r;o.vy*=-1;}if(o.y+o.r>H){o.y=H-o.r;o.vy*=-1;}
+    const age=now-o.born;
+    if(age>=o.life){o.escaped=true;o.escapeT=now;streak=0;lives=Math.max(0,lives-1);screenFlash();updateHUD();if(lives<=0){endGame(false);return;}continue;}
+    const fadeAt=o.life*.62;o.alpha=age>fadeAt?1-(age-fadeAt)/(o.life-fadeAt):1;o.phase=(o.phase+.052*dt)%(Math.PI*2);
+  }
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.08*dt;p.alpha-=.02*dt;if(p.alpha<=0)particles.splice(i,1);}
+  // reloj
+  clkEl.textContent=fmtTime(timeLeft);clkEl.classList.toggle('low',timeLeft<=15);
+  timeFill.style.width=(timeLeft/DURATION*100)+'%';
+}
 function drawGrid(color){const S=32;ctx.fillStyle=color+'10';for(let x=S/2;x<W;x+=S)for(let y=HUD_H+S/2;y<H;y+=S){ctx.beginPath();ctx.arc(x,y,.85,0,Math.PI*2);ctx.fill();}}
 function drawOrb(o,now){const col=ORB[o.type].color||lvCol(level);const pulse=1+Math.sin(o.phase)*.055;const pr=o.r*pulse;const ratio=Math.min((now-o.born)/o.life,1);if(o.escaped){const p2=(now-o.escapeT)/440;ctx.save();ctx.globalAlpha=(1-p2)*.65;ctx.strokeStyle='#ff0066';ctx.lineWidth=3;ctx.shadowColor='#ff0066';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(o.x,o.y,o.r*(1+p2*.9),0,Math.PI*2);ctx.stroke();ctx.restore();return;}ctx.save();ctx.globalAlpha=o.alpha;ctx.shadowColor=col;ctx.shadowBlur=28*pulse;const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,pr);g.addColorStop(0,'#fff');g.addColorStop(.28,col);g.addColorStop(1,col+'00');ctx.beginPath();ctx.arc(o.x,o.y,pr,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=col+'55';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(o.x,o.y,pr+8,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-ratio));ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.shadowColor=col;ctx.shadowBlur=10;ctx.stroke();const glyph=ORB[o.type].glyph||(level>1?fmtMult(level):null);if(glyph&&o.r>=18){ctx.shadowBlur=8;ctx.fillStyle='#fff';ctx.font=`800 ${Math.round(o.r*.58)}px Quicksand,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(glyph,o.x,o.y);}ctx.restore();}
 function draw(now){ctx.clearRect(0,0,W,H);ctx.fillStyle='#050810';ctx.fillRect(0,0,W,H);drawGrid(lvCol(level));for(const p of particles){ctx.save();ctx.globalAlpha=Math.max(0,p.alpha);ctx.shadowColor=p.color;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();ctx.restore();}for(const o of orbs)drawOrb(o,now);}
 function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame(loop);}
-function startGame(){orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;running=true;stor.save({_lastFlux:0});updateHUD();overlay.style.display='none';resize();scheduleSpawn();lastTime=performance.now();animId=requestAnimationFrame(loop);}
-function endGame(){running=false;clearTimeout(spawnTimer);cancelAnimationFrame(animId);const s=stor.load();const isRec=flux>0&&flux>=(s.best||0);if(isRec)stor.save({best:flux});const games=(s.games||0)+1;stor.save({games,_lastFlux:0});const tf=s.totalFlux||0;overlay.innerHTML=`<div class="ov-eye">Run complete</div><div class="ov-title">FLUX</div>${isRec&&flux>0?'<div class="rec-pill">▲ NEW RECORD</div>':''}<div class="ov-big">${fmtNum(flux)}</div><div class="ov-sub">Level ${level} · ${fmtMult(level)} mult · ${xp} XP</div><div class="stats-grid"><div class="sc"><div class="v">${fmtNum(s.best||flux)}</div><div class="l">Best</div></div><div class="sc"><div class="v">${fmtNum(tf+flux)}</div><div class="l">Total Flux</div></div><div class="sc"><div class="v">${games}</div><div class="l">Runs</div></div></div><button id="btn">PLAY AGAIN</button>`;overlay.style.display='flex';document.getElementById('btn').addEventListener('click',startGame);}
-function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;const tf=s.totalFlux||0;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtNum(s.best||0)}</div><div class="l">Best</div></div><div class="sc"><div class="v">${fmtNum(tf)}</div><div class="l">Total Flux</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Runs</div></div>`;}
-renderStartStats();
+
+function startGame(){
+  orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;
+  DURATION=EFF.duration();timeLeft=DURATION;essMultRun=EFF.essMult();
+  running=true;paused=false;
+  clkEl.textContent=fmtTime(timeLeft);clkEl.classList.remove('low');timeFill.style.width='100%';
+  updateHUD();updateWallet();
+  overlay.style.display='none';resize();
+  lastSpawn=0;for(let i=0;i<EFF.baseTarget();i++)spawnOrb();
+  lastTime=performance.now();animId=requestAnimationFrame(loop);
+}
+
+function endGame(early,forced){
+  if(!running)return;
+  running=false;paused=false;cancelAnimationFrame(animId);
+  const reward=early?forced:projEssence();
+  const s=stor.load();
+  stor.save({essence:(s.essence||0)+reward,games:(s.games||0)+1,best:Math.max(flux,s.best||0)});
+  updateWallet();
+  const newEss=Math.floor(stor.load().essence||0);
+  overlay.innerHTML=`
+    <div class="ov-eye">${early?'Salida anticipada':'¡Reto completado!'}</div>
+    <div class="ov-title">FLUX</div>
+    <div class="ess-reward"><div class="coin"></div><div class="n">+${fmtNum(reward)}</div></div>
+    <div class="ess-cap">Circle Essence ganada</div>
+    <div class="ov-bd">
+      Circles tocados: <b>${circles}</b><br>
+      Multiplicador essence: <b>×${essMultRun.toFixed(2)}</b><br>
+      ${early?'<span class="neg">Penalización por salir aplicada</span><br>':''}
+      Flux del run: <b>${fmtNum(flux)}</b> · Nivel <b>${level}</b><br>
+      Essence total: <b>${fmtNum(newEss)}</b>
+    </div>
+    <div class="row-btns">
+      <button id="btn">▶ Jugar otra vez</button>
+      <button class="alt small" onclick="openTree()">🌳 Mejoras</button>
+    </div>`;
+  overlay.style.display='flex';
+  document.getElementById('btn').addEventListener('click',startGame);
+}
+
+/* ===== SALIR ANTES DE TIEMPO ===== */
+function requestExit(){
+  if(!running||paused)return;
+  paused=true;
+  const elapsed=DURATION-timeLeft;const frac=Math.min(1,elapsed/DURATION);
+  const penalty=0.35+0.65*frac;
+  const full=projEssence();const payout=Math.floor(full*penalty);
+  window._exitPayout=payout;
+  overlay.innerHTML=`
+    <div class="ov-eye">¿Salir antes de tiempo?</div>
+    <div class="ov-title" style="font-size:1.8rem">⏏ Salir</div>
+    <p class="ov-warn">Llevas <b>${fmtTime(elapsed)}</b> jugados. Si sales ahora cobras solo el <b>${Math.round(penalty*100)}%</b> de tu Essence.</p>
+    <div class="ov-bd">
+      Circles: <b>${circles}</b><br>
+      Essence completa: <b>${full}</b><br>
+      Penalización: <span class="neg">-${full-payout}</span><br>
+      Cobrarías: <b>${payout}</b> 🪙
+    </div>
+    <div class="row-btns">
+      <button class="alt small" onclick="cancelExit()">Seguir jugando</button>
+      <button class="danger small" onclick="confirmExit()">Salir y cobrar</button>
+    </div>`;
+  overlay.style.display='flex';
+}
+function cancelExit(){overlay.style.display='none';paused=false;lastTime=performance.now();}
+function confirmExit(){overlay.style.display='none';endGame(true,window._exitPayout||0);}
+
+/* ===== ÁRBOL DE MEJORAS UI ===== */
+function openTree(){document.getElementById('tree-ov').classList.add('show');renderTree();updateWallet();}
+function closeTree(){document.getElementById('tree-ov').classList.remove('show');}
+function buyNode(bid,ni){
+  const b=TREE.find(x=>x.id===bid);const owned=lvl(bid);if(ni!==owned)return;
+  const node=b.levels[ni];const ess=stor.load().essence||0;
+  if(ess<node.cost){showBanner('Te falta Circle Essence');return;}
+  stor.save({essence:ess-node.cost});setLvl(bid,owned+1);
+  updateWallet();renderTree();
+}
+function renderTree(){
+  const grid=document.getElementById('tree-grid');grid.innerHTML='';
+  TREE.forEach((b,bi)=>{
+    const unlocked=branchUnlocked(bi);const owned=lvl(b.id);
+    const col=document.createElement('div');col.className='branch'+(unlocked?'':' lock');
+    const head=document.createElement('div');head.style.cssText='display:flex;flex-direction:column;align-items:center;';
+    head.innerHTML=`<div class="bi">${b.icon}</div><div class="bt">${b.title}</div><div class="bd">${b.desc}</div>`;
+    col.appendChild(head);
+    b.levels.forEach((node,ni)=>{
+      if(ni>0){const c=document.createElement('div');c.className='conn'+(owned>=ni?' on':'');col.appendChild(c);}
+      const purchased=owned>=(ni+1);const isNext=!purchased&&owned===ni;
+      const ess=stor.load().essence||0;const afford=isNext&&unlocked&&ess>=node.cost;
+      const el=document.createElement('div');
+      let cls='node';if(purchased)cls+=' owned';else if(!unlocked||!isNext)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';
+      el.className=cls;
+      el.innerHTML=`<div class="nl">Nivel ${ni+1}</div><div class="ne">${node.label}</div>`+
+        (purchased?'<span class="nc" style="border-color:transparent;color:var(--grn);background:rgba(0,245,160,.1)">Adquirido</span>':`<span class="nc"><span class="mc"></span>${node.cost}</span>`);
+      if(isNext&&unlocked){const btn=el.querySelector('.nc');btn.onclick=()=>buyNode(b.id,ni);}
+      col.appendChild(el);
+    });
+    if(!unlocked){const ln=document.createElement('div');ln.className='ln';ln.textContent=`🔒 Mejora "${TREE[bi-1].title}" para desbloquear`;col.appendChild(ln);}
+    grid.appendChild(col);
+  });
+}
+
+function renderStartStats(){const s=stor.load();if(!s.best&&!s.games)return;startStats.style.display='grid';startStats.innerHTML=`<div class="sc"><div class="v">${fmtNum(s.best||0)}</div><div class="l">Mejor Flux</div></div><div class="sc"><div class="v">${fmtNum(Math.floor(s.essence||0))}</div><div class="l">Essence</div></div><div class="sc"><div class="v">${s.games||0}</div><div class="l">Retos</div></div>`;}
+
+renderStartStats();updateWallet();
 document.getElementById('btn').addEventListener('click',startGame);
 ctx.fillStyle='#050810';ctx.fillRect(0,0,W,H);
 </script>
