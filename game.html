@@ -8,7 +8,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: #0f0f1a;
+      background: #0a0a14;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -17,38 +17,45 @@
       font-family: 'Segoe UI', sans-serif;
       color: #fff;
       overflow: hidden;
+      user-select: none;
     }
 
     h1 {
-      font-size: 2rem;
-      letter-spacing: 4px;
-      margin-bottom: 12px;
-      background: linear-gradient(90deg, #ff6ec7, #a78bfa, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 1.6rem;
+      letter-spacing: 6px;
+      margin-bottom: 10px;
+      color: #38bdf8;
       text-transform: uppercase;
+      text-shadow: 0 0 20px #38bdf866;
     }
 
     #hud {
       display: flex;
-      gap: 40px;
-      margin-bottom: 14px;
-      font-size: 1.1rem;
+      gap: 48px;
+      margin-bottom: 12px;
+      font-size: 1rem;
       letter-spacing: 1px;
+      color: #94a3b8;
     }
 
-    #hud span { color: #a78bfa; font-weight: 700; }
+    #hud .val { color: #e2e8f0; font-weight: 700; font-size: 1.3rem; }
+    #hud .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #64748b; margin-top: 2px; }
+    #hud .col { display: flex; flex-direction: column; align-items: center; }
 
-    #canvas-wrap {
-      position: relative;
-    }
+    #lives { display: flex; gap: 6px; align-items: center; }
+    .heart { width: 16px; height: 16px; background: #ef4444; border-radius: 50% 50% 0 0; position: relative; transform: rotate(-45deg); transition: all 0.2s; }
+    .heart::after { content: ''; position: absolute; width: 16px; height: 16px; background: #ef4444; border-radius: 50%; left: 50%; top: 0; transform: translateX(-50%); }
+    .heart.lost { background: #1e293b; }
+    .heart.lost::after { background: #1e293b; }
+
+    #canvas-wrap { position: relative; }
 
     canvas {
       display: block;
-      border-radius: 16px;
-      border: 2px solid #2d2d4e;
+      border-radius: 14px;
+      border: 1.5px solid #1e293b;
       cursor: crosshair;
-      box-shadow: 0 0 40px #a78bfa44;
+      box-shadow: 0 0 60px #38bdf81a;
     }
 
     #overlay {
@@ -58,173 +65,197 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(15, 15, 26, 0.88);
-      border-radius: 16px;
-      gap: 18px;
+      background: rgba(10, 10, 20, 0.92);
+      border-radius: 14px;
+      gap: 16px;
+      backdrop-filter: blur(4px);
     }
 
-    #overlay h2 {
-      font-size: 2.2rem;
-      background: linear-gradient(90deg, #ff6ec7, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+    #overlay h2 { font-size: 2rem; color: #38bdf8; letter-spacing: 2px; }
+    #overlay .sub { font-size: 1rem; color: #64748b; text-align: center; line-height: 1.8; }
+    #overlay .big { font-size: 4rem; font-weight: 900; color: #e2e8f0; line-height: 1; }
+    #overlay .label { font-size: 0.8rem; color: #64748b; letter-spacing: 3px; text-transform: uppercase; }
 
-    #overlay p { font-size: 1.1rem; color: #cbd5e1; text-align: center; line-height: 1.7; }
-
-    #overlay .final-score { font-size: 3rem; font-weight: 800; color: #38bdf8; }
-
-    button {
-      padding: 12px 36px;
+    .milestone-banner {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      text-align: center;
+      padding: 10px;
       font-size: 1rem;
       font-weight: 700;
       letter-spacing: 2px;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      background: linear-gradient(135deg, #a78bfa, #38bdf8);
-      color: #0f0f1a;
-      transition: transform 0.15s, box-shadow 0.15s;
-      text-transform: uppercase;
+      color: #0a0a14;
+      background: #38bdf8;
+      border-radius: 14px 14px 0 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
     }
 
-    button:hover { transform: scale(1.06); box-shadow: 0 0 20px #a78bfa88; }
+    button {
+      padding: 11px 40px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      border: 1.5px solid #38bdf8;
+      border-radius: 50px;
+      cursor: pointer;
+      background: transparent;
+      color: #38bdf8;
+      text-transform: uppercase;
+      transition: all 0.15s;
+    }
 
-    #combo-popup {
+    button:hover { background: #38bdf8; color: #0a0a14; box-shadow: 0 0 20px #38bdf855; }
+
+    #score-popup {
       position: absolute;
-      top: 0; left: 0;
       pointer-events: none;
-      font-size: 1.4rem;
+      font-size: 1.1rem;
       font-weight: 800;
-      color: #ffd700;
-      text-shadow: 0 0 10px #ffd70099;
+      color: #38bdf8;
+      text-shadow: 0 0 10px #38bdf8;
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity 0.15s;
     }
   </style>
 </head>
 <body>
 
-<h1>Recolecta Círculos</h1>
+<h1>Círculos</h1>
 
 <div id="hud">
-  <div>Puntos: <span id="score">0</span></div>
-  <div>Nivel: <span id="level">1</span></div>
-  <div>Tiempo: <span id="timer">30</span>s</div>
-  <div>Combo: <span id="combo">x1</span></div>
+  <div class="col">
+    <div class="val" id="score">0</div>
+    <div class="lbl">recolectados</div>
+  </div>
+  <div class="col">
+    <div class="val" id="level">1</div>
+    <div class="lbl">nivel</div>
+  </div>
+  <div class="col">
+    <div id="lives">
+      <div class="heart" id="h1"></div>
+      <div class="heart" id="h2"></div>
+      <div class="heart" id="h3"></div>
+    </div>
+    <div class="lbl" style="margin-top:6px">vidas</div>
+  </div>
+  <div class="col">
+    <div class="val" id="best">0</div>
+    <div class="lbl">mejor</div>
+  </div>
 </div>
 
 <div id="canvas-wrap">
-  <canvas id="canvas" width="700" height="480"></canvas>
+  <canvas id="canvas" width="680" height="460"></canvas>
+  <div class="milestone-banner" id="banner"></div>
+
   <div id="overlay">
     <h2>Recolecta Círculos</h2>
-    <p>Haz clic en los círculos antes de que desaparezcan.<br>
-       Los círculos <b style="color:#ff6ec7">rosados</b> valen más puntos.<br>
-       ¡Encadena clics para multiplicar tu puntaje!</p>
-    <button id="btn">Jugar</button>
+    <p class="sub">
+      Haz clic en los círculos antes de que desaparezcan.<br>
+      Cada 10 que recolectes el juego sube de nivel.<br>
+      Pierdes una vida si se escapa un círculo. ¡3 vidas!
+    </p>
+    <button id="btn">Empezar</button>
   </div>
-  <div id="combo-popup"></div>
+
+  <div id="score-popup"></div>
 </div>
 
 <script>
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const scoreEl = document.getElementById('score');
-const levelEl = document.getElementById('level');
-const timerEl = document.getElementById('timer');
-const comboEl = document.getElementById('combo');
-const overlay = document.getElementById('overlay');
-const btn = document.getElementById('btn');
-const comboPopup = document.getElementById('combo-popup');
+const scoreEl  = document.getElementById('score');
+const levelEl  = document.getElementById('level');
+const bestEl   = document.getElementById('best');
+const overlay  = document.getElementById('overlay');
+const btn      = document.getElementById('btn');
+const banner   = document.getElementById('banner');
+const popup    = document.getElementById('score-popup');
+const hearts   = [document.getElementById('h1'), document.getElementById('h2'), document.getElementById('h3')];
 
 const W = canvas.width;
 const H = canvas.height;
 
-const CIRCLE_TYPES = [
-  { color: '#38bdf8', glow: '#38bdf888', radius: 28, points: 10, speed: 1.2, lifespan: 4500 },
-  { color: '#a78bfa', glow: '#a78bfa88', radius: 22, points: 20, speed: 1.8, lifespan: 3500 },
-  { color: '#ff6ec7', glow: '#ff6ec788', radius: 16, points: 40, speed: 2.5, lifespan: 2500 },
-  { color: '#fbbf24', glow: '#fbbf2488', radius: 12, points: 80, speed: 3.2, lifespan: 1800 },
-];
-
-let circles = [];
-let score = 0;
-let level = 1;
-let timeLeft = 30;
-let combo = 1;
-let comboTimer = null;
+let circles = [], particles = [];
+let score = 0, level = 1, lives = 3, best = 0;
+let collected = 0;
 let running = false;
-let animId = null;
-let spawnInterval = null;
-let countdownInterval = null;
-let particles = [];
+let animId = null, spawnTimer = null;
 let lastTime = 0;
 
-function rand(min, max) { return Math.random() * (max - min) + min; }
+function rand(a, b) { return Math.random() * (b - a) + a; }
+
+function getConfig() {
+  const spd  = 1.2 + (level - 1) * 0.22;
+  const life = Math.max(1600, 4000 - (level - 1) * 180);
+  const rate = Math.max(600,  2000 - (level - 1) * 120);
+  const r    = Math.max(14, 24 - Math.floor((level - 1) / 3));
+  return { spd, life, rate, r };
+}
 
 function spawnCircle() {
-  const weights = [50, 30, 15, 5];
-  const total = weights.reduce((a, b) => a + b, 0);
-  let r = Math.random() * total;
-  let typeIdx = 0;
-  for (let i = 0; i < weights.length; i++) {
-    r -= weights[i];
-    if (r <= 0) { typeIdx = i; break; }
-  }
-
-  const type = CIRCLE_TYPES[typeIdx];
-  const radius = type.radius;
-  const angle = Math.random() * Math.PI * 2;
-  const speedMult = 1 + (level - 1) * 0.15;
-  const speed = type.speed * speedMult;
-
+  if (!running) return;
+  const { spd, life, r } = getConfig();
+  const angle = rand(0, Math.PI * 2);
   circles.push({
-    x: rand(radius, W - radius),
-    y: rand(radius, H - radius),
-    radius,
-    color: type.color,
-    glow: type.glow,
-    points: type.points,
-    vx: Math.cos(angle) * speed,
-    vy: Math.sin(angle) * speed,
+    x: rand(r + 4, W - r - 4),
+    y: rand(r + 4, H - r - 4),
+    r,
+    vx: Math.cos(angle) * spd,
+    vy: Math.sin(angle) * spd,
     born: performance.now(),
-    lifespan: type.lifespan,
+    life,
     alpha: 1,
     pulse: rand(0, Math.PI * 2),
+    popped: false,
   });
+  scheduleSpawn();
 }
 
-function spawnParticles(x, y, color, count = 10) {
-  for (let i = 0; i < count; i++) {
-    const angle = (Math.PI * 2 * i) / count + rand(-0.3, 0.3);
-    const speed = rand(2, 6);
-    particles.push({
-      x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      color,
-      alpha: 1,
-      radius: rand(3, 7),
-    });
+function scheduleSpawn() {
+  clearTimeout(spawnTimer);
+  const { rate } = getConfig();
+  spawnTimer = setTimeout(spawnCircle, rate + rand(-100, 100));
+}
+
+function spawnParticles(x, y) {
+  for (let i = 0; i < 12; i++) {
+    const a = (Math.PI * 2 * i) / 12 + rand(-0.2, 0.2);
+    const spd = rand(2, 5);
+    particles.push({ x, y, vx: Math.cos(a)*spd, vy: Math.sin(a)*spd, alpha: 1, r: rand(2, 5) });
   }
 }
 
-function updateCombo() {
-  comboEl.textContent = `x${combo}`;
-  clearTimeout(comboTimer);
-  comboTimer = setTimeout(() => {
-    combo = 1;
-    comboEl.textContent = 'x1';
-  }, 1500);
+function showPopup(x, y, text) {
+  popup.textContent = text;
+  popup.style.left = (x - 16) + 'px';
+  popup.style.top  = (y - 36) + 'px';
+  popup.style.opacity = '1';
+  clearTimeout(popup._t);
+  popup._t = setTimeout(() => { popup.style.opacity = '0'; }, 600);
 }
 
-function showComboPopup(x, y, pts) {
-  comboPopup.style.left = (x - 20) + 'px';
-  comboPopup.style.top = (y - 40) + 'px';
-  comboPopup.textContent = `+${pts}${combo > 1 ? ` x${combo}` : ''}`;
-  comboPopup.style.opacity = '1';
-  clearTimeout(comboPopup._t);
-  comboPopup._t = setTimeout(() => { comboPopup.style.opacity = '0'; }, 700);
+function showBanner(text) {
+  banner.textContent = text;
+  banner.style.opacity = '1';
+  clearTimeout(banner._t);
+  banner._t = setTimeout(() => { banner.style.opacity = '0'; }, 1400);
+}
+
+function loseLife() {
+  lives--;
+  const h = hearts[lives];
+  if (h) h.classList.add('lost');
+  if (lives <= 0) endGame();
+}
+
+function updateHearts() {
+  hearts.forEach((h, i) => {
+    h.classList.toggle('lost', i >= lives);
+  });
 }
 
 canvas.addEventListener('click', (e) => {
@@ -232,29 +263,28 @@ canvas.addEventListener('click', (e) => {
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
-
-  let hit = false;
   for (let i = circles.length - 1; i >= 0; i--) {
     const c = circles[i];
+    if (c.popped) continue;
     const dx = mx - c.x, dy = my - c.y;
-    if (Math.sqrt(dx * dx + dy * dy) <= c.radius) {
-      const earned = c.points * combo;
-      score += earned;
+    if (dx*dx + dy*dy <= c.r*c.r) {
+      c.popped = true;
+      collected++;
+      score = collected;
       scoreEl.textContent = score;
-      combo++;
-      updateCombo();
-      showComboPopup(c.x, c.y, earned);
-      spawnParticles(c.x, c.y, c.color, 14);
-      circles.splice(i, 1);
-      hit = true;
+      spawnParticles(c.x, c.y);
+      showPopup(c.x, c.y, '+1');
+
+      if (score > best) { best = score; bestEl.textContent = best; }
+
+      const newLevel = Math.floor(collected / 10) + 1;
+      if (newLevel > level) {
+        level = newLevel;
+        levelEl.textContent = level;
+        showBanner(`NIVEL ${level} — ¡MÁS RÁPIDO!`);
+      }
       break;
     }
-  }
-
-  if (!hit) {
-    combo = 1;
-    comboEl.textContent = 'x1';
-    clearTimeout(comboTimer);
   }
 });
 
@@ -264,131 +294,118 @@ function update(now) {
 
   for (let i = circles.length - 1; i >= 0; i--) {
     const c = circles[i];
+    if (c.popped) { circles.splice(i, 1); continue; }
+
     c.x += c.vx * dt;
     c.y += c.vy * dt;
-
-    if (c.x - c.radius < 0) { c.x = c.radius; c.vx *= -1; }
-    if (c.x + c.radius > W) { c.x = W - c.radius; c.vx *= -1; }
-    if (c.y - c.radius < 0) { c.y = c.radius; c.vy *= -1; }
-    if (c.y + c.radius > H) { c.y = H - c.radius; c.vy *= -1; }
+    if (c.x - c.r < 0)   { c.x = c.r;   c.vx *= -1; }
+    if (c.x + c.r > W)   { c.x = W-c.r; c.vx *= -1; }
+    if (c.y - c.r < 0)   { c.y = c.r;   c.vy *= -1; }
+    if (c.y + c.r > H)   { c.y = H-c.r; c.vy *= -1; }
 
     const age = now - c.born;
-    if (age > c.lifespan) {
+    if (age >= c.life) {
       circles.splice(i, 1);
+      loseLife();
       continue;
     }
-    const fadeStart = c.lifespan * 0.7;
-    c.alpha = age > fadeStart ? 1 - (age - fadeStart) / (c.lifespan - fadeStart) : 1;
-    c.pulse = (c.pulse + 0.06 * dt) % (Math.PI * 2);
+    const fadeAt = c.life * 0.65;
+    c.alpha = age > fadeAt ? 1 - (age - fadeAt) / (c.life - fadeAt) : 1;
+    c.pulse = (c.pulse + 0.055 * dt) % (Math.PI * 2);
   }
 
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    p.vy += 0.15 * dt;
-    p.alpha -= 0.03 * dt;
+    p.x  += p.vx * dt;
+    p.y  += p.vy * dt;
+    p.vy += 0.12 * dt;
+    p.alpha -= 0.028 * dt;
     if (p.alpha <= 0) particles.splice(i, 1);
   }
 }
 
-function draw(now) {
+function draw() {
   ctx.clearRect(0, 0, W, H);
-
-  ctx.fillStyle = '#0f0f1a';
+  ctx.fillStyle = '#0a0a14';
   ctx.fillRect(0, 0, W, H);
 
   for (const p of particles) {
     ctx.save();
     ctx.globalAlpha = Math.max(0, p.alpha);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = p.color;
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#38bdf8';
     ctx.fill();
     ctx.restore();
   }
 
   for (const c of circles) {
-    const pulse = 1 + Math.sin(c.pulse) * 0.07;
+    const pulse = 1 + Math.sin(c.pulse) * 0.06;
+    const pr = c.r * pulse;
+
     ctx.save();
     ctx.globalAlpha = c.alpha;
 
-    ctx.shadowColor = c.glow;
-    ctx.shadowBlur = 24 * pulse;
+    const grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, pr);
+    grad.addColorStop(0,   '#7dd3fc');
+    grad.addColorStop(0.5, '#38bdf8');
+    grad.addColorStop(1,   '#0ea5e9');
+
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur  = 18 * pulse;
     ctx.beginPath();
-    ctx.arc(c.x, c.y, c.radius * pulse, 0, Math.PI * 2);
-    ctx.fillStyle = c.color;
+    ctx.arc(c.x, c.y, pr, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
     ctx.fill();
 
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = '#ffffff33';
+    ctx.strokeStyle = `rgba(255,255,255,${0.25 * c.alpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    const age = performance.now() - c.born;
+    const ratio = Math.min(age / c.life, 1);
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, pr + 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - ratio));
+    ctx.strokeStyle = `rgba(56,189,248,${0.5 * c.alpha})`;
     ctx.lineWidth = 2;
     ctx.stroke();
+
     ctx.restore();
   }
 }
 
 function loop(now) {
   update(now);
-  draw(now);
+  draw();
   if (running) animId = requestAnimationFrame(loop);
 }
 
 function startGame() {
-  circles = [];
-  particles = [];
-  score = 0;
-  level = 1;
-  timeLeft = 30;
-  combo = 1;
+  circles = []; particles = [];
+  score = 0; level = 1; lives = 3; collected = 0;
   running = true;
   scoreEl.textContent = '0';
   levelEl.textContent = '1';
-  timerEl.textContent = '30';
-  comboEl.textContent = 'x1';
-
+  updateHearts();
   overlay.style.display = 'none';
-
-  clearInterval(spawnInterval);
-  clearInterval(countdownInterval);
-
-  spawnInterval = setInterval(() => {
-    if (!running) return;
-    const count = 1 + Math.floor(level / 3);
-    for (let i = 0; i < count; i++) spawnCircle();
-  }, Math.max(500, 1200 - level * 60));
-
-  countdownInterval = setInterval(() => {
-    timeLeft--;
-    timerEl.textContent = timeLeft;
-    if (timeLeft % 10 === 0 && timeLeft > 0) {
-      level++;
-      levelEl.textContent = level;
-      clearInterval(spawnInterval);
-      spawnInterval = setInterval(() => {
-        if (!running) return;
-        const count = 1 + Math.floor(level / 3);
-        for (let i = 0; i < count; i++) spawnCircle();
-      }, Math.max(500, 1200 - level * 60));
-    }
-    if (timeLeft <= 0) endGame();
-  }, 1000);
-
+  scheduleSpawn();
   lastTime = performance.now();
   animId = requestAnimationFrame(loop);
 }
 
 function endGame() {
   running = false;
-  clearInterval(spawnInterval);
-  clearInterval(countdownInterval);
+  clearTimeout(spawnTimer);
   cancelAnimationFrame(animId);
 
   overlay.innerHTML = `
-    <h2>¡Tiempo!</h2>
-    <div class="final-score">${score} pts</div>
-    <p>Llegaste al nivel <b style="color:#a78bfa">${level}</b>.<br>
-       Recolectaste círculos con un combo máximo increíble.</p>
+    <div class="label">Juego terminado</div>
+    <div class="big">${score}</div>
+    <div class="label">recolectados — nivel ${level}</div>
+    <p class="sub" style="margin-top:4px">
+      ${score > 0 && score === best ? '¡Nuevo récord personal!' : `Tu mejor marca es ${best}`}
+    </p>
     <button id="btn">Jugar de nuevo</button>
   `;
   overlay.style.display = 'flex';
@@ -396,8 +413,7 @@ function endGame() {
 }
 
 btn.addEventListener('click', startGame);
-
-ctx.fillStyle = '#0f0f1a';
+ctx.fillStyle = '#0a0a14';
 ctx.fillRect(0, 0, W, H);
 </script>
 </body>
