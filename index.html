@@ -114,7 +114,7 @@
 
   /* futuristic audio button */
   #sound-btn{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:35;width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;background:transparent;padding:0;display:flex;align-items:center;justify-content:center;}
-  #sound-btn .ring{position:absolute;inset:0;border-radius:50%;padding:2px;background:conic-gradient(from 0deg,var(--p),var(--s),var(--grn),var(--p));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 4s linear infinite;}
+  #sound-btn .ring{position:absolute;inset:0;border-radius:50%;padding:2px;background:conic-gradient(from 0deg,var(--p),var(--s),var(--grn),var(--p));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;}
   @keyframes spin{to{transform:rotate(360deg)}}
   #sound-btn .core{position:absolute;inset:4px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#0d1b2a,#070d16);box-shadow:inset 0 0 10px rgba(0,212,255,.35),0 0 16px rgba(0,212,255,.25);}
   #sound-btn .eq{position:relative;display:inline-flex;align-items:center;gap:3px;height:18px;z-index:1;}
@@ -193,6 +193,29 @@
   .ov-title.wave{background:none;-webkit-text-fill-color:initial;}
   .ov-title.wave .wl{display:inline-block;background:linear-gradient(135deg,var(--p),var(--s),var(--acc));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:wlwave 2.2s ease-in-out infinite;will-change:transform;}
   @keyframes wlwave{0%,100%{transform:translateY(0)}30%{transform:translateY(-13px)}60%{transform:translateY(2px)}}
+
+  /* ---- árbol in-run como grafo de nodos circulares ---- */
+  .rt-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 34px;min-width:max-content;margin:0 auto;}
+  .rt-branch{display:flex;flex-direction:column;align-items:center;}
+  .rt-branch.dim{opacity:.45;}
+  .rt-split .rt-branch{width:120px;}
+  .rt-lbl{font-size:.62rem;font-weight:800;letter-spacing:.5px;color:#cfe6f5;text-transform:uppercase;margin-bottom:8px;text-align:center;max-width:130px;line-height:1.25;display:flex;align-items:center;gap:5px;justify-content:center;}
+  .rt-lbl span{font-size:1rem;}
+  .rt-step{font-size:.54rem;font-weight:700;color:#9fbace;margin-top:8px;text-transform:uppercase;letter-spacing:.5px;}
+  .rnode{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bord);background:var(--panel);font-weight:800;color:#9fbace;transition:all .16s;}
+  .rnode .rc{font-size:.72rem;white-space:nowrap;}
+  .rnode .rk{font-size:1.15rem;}
+  .rnode.owned{border-color:var(--grn);color:var(--grn);background:rgba(0,245,160,.12);box-shadow:0 0 12px rgba(0,245,160,.35);}
+  .rnode.buy{border-color:var(--p);color:var(--p);box-shadow:0 0 14px rgba(0,212,255,.4);cursor:pointer;}
+  .rnode.buy:active{background:var(--p);color:var(--bg);transform:scale(.92);}
+  .rnode.poor{opacity:.8;}
+  .rnode.lockn{opacity:.4;}
+  .rconn{width:3px;height:16px;background:var(--bord);}
+  .rconn.trunk{height:24px;}
+  .rconn.on{background:var(--p);box-shadow:0 0 6px var(--p);}
+  .rt-fork{width:160px;height:16px;border:2px solid var(--bord);border-bottom:none;border-radius:8px 8px 0 0;margin:0 auto;}
+  .rt-fork.on{border-color:var(--p);box-shadow:0 0 6px var(--p);}
+  .rt-split{display:flex;gap:40px;align-items:flex-start;}
 </style>
 
 <div id="hud">
@@ -354,18 +377,20 @@ const EFF={
 };
 
 /* ===== IN-RUN UPGRADE TREE (spend Flux, resets each run) ===== */
+/* in-run tree as a branching graph (parent -> children) */
 const RUN_TREE=[
-  {id:'slow',icon:'🐢',title:'Slow',desc:'Circles move slower.',step:'-10% speed',levels:[8,20,45,90],eff:()=>{runMods.speed*=0.90;}},
-  {id:'grow',icon:'⭕',title:'Grow',desc:'Bigger circles, easier to hit.',step:'+12% size',levels:[12,28,60,120],eff:()=>{runMods.radius*=1.12;}},
-  {id:'power',icon:'⚡',title:'Power',desc:'More Flux per tap.',step:'+20% flux',levels:[15,35,75,150,300],eff:()=>{runMods.flux*=1.20;}},
-  {id:'linger',icon:'⏳',title:'Linger',desc:'Circles last longer before escaping.',step:'+15% life',levels:[25,60,140],eff:()=>{runMods.life*=1.15;}},
-  {id:'combo',icon:'🎯',title:'Combo',desc:'Streak multiplier grows faster.',step:'streak +',levels:[30,80,180],eff:()=>{runMods.streakInc+=0.006;}},
+  {id:'power', parent:null,    icon:'⚡',title:'×1.3 Flux',       desc:'+30% flux per tap',   step:'×1.3 flux',     levels:[15,35,75,150,300], eff:()=>{runMods.flux*=1.30;}},
+  {id:'slow',  parent:'power', icon:'🐢',title:'Slower circles', desc:'circles move slower', step:'-5% speed',     levels:[20,45,90],          eff:()=>{runMods.speed*=0.95;}},
+  {id:'limit', parent:'slow',  icon:'⭕',title:'+1 Circle limit',desc:'+1 circle on field',  step:'+1 circle',     levels:[80],                eff:()=>{runMods.target+=1;}},
+  {id:'life',  parent:'slow',  icon:'⏳',title:'+5% Lifetime',   desc:'circles last longer', step:'+5% lifetime',  levels:[40,90,160],         eff:()=>{runMods.life*=1.05;}},
 ];
 let runUp={};
 function runLvl(id){return runUp[id]||0;}
-function runBranchUnlocked(i){if(i===0)return true;return runLvl(RUN_TREE[i-1].id)>=1;}
+function runNode(id){return RUN_TREE.find(x=>x.id===id);}
+function nodeUnlocked(id){const n=runNode(id);if(!n||!n.parent)return true;return runLvl(n.parent)>=1;}
+function childrenOf(id){return RUN_TREE.filter(x=>x.parent===id);}
 
-let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0};
+let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0};
 
 function pickType(){const r=Math.random();const boost=.07+EFF.boostChance()+(running?runMods.boost:0);if(r<.03)return 'SHIELD';if(r<.03+boost)return 'BOOST';return 'NORMAL';}
 
@@ -394,7 +419,7 @@ function getConf(){
     life:Math.max(900,(4800-(level-1)*160)*(1-t*0.45))*EFF.lifeFactor()*runMods.life,
     rate:Math.max(200,(2400-(level-1)*120)*(1-t*0.5))*EFF.rateFactor(),
     radius:Math.max(15,(32-Math.floor((level-1)/3)*2)*(1-t*0.22))*runMods.radius,
-    target:EFF.baseTarget()+Math.floor(t*6)
+    target:EFF.baseTarget()+Math.floor(t*6)+runMods.target
   };
 }
 function aliveCount(){let n=0;for(const o of orbs)if(!o.popped&&!o.escaped)n++;return n;}
@@ -466,32 +491,47 @@ function runCountdown(cb){
   setTimeout(tick,800);
 }
 function buyRunNode(bid,ni){
-  const b=RUN_TREE.find(x=>x.id===bid);const owned=runLvl(bid);if(ni!==owned)return;
+  const b=runNode(bid);const owned=runLvl(bid);if(ni!==owned)return;if(!nodeUnlocked(bid))return;
   const cost=b.levels[ni];
   if(flux<cost){showBanner('Not enough Flux');return;}
   flux-=cost;runUp[bid]=owned+1;b.eff();Sound.pick();updateHUD();renderRunTree();
 }
+// una rama = columna de nodos circulares (un círculo por nivel)
+function rtBranch(b){
+  const col=document.createElement('div');col.className='rt-branch';
+  const unlocked=nodeUnlocked(b.id);const owned=runLvl(b.id);
+  if(!unlocked)col.classList.add('dim');
+  const lbl=document.createElement('div');lbl.className='rt-lbl';lbl.innerHTML=`<span>${b.icon}</span> ${b.title}`;col.appendChild(lbl);
+  b.levels.forEach((cost,ni)=>{
+    if(ni>0){const c=document.createElement('div');c.className='rconn'+(owned>=ni?' on':'');col.appendChild(c);}
+    const purchased=owned>=(ni+1);const isNext=!purchased&&owned===ni;const afford=isNext&&unlocked&&flux>=cost;
+    const n=document.createElement('div');let cls='rnode';if(purchased)cls+=' owned';else if(!unlocked||!isNext)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';n.className=cls;
+    n.innerHTML=purchased?'<span class="rk">✓</span>':`<span class="rc">⚡${cost}</span>`;
+    if(isNext&&unlocked)n.onclick=()=>buyRunNode(b.id,ni);
+    col.appendChild(n);
+  });
+  const d=document.createElement('div');d.className='rt-step';d.textContent=b.step;col.appendChild(d);
+  return col;
+}
+function trunkConn(on){const c=document.createElement('div');c.className='rconn trunk'+(on?' on':'');return c;}
 function renderRunTree(){
   document.getElementById('runtree-flux').textContent=fmtSig(flux);
-  const grid=document.getElementById('runtree-grid');grid.innerHTML='';
-  RUN_TREE.forEach((b,bi)=>{
-    const unlocked=runBranchUnlocked(bi);const owned=runLvl(b.id);
-    const col=document.createElement('div');col.className='branch'+(unlocked?'':' lock');
-    const head=document.createElement('div');head.style.cssText='display:flex;flex-direction:column;align-items:center;';
-    head.innerHTML=`<div class="bi">${b.icon}</div><div class="bt">${b.title}</div><div class="bd">${b.desc}</div>`;
-    col.appendChild(head);
-    b.levels.forEach((cost,ni)=>{
-      if(ni>0){const c=document.createElement('div');c.className='conn'+(owned>=ni?' on':'');col.appendChild(c);}
-      const purchased=owned>=(ni+1);const isNext=!purchased&&owned===ni;const afford=isNext&&unlocked&&flux>=cost;
-      const el=document.createElement('div');let cls='node';if(purchased)cls+=' owned';else if(!unlocked||!isNext)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';el.className=cls;
-      el.innerHTML=`<div class="ncirc">${purchased?'✓':(ni+1)}</div><div class="nl">Level ${ni+1}</div><div class="ne">${b.step}</div>`+
-        (purchased?'<span class="nc" style="border-color:transparent;color:var(--grn);background:rgba(0,245,160,.12)">Owned</span>':`<span class="nc"><span style="color:#fff">⚡</span>${cost}</span>`);
-      if(isNext&&unlocked){const fn=()=>buyRunNode(b.id,ni);el.querySelector('.nc').onclick=fn;el.querySelector('.ncirc').onclick=fn;}
-      col.appendChild(el);
-    });
-    if(!unlocked){const ln=document.createElement('div');ln.className='ln';ln.textContent=`🔒 Buy "${RUN_TREE[bi-1].title}" to unlock`;col.appendChild(ln);}
-    grid.appendChild(col);
-  });
+  const grid=document.getElementById('runtree-grid');grid.className='';grid.innerHTML='';
+  const wrap=document.createElement('div');wrap.className='rt-wrap';
+  // tronco: power -> slow
+  wrap.appendChild(rtBranch(runNode('power')));
+  wrap.appendChild(trunkConn(runLvl('power')>=1));
+  wrap.appendChild(rtBranch(runNode('slow')));
+  // bifurcación de slow hacia sus hijos
+  const kids=childrenOf('slow');
+  if(kids.length){
+    wrap.appendChild(trunkConn(runLvl('slow')>=1));
+    const fork=document.createElement('div');fork.className='rt-fork'+(runLvl('slow')>=1?' on':'');wrap.appendChild(fork);
+    const split=document.createElement('div');split.className='rt-split';
+    kids.forEach(k=>split.appendChild(rtBranch(k)));
+    wrap.appendChild(split);
+  }
+  grid.appendChild(wrap);
 }
 
 function update(now){
@@ -528,7 +568,7 @@ function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame
 function startGame(){
   Sound.init();
   orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;lastSec=-1;spawnFill=0;
-  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0};runUp={};
+  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0};runUp={};
   DURATION=EFF.duration();timeLeft=DURATION;essMultRun=EFF.essMult();
   running=true;paused=false;
   document.getElementById('runtree-ov').classList.remove('show');
