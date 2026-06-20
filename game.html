@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Circle Essence</title>
+<style>
+  :root {
+    --bg: #0a0d12;
+    --surface: #111620;
+    --surface2: #161c28;
+    --border: #1e2a3a;
+    --accent: #00d4a0;
+    --accent-dim: rgba(0,212,160,0.12);
+    --red: #ff4d6a;
+    --red-dim: rgba(255,77,106,0.12);
+    --yellow: #f5c542;
+    --yellow-dim: rgba(245,197,66,0.1);
+    --purple: #9d7bff;
+    --text: #eef3fa;
+    --text2: #b3c4d8;
+    --text3: #8597ad;
+    --font: 'Space Grotesk', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height:100%; overflow:hidden; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -10%, rgba(0,212,160,0.05), transparent), var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    display:flex; flex-direction:column;
+    user-select:none;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 16px; height:54px; flex-shrink:0;
+    border-bottom:1px solid var(--border); background:var(--surface);
+    z-index:30;
+  }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.05rem; letter-spacing:-0.5px; }
+  .brand .orb { width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #6ffdd6, var(--accent)); box-shadow:0 0 14px var(--accent); }
+  .essence-wallet {
+    display:flex; align-items:center; gap:8px;
+    background:var(--accent-dim); border:1px solid rgba(0,212,160,0.25);
+    padding:6px 12px; border-radius:30px;
+  }
+  .essence-wallet .coin { width:18px; height:18px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #6ffdd6, var(--accent)); box-shadow:0 0 10px var(--accent); flex-shrink:0; }
+  .essence-wallet .amt { font-family:var(--mono); font-weight:700; font-size:1rem; color:var(--accent); }
+  .essence-wallet .lbl { font-size:0.62rem; color:var(--text2); text-transform:uppercase; letter-spacing:1px; }
+
+  .topbar .right { display:flex; align-items:center; gap:8px; }
+  .icon-link {
+    background:var(--surface2); border:1px solid var(--border); color:var(--text2);
+    border-radius:8px; padding:6px 12px; font-size:0.72rem; font-weight:600; cursor:pointer;
+    text-decoration:none; transition:all .15s; font-family:var(--font);
+  }
+  .icon-link:hover { border-color:var(--accent); color:var(--accent); }
+
+  /* VIEW LAYOUT */
+  .stage { flex:1; position:relative; overflow:hidden; min-height:0; }
+  .view { position:absolute; inset:0; display:none; }
+  .view.active { display:flex; }
+
+  /* ---- HOME / MENU ---- */
+  #view-home { flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:24px; text-align:center; }
+  .home-title { font-size:2.4rem; font-weight:700; letter-spacing:-1px; }
+  .home-title span { color:var(--accent); }
+  .home-sub { color:var(--text2); max-width:440px; line-height:1.6; font-size:0.9rem; }
+  .home-actions { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .big-btn {
+    border:none; cursor:pointer; font-family:var(--font); font-weight:700;
+    padding:16px 30px; border-radius:14px; font-size:1.05rem; transition:transform .12s, box-shadow .2s;
+  }
+  .big-btn.play { background:linear-gradient(135deg, var(--accent), #06b386); color:#04150f; box-shadow:0 8px 30px rgba(0,212,160,0.35); }
+  .big-btn.tree { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+  .big-btn:active { transform:scale(0.96); }
+  .home-stats { display:flex; gap:26px; margin-top:8px; flex-wrap:wrap; justify-content:center; }
+  .home-stat { text-align:center; }
+  .home-stat .v { font-family:var(--mono); font-size:1.3rem; font-weight:700; }
+  .home-stat .l { font-size:0.6rem; color:var(--text2); text-transform:uppercase; letter-spacing:1px; }
+
+  /* ---- GAME ---- */
+  #view-game { flex-direction:column; }
+  .hud {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:8px 14px; background:var(--surface); border-bottom:1px solid var(--border); z-index:10; flex-wrap:wrap;
+  }
+  .hud-block { display:flex; align-items:center; gap:8px; }
+  .hud-pill { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:5px 12px; text-align:center; min-width:78px; }
+  .hud-pill .l { font-size:0.55rem; color:var(--text2); text-transform:uppercase; letter-spacing:1px; }
+  .hud-pill .v { font-family:var(--mono); font-weight:700; font-size:1.05rem; }
+  .hud-pill .v.circles { color:var(--accent); }
+  .hud-pill .v.time { color:var(--yellow); }
+  .hud-pill .v.time.low { color:var(--red); }
+  .exit-btn {
+    background:var(--red-dim); border:1px solid rgba(255,77,106,0.35); color:var(--red);
+    border-radius:10px; padding:6px 14px; font-weight:700; font-size:0.8rem; cursor:pointer; font-family:var(--font);
+    transition:all .15s;
+  }
+  .exit-btn:hover { background:rgba(255,77,106,0.2); }
+  .timebar { height:4px; background:var(--surface2); position:relative; flex-shrink:0; }
+  .timebar .fill { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg, var(--accent), var(--yellow)); width:100%; transition:width .25s linear; }
+  #game-canvas { flex:1; display:block; width:100%; touch-action:none; cursor:crosshair; }
+
+  .combo-flash {
+    position:absolute; pointer-events:none; font-family:var(--mono); font-weight:700;
+    color:var(--accent); text-shadow:0 0 10px rgba(0,212,160,0.6); font-size:1rem;
+    animation:floatUp .8s ease-out forwards; z-index:20;
+  }
+  @keyframes floatUp { from{opacity:1; transform:translateY(0) scale(1);} to{opacity:0; transform:translateY(-40px) scale(1.3);} }
+
+  /* ---- UPGRADE TREE ---- */
+  #view-tree { flex-direction:column; }
+  .tree-head { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); background:var(--surface); flex-wrap:wrap; gap:10px; }
+  .tree-head h2 { font-size:1.2rem; font-weight:700; }
+  .tree-head h2 small { color:var(--text2); font-weight:400; font-size:0.75rem; display:block; margin-top:2px; }
+  .tree-scroll { flex:1; overflow:auto; padding:24px; }
+  .tree-grid { display:flex; gap:26px; align-items:flex-start; min-width:min-content; padding-bottom:20px; }
+  .branch { display:flex; flex-direction:column; align-items:center; gap:0; min-width:172px; }
+  .branch-title { font-weight:700; font-size:0.92rem; margin-bottom:4px; text-align:center; }
+  .branch-icon { font-size:1.4rem; margin-bottom:2px; }
+  .branch-desc { font-size:0.62rem; color:var(--text2); text-align:center; margin-bottom:12px; line-height:1.4; min-height:26px; }
+  /* nodos circulares estilo árbol de habilidades */
+  .node {
+    width:160px; display:flex; flex-direction:column; align-items:center; gap:7px;
+    text-align:center; transition:all .18s; position:relative;
+  }
+  .node + .node { margin-top:0; }
+  .connector { width:3px; height:22px; background:var(--border); }
+  .connector.filled { background:var(--accent); box-shadow:0 0 8px rgba(0,212,160,0.4); }
+  .node-circle {
+    width:62px; height:62px; border-radius:50%; flex-shrink:0;
+    background:var(--surface); border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-weight:700; font-size:1.05rem; color:var(--text2);
+    transition:all .18s; position:relative;
+  }
+  .node .nlvl { font-size:0.55rem; color:var(--text2); text-transform:uppercase; letter-spacing:1px; }
+  .node .neffect { font-size:0.78rem; font-weight:600; line-height:1.3; color:var(--text); }
+  .node .ncost {
+    display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-weight:700; font-size:0.8rem;
+    background:var(--surface2); padding:4px 10px; border-radius:20px; border:1px solid var(--border); transition:all .15s;
+  }
+  .node .ncost .mini-coin { width:12px; height:12px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #6ffdd6, var(--accent)); }
+  .node.owned .node-circle {
+    border-color:var(--accent); color:var(--accent);
+    background:radial-gradient(circle at 32% 28%, var(--accent-dim), var(--surface));
+    box-shadow:0 0 16px rgba(0,212,160,0.32);
+  }
+  .node.affordable .node-circle { border-color:var(--accent); color:var(--accent); cursor:pointer; box-shadow:0 0 10px rgba(0,212,160,0.2); }
+  .node.affordable .node-circle:hover { background:var(--accent); color:#04150f; box-shadow:0 0 20px rgba(0,212,160,0.55); transform:scale(1.06); }
+  .node.affordable .ncost { border-color:var(--accent); color:var(--accent); cursor:pointer; }
+  .node.affordable .ncost:hover { background:var(--accent); color:#04150f; }
+  .node.locked { opacity:0.4; filter:grayscale(0.6); }
+  .node.cantafford .node-circle { opacity:0.85; }
+  .node.cantafford .ncost { opacity:0.6; cursor:not-allowed; }
+  .branch.locked-branch { opacity:0.45; }
+  .branch-lock-note { font-size:0.6rem; color:var(--text3); margin-top:8px; text-align:center; max-width:150px; }
+
+  /* ---- MODAL ---- */
+  .overlay {
+    position:absolute; inset:0; background:rgba(5,8,12,0.82); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .overlay.show { display:flex; animation:fade .25s ease; }
+  @keyframes fade { from{opacity:0;} to{opacity:1;} }
+  .modal {
+    background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:26px;
+    max-width:380px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    animation:pop .3s cubic-bezier(.2,1.2,.4,1);
+  }
+  @keyframes pop { from{transform:scale(0.85); opacity:0;} to{transform:scale(1); opacity:1;} }
+  .modal h3 { font-size:1.35rem; margin-bottom:6px; }
+  .modal .reward-coin { width:64px; height:64px; border-radius:50%; margin:10px auto; background:radial-gradient(circle at 32% 30%, #8ffde2, var(--accent)); box-shadow:0 0 30px rgba(0,212,160,0.5); display:flex; align-items:center; justify-content:center; font-size:1.6rem; }
+  .modal .reward-amt { font-family:var(--mono); font-size:2.2rem; font-weight:700; color:var(--accent); }
+  .modal .reward-label { font-size:0.7rem; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .modal .breakdown { font-size:0.78rem; color:var(--text2); line-height:1.7; margin:12px 0; background:var(--surface2); border-radius:10px; padding:12px; }
+  .modal .breakdown b { color:var(--text); }
+  .modal .warn { color:var(--yellow); font-size:0.78rem; line-height:1.5; margin:10px 0; }
+  .modal-actions { display:flex; gap:10px; margin-top:8px; }
+  .modal-actions button { flex:1; border:none; cursor:pointer; font-family:var(--font); font-weight:700; padding:12px; border-radius:11px; font-size:0.9rem; transition:transform .1s; }
+  .modal-actions button:active { transform:scale(0.95); }
+  .btn-ghost { background:var(--surface2); color:var(--text); border:1px solid var(--border) !important; }
+  .btn-go { background:linear-gradient(135deg, var(--accent), #06b386); color:#04150f; }
+  .btn-danger { background:var(--red-dim); color:var(--red); border:1px solid rgba(255,77,106,0.4) !important; }
+
+  .toast {
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    padding:10px 18px; border-radius:12px; font-size:0.82rem; opacity:0; transition:all .3s; z-index:60; pointer-events:none;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---- ANIMACIONES GENERALES ---- */
+  button, .icon-link, .ncost, .node-circle, .lev-btn { transition: transform .12s, box-shadow .2s, background .15s, color .15s, border-color .15s; }
+  button:active, .icon-link:active { transform:scale(0.93); }
+  .view.active { animation: viewIn .32s ease; }
+  @keyframes viewIn { from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+  .big-btn.play { animation: glowPulse 2.4s ease-in-out infinite; }
+  @keyframes glowPulse {
+    0%,100%{ box-shadow:0 8px 30px rgba(0,212,160,0.35); }
+    50%{ box-shadow:0 8px 42px rgba(0,212,160,0.6); }
+  }
+
+  /* ---- TÍTULO EN OLA ---- */
+  .home-title { font-size:2.6rem; font-weight:700; letter-spacing:-1px; display:inline-flex; justify-content:center; }
+  .home-title .ltr { display:inline-block; animation: wave 2.2s ease-in-out infinite; will-change:transform; }
+  .home-title .ltr.sp { width:0.45em; }
+  .home-title .ltr.accent { color:var(--accent); text-shadow:0 0 18px rgba(0,212,160,0.4); }
+  @keyframes wave { 0%,100%{ transform:translateY(0); } 30%{ transform:translateY(-14px); } 60%{ transform:translateY(2px); } }
+
+  /* ---- CONFIG ---- */
+  .cfg-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
+  .cfg-col { display:flex; flex-direction:column; gap:8px; padding:12px 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
+  .cfg-col input[type=range], .cfg-row input[type=range] { width:100%; accent-color:var(--accent); cursor:pointer; }
+  .cfg-select { background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:9px 10px; font-family:var(--font); font-size:0.85rem; cursor:pointer; outline:none; }
+  .cfg-select:focus { border-color:var(--accent); }
+  .cfg-reset-btn { width:100%; margin-top:16px; background:var(--red-dim); color:var(--red); border:1px solid rgba(255,77,106,0.4); border-radius:11px; padding:12px; font-weight:700; font-size:0.9rem; cursor:pointer; font-family:var(--font); transition:all .15s; }
+  .cfg-reset-btn:hover { background:rgba(255,77,106,0.22); }
+  .switch { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
+  .switch input { opacity:0; width:0; height:0; }
+  .switch .sl { position:absolute; inset:0; background:var(--surface2); border:1px solid var(--border); border-radius:24px; transition:.2s; cursor:pointer; }
+  .switch .sl::before { content:''; position:absolute; height:16px; width:16px; left:3px; top:3px; background:var(--text2); border-radius:50%; transition:.2s; }
+  .switch input:checked + .sl { background:var(--accent-dim); border-color:var(--accent); }
+  .switch input:checked + .sl::before { transform:translateX(19px); background:var(--accent); }
+
+  /* ---- CUENTA ATRÁS ---- */
+  .countdown { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(5,8,12,0.72); backdrop-filter:blur(4px); z-index:55; }
+  .countdown.show { display:flex; }
+  .cd-num { font-family:var(--mono); font-weight:700; font-size:6.5rem; color:var(--accent); text-shadow:0 0 36px rgba(0,212,160,0.6); animation: cdPop .8s ease; }
+  @keyframes cdPop { 0%{ transform:scale(0.4); opacity:0; } 35%{ transform:scale(1.12); opacity:1; } 100%{ transform:scale(1); opacity:0.85; } }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand"><div class="orb"></div> Circle Essence</div>
+  <div class="right">
+    <div class="essence-wallet" title="Tu Circle Essence">
+      <div class="coin"></div>
+      <div>
+        <div class="amt" id="wallet-amt">0</div>
+        <div class="lbl">Circle Essence</div>
+      </div>
+    </div>
+    <button class="icon-link" onclick="UI.openSettings()" title="Configuración">⚙</button>
+    <a class="icon-link" href="index.html">← TradeBot</a>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- HOME -->
+  <div class="view active" id="view-home">
+    <div class="home-title" id="home-title"></div>
+    <div class="home-sub">Tienes <b>2 minutos</b>. Toca todos los círculos que puedas: cuantos más cierres, más Circle Essence ganarás. Pero cuidado — con el tiempo aparecen más círculos y se mueven cada vez más rápido.</div>
+    <div class="home-actions">
+      <button class="big-btn play" onclick="Game.start()">▶ Empezar reto</button>
+      <button class="big-btn tree" onclick="UI.show('tree')">🌳 Árbol de mejoras</button>
+    </div>
+    <div class="home-stats">
+      <div class="home-stat"><div class="v" id="home-essence">0</div><div class="l">Essence</div></div>
+      <div class="home-stat"><div class="v" id="home-best">0</div><div class="l">Récord circles</div></div>
+      <div class="home-stat"><div class="v" id="home-runs">0</div><div class="l">Retos jugados</div></div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="view" id="view-game">
+    <div class="hud">
+      <div class="hud-block">
+        <div class="hud-pill"><div class="l">Circles</div><div class="v circles" id="hud-circles">0</div></div>
+        <div class="hud-pill"><div class="l">Tiempo</div><div class="v time" id="hud-time">2:00</div></div>
+        <div class="hud-pill"><div class="l">Essence proy.</div><div class="v" id="hud-proj" style="color:var(--accent)">0</div></div>
+      </div>
+      <button class="exit-btn" onclick="Game.requestExit()">⏏ Salir antes</button>
+    </div>
+    <div class="timebar"><div class="fill" id="timebar-fill"></div></div>
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!-- UPGRADE TREE -->
+  <div class="view" id="view-tree">
+    <div class="tree-head">
+      <h2>Árbol de mejoras <small>Gasta Circle Essence para potenciar tus retos</small></h2>
+      <button class="icon-link" onclick="UI.show('home')">← Volver</button>
+    </div>
+    <div class="tree-scroll">
+      <div class="tree-grid" id="tree-grid"></div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="overlay" id="overlay-exit">
+    <div class="modal">
+      <h3>¿Salir antes de tiempo?</h3>
+      <div class="warn" id="exit-warn"></div>
+      <div class="breakdown" id="exit-breakdown"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="Game.cancelExit()">Seguir jugando</button>
+        <button class="btn-danger" onclick="Game.confirmExit()">Salir y cobrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-result">
+    <div class="modal">
+      <h3 id="result-title">¡Tiempo!</h3>
+      <div class="reward-coin">🪙</div>
+      <div class="reward-amt" id="result-amt">+0</div>
+      <div class="reward-label">Circle Essence ganada</div>
+      <div class="breakdown" id="result-breakdown"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="UI.show('tree'); UI.closeModals();">🌳 Mejoras</button>
+        <button class="btn-go" onclick="Game.start(); UI.closeModals();">▶ Otra vez</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="overlay" id="overlay-settings">
+    <div class="modal" style="text-align:left;">
+      <h3 style="text-align:center;">⚙ Configuración</h3>
+      <div class="cfg-row">
+        <span>🔊 Efectos de sonido</span>
+        <label class="switch"><input type="checkbox" id="cfg-sfx"><span class="sl"></span></label>
+      </div>
+      <div class="cfg-row">
+        <span>🎵 Música</span>
+        <label class="switch"><input type="checkbox" id="cfg-music"><span class="sl"></span></label>
+      </div>
+      <div class="cfg-col">
+        <span>Volumen</span>
+        <input type="range" id="cfg-vol" min="0" max="1" step="0.05">
+      </div>
+      <div class="cfg-col">
+        <span>Fuente del texto</span>
+        <select id="cfg-font" class="cfg-select">
+          <option value="'Space Grotesk', system-ui, sans-serif">Space Grotesk</option>
+          <option value="system-ui, -apple-system, sans-serif">Sistema</option>
+          <option value="Georgia, 'Times New Roman', serif">Serif</option>
+          <option value="'JetBrains Mono', ui-monospace, monospace">Monospace</option>
+          <option value="'Trebuchet MS', 'Segoe UI', sans-serif">Trebuchet</option>
+          <option value="'Comic Sans MS', 'Comic Sans', cursive">Redondeada</option>
+        </select>
+      </div>
+      <button class="cfg-reset-btn" id="cfg-reset">↺ Reiniciar progreso</button>
+      <div class="modal-actions"><button class="btn-go" id="cfg-close">Listo</button></div>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN AL REANUDAR -->
+  <div class="countdown" id="countdown"><div class="cd-num" id="cd-num">3</div></div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ====================== STATE / PERSISTENCE ====================== */
+const SAVE_KEY = 'circleEssenceSave_v1';
+const ESSENCE_RATE = 0.45;   // nerf de la fórmula de essence
+const State = {
+  essence: 0,
+  bestCircles: 0,
+  runs: 0,
+  upgrades: {}, // id -> level
+  settings: {}, // sfx, music, volume, font
+};
+function loadState(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw){ Object.assign(State, JSON.parse(raw)); }
+  } catch(e){}
+  if (!State.upgrades) State.upgrades = {};
+  if (!State.settings) State.settings = {};
+  const s = State.settings;
+  if (s.sfx === undefined)    s.sfx = true;
+  if (s.music === undefined)  s.music = false;
+  if (s.volume === undefined) s.volume = 0.85;
+  if (s.font === undefined)   s.font = "'Space Grotesk', system-ui, sans-serif";
+}
+function saveState(){
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(State)); } catch(e){}
+}
+
+/* ====================== UPGRADE TREE DEFINITION ======================
+   Cada rama (branch) es una cadena de niveles. Las ramas se desbloquean
+   en orden: al comprar el PRIMER nivel de una rama, se desvela la siguiente. */
+const TREE = [
+  {
+    id:'abundancia', title:'Abundancia', icon:'⭕',
+    desc:'Más círculos en pantalla (base: 4).',
+    levels:[
+      { cost:8,   label:'+1 círculo' },
+      { cost:18,  label:'+1 círculo' },
+      { cost:35,  label:'+1 círculo' },
+      { cost:60,  label:'+1 círculo' },
+      { cost:95,  label:'+1 círculo' },
+    ]
+  },
+  {
+    id:'esencia', title:'Esencia', icon:'💎',
+    desc:'Más Circle Essence por cada círculo (XP).',
+    levels:[
+      { cost:12,  label:'+15% essence' },
+      { cost:26,  label:'+15% essence' },
+      { cost:48,  label:'+15% essence' },
+      { cost:80,  label:'+20% essence' },
+      { cost:130, label:'+25% essence' },
+    ]
+  },
+  {
+    id:'calma', title:'Calma', icon:'🐢',
+    desc:'Los círculos se mueven más despacio.',
+    levels:[
+      { cost:15,  label:'-10% velocidad' },
+      { cost:30,  label:'-10% velocidad' },
+      { cost:55,  label:'-10% velocidad' },
+      { cost:90,  label:'-12% velocidad' },
+    ]
+  },
+  {
+    id:'tiempo', title:'Tiempo', icon:'⏳',
+    desc:'Más segundos de reto.',
+    levels:[
+      { cost:25,  label:'+15 segundos' },
+      { cost:55,  label:'+15 segundos' },
+      { cost:100, label:'+20 segundos' },
+    ]
+  },
+  {
+    id:'fortuna', title:'Fortuna', icon:'🌟',
+    desc:'Aparecen círculos dorados que valen x5.',
+    levels:[
+      { cost:40,  label:'5% dorados' },
+      { cost:85,  label:'+4% dorados' },
+      { cost:150, label:'+4% dorados (x6)' },
+    ]
+  },
+];
+
+function lvl(id){ return State.upgrades[id] || 0; }
+function branchIndex(id){ return TREE.findIndex(b=>b.id===id); }
+// Una rama está desbloqueada si es la primera, o si la rama anterior tiene >=1 nivel comprado.
+function branchUnlocked(i){
+  if (i===0) return true;
+  const prev = TREE[i-1];
+  return lvl(prev.id) >= 1;
+}
+
+/* Efectos derivados de las mejoras */
+const Effects = {
+  maxCircles(){ return 4 + lvl('abundancia'); },          // base + niveles
+  essenceMult(){
+    const l = lvl('esencia');
+    let m = 1;
+    const inc = [0.15,0.15,0.15,0.20,0.25];
+    for (let i=0;i<l;i++) m += inc[i];
+    return m;
+  },
+  speedFactor(){
+    const l = lvl('calma');
+    const dec = [0.10,0.10,0.10,0.12];
+    let f = 1;
+    for (let i=0;i<l;i++) f *= (1-dec[i]);
+    return f;
+  },
+  duration(){
+    const l = lvl('tiempo');
+    const add = [15,15,20];
+    let d = 120;
+    for (let i=0;i<l;i++) d += add[i];
+    return d;
+  },
+  goldenChance(){
+    const l = lvl('fortuna');
+    const add = [0.05,0.04,0.04];
+    let c = 0;
+    for (let i=0;i<l;i++) c += add[i];
+    return c;
+  },
+  goldenValue(){ return lvl('fortuna') >= 3 ? 6 : 5; }
+};
+
+/* ====================== AUDIO (SFX + MÚSICA SINTÉTICA) ====================== */
+const Sound = {
+  ctx:null, master:null, musicTimer:null,
+  enabledSfx:true, enabledMusic:false, volume:0.85,
+  ensure(){
+    if (!this.ctx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = this.volume;
+      this.master.connect(this.ctx.destination);
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    return true;
+  },
+  // un tono con envolvente; gain alto para que se oiga bien
+  blip(freq, dur, type, gain, slideTo){
+    if (!this.enabledSfx) return;
+    if (!this.ensure()) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain || 0.6, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + dur + 0.03);
+  },
+  click(){ this.blip(430, 0.07, 'square', 0.45, 620); },
+  pop(){ this.blip(680, 0.16, 'triangle', 0.85, 1040); },   // click al círculo, bien audible
+  gold(){ this.blip(900, 0.18, 'triangle', 0.85, 1380); setTimeout(()=>this.blip(1240,0.16,'sine',0.7),55); },
+  buy(){ this.blip(540, 0.1, 'sine', 0.7, 820); setTimeout(()=>this.blip(820,0.13,'sine',0.7),90); },
+  beep(){ this.blip(560, 0.14, 'sine', 0.7); },
+  go(){ this.blip(720, 0.28, 'sawtooth', 0.7, 1180); },
+  startMusic(){
+    if (!this.enabledMusic) return;
+    if (!this.ensure()) return;
+    if (this.musicTimer) return;
+    const scale = [196, 233.08, 261.63, 293.66, 349.23, 392, 466.16];
+    const step = ()=>{
+      if (!this.enabledMusic){ this.stopMusic(); return; }
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      const f = scale[Math.floor(Math.random()*scale.length)] * (Math.random()<0.3?2:1);
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.1, t + 0.06);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+      o.connect(g); g.connect(this.master);
+      o.start(t); o.stop(t + 0.65);
+    };
+    this.musicTimer = setInterval(step, 430);
+  },
+  stopMusic(){ if (this.musicTimer){ clearInterval(this.musicTimer); this.musicTimer = null; } }
+};
+
+function applySettings(){
+  const s = State.settings;
+  Sound.enabledSfx = s.sfx;
+  Sound.enabledMusic = s.music;
+  Sound.volume = s.volume;
+  if (Sound.master) Sound.master.gain.value = s.volume;
+  document.body.style.setProperty('--font', s.font);
+  if (s.music) Sound.startMusic(); else Sound.stopMusic();
+}
+
+function bindSettings(){
+  const s = State.settings;
+  const $ = id => document.getElementById(id);
+  $('cfg-sfx').onchange   = e => { s.sfx = e.target.checked; saveState(); applySettings(); if (s.sfx) Sound.click(); };
+  $('cfg-music').onchange = e => { s.music = e.target.checked; saveState(); applySettings(); };
+  $('cfg-vol').oninput    = e => { s.volume = parseFloat(e.target.value); applySettings(); };
+  $('cfg-vol').onchange   = () => { saveState(); Sound.pop(); };
+  $('cfg-font').onchange  = e => { s.font = e.target.value; saveState(); applySettings(); };
+  $('cfg-reset').onclick  = () => UI.resetProgress();
+  $('cfg-close').onclick  = () => $('overlay-settings').classList.remove('show');
+}
+
+function buildTitle(){
+  const el = document.getElementById('home-title');
+  if (!el) return;
+  const text = 'Circle Essence';
+  const accentStart = text.indexOf('Essence');
+  el.innerHTML = '';
+  [...text].forEach((ch, i)=>{
+    const sp = document.createElement('span');
+    sp.className = 'ltr' + (ch === ' ' ? ' sp' : '') + (i >= accentStart ? ' accent' : '');
+    sp.textContent = ch === ' ' ? ' ' : ch;
+    sp.style.animationDelay = (i * 0.08) + 's';
+    el.appendChild(sp);
+  });
+}
+
+/* ====================== UI ====================== */
+const UI = {
+  show(name){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+name).classList.add('active');
+    if (name==='tree') this.renderTree();
+    if (name==='home') this.renderHome();
+    this.renderWallet();
+  },
+  renderWallet(){ document.getElementById('wallet-amt').textContent = Math.floor(State.essence); },
+  renderHome(){
+    document.getElementById('home-essence').textContent = Math.floor(State.essence);
+    document.getElementById('home-best').textContent = State.bestCircles;
+    document.getElementById('home-runs').textContent = State.runs;
+  },
+  closeModals(){ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show')); },
+  openSettings(){
+    const s = State.settings;
+    document.getElementById('cfg-sfx').checked = s.sfx;
+    document.getElementById('cfg-music').checked = s.music;
+    document.getElementById('cfg-vol').value = s.volume;
+    document.getElementById('cfg-font').value = s.font;
+    document.getElementById('overlay-settings').classList.add('show');
+  },
+  resetProgress(){
+    if (!confirm('¿Seguro que quieres reiniciar TODO tu progreso? Se borrará tu Essence y todas las mejoras.')) return;
+    State.essence = 0;
+    State.bestCircles = 0;
+    State.runs = 0;
+    State.upgrades = {};
+    saveState();   // conserva los ajustes (audio/fuente)
+    this.renderWallet();
+    this.renderHome();
+    document.getElementById('overlay-settings').classList.remove('show');
+    this.toast('Progreso reiniciado');
+  },
+  toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(this._tt); this._tt = setTimeout(()=>t.classList.remove('show'), 1600);
+  },
+  renderTree(){
+    const grid = document.getElementById('tree-grid');
+    grid.innerHTML = '';
+    TREE.forEach((branch, bi)=>{
+      const unlocked = branchUnlocked(bi);
+      const col = document.createElement('div');
+      col.className = 'branch' + (unlocked ? '' : ' locked-branch');
+
+      const head = document.createElement('div');
+      head.innerHTML = `<div class="branch-icon">${branch.icon}</div>
+                        <div class="branch-title">${branch.title}</div>
+                        <div class="branch-desc">${branch.desc}</div>`;
+      head.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+      col.appendChild(head);
+
+      const owned = lvl(branch.id);          // nº de niveles ya comprados en esta rama
+      branch.levels.forEach((node, ni)=>{
+        if (ni>0){
+          const c = document.createElement('div');
+          c.className = 'connector' + (owned >= ni ? ' filled' : '');
+          col.appendChild(c);
+        }
+        const purchased = owned >= (ni+1);     // nivel ni comprado cuando owned >= ni+1
+        const isNext = !purchased && owned === ni;   // el siguiente comprable de la rama
+        const affordable = isNext && unlocked && State.essence >= node.cost;
+
+        const el = document.createElement('div');
+        let cls = 'node';
+        if (purchased) cls += ' owned';
+        else if (!unlocked || !isNext) cls += ' locked';
+        else if (affordable) cls += ' affordable';
+        else cls += ' cantafford';
+        el.className = cls;
+
+        el.innerHTML = `<div class="node-circle">${purchased ? '✓' : (ni+1)}</div>
+                        <div class="nlvl">Nivel ${ni+1}</div>
+                        <div class="neffect">${node.label}</div>
+                        ${purchased
+                          ? '<span class="ncost" style="background:var(--accent-dim);color:var(--accent);border-color:transparent;">Adquirido</span>'
+                          : `<span class="ncost"><span class="mini-coin"></span>${node.cost}</span>`}`;
+
+        if (isNext && unlocked){
+          const doBuy = ()=> UI.buy(branch.id, ni, node);
+          el.querySelector('.node-circle').onclick = doBuy;
+          el.querySelector('.ncost').onclick = doBuy;
+        }
+        col.appendChild(el);
+      });
+
+      if (!unlocked){
+        const note = document.createElement('div');
+        note.className = 'branch-lock-note';
+        note.textContent = `🔒 Mejora "${TREE[bi-1].title}" para desbloquear`;
+        col.appendChild(note);
+      }
+
+      grid.appendChild(col);
+    });
+  },
+  buy(branchId, nodeIndex, node){
+    const owned = lvl(branchId);
+    if (owned !== nodeIndex){ return; }              // sólo el siguiente nivel
+    if (State.essence < node.cost){ UI.toast('No tienes suficiente Circle Essence'); return; }
+    State.essence -= node.cost;
+    State.upgrades[branchId] = owned + 1;
+    saveState();
+    Sound.buy();
+    UI.renderWallet();
+    UI.renderTree();
+    const branch = TREE[branchIndex(branchId)];
+    UI.toast(`✔ ${branch.title} mejorado`);
+    // Si acabamos de comprar el primer nivel, la siguiente rama se desvela sola al re-render.
+  }
+};
+
+/* ====================== GAME ====================== */
+const Game = {
+  canvas:null, ctx:null, raf:null,
+  circles:[], running:false,
+  circlesPopped:0, startTime:0, duration:120, lastSpawn:0,
+  W:0, H:0, dpr:1,
+
+  init(){
+    this.canvas = document.getElementById('game-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    window.addEventListener('resize', ()=>this.resize());
+    const hit = (e)=>this.handleHit(e);
+    this.canvas.addEventListener('pointerdown', hit);
+  },
+  resize(){
+    if (!this.canvas) return;
+    this.dpr = Math.min(window.devicePixelRatio||1, 2);
+    const r = this.canvas.getBoundingClientRect();
+    this.W = r.width; this.H = r.height;
+    this.canvas.width = r.width * this.dpr;
+    this.canvas.height = r.height * this.dpr;
+    this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+  },
+
+  start(){
+    UI.closeModals();
+    UI.show('game');
+    this.resize();
+    this.circles = [];
+    this.circlesPopped = 0;
+    this.scoreUnits = 0;            // unidades ponderadas (dorados valen más)
+    this.duration = Effects.duration();
+    this.baseMax = Effects.maxCircles();
+    this.speedFactor = Effects.speedFactor();
+    this.goldenChance = Effects.goldenChance();
+    this.goldenValue = Effects.goldenValue();
+    this.essenceMult = Effects.essenceMult();
+    this.startTime = performance.now();
+    this.running = true;
+    this.exitPending = false;
+    // semilla inicial
+    for (let i=0;i<this.baseMax;i++) this.spawn();
+    this.updateHud();
+    document.getElementById('hud-time').textContent = this.fmtTime(this.duration);
+    document.getElementById('timebar-fill').style.width = '100%';
+    cancelAnimationFrame(this.raf);
+    this._last = performance.now();
+    this.loop();
+  },
+
+  // dificultad: progreso 0->1 a lo largo del reto
+  progress(){ return Math.min(1, (performance.now()-this.startTime)/(this.duration*1000)); },
+  // nº máximo de círculos sube con el tiempo (hasta +7)
+  currentMax(){ return Math.round(this.baseMax + this.progress()*7); },
+  // multiplicador de velocidad: x1 al inicio, hasta x2.4 al final
+  speedRamp(){ return 1 + this.progress()*1.4; },
+
+  spawn(){
+    const p = this.progress();
+    const isGold = Math.random() < this.goldenChance;
+    const baseR = isGold ? 16 : (22 - p*7);          // se encogen con el tiempo
+    const r = Math.max(11, baseR + (Math.random()*6-3));
+    // velocidad base (sin rampa de tiempo); la rampa se aplica cada frame en loop()
+    const speed = (40 + Math.random()*55) * this.speedFactor;
+    const ang = Math.random()*Math.PI*2;
+    this.circles.push({
+      x: r + Math.random()*(this.W-2*r),
+      y: r + Math.random()*(this.H-2*r),
+      vx: Math.cos(ang)*speed,
+      vy: Math.sin(ang)*speed,
+      r, gold:isGold, born:performance.now(), pulse:Math.random()*Math.PI*2
+    });
+  },
+
+  handleHit(e){
+    if (!this.running) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    // buscar el círculo más cercano tocado (prioriza el de encima)
+    for (let i=this.circles.length-1; i>=0; i--){
+      const c = this.circles[i];
+      const dx = x-c.x, dy = y-c.y;
+      if (dx*dx+dy*dy <= (c.r+4)*(c.r+4)){
+        this.pop(c, i, x, y);
+        return;
+      }
+    }
+  },
+
+  pop(c, i, x, y){
+    this.circles.splice(i,1);
+    this.circlesPopped++;
+    const units = c.gold ? this.goldenValue : 1;
+    this.scoreUnits += units;
+    if (c.gold) Sound.gold(); else Sound.pop();
+    this.flash(x, y, c.gold ? `+${units}★` : '+1', c.gold);
+    // respawn manteniendo el número objetivo
+    this.spawn();
+    this.updateHud();
+  },
+
+  flash(x,y,txt,gold){
+    const el = document.createElement('div');
+    el.className = 'combo-flash';
+    el.textContent = txt;
+    el.style.left = x+'px'; el.style.top = y+'px';
+    el.style.color = gold ? 'var(--yellow)' : '#ffffff';   // blanco al recoger círculo normal
+    document.getElementById('view-game').appendChild(el);
+    setTimeout(()=>el.remove(), 800);
+  },
+
+  // nerf: cada círculo rinde menos essence base (rate 0.45)
+  projectedEssence(){ return Math.floor(this.scoreUnits * this.essenceMult * ESSENCE_RATE); },
+
+  updateHud(){
+    document.getElementById('hud-circles').textContent = this.circlesPopped;
+    document.getElementById('hud-proj').textContent = this.projectedEssence();
+  },
+
+  loop(){
+    if (!this.running) return;
+    const now = performance.now();
+    const dt = Math.min(0.05, (now - (this._last||now))/1000);
+    this._last = now;
+
+    // mantener el número de círculos objetivo (sube con el tiempo)
+    const target = this.currentMax();
+    while (this.circles.length < target) this.spawn();
+
+    // física: la rampa de tiempo acelera a TODOS los círculos por igual
+    const ramp = this.speedRamp();
+    for (const c of this.circles){
+      c.x += c.vx*ramp*dt;
+      c.y += c.vy*ramp*dt;
+      if (c.x < c.r){ c.x=c.r; c.vx*=-1; }
+      if (c.x > this.W-c.r){ c.x=this.W-c.r; c.vx*=-1; }
+      if (c.y < c.r){ c.y=c.r; c.vy*=-1; }
+      if (c.y > this.H-c.r){ c.y=this.H-c.r; c.vy*=-1; }
+      c.pulse += dt*4;
+    }
+
+    this.draw();
+
+    // tiempo
+    const elapsed = (now - this.startTime)/1000;
+    const remain = Math.max(0, this.duration - elapsed);
+    const m = Math.floor(remain/60), s = Math.floor(remain%60);
+    const tEl = document.getElementById('hud-time');
+    tEl.textContent = `${m}:${s<10?'0':''}${s}`;
+    tEl.classList.toggle('low', remain <= 15);
+    document.getElementById('timebar-fill').style.width = (remain/this.duration*100)+'%';
+
+    if (remain <= 0){ this.finish(false); return; }
+    this.raf = requestAnimationFrame(()=>this.loop());
+  },
+
+  draw(){
+    const ctx = this.ctx;
+    ctx.clearRect(0,0,this.W,this.H);
+    for (const c of this.circles){
+      const pr = c.r;   // el aro no se mueve: radio fijo, sin pulso
+      const g = ctx.createRadialGradient(c.x-pr*0.3, c.y-pr*0.3, pr*0.1, c.x, c.y, pr);
+      if (c.gold){
+        g.addColorStop(0,'#fff3b0'); g.addColorStop(0.5,'#f5c542'); g.addColorStop(1,'#b88a00');
+      } else {
+        g.addColorStop(0,'#8ffde2'); g.addColorStop(0.55,'#00d4a0'); g.addColorStop(1,'#06795f');
+      }
+      ctx.beginPath(); ctx.arc(c.x,c.y,pr,0,Math.PI*2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = c.gold ? 'rgba(255,240,180,0.8)' : 'rgba(140,255,226,0.6)';
+      ctx.stroke();
+      if (c.gold){
+        ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font=`${pr}px sans-serif`;
+        ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('★', c.x, c.y+1);
+      }
+    }
+  },
+
+  /* ---- salir antes de tiempo ---- */
+  requestExit(){
+    if (!this.running) return;
+    this.running = false;
+    cancelAnimationFrame(this.raf);
+    this._pausedElapsed = performance.now() - this.startTime;   // congelar reloj
+    const elapsed = this._pausedElapsed/1000;
+    const frac = Math.min(1, elapsed/this.duration);
+    // penalización: cuanto antes salgas, menos cobras de lo proyectado
+    const penalty = 0.35 + 0.65*frac;          // 35% al principio -> 100% al final
+    const full = this.projectedEssence();
+    const payout = Math.floor(full * penalty);
+    this.pendingPayout = payout;
+    document.getElementById('exit-warn').innerHTML =
+      `Llevas <b>${this.fmtTime(elapsed)}</b> jugados. Si sales ahora cobras menos: sólo el <b>${Math.round(penalty*100)}%</b> de tu Essence proyectada.`;
+    document.getElementById('exit-breakdown').innerHTML =
+      `Circles: <b>${this.circlesPopped}</b><br>` +
+      `Essence completa: <b>${full}</b><br>` +
+      `Penalización por salir: <b style="color:var(--red)">-${full-payout}</b><br>` +
+      `<span style="font-size:0.95rem">Cobrarías: <b style="color:var(--accent)">${payout}</b> 🪙</span>`;
+    document.getElementById('overlay-exit').classList.add('show');
+  },
+  cancelExit(){
+    document.getElementById('overlay-exit').classList.remove('show');
+    // cuenta atrás de preparación antes de reanudar
+    this.runCountdown(()=>{
+      this.running = true; this._last = performance.now();
+      // reanudar manteniendo el tiempo transcurrido antes del modal/cuenta atrás
+      this.startTime = performance.now() - (this._pausedElapsed||0);
+      this.raf = requestAnimationFrame(()=>this.loop());
+    });
+  },
+
+  // pantalla 3-2-1-¡YA! para darte margen de prepararte
+  runCountdown(cb){
+    const ov = document.getElementById('countdown');
+    const num = document.getElementById('cd-num');
+    ov.classList.add('show');
+    const show = (txt, go)=>{
+      num.textContent = txt;
+      num.style.animation = 'none'; void num.offsetWidth; num.style.animation = 'cdPop .8s ease';
+      if (go) Sound.go(); else Sound.beep();
+    };
+    let n = 3;
+    show(n);
+    const tick = ()=>{
+      n--;
+      if (n > 0){ show(n); setTimeout(tick, 800); }
+      else if (n === 0){ show('¡YA!', true); setTimeout(tick, 800); }
+      else { ov.classList.remove('show'); cb(); }
+    };
+    setTimeout(tick, 800);
+  },
+  confirmExit(){
+    document.getElementById('overlay-exit').classList.remove('show');
+    this.finish(true, this.pendingPayout);
+  },
+
+  fmtTime(s){ const m=Math.floor(s/60), sec=Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; },
+
+  finish(early, forcedPayout){
+    this.running = false;
+    cancelAnimationFrame(this.raf);
+    const payout = early ? forcedPayout : this.projectedEssence();
+    State.essence += payout;
+    State.runs += 1;
+    if (this.circlesPopped > State.bestCircles) State.bestCircles = this.circlesPopped;
+    saveState();
+    UI.renderWallet();
+
+    document.getElementById('result-title').textContent = early ? '⏏ Saliste antes' : '⏱ ¡Tiempo!';
+    document.getElementById('result-amt').textContent = '+'+payout;
+    let bd = `Circles tocados: <b>${this.circlesPopped}</b><br>` +
+             `Multiplicador essence: <b>x${this.essenceMult.toFixed(2)}</b><br>`;
+    if (early) bd += `<span style="color:var(--red)">Salida anticipada aplicada</span><br>`;
+    bd += `Total acumulado: <b>${Math.floor(State.essence)}</b> 🪙`;
+    document.getElementById('result-breakdown').innerHTML = bd;
+    document.getElementById('overlay-result').classList.add('show');
+  }
+};
+
+/* ====================== INIT ====================== */
+loadState();
+Game.init();
+buildTitle();
+bindSettings();
+applySettings();
+UI.renderWallet();
+UI.renderHome();
+
+// SFX en cada click (excepto el lienzo del juego, que usa su propio sonido al tocar círculo)
+document.addEventListener('pointerdown', (e)=>{
+  if (e.target.closest('#game-canvas')) return;
+  Sound.click();
+  // arrancar la música tras el primer gesto si está activada
+  if (State.settings.music) Sound.startMusic();
+}, true);
+</script>
+</body>
+</html>
