@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -9,341 +9,167 @@
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:       #050810;
-      --panel:    rgba(0,212,255,0.05);
-      --border:   rgba(0,212,255,0.22);
-      --p:        #00d4ff;
-      --s:        #9b5de5;
-      --acc:      #ff0066;
-      --green:    #00f5a0;
-      --text:     #c8e8f8;
-      --muted:    #263d52;
-      --font:     'Quicksand', system-ui, sans-serif;
+      --bg:    #050810;
+      --panel: rgba(0,212,255,.05);
+      --bord:  rgba(0,212,255,.2);
+      --p:     #00d4ff;
+      --s:     #9b5de5;
+      --acc:   #ff0066;
+      --gold:  #ffcc00;
+      --grn:   #00f5a0;
+      --text:  #c8e8f8;
+      --dim:   #263d52;
+      --font:  'Quicksand', system-ui, sans-serif;
     }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html, body { width:100%; height:100%; background:var(--bg); overflow:hidden; font-family:var(--font); color:var(--text); touch-action:none; }
 
-    *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      width: 100%; height: 100%;
-      background: var(--bg);
-      overflow: hidden;
-      font-family: var(--font);
-      color: var(--text);
-      touch-action: none;
-    }
-
-    /* ─── HUD ─────────────────────────────────────────────────── */
+    /* ── HUD ──────────────────────────────────── */
     #hud {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 10;
-      padding: max(10px, env(safe-area-inset-top)) 10px 0;
-      background: linear-gradient(to bottom, rgba(5,8,16,.98) 75%, transparent);
+      position:fixed; top:0; left:0; right:0; z-index:10;
+      padding: max(10px,env(safe-area-inset-top)) 10px 0;
+      background: linear-gradient(to bottom, rgba(5,8,16,.98) 70%, transparent);
     }
-
-    .hud-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 7px;
-    }
-
+    .hud-row { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-bottom:6px; }
     .hud-cell {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 4px 6px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+      background:var(--panel); border:1px solid var(--bord); border-radius:10px;
+      padding:8px 4px 6px; text-align:center; position:relative; overflow:hidden;
     }
-
-    /* Corner brackets */
     .hud-cell::before, .hud-cell::after {
-      content: '';
-      position: absolute;
-      width: 7px; height: 7px;
-      border-color: var(--p);
-      border-style: solid;
-      opacity: .55;
+      content:''; position:absolute; width:7px; height:7px;
+      border-color:var(--p); border-style:solid; opacity:.5;
     }
-    .hud-cell::before { top: 2px; left: 2px;   border-width: 1.5px 0 0 1.5px; }
-    .hud-cell::after  { bottom: 2px; right: 2px; border-width: 0 1.5px 1.5px 0; }
-
+    .hud-cell::before { top:2px; left:2px;    border-width:1.5px 0 0 1.5px; }
+    .hud-cell::after  { bottom:2px; right:2px; border-width:0 1.5px 1.5px 0; }
     .hud-val {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--p);
-      line-height: 1;
-      letter-spacing: -.5px;
-      transition: color .18s, text-shadow .18s;
+      font-size:1.3rem; font-weight:800; color:var(--p); line-height:1;
+      letter-spacing:-.5px; transition:color .15s, text-shadow .15s;
     }
-    .hud-val.flash {
-      color: #fff;
-      text-shadow: 0 0 14px var(--p), 0 0 30px var(--p);
+    .hud-val.flash { color:#fff; text-shadow:0 0 16px var(--p), 0 0 32px var(--p); }
+    .hud-lbl { font-size:.52rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); margin-top:3px; }
+    #lives-row { display:flex; justify-content:center; gap:4px; align-items:center; height:1.3rem; }
+    .heart { font-size:.9rem; transition:all .2s; filter:drop-shadow(0 0 5px #ff0066); }
+    .heart.lost { filter:none; opacity:.15; }
+
+    /* XP bar */
+    .xp-wrap { margin-bottom:4px; }
+    .xp-bar { height:3px; background:rgba(0,212,255,.08); border-radius:99px; position:relative; overflow:visible; }
+    .xp-fill {
+      height:100%; border-radius:99px;
+      background:linear-gradient(90deg, var(--s), var(--p));
+      transition:width .35s ease; box-shadow:0 0 8px var(--p); position:relative;
+    }
+    .xp-fill::after {
+      content:''; position:absolute; right:-3px; top:50%; transform:translateY(-50%);
+      width:8px; height:8px; background:var(--p); border-radius:50%;
+      box-shadow:0 0 10px var(--p), 0 0 22px var(--p);
+    }
+    .xp-text {
+      font-size:.52rem; font-weight:700; color:var(--dim); text-align:center;
+      letter-spacing:1px; margin-top:3px; margin-bottom:7px;
+      text-transform:uppercase;
     }
 
-    .hud-lbl {
-      font-size: .55rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      margin-top: 3px;
-    }
+    /* ── Canvas ───────────────────────────────── */
+    canvas { position:fixed; top:0; left:0; touch-action:none; }
 
-    #lives-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-      height: 1.35rem;
-    }
-    .heart {
-      font-size: .9rem;
-      line-height: 1;
-      transition: all .2s;
-      filter: drop-shadow(0 0 5px #ff0066);
-    }
-    .heart.lost { filter: none; opacity: .18; }
-
-    /* Progress bar */
-    .hud-bar {
-      height: 3px;
-      background: rgba(0,212,255,.08);
-      border-radius: 99px;
-      margin-bottom: 8px;
-      position: relative;
-      overflow: visible;
-    }
-    .hud-bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--s), var(--p));
-      transition: width .3s ease;
-      box-shadow: 0 0 8px var(--p);
-      position: relative;
-    }
-    .hud-bar-fill::after {
-      content: '';
-      position: absolute;
-      right: -3px; top: 50%;
-      transform: translateY(-50%);
-      width: 8px; height: 8px;
-      background: var(--p);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--p), 0 0 20px var(--p);
-    }
-
-    /* ─── Canvas ──────────────────────────────────────────────── */
-    canvas { position: fixed; top: 0; left: 0; touch-action: none; }
-
-    /* ─── Level banner ────────────────────────────────────────── */
+    /* ── Level-up banner ──────────────────────── */
     #banner {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 30;
-      text-align: center;
-      padding: max(8px, env(safe-area-inset-top)) 12px 12px;
-      font-family: var(--font);
-      font-size: .82rem;
-      font-weight: 800;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--bg);
-      background: linear-gradient(90deg, var(--s), var(--p), var(--green));
-      opacity: 0;
-      transform: translateY(-110%);
-      transition: all .3s cubic-bezier(.34,1.56,.64,1);
-      pointer-events: none;
+      position:fixed; top:0; left:0; right:0; z-index:30;
+      padding:max(8px,env(safe-area-inset-top)) 12px 12px;
+      font-family:var(--font); font-size:.82rem; font-weight:800;
+      letter-spacing:3px; text-transform:uppercase; text-align:center;
+      color:var(--bg); background:linear-gradient(90deg,var(--s),var(--p),var(--grn));
+      opacity:0; transform:translateY(-110%);
+      transition:all .3s cubic-bezier(.34,1.56,.64,1); pointer-events:none;
     }
-    #banner.show { opacity: 1; transform: translateY(0); }
+    #banner.show { opacity:1; transform:translateY(0); }
 
-    /* ─── Tap popup ───────────────────────────────────────────── */
+    /* ── Popup ────────────────────────────────── */
     #popup {
-      position: fixed;
-      z-index: 15;
-      pointer-events: none;
-      font-family: var(--font);
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--p);
-      text-shadow: 0 0 12px var(--p);
-      opacity: 0;
-      transition: opacity .15s;
+      position:fixed; z-index:15; pointer-events:none;
+      font-family:var(--font); font-size:1rem; font-weight:800;
+      opacity:0; transition:opacity .15s;
     }
 
-    /* ─── Overlay ─────────────────────────────────────────────── */
+    /* ── Overlay ──────────────────────────────── */
     #overlay {
-      position: fixed; inset: 0; z-index: 20;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      padding: max(28px, env(safe-area-inset-top)) 20px 24px;
-      background: rgba(5,8,16,.94);
-      backdrop-filter: blur(10px);
-      font-family: var(--font);
-      overflow: hidden;
+      position:fixed; inset:0; z-index:20;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:13px; padding:max(28px,env(safe-area-inset-top)) 20px 24px;
+      background:rgba(5,8,16,.94); backdrop-filter:blur(10px);
+      font-family:var(--font); overflow:hidden;
     }
-
-    /* Animated scan line */
     #overlay::before {
-      content: '';
-      position: absolute;
-      left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent 0%, var(--p) 50%, transparent 100%);
-      animation: scanline 4s linear infinite;
-      pointer-events: none;
+      content:''; position:absolute; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,var(--p),transparent);
+      animation:scan 4s linear infinite; pointer-events:none;
     }
-    @keyframes scanline {
-      0%   { top: 0;    opacity: 0; }
-      5%   { opacity: 1; }
-      95%  { opacity: 1; }
-      100% { top: 100%; opacity: 0; }
-    }
-
-    /* Decorative corner brackets on overlay */
+    @keyframes scan { 0%{top:0;opacity:0} 5%{opacity:1} 95%{opacity:1} 100%{top:100%;opacity:0} }
     #overlay::after {
-      content: '';
-      position: absolute;
-      inset: 12px;
-      border: 1px solid rgba(0,212,255,.1);
-      border-radius: 16px;
-      pointer-events: none;
+      content:''; position:absolute; inset:12px;
+      border:1px solid rgba(0,212,255,.1); border-radius:16px; pointer-events:none;
     }
 
-    .ov-eyebrow {
-      font-size: .65rem;
-      font-weight: 700;
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
+    .ov-eye   { font-size:.62rem; font-weight:700; letter-spacing:5px; text-transform:uppercase; color:var(--dim); }
     .ov-title {
-      font-size: 3rem;
-      font-weight: 800;
-      letter-spacing: 10px;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, var(--p) 0%, var(--s) 60%, var(--acc) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-top: -6px;
-      line-height: 1;
+      font-size:3rem; font-weight:800; letter-spacing:10px; text-transform:uppercase; line-height:1; margin-top:-4px;
+      background:linear-gradient(135deg,var(--p),var(--s),var(--acc));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     }
-
     .ov-big {
-      font-size: 4.5rem;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -2px;
-      background: linear-gradient(135deg, var(--p), var(--green));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 12px rgba(0,212,255,.4));
+      font-size:4.5rem; font-weight:800; line-height:1; letter-spacing:-2px; margin-top:2px;
+      background:linear-gradient(135deg,var(--p),var(--grn));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 14px rgba(0,212,255,.4));
     }
+    .ov-sub { font-size:.7rem; font-weight:700; color:var(--dim); letter-spacing:3px; text-transform:uppercase; margin-top:-6px; }
+    .ov-hint { font-size:.85rem; color:#3a5a72; text-align:center; line-height:2; max-width:272px; font-weight:600; }
 
-    .ov-lbl {
-      font-size: .7rem;
-      font-weight: 700;
-      color: var(--muted);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-top: -8px;
-    }
+    /* Special orb legend */
+    .orb-legend { display:flex; gap:12px; align-items:center; }
+    .orb-pip { display:flex; align-items:center; gap:5px; font-size:.7rem; font-weight:700; }
+    .orb-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 
-    .ov-hint {
-      font-size: .85rem;
-      color: #3a5a72;
-      text-align: center;
-      line-height: 1.95;
-      max-width: 260px;
-      font-weight: 600;
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; max-width:310px; }
+    .sc {
+      background:rgba(0,212,255,.04); border:1px solid rgba(0,212,255,.2);
+      border-radius:12px; padding:12px 6px; text-align:center; position:relative;
     }
+    .sc::before, .sc::after { content:''; position:absolute; width:5px; height:5px; border-color:var(--p); border-style:solid; opacity:.4; }
+    .sc::before { top:3px; left:3px;   border-width:1px 0 0 1px; }
+    .sc::after  { bottom:3px; right:3px; border-width:0 1px 1px 0; }
+    .sc .v { font-size:1.15rem; font-weight:800; color:var(--p); }
+    .sc .l { font-size:.52rem; font-weight:700; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-top:3px; }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      width: 100%;
-      max-width: 310px;
+    .rec-pill {
+      padding:6px 22px; border-radius:99px; color:#fff;
+      background:linear-gradient(90deg,var(--s),var(--acc));
+      font-size:.68rem; font-weight:800; letter-spacing:3px; text-transform:uppercase;
+      animation:gpill 1.2s ease infinite alternate;
     }
-
-    .stat-card {
-      background: rgba(0,212,255,.04);
-      border: 1px solid rgba(0,212,255,.2);
-      border-radius: 12px;
-      padding: 12px 6px;
-      text-align: center;
-      position: relative;
-    }
-    .stat-card::before, .stat-card::after {
-      content: '';
-      position: absolute;
-      width: 5px; height: 5px;
-      border-color: var(--p);
-      border-style: solid;
-      opacity: .4;
-    }
-    .stat-card::before { top: 3px; left: 3px;   border-width: 1px 0 0 1px; }
-    .stat-card::after  { bottom:3px; right: 3px; border-width: 0 1px 1px 0; }
-    .stat-card .v { font-size: 1.2rem; font-weight: 800; color: var(--p); }
-    .stat-card .l { font-size: .55rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
-
-    .record-pill {
-      padding: 6px 22px;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--s), var(--acc));
-      font-size: .7rem;
-      font-weight: 800;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #fff;
-      animation: glow-pill 1.2s ease infinite alternate;
-    }
-    @keyframes glow-pill {
-      from { box-shadow: 0 0 10px var(--s); }
-      to   { box-shadow: 0 0 24px var(--s), 0 0 40px var(--acc); }
-    }
+    @keyframes gpill { from{box-shadow:0 0 10px var(--s)} to{box-shadow:0 0 24px var(--s),0 0 42px var(--acc)} }
 
     button {
-      padding: 15px 44px;
-      font-family: var(--font);
-      font-size: .88rem;
-      font-weight: 800;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      border: 1.5px solid var(--p);
-      border-radius: 99px;
-      background: transparent;
-      color: var(--p);
-      cursor: pointer;
-      min-width: 190px;
-      position: relative;
-      transition: all .15s;
-      animation: pulse-btn 2.5s ease infinite;
+      padding:15px 44px; font-family:var(--font); font-size:.88rem; font-weight:800;
+      letter-spacing:4px; text-transform:uppercase; border:1.5px solid var(--p);
+      border-radius:99px; background:transparent; color:var(--p);
+      cursor:pointer; min-width:190px; transition:all .15s;
+      animation:pbtn 2.5s ease infinite;
     }
-    @keyframes pulse-btn {
-      0%,100% { box-shadow: 0 0 8px rgba(0,212,255,.25); }
-      50%     { box-shadow: 0 0 22px rgba(0,212,255,.55), 0 0 44px rgba(0,212,255,.15); }
+    @keyframes pbtn { 0%,100%{box-shadow:0 0 8px rgba(0,212,255,.25)} 50%{box-shadow:0 0 22px rgba(0,212,255,.55),0 0 44px rgba(0,212,255,.15)} }
+    button:active { background:var(--p); color:var(--bg); transform:scale(.97); box-shadow:none; }
+
+    /* Screen flash on life lost */
+    #flash-overlay {
+      position:fixed; inset:0; z-index:25; pointer-events:none;
+      background:rgba(255,0,102,.18); opacity:0; transition:opacity .08s;
     }
-    button:active {
-      background: var(--p);
-      color: var(--bg);
-      transform: scale(.97);
-      box-shadow: none;
-    }
+    #flash-overlay.show { opacity:1; }
   </style>
 </head>
 <body>
 
-<!-- HUD -->
 <div id="hud">
   <div class="hud-row">
     <div class="hud-cell">
@@ -352,7 +178,7 @@
     </div>
     <div class="hud-cell">
       <div class="hud-val" id="level-el">1</div>
-      <div class="hud-lbl">NIVEL</div>
+      <div class="hud-lbl">LEVEL</div>
     </div>
     <div class="hud-cell">
       <div id="lives-row">
@@ -360,68 +186,105 @@
         <span class="heart" id="h2">♥</span>
         <span class="heart" id="h3">♥</span>
       </div>
-      <div class="hud-lbl">VIDAS</div>
+      <div class="hud-lbl">LIVES</div>
     </div>
     <div class="hud-cell">
       <div class="hud-val" id="mult-el">×1</div>
-      <div class="hud-lbl">FLUX/TAP</div>
+      <div class="hud-lbl">MULT</div>
     </div>
   </div>
-  <div class="hud-bar">
-    <div class="hud-bar-fill" id="bar-fill" style="width:0%"></div>
+  <div class="xp-wrap">
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    <div class="xp-text" id="xp-text">0 / 10 orbs to level up</div>
   </div>
 </div>
 
 <canvas id="canvas"></canvas>
 <div id="banner"></div>
 <div id="popup"></div>
+<div id="flash-overlay"></div>
 
-<!-- Overlay -->
 <div id="overlay">
-  <div class="ov-eyebrow">Sistema de Orbes</div>
+  <div class="ov-eye">Orb Collection System</div>
   <div class="ov-title">FLUX</div>
   <p class="ov-hint">
-    Toca los orbes antes de que expiren.<br>
-    Cada nivel multiplica el FLUX por toque.<br>
-    3 vidas — ¡que no escape ninguno!
+    Tap orbs before they expire — each miss costs a life.<br>
+    Every level: ×1.25 more flux per tap.<br>
+    Each level requires ×1.4 more orbs than the last.
   </p>
+  <div class="orb-legend">
+    <div class="orb-pip"><div class="orb-dot" style="background:#00d4ff;box-shadow:0 0 6px #00d4ff"></div><span style="color:#00d4ff">Normal</span></div>
+    <div class="orb-pip"><div class="orb-dot" style="background:#ffcc00;box-shadow:0 0 6px #ffcc00"></div><span style="color:#ffcc00">Boost ×5</span></div>
+    <div class="orb-pip"><div class="orb-dot" style="background:#00f5a0;box-shadow:0 0 6px #00f5a0"></div><span style="color:#00f5a0">Shield +♥</span></div>
+  </div>
   <div class="stats-grid" id="start-stats" style="display:none"></div>
-  <button id="btn">INICIAR</button>
+  <button id="btn">START</button>
 </div>
 
 <script>
-// ── Paleta de colores por nivel ───────────────────────────────────────────
-const LEVEL_COLORS = [
-  '#00d4ff','#00b8ff','#3b9fff','#6b7bff',
+// ── Level palette ─────────────────────────────────────────────────────────
+const LV_COLORS = [
+  '#00d4ff','#00b8ff','#4499ff','#7b6fff',
   '#9b5de5','#c040d0','#ff0099','#ff0055',
-  '#ff4422','#ff7700','#ffcc00','#00f5a0',
+  '#ff3311','#ff7700','#ffcc00','#00f5a0',
 ];
-function levelColor(l) { return LEVEL_COLORS[Math.min(l-1, LEVEL_COLORS.length-1)]; }
+function lvCol(l) { return LV_COLORS[Math.min(l-1, LV_COLORS.length-1)]; }
 
-// ── Partículas multicolor ─────────────────────────────────────────────────
-const PAR_COLS = ['#00d4ff','#9b5de5','#ff0066','#00f5a0','#fff','#ffcc00'];
+// ── Orb types ─────────────────────────────────────────────────────────────
+const ORB = {
+  NORMAL: { fluxMult:1,  color:null,      glyph:null,  shield:false, lifeScale:1   },
+  BOOST:  { fluxMult:5,  color:'#ffcc00', glyph:'×5',  shield:false, lifeScale:.75 },
+  SHIELD: { fluxMult:0,  color:'#00f5a0', glyph:'♥',   shield:true,  lifeScale:.85 },
+};
+function pickType() {
+  const r = Math.random();
+  if (r < .03) return 'SHIELD';
+  if (r < .10) return 'BOOST';
+  return 'NORMAL';
+}
+
+// ── Progression ───────────────────────────────────────────────────────────
+const BASE_XP = 10, XP_SCALE = 1.4, MULT_PER_LEVEL = 1.25;
+function xpToNext(lv) { return Math.ceil(BASE_XP * Math.pow(XP_SCALE, lv - 1)); }
+function multAt(lv)   { return Math.pow(MULT_PER_LEVEL, lv - 1); }
+function fluxGain(lv, orbType) { return multAt(lv) * ORB[orbType].fluxMult; }
+function fmtMult(lv) {
+  const m = multAt(lv);
+  if (m >= 1000) return '×' + (m/1000).toFixed(1) + 'K';
+  if (m >= 100)  return '×' + Math.round(m);
+  if (m >= 10)   return '×' + m.toFixed(1);
+  return '×' + m.toFixed(2);
+}
+function fmtNum(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return Math.floor(n).toString();
+}
 
 // ── Save ──────────────────────────────────────────────────────────────────
-const KEY = 'flux_v2';
+const KEY = 'flux_v3';
 const stor = {
   load() { try { return JSON.parse(localStorage.getItem(KEY))||{}; } catch { return {}; } },
   save(d) { try { const c=this.load(); localStorage.setItem(KEY,JSON.stringify({...c,...d})); } catch {} },
 };
 
 // ── DOM ───────────────────────────────────────────────────────────────────
-const canvas    = document.getElementById('canvas');
-const ctx       = canvas.getContext('2d');
-const overlay   = document.getElementById('overlay');
-const banner    = document.getElementById('banner');
-const popup     = document.getElementById('popup');
-const fluxEl    = document.getElementById('flux-el');
-const levelEl   = document.getElementById('level-el');
-const multEl    = document.getElementById('mult-el');
-const barFill   = document.getElementById('bar-fill');
-const hearts    = ['h1','h2','h3'].map(id => document.getElementById(id));
+const canvas  = document.getElementById('canvas');
+const ctx     = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const banner  = document.getElementById('banner');
+const popup   = document.getElementById('popup');
+const flashOv = document.getElementById('flash-overlay');
+const fluxEl  = document.getElementById('flux-el');
+const levelEl = document.getElementById('level-el');
+const multEl  = document.getElementById('mult-el');
+const xpFill  = document.getElementById('xp-fill');
+const xpText  = document.getElementById('xp-text');
+const hearts  = ['h1','h2','h3'].map(id=>document.getElementById(id));
 const startStats = document.getElementById('start-stats');
 
-// ── Tamaño ────────────────────────────────────────────────────────────────
+// ── Resize ────────────────────────────────────────────────────────────────
 let HUD_H=0, W=0, H=0;
 function resize() {
   HUD_H = document.getElementById('hud').getBoundingClientRect().height;
@@ -429,122 +292,146 @@ function resize() {
   H = canvas.height = window.innerHeight;
 }
 resize();
-window.addEventListener('resize', () => { resize(); if (running) spawnCircle(); });
+window.addEventListener('resize', ()=>{ resize(); if(running) spawnOrb(); });
 
-// ── Estado ────────────────────────────────────────────────────────────────
-let circles=[], particles=[];
-let flux=0, collected=0, level=1, lives=3;
+// ── State ─────────────────────────────────────────────────────────────────
+let orbs=[], particles=[];
+let flux=0, xp=0, level=1, lives=3;
 let running=false, animId=null, spawnTimer=null, lastTime=0;
+let streak=0;
 
-// ─ Incremento: nivel² flux por toque
-function fluxPerTap()   { return level * level; }
-function curLevel()     { return Math.floor(collected/10)+1; }
-function levelProgress(){ return (collected%10)/10; }
-
-function getConfig() {
-  const lv = level;
+function getConf() {
   return {
-    speed:  1.25 + (lv-1)*0.22,
-    life:   Math.max(1500, 4600-(lv-1)*170),
-    rate:   Math.max(580,  2300-(lv-1)*130),
-    radius: Math.max(18, 32-Math.floor((lv-1)/3)*2),
+    speed:  1.2 + (level-1)*.2,
+    life:   Math.max(1400, 4800-(level-1)*160),
+    rate:   Math.max(550,  2400-(level-1)*120),
+    radius: Math.max(18, 32-Math.floor((level-1)/3)*2),
   };
 }
 
-// ── Spawn ─────────────────────────────────────────────────────────────────
-function rand(a,b){ return Math.random()*(b-a)+a; }
+// ── Orb spawn ─────────────────────────────────────────────────────────────
+function rand(a,b) { return Math.random()*(b-a)+a; }
 
-function spawnCircle() {
+function spawnOrb(forceType) {
   if (!running) return;
-  const { speed, life, radius: r } = getConfig();
+  const type = forceType || pickType();
+  const cfg  = getConf();
+  const R = cfg.radius * (type==='BOOST' ? 1.25 : type==='SHIELD' ? 1.15 : 1);
   const a = Math.random()*Math.PI*2;
-  circles.push({
-    x: rand(r+12, W-r-12),
-    y: rand(HUD_H+r+12, H-r-12),
-    r,
-    vx: Math.cos(a)*speed,
-    vy: Math.sin(a)*speed,
+  orbs.push({
+    x: rand(R+12, W-R-12),
+    y: rand(HUD_H+R+12, H-R-12),
+    r: R,
+    vx: Math.cos(a)*cfg.speed * (type==='BOOST' ? 1.3 : 1),
+    vy: Math.sin(a)*cfg.speed * (type==='BOOST' ? 1.3 : 1),
     born: performance.now(),
-    life,
-    alpha: 1,
-    phase: rand(0, Math.PI*2),
-    popped: false,
-    escaped: false,
-    escapeT: 0,
+    life: cfg.life * ORB[type].lifeScale,
+    alpha:1, phase:rand(0,Math.PI*2),
+    type, popped:false, escaped:false, escapeT:0,
   });
   scheduleSpawn();
 }
-
 function scheduleSpawn() {
   clearTimeout(spawnTimer);
-  spawnTimer = setTimeout(spawnCircle, getConfig().rate + rand(-90,90));
+  spawnTimer = setTimeout(spawnOrb, getConf().rate + rand(-80,80));
 }
 
-// ── Partículas ────────────────────────────────────────────────────────────
-function burst(x, y, color) {
-  for (let i=0; i<18; i++) {
-    const a=(Math.PI*2*i)/18+rand(-.15,.15), s=rand(3,8);
-    const c = Math.random()<.5 ? color : PAR_COLS[Math.floor(Math.random()*PAR_COLS.length)];
+// ── Particles ─────────────────────────────────────────────────────────────
+const PAR_POOL = ['#00d4ff','#9b5de5','#ff0066','#00f5a0','#fff','#ffcc00'];
+function burst(x, y, color, count=18) {
+  for (let i=0; i<count; i++) {
+    const a=(Math.PI*2*i)/count+rand(-.2,.2), s=rand(3,8);
+    const c = Math.random()<.5 ? color : PAR_POOL[Math.floor(Math.random()*PAR_POOL.length)];
     particles.push({ x, y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, alpha:1, r:rand(2,5.5), color:c });
   }
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────
-function flash(el) {
+function flash(el, dur=220) {
   el.classList.add('flash');
   clearTimeout(el._ft);
-  el._ft = setTimeout(()=>el.classList.remove('flash'), 220);
+  el._ft = setTimeout(()=>el.classList.remove('flash'), dur);
 }
-
-function showPopup(x, y, text) {
+function showPopup(x, y, text, color) {
   popup.textContent = text;
-  popup.style.cssText = `left:${x-14}px;top:${y-46}px;opacity:1;color:${levelColor(level)};text-shadow:0 0 12px ${levelColor(level)}`;
+  popup.style.cssText = `left:${x-16}px;top:${y-48}px;opacity:1;color:${color};text-shadow:0 0 14px ${color}`;
   clearTimeout(popup._t);
-  popup._t = setTimeout(()=>popup.style.opacity='0', 720);
+  popup._t = setTimeout(()=>popup.style.opacity='0', 750);
 }
-
 function showBanner(text) {
   banner.textContent = text;
   banner.classList.add('show');
   clearTimeout(banner._t);
   banner._t = setTimeout(()=>banner.classList.remove('show'), 2000);
 }
-
+function screenFlash() {
+  flashOv.classList.add('show');
+  clearTimeout(flashOv._t);
+  flashOv._t = setTimeout(()=>flashOv.classList.remove('show'), 180);
+}
 function updateHUD() {
-  fluxEl.textContent  = flux >= 1000 ? (flux/1000).toFixed(1)+'K' : flux;
+  const needed = xpToNext(level);
+  fluxEl.textContent  = fmtNum(flux);
   levelEl.textContent = level;
-  multEl.textContent  = '×'+fluxPerTap();
-  barFill.style.width = (levelProgress()*100).toFixed(1)+'%';
+  multEl.textContent  = fmtMult(level);
+  xpFill.style.width  = Math.min(xp/needed*100, 100).toFixed(1)+'%';
+  xpText.textContent  = `${xp} / ${needed} orbs to level up`;
   hearts.forEach((h,i)=>h.classList.toggle('lost', i>=lives));
 }
 
 // ── Input ─────────────────────────────────────────────────────────────────
 function handleTap(ex, ey) {
   if (!running) return;
-  for (let i=circles.length-1; i>=0; i--) {
-    const c = circles[i];
-    if (c.popped || c.escaped) continue;
-    const dx=ex-c.x, dy=ey-c.y;
-    if (dx*dx+dy*dy <= c.r*c.r) {
-      c.popped = true;
-      const gained = fluxPerTap();
-      flux += gained;
-      collected++;
-      burst(c.x, c.y, levelColor(level));
-      showPopup(c.x, c.y, '+'+gained);
-      flash(fluxEl);
+  for (let i=orbs.length-1; i>=0; i--) {
+    const o = orbs[i];
+    if (o.popped || o.escaped) continue;
+    const dx=ex-o.x, dy=ey-o.y;
+    if (dx*dx+dy*dy <= o.r*o.r) {
+      o.popped = true;
+      const col = ORB[o.type].color || lvCol(level);
+
+      if (o.type === 'SHIELD') {
+        // Restore a life
+        if (lives < 3) {
+          lives++;
+          showBanner('SHIELD COLLECTED — ♥ RESTORED');
+          burst(o.x, o.y, '#00f5a0', 22);
+          showPopup(o.x, o.y, '+♥', '#00f5a0');
+        } else {
+          // Already full: give bonus flux instead
+          const bonus = multAt(level) * 2;
+          flux += bonus;
+          showBanner('SHIELD — FULL HP — BONUS FLUX!');
+          burst(o.x, o.y, '#00f5a0', 18);
+          showPopup(o.x, o.y, '+' + fmtNum(bonus), '#00f5a0');
+        }
+        flash(levelEl);
+      } else {
+        const gained = fluxGain(level, o.type);
+        flux += gained;
+        streak++;
+        burst(o.x, o.y, col, o.type==='BOOST' ? 26 : 18);
+        showPopup(o.x, o.y, (o.type==='BOOST'?'BOOST! ':'')+'+'+fmtNum(gained), col);
+        flash(fluxEl);
+
+        if (streak > 0 && streak % 10 === 0)
+          showBanner(`🔥 ${streak} STREAK!`);
+
+        // XP & level up
+        xp++;
+        if (xp >= xpToNext(level)) {
+          xp = 0;
+          level++;
+          const extra = Math.min(Math.floor(level/4), 3);
+          for (let j=0; j<extra; j++) setTimeout(spawnOrb, j*160);
+          showBanner(`▲ LEVEL ${level} — MULT ${fmtMult(level)}`);
+          flash(levelEl, 300); flash(multEl, 300);
+        }
+      }
 
       const s = stor.load();
-      stor.save({ best: Math.max(flux, s.best||0), totalFlux: (s.totalFlux||0)+gained });
-
-      const nl = curLevel();
-      if (nl > level) {
-        level = nl;
-        const extra = Math.min(Math.floor(level/4), 3);
-        for (let j=0; j<extra; j++) setTimeout(spawnCircle, j*180);
-        showBanner(`▲ NIVEL ${level}  —  ×${fluxPerTap()} FLUX/TAP`);
-        flash(levelEl); flash(multEl);
-      }
+      stor.save({ best: Math.max(flux, s.best||0), totalFlux: (s.totalFlux||0) + (flux - (s._lastFlux||0)) });
+      stor.save({ _lastFlux: flux });
       updateHUD();
       break;
     }
@@ -566,165 +453,132 @@ function update(now) {
   const dt = Math.min((now-lastTime)/16.67, 3);
   lastTime = now;
 
-  for (let i=circles.length-1; i>=0; i--) {
-    const c = circles[i];
+  for (let i=orbs.length-1; i>=0; i--) {
+    const o = orbs[i];
+    if (o.escaped) { if (now-o.escapeT > 440) orbs.splice(i,1); continue; }
+    if (o.popped)  { orbs.splice(i,1); continue; }
 
-    if (c.escaped) {
-      if (now-c.escapeT > 420) circles.splice(i,1);
-      continue;
-    }
-    if (c.popped) { circles.splice(i,1); continue; }
+    o.x+=o.vx*dt; o.y+=o.vy*dt;
+    if (o.x-o.r<0)     { o.x=o.r;     o.vx*=-1; }
+    if (o.x+o.r>W)     { o.x=W-o.r;   o.vx*=-1; }
+    if (o.y-o.r<HUD_H) { o.y=HUD_H+o.r; o.vy*=-1; }
+    if (o.y+o.r>H)     { o.y=H-o.r;   o.vy*=-1; }
 
-    c.x+=c.vx*dt; c.y+=c.vy*dt;
-    if (c.x-c.r<0)      { c.x=c.r;      c.vx*=-1; }
-    if (c.x+c.r>W)      { c.x=W-c.r;    c.vx*=-1; }
-    if (c.y-c.r<HUD_H)  { c.y=HUD_H+c.r; c.vy*=-1; }
-    if (c.y+c.r>H)      { c.y=H-c.r;    c.vy*=-1; }
-
-    const age = now-c.born;
-    if (age >= c.life) {
-      c.escaped = true; c.escapeT = now;
+    const age = now-o.born;
+    if (age >= o.life) {
+      o.escaped=true; o.escapeT=now;
+      streak=0;
       lives = Math.max(0, lives-1);
+      screenFlash();
       updateHUD();
       if (lives<=0) { endGame(); return; }
       continue;
     }
-    const fadeAt = c.life*.65;
-    c.alpha = age>fadeAt ? 1-(age-fadeAt)/(c.life-fadeAt) : 1;
-    c.phase = (c.phase+.052*dt)%(Math.PI*2);
+    const fadeAt = o.life*.62;
+    o.alpha = age>fadeAt ? 1-(age-fadeAt)/(o.life-fadeAt) : 1;
+    o.phase = (o.phase+.052*dt)%(Math.PI*2);
   }
 
   for (let i=particles.length-1; i>=0; i--) {
     const p=particles[i];
-    p.x+=p.vx*dt; p.y+=p.vy*dt;
-    p.vy+=.08*dt;
-    p.alpha-=.021*dt;
+    p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=.08*dt; p.alpha-=.02*dt;
     if (p.alpha<=0) particles.splice(i,1);
   }
 }
 
 // ── Draw ──────────────────────────────────────────────────────────────────
-function drawDotGrid(color) {
-  const STEP = 30;
-  ctx.fillStyle = color+'12';
-  for (let x=STEP/2; x<W; x+=STEP) {
-    for (let y=HUD_H+STEP/2; y<H; y+=STEP) {
-      ctx.beginPath();
-      ctx.arc(x, y, .9, 0, Math.PI*2);
-      ctx.fill();
+function drawGrid(color) {
+  const S=32; ctx.fillStyle=color+'10';
+  for (let x=S/2; x<W; x+=S)
+    for (let y=HUD_H+S/2; y<H; y+=S) {
+      ctx.beginPath(); ctx.arc(x,y,.85,0,Math.PI*2); ctx.fill();
     }
+}
+
+function drawOrb(o, now) {
+  const col   = ORB[o.type].color || lvCol(level);
+  const pulse = 1+Math.sin(o.phase)*.055;
+  const pr    = o.r*pulse;
+  const ratio = Math.min((now-o.born)/o.life, 1);
+
+  if (o.escaped) {
+    const p2=(now-o.escapeT)/440;
+    ctx.save();
+    ctx.globalAlpha=(1-p2)*.65;
+    ctx.strokeStyle='#ff0066'; ctx.lineWidth=3;
+    ctx.shadowColor='#ff0066'; ctx.shadowBlur=18;
+    ctx.beginPath(); ctx.arc(o.x,o.y,o.r*(1+p2*.9),0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+    return;
   }
+
+  ctx.save();
+  ctx.globalAlpha=o.alpha;
+
+  // Glow
+  ctx.shadowColor=col; ctx.shadowBlur=28*pulse;
+
+  // Fill gradient
+  const g=ctx.createRadialGradient(o.x,o.y,0, o.x,o.y,pr);
+  g.addColorStop(0, '#fff');
+  g.addColorStop(.28, col);
+  g.addColorStop(1, col+'00');
+  ctx.beginPath(); ctx.arc(o.x,o.y,pr,0,Math.PI*2);
+  ctx.fillStyle=g; ctx.fill();
+
+  // Ring
+  ctx.shadowBlur=0;
+  ctx.strokeStyle=col+'55'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Timer arc (clockwise countdown)
+  ctx.beginPath();
+  ctx.arc(o.x,o.y,pr+8, -Math.PI/2, -Math.PI/2+Math.PI*2*(1-ratio));
+  ctx.strokeStyle=col; ctx.lineWidth=2.5;
+  ctx.shadowColor=col; ctx.shadowBlur=10; ctx.stroke();
+
+  // Center glyph
+  const glyph = ORB[o.type].glyph || (level>1 ? fmtMult(level) : null);
+  if (glyph && o.r>=18) {
+    ctx.shadowBlur=8; ctx.fillStyle='#fff';
+    ctx.font=`800 ${Math.round(o.r*.58)}px Quicksand,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(glyph, o.x, o.y);
+  }
+
+  ctx.restore();
 }
 
 function draw(now) {
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#050810';
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#050810'; ctx.fillRect(0,0,W,H);
 
-  const col = levelColor(level);
-  drawDotGrid(col);
+  drawGrid(lvCol(level));
 
-  // Particles
   for (const p of particles) {
     ctx.save();
-    ctx.globalAlpha = Math.max(0,p.alpha);
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur = 10;
+    ctx.globalAlpha=Math.max(0,p.alpha);
+    ctx.shadowColor=p.color; ctx.shadowBlur=10;
     ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle = p.color;
-    ctx.fill();
+    ctx.fillStyle=p.color; ctx.fill();
     ctx.restore();
   }
 
-  // Circles
-  for (const c of circles) {
-    const t = now - c.born;
-
-    // Escape flash
-    if (c.escaped) {
-      const p2 = (now-c.escapeT)/420;
-      ctx.save();
-      ctx.globalAlpha = (1-p2)*.6;
-      ctx.strokeStyle = '#ff0066';
-      ctx.lineWidth = 2.5;
-      ctx.shadowColor = '#ff0066';
-      ctx.shadowBlur = 16;
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, c.r*(1+p2*.8), 0, Math.PI*2);
-      ctx.stroke();
-      ctx.restore();
-      continue;
-    }
-
-    const pulse = 1+Math.sin(c.phase)*.055;
-    const pr = c.r*pulse;
-    const ratio = Math.min(t/c.life, 1);
-    const cc = col;
-
-    ctx.save();
-    ctx.globalAlpha = c.alpha;
-
-    // Glow
-    ctx.shadowColor = cc;
-    ctx.shadowBlur  = 26*pulse;
-
-    // Radial gradient fill
-    const g = ctx.createRadialGradient(c.x,c.y,0, c.x,c.y,pr);
-    g.addColorStop(0, '#fff');
-    g.addColorStop(.3, cc);
-    g.addColorStop(1, cc+'00');
-    ctx.beginPath(); ctx.arc(c.x,c.y,pr,0,Math.PI*2);
-    ctx.fillStyle = g;
-    ctx.fill();
-
-    // Outer ring
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = cc+'55';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Timer arc
-    const start = -Math.PI/2;
-    const end   = start + Math.PI*2*(1-ratio);
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, pr+7, start, end);
-    ctx.strokeStyle = cc;
-    ctx.lineWidth = 2.2;
-    ctx.shadowColor = cc;
-    ctx.shadowBlur  = 8;
-    ctx.stroke();
-
-    // Flux value inside
-    const fp = fluxPerTap();
-    if (fp > 1 && c.r >= 20) {
-      ctx.shadowBlur = 6;
-      ctx.fillStyle = '#fff';
-      ctx.font = `800 ${Math.round(c.r*.62)}px Quicksand,sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('+'+fp, c.x, c.y);
-    }
-
-    ctx.restore();
-  }
+  for (const o of orbs) drawOrb(o, now);
 }
 
-function loop(now) {
-  update(now);
-  draw(now);
-  if (running) animId = requestAnimationFrame(loop);
-}
+function loop(now) { update(now); draw(now); if(running) animId=requestAnimationFrame(loop); }
 
-// ── Inicio / Fin ───────────────────────────────────────────────────────────
+// ── Start / End ───────────────────────────────────────────────────────────
 function startGame() {
-  circles=[]; particles=[];
-  flux=0; collected=0; level=1; lives=3;
+  orbs=[]; particles=[];
+  flux=0; xp=0; level=1; lives=3; streak=0;
   running=true;
+  stor.save({ _lastFlux:0 });
   updateHUD();
   overlay.style.display='none';
   resize(); scheduleSpawn();
-  lastTime = performance.now();
-  animId = requestAnimationFrame(loop);
+  lastTime=performance.now();
+  animId=requestAnimationFrame(loop);
 }
 
 function endGame() {
@@ -732,62 +586,42 @@ function endGame() {
   clearTimeout(spawnTimer);
   cancelAnimationFrame(animId);
 
-  const s = stor.load();
+  const s   = stor.load();
   const isRec = flux>0 && flux>=(s.best||0);
   if (isRec) stor.save({ best:flux });
   const games = (s.games||0)+1;
-  stor.save({ games });
-
-  const totalFlux = (s.totalFlux||0);
+  stor.save({ games, _lastFlux:0 });
+  const tf = s.totalFlux||0;
 
   overlay.innerHTML = `
-    <div class="ov-eyebrow">Fin de partida</div>
+    <div class="ov-eye">Run complete</div>
     <div class="ov-title">FLUX</div>
-    ${isRec && flux>0 ? '<div class="record-pill">▲ NUEVO RÉCORD</div>' : ''}
-    <div class="ov-big">${flux>=1000?(flux/1000).toFixed(2)+'K':flux}</div>
-    <div class="ov-lbl">FLUX · Nivel ${level} · ×${fluxPerTap()} /tap</div>
+    ${isRec&&flux>0 ? '<div class="rec-pill">▲ NEW RECORD</div>' : ''}
+    <div class="ov-big">${fmtNum(flux)}</div>
+    <div class="ov-sub">Level ${level} · ${fmtMult(level)} mult · ${xp} XP</div>
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="v">${(s.best||flux)>=1000?((s.best||flux)/1000).toFixed(1)+'K':(s.best||flux)}</div>
-        <div class="l">Récord</div>
-      </div>
-      <div class="stat-card">
-        <div class="v">${totalFlux>=1000?(totalFlux/1000).toFixed(1)+'K':totalFlux}</div>
-        <div class="l">FLUX Total</div>
-      </div>
-      <div class="stat-card">
-        <div class="v">${games}</div>
-        <div class="l">Partidas</div>
-      </div>
+      <div class="sc"><div class="v">${fmtNum(s.best||flux)}</div><div class="l">Best</div></div>
+      <div class="sc"><div class="v">${fmtNum(tf+flux)}</div><div class="l">Total Flux</div></div>
+      <div class="sc"><div class="v">${games}</div><div class="l">Runs</div></div>
     </div>
-    <button id="btn">JUGAR DE NUEVO</button>
+    <button id="btn">PLAY AGAIN</button>
   `;
   overlay.style.display='flex';
   document.getElementById('btn').addEventListener('click', startGame);
 }
 
-// ── Pantalla inicio ────────────────────────────────────────────────────────
+// ── Start screen ──────────────────────────────────────────────────────────
 function renderStartStats() {
   const s = stor.load();
   if (!s.best && !s.games) return;
   const tf = s.totalFlux||0;
   startStats.style.display='grid';
-  startStats.innerHTML = `
-    <div class="stat-card">
-      <div class="v">${(s.best||0)>=1000?((s.best||0)/1000).toFixed(1)+'K':(s.best||0)}</div>
-      <div class="l">Récord</div>
-    </div>
-    <div class="stat-card">
-      <div class="v">${tf>=1000?(tf/1000).toFixed(1)+'K':tf}</div>
-      <div class="l">FLUX Total</div>
-    </div>
-    <div class="stat-card">
-      <div class="v">${s.games||0}</div>
-      <div class="l">Partidas</div>
-    </div>
+  startStats.innerHTML=`
+    <div class="sc"><div class="v">${fmtNum(s.best||0)}</div><div class="l">Best</div></div>
+    <div class="sc"><div class="v">${fmtNum(tf)}</div><div class="l">Total Flux</div></div>
+    <div class="sc"><div class="v">${s.games||0}</div><div class="l">Runs</div></div>
   `;
 }
-
 renderStartStats();
 document.getElementById('btn').addEventListener('click', startGame);
 ctx.fillStyle='#050810'; ctx.fillRect(0,0,W,H);
