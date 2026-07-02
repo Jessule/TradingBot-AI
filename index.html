@@ -246,6 +246,10 @@
   .tapr{position:fixed;z-index:18;pointer-events:none;width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 10px rgba(255,255,255,.6);transform:translate(-50%,-50%) scale(.4);opacity:.9;animation:tapr .42s ease-out forwards;}
   @keyframes tapr{0%{opacity:.9;transform:translate(-50%,-50%) scale(.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.6)}}
 
+  /* ---- trail al arrastrar ---- */
+  .trail{position:fixed;z-index:16;pointer-events:none;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#9ff,rgba(0,212,255,0) 70%);box-shadow:0 0 10px #00d4ff;transform:translate(-50%,-50%);opacity:.85;animation:trailf .38s ease-out forwards;}
+  @keyframes trailf{0%{opacity:.85;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.3)}}
+
   /* ---- última vida: corazón rojo temblando ---- */
   .heart.danger{color:#ff0066;filter:drop-shadow(0 0 9px #ff0066);animation:heartDanger .5s ease-in-out infinite;}
   @keyframes heartDanger{0%,100%{transform:translate(0,0) scale(1);opacity:1}25%{transform:translate(-1.5px,1px) scale(1.18);opacity:.55}50%{transform:translate(1.5px,-1px) scale(1.22);opacity:1}75%{transform:translate(-1px,1px) scale(1.12);opacity:.65}}
@@ -416,11 +420,11 @@ function showBig(text){
 function showCombo(){showBig('COMBOX'+streak+'!!!!');Sound.combo();}
 
 /* ===== PERSISTENT ESSENCE TREE ===== */
-// Árbol de Essence (permanente) como grafo de nodos: limite -> {flux, hitbox}
+// Árbol de Essence (permanente) como grafo de nodos: flux -> {limite, hitbox}
 const TREE=[
-  {id:'plimit',parent:null,     icon:'⭕',title:'+1 Circle limit',step:'+1 circle', base:25, mult:1,   max:1},
-  {id:'pflux', parent:'plimit', icon:'⚡',title:'×1.45 Flux',     step:'×1.45 flux',base:30, mult:2.2, max:3},
-  {id:'phit',  parent:'plimit', icon:'⭕',title:'Bigger hitbox',  step:'+1px',      base:45, mult:2.4, max:2},
+  {id:'pflux', parent:null,     icon:'⚡',title:'×1.45 Flux',     step:'×1.45 flux',base:30, mult:2.0, max:3},
+  {id:'plimit',parent:'pflux',  icon:'⭕',title:'+1 Circle limit',step:'+1 circle', base:40, mult:1,   max:1},
+  {id:'phit',  parent:'pflux',  icon:'⭕',title:'Bigger hitbox',  step:'+1px',      base:55, mult:2.2, max:2},
 ];
 function lvl(id){const u=stor.load().up||{};return u[id]||0;}
 function setLvl(id,v){const s=stor.load();const u=s.up||{};u[id]=v;stor.save({up:u});}
@@ -524,7 +528,6 @@ function updateWallet(){const e=Math.floor(stor.load().essence||0);if(essAmt){es
 const TAP_REACH=18;   // rango extra de toque (px)
 function handleTap(ex,ey){
   if(!running||paused)return;
-  showTapRipple(ex,ey);                          // marca dónde clicaste
   // elegir el círculo más cercano dentro del rango
   let best=-1,bestD=Infinity;
   for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];if(o.popped||o.escaped)continue;const dx=ex-o.x,dy=ey-o.y;const reach=o.r+TAP_REACH,d=dx*dx+dy*dy;if(d<=reach*reach&&d<bestD){bestD=d;best=i;}}
@@ -550,8 +553,15 @@ function handleTap(ex,ey){
   }}
 }
 function showTapRipple(x,y){const el=document.createElement('div');el.className='tapr';el.style.left=x+'px';el.style.top=y+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),420);}
-canvas.addEventListener('touchstart',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();for(const t of e.changedTouches)handleTap(t.clientX-r.left,t.clientY-r.top);},{passive:false});
-canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleTap(e.clientX-r.left,e.clientY-r.top);});
+let lastTrail=[0,0];
+function trailDot(x,y){if(Math.hypot(x-lastTrail[0],y-lastTrail[1])<7)return;lastTrail=[x,y];const el=document.createElement('div');el.className='trail';el.style.left=x+'px';el.style.top=y+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),380);}
+// entrada por puntero: tap normal + arrastre (trail + toca al arrastrar)
+let dragging=false;
+function canvasPos(e){const r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];}
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();dragging=true;const[x,y]=canvasPos(e);showTapRipple(x,y);handleTap(x,y);},{passive:false});
+canvas.addEventListener('pointermove',e=>{if(!dragging)return;const[x,y]=canvasPos(e);trailDot(x,y);handleTap(x,y);},{passive:false});
+window.addEventListener('pointerup',()=>{dragging=false;});
+canvas.addEventListener('pointercancel',()=>{dragging=false;});
 
 /* pausa/reanudar: desplaza el "nacimiento" de los orbes el tiempo en pausa
    para que NO caduquen de golpe (ni te quiten vidas) al reanudar */
@@ -718,7 +728,7 @@ function requestExit(){
   if(!running||paused)return;
   pauseGame();
   const elapsed=DURATION-timeLeft;const frac=Math.min(1,elapsed/DURATION);
-  const penalty=0.35+0.65*frac;
+  const penalty=0.15+0.5*frac;   // penalti mayor: 15% al principio -> 65% cerca del final
   const full=projEssence();const payout=Math.floor(full*penalty);
   window._exitPayout=payout;
   overlay.innerHTML=`
@@ -770,11 +780,11 @@ function pTreeBranch(b){
 function renderTree(){
   const grid=document.getElementById('tree-grid');grid.className='';grid.innerHTML='';
   const wrap=document.createElement('div');wrap.className='rt-wrap';
-  wrap.appendChild(pTreeBranch(pNode('plimit')));
-  const kids=TREE.filter(x=>x.parent==='plimit');
+  wrap.appendChild(pTreeBranch(pNode('pflux')));
+  const kids=TREE.filter(x=>x.parent==='pflux');
   if(kids.length){
-    wrap.appendChild(trunkConn(lvl('plimit')>=1));
-    const fork=document.createElement('div');fork.className='rt-fork'+(lvl('plimit')>=1?' on':'');wrap.appendChild(fork);
+    wrap.appendChild(trunkConn(lvl('pflux')>=1));
+    const fork=document.createElement('div');fork.className='rt-fork'+(lvl('pflux')>=1?' on':'');wrap.appendChild(fork);
     const split=document.createElement('div');split.className='rt-split';
     kids.forEach(k=>split.appendChild(pTreeBranch(k)));
     wrap.appendChild(split);
