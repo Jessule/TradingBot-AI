@@ -208,7 +208,7 @@
   .rt-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 34px;min-width:max-content;margin:0 auto;}
   .rt-branch{display:flex;flex-direction:column;align-items:center;}
   .rt-branch.dim{opacity:.45;}
-  .rt-split .rt-branch{width:120px;}
+  .rt-split>.rt-branch{min-width:118px;}
   .rt-lbl{font-size:.62rem;font-weight:800;letter-spacing:.5px;color:#cfe6f5;text-transform:uppercase;margin-bottom:8px;text-align:center;max-width:130px;line-height:1.25;display:flex;align-items:center;gap:5px;justify-content:center;}
   .rt-lbl span{font-size:1rem;}
   .rt-step{font-size:.54rem;font-weight:700;color:#9fbace;margin-top:8px;text-transform:uppercase;letter-spacing:.5px;}
@@ -426,6 +426,7 @@ function showCombo(){showBig('COMBOX'+streak+'!!!!');Sound.combo();}
 const TREE=[
   {id:'pflux', parent:null,     icon:'⚡',title:'×1.45 Flux',     step:'×1.45 flux',base:30, mult:2.0, max:3},
   {id:'plimit',parent:'pflux',  icon:'⭕',title:'+1 Circle limit',step:'+1 circle', base:40, mult:1,   max:1},
+  {id:'pspawn',parent:'plimit', icon:'⏩',title:'Faster spawn',   step:'+0.1/sec',  base:50, mult:1.8, max:4},
   {id:'phit',  parent:'pflux',  icon:'⭕',title:'Bigger hitbox',  step:'+1px',      base:55, mult:2.2, max:2},
 ];
 function lvl(id){const u=stor.load().up||{};return u[id]||0;}
@@ -437,6 +438,7 @@ const EFF={
   baseTarget(){return 1+lvl('plimit');},
   fluxMult(){return Math.pow(1.45,lvl('pflux'));},   // ×1.45 por nivel (permanente)
   hitbox(){return lvl('phit');},                     // +1px por nivel
+  spawnBonus(){return 0.1*lvl('pspawn');},            // +0.1 círculos/seg por nivel
   essMult(){return 1;},
   speedFactor(){return 1;},
   lifeFactor(){return 1;},
@@ -450,6 +452,7 @@ const EFF={
 const RUN_TREE=[
   {id:'power', parent:null,    icon:'⚡',title:'×1.3 Flux',       desc:'+30% flux per tap',   step:'×1.3 flux',    base:15, mult:1.65, max:5, eff:()=>{runMods.flux*=1.30;}},
   {id:'slow',  parent:'power', icon:'🐢',title:'Slower circles', desc:'circles move slower', step:'-5% speed',    base:20, mult:1.5,  max:3, eff:()=>{runMods.speed*=0.95;}},
+  {id:'fspawn',parent:'power', icon:'⏩',title:'Faster spawn',   desc:'more circles per sec',step:'+0.1/sec',     base:25, mult:1.6,  max:4, eff:()=>{runMods.spawnBonus+=0.1;}},
   {id:'limit', parent:'slow',  icon:'⭕',title:'+1 Circle limit',desc:'+1 circle on field',  step:'+1 circle',    base:80, mult:1.0,  max:1, eff:()=>{runMods.target+=1;}},
   {id:'life',  parent:'slow',  icon:'⏳',title:'+5% Lifetime',   desc:'circles last longer', step:'+5% lifetime', base:40, mult:1.7,  max:3, eff:()=>{runMods.life*=1.05;}},
 ];
@@ -460,7 +463,7 @@ function nodeUnlocked(id){const n=runNode(id);if(!n||!n.parent)return true;retur
 function childrenOf(id){return RUN_TREE.filter(x=>x.parent===id);}
 function runCost(b){return Math.round(b.base*Math.pow(b.mult,runLvl(b.id)));}
 
-let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0};
+let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0,spawnBonus:0};
 
 function pickType(){const r=Math.random();const boost=.04+EFF.boostChance()+(running?runMods.boost:0);if(r<.015)return 'SHIELD';if(r<.015+boost)return 'BOOST';return 'NORMAL';}
 
@@ -486,7 +489,7 @@ function collideOrbs(){
   }
 }
 // rebote contra los botones (para que las bolas no se escondan detrás)
-function btnRect(el){if(!el||el.offsetParent===null)return null;const r=el.getBoundingClientRect();return r.width>0?r:null;}
+function btnRect(el){if(!el)return null;const r=el.getBoundingClientRect();return (r.width>0&&r.height>0)?r:null;}
 function bounceRect(o,r){if(!r)return;const cx=Math.max(r.left,Math.min(o.x,r.right)),cy=Math.max(r.top,Math.min(o.y,r.bottom));let dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy);if(d<o.r){if(d===0){o.vy=-Math.abs(o.vy);return;}const nx=dx/d,ny=dy/d;o.x=cx+nx*o.r;o.y=cy+ny*o.r;const p=o.vx*nx+o.vy*ny;if(p<0){o.vx-=2*p*nx;o.vy-=2*p*ny;}}}
 let HUD_H=0,W=0,H=0;
 function resize(){HUD_H=document.getElementById('hud').getBoundingClientRect().height;W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
@@ -621,38 +624,36 @@ function buyRunNode(bid){
   const el=document.querySelector('.rnode[data-id="'+bid+'"]');
   if(el){el.classList.remove('bought');void el.offsetWidth;el.classList.add('bought');domBurst(el);}
 }
-// una rama = UN solo círculo con progreso owned/max
-function rtBranch(b){
+function trunkConn(on){const c=document.createElement('div');c.className='rconn trunk'+(on?' on':'');return c;}
+// constructor recursivo genérico de nodos (un círculo con owned/max + hijos)
+function buildTreeNode(b,K){
   const col=document.createElement('div');col.className='rt-branch';
-  const unlocked=nodeUnlocked(b.id);const owned=runLvl(b.id);
+  const unlocked=K.unlocked(b.id),owned=K.lvl(b.id),maxed=owned>=b.max;
   if(!unlocked)col.classList.add('dim');
   const lbl=document.createElement('div');lbl.className='rt-lbl';lbl.innerHTML=`<span>${b.icon}</span> ${b.title}`;col.appendChild(lbl);
-  const maxed=owned>=b.max;const cost=runCost(b);const afford=!maxed&&unlocked&&flux>=cost;
-  const n=document.createElement('div');let cls='rnode';
-  if(maxed)cls+=' owned';else if(!unlocked)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';
-  n.className=cls;n.dataset.id=b.id;
-  n.innerHTML=`<span class="rprog">${owned}/${b.max}</span>`;
-  if(!maxed&&unlocked)n.onclick=()=>buyRunNode(b.id);
+  const cost=K.cost(b),afford=!maxed&&unlocked&&K.have()>=cost;
+  const n=document.createElement('div');let cls='rnode';if(maxed)cls+=' owned';else if(!unlocked)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';
+  n.className=cls;n.dataset.id=b.id;n.innerHTML=`<span class="rprog">${owned}/${b.max}</span>`;
+  if(!maxed&&unlocked)n.onclick=()=>K.buy(b.id);
   col.appendChild(n);
-  const d=document.createElement('div');d.className='rt-step';d.textContent=maxed?'MAX':('⚡'+fmtSig(cost)+' · '+b.step);col.appendChild(d);
+  const d=document.createElement('div');d.className='rt-step';d.textContent=maxed?'MAX':(K.glyph+fmtNum(cost)+' · '+b.step);col.appendChild(d);
+  const kids=K.children(b.id);
+  if(kids.length){
+    col.appendChild(trunkConn(owned>=1));
+    if(kids.length>1){const f=document.createElement('div');f.className='rt-fork'+(owned>=1?' on':'');col.appendChild(f);}
+    const row=document.createElement('div');row.className='rt-split';
+    kids.forEach(k=>row.appendChild(buildTreeNode(k,K)));
+    col.appendChild(row);
+  }
   return col;
 }
-function trunkConn(on){const c=document.createElement('div');c.className='rconn trunk'+(on?' on':'');return c;}
+const K_RUN={lvl:runLvl,cost:runCost,unlocked:nodeUnlocked,children:childrenOf,have:()=>flux,buy:buyRunNode,glyph:'⚡'};
+const K_ESS={lvl:lvl,cost:pCost,unlocked:pUnlocked,children:(id)=>TREE.filter(x=>x.parent===id),have:()=>stor.load().essence||0,buy:buyNode,glyph:'◈'};
 function renderRunTree(){
   document.getElementById('runtree-flux').textContent=fmtSig(flux);
   const grid=document.getElementById('runtree-grid');grid.className='';grid.innerHTML='';
   const wrap=document.createElement('div');wrap.className='rt-wrap';
-  wrap.appendChild(rtBranch(runNode('power')));
-  wrap.appendChild(trunkConn(runLvl('power')>=1));
-  wrap.appendChild(rtBranch(runNode('slow')));
-  const kids=childrenOf('slow');
-  if(kids.length){
-    wrap.appendChild(trunkConn(runLvl('slow')>=1));
-    const fork=document.createElement('div');fork.className='rt-fork'+(runLvl('slow')>=1?' on':'');wrap.appendChild(fork);
-    const split=document.createElement('div');split.className='rt-split';
-    kids.forEach(k=>split.appendChild(rtBranch(k)));
-    wrap.appendChild(split);
-  }
+  wrap.appendChild(buildTreeNode(runNode('power'),K_RUN));
   grid.appendChild(wrap);
 }
 
@@ -662,7 +663,7 @@ function update(now){
   timeLeft-=realDt;
   if(timeLeft<=0){timeLeft=0;endGame(false);return;}
   // spawn bar: fills at circles/sec; when full and there's room, a circle appears
-  const cfg=getConf();const alive=aliveCount();const cps=1000/cfg.rate;
+  const cfg=getConf();const alive=aliveCount();const cps=1000/cfg.rate+EFF.spawnBonus()+runMods.spawnBonus;
   spawnFill+=cps*realDt;if(spawnFill>1)spawnFill=1;
   if(spawnFill>=1&&alive<cfg.target){spawnFill=0;spawnOrb();}
   const sbRect=btnRect(soundBtnEl),rtRect=btnRect(runtreeBtnEl);
@@ -677,7 +678,6 @@ function update(now){
     if(age>=o.life){o.escaped=true;o.escapeT=now;streak=0;lives=Math.max(0,lives-1);Sound.miss();screenFlash();heartBreak(o.x,o.y);burst(o.x,o.y,'#ff0066',16);updateHUD();if(lives<=0){endGame(false);return;}continue;}
     const fadeAt=o.life*.62;o.alpha=age>fadeAt?1-(age-fadeAt)/(o.life-fadeAt):1;o.phase=(o.phase+.052*dt)%(Math.PI*2);
   }
-  collideOrbs();
   for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.08*dt;p.alpha-=.02*dt;if(p.alpha<=0)particles.splice(i,1);}
   const sec=Math.ceil(timeLeft);clkEl.textContent=fmtTime(timeLeft);
   clkEl.classList.toggle('low',timeLeft<=15);clkEl.classList.toggle('low2',timeLeft<=5);clkEl.classList.toggle('low3',timeLeft<=3);
@@ -700,7 +700,7 @@ function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame
 function startGame(){
   Sound.init();
   orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;lastSec=-1;spawnFill=0;tickAcc=0;
-  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0};runUp={};
+  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0,spawnBonus:0};runUp={};
   runMods.flux*=EFF.fluxMult();   // ×1.45 permanente del árbol de Essence
   DURATION=EFF.duration();timeLeft=DURATION;essMultRun=EFF.essMult();
   running=true;paused=true;   // congelado durante READY 3 2 1 GO
@@ -790,32 +790,10 @@ function buyNode(bid){
   const el=document.querySelector('#tree-grid .rnode[data-id="'+bid+'"]');
   if(el){el.classList.remove('bought');void el.offsetWidth;el.classList.add('bought');domBurst(el);}
 }
-// rama del árbol de Essence = un círculo con progreso owned/max
-function pTreeBranch(b){
-  const col=document.createElement('div');col.className='rt-branch';
-  const unlocked=pUnlocked(b.id),owned=lvl(b.id);
-  if(!unlocked)col.classList.add('dim');
-  const lblEl=document.createElement('div');lblEl.className='rt-lbl';lblEl.innerHTML=`<span>${b.icon}</span> ${b.title}`;col.appendChild(lblEl);
-  const maxed=owned>=b.max,cost=pCost(b),ess=stor.load().essence||0,afford=!maxed&&unlocked&&ess>=cost;
-  const n=document.createElement('div');let cls='rnode';if(maxed)cls+=' owned';else if(!unlocked)cls+=' lockn';else if(afford)cls+=' buy';else cls+=' poor';
-  n.className=cls;n.dataset.id=b.id;n.innerHTML=`<span class="rprog">${owned}/${b.max}</span>`;
-  if(!maxed&&unlocked)n.onclick=()=>buyNode(b.id);
-  col.appendChild(n);
-  const d=document.createElement('div');d.className='rt-step';d.textContent=maxed?'MAX':('◈'+fmtNum(cost)+' · '+b.step);col.appendChild(d);
-  return col;
-}
 function renderTree(){
   const grid=document.getElementById('tree-grid');grid.className='';grid.innerHTML='';
   const wrap=document.createElement('div');wrap.className='rt-wrap';
-  wrap.appendChild(pTreeBranch(pNode('pflux')));
-  const kids=TREE.filter(x=>x.parent==='pflux');
-  if(kids.length){
-    wrap.appendChild(trunkConn(lvl('pflux')>=1));
-    const fork=document.createElement('div');fork.className='rt-fork'+(lvl('pflux')>=1?' on':'');wrap.appendChild(fork);
-    const split=document.createElement('div');split.className='rt-split';
-    kids.forEach(k=>split.appendChild(pTreeBranch(k)));
-    wrap.appendChild(split);
-  }
+  wrap.appendChild(buildTreeNode(pNode('pflux'),K_ESS));
   grid.appendChild(wrap);
 }
 
