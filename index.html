@@ -69,6 +69,8 @@
   .tb-time .lbl{font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#8aa6bd;}
   .tb-time .clk{font-size:1rem;font-weight:800;color:var(--gold);letter-spacing:-.5px;display:inline-block;transform-origin:left center;}
   .tb-time .clk.low{color:var(--acc);animation:lowpulse .6s ease infinite alternate;}
+  .tb-time .clk.low2{animation-duration:.28s;}
+  .tb-time .clk.low3{animation-duration:.14s;}
   @keyframes lowpulse{from{opacity:.55}to{opacity:1}}
   .tb-bar{height:4px;border-radius:99px;background:rgba(0,212,255,.1);overflow:hidden;}
   .tb-bar .fill{height:100%;width:100%;background:linear-gradient(90deg,var(--grn),var(--gold),var(--acc));transition:width .25s linear;}
@@ -360,7 +362,7 @@ const LV_COLORS=['#00d4ff','#00b8ff','#4499ff','#7b6fff','#9b5de5','#c040d0','#f
 function lvCol(l){return LV_COLORS[Math.min(l-1,LV_COLORS.length-1)];}
 const ORB={NORMAL:{fluxMult:1,color:null,glyph:null,shield:false,lifeScale:1,ess:1},BOOST:{fluxMult:5,color:'#ffcc00',glyph:'×5',shield:false,lifeScale:.75,ess:3},SHIELD:{fluxMult:0,color:'#00f5a0',glyph:'♥',shield:true,lifeScale:.85,ess:0}};
 const BASE_XP=10,XP_SCALE=1.4,MPL=1.25;
-const ESS_DIV=5;  // essence nerf: divide raw essence so progression is slower
+const ESS_DIV=1.25;  // essence buff (~x4 respecto a antes)
 function xpToNext(lv){return Math.ceil(BASE_XP*Math.pow(XP_SCALE,lv-1));}
 function multAt(lv){return Math.pow(MPL,lv-1);}
 function fluxGain(lv,t){return multAt(lv)*ORB[t].fluxMult;}
@@ -469,16 +471,35 @@ const circlesEl=document.getElementById('circles-el'),essAmt=document.getElement
 const fieldCountEl=document.getElementById('field-count'),cpsEl=document.getElementById('cps'),spawnFillEl=document.getElementById('spawn-fill');
 const hearts=['h1','h2','h3'].map(id=>document.getElementById(id));
 const startStats=document.getElementById('start-stats');
+const soundBtnEl=document.getElementById('sound-btn'),runtreeBtnEl=document.getElementById('runtree-btn');
+// choque entre bolas
+function collideOrbs(){
+  for(let i=0;i<orbs.length;i++){const a=orbs[i];if(a.popped||a.escaped)continue;
+    for(let j=i+1;j<orbs.length;j++){const b=orbs[j];if(b.popped||b.escaped)continue;
+      let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),min=a.r+b.r;
+      if(d>0&&d<min){const nx=dx/d,ny=dy/d,ov=(min-d)/2;
+        a.x-=nx*ov;a.y-=ny*ov;b.x+=nx*ov;b.y+=ny*ov;
+        const p=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+        if(p<0){a.vx+=p*nx;a.vy+=p*ny;b.vx-=p*nx;b.vy-=p*ny;}
+      }
+    }
+  }
+}
+// rebote contra los botones (para que las bolas no se escondan detrás)
+function btnRect(el){if(!el||el.offsetParent===null)return null;const r=el.getBoundingClientRect();return r.width>0?r:null;}
+function bounceRect(o,r){if(!r)return;const cx=Math.max(r.left,Math.min(o.x,r.right)),cy=Math.max(r.top,Math.min(o.y,r.bottom));let dx=o.x-cx,dy=o.y-cy,d=Math.hypot(dx,dy);if(d<o.r){if(d===0){o.vy=-Math.abs(o.vy);return;}const nx=dx/d,ny=dy/d;o.x=cx+nx*o.r;o.y=cy+ny*o.r;const p=o.vx*nx+o.vy*ny;if(p<0){o.vx-=2*p*nx;o.vy-=2*p*ny;}}}
 let HUD_H=0,W=0,H=0;
 function resize(){HUD_H=document.getElementById('hud').getBoundingClientRect().height;W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
 resize();window.addEventListener('resize',()=>{resize();});
 
 let orbs=[],particles=[],flux=0,xp=0,level=1,lives=3,running=false,paused=false,animId=null,lastTime=0,streak=0;
-let circles=0,runEssRaw=0,DURATION=120,timeLeft=120,essMultRun=1,lastSec=-1,spawnFill=0;
+let circles=0,runEssRaw=0,DURATION=120,timeLeft=120,essMultRun=1,lastSec=-1,spawnFill=0,tickAcc=0;
 
 function rand(a,b){return Math.random()*(b-a)+a;}
 function progress(){return Math.min(1,(DURATION-timeLeft)/DURATION);}
 function streakMult(){return 1+(0.01+runMods.streakInc)*streak;}
+function totalMult(){return multAt(level)*runMods.flux*streakMult();}   // multiplicador TOTAL de flux por toque
+function fmtMult(m){return '×'+(m>=100?Math.round(m):m>=10?m.toFixed(1):m.toFixed(2));}
 function getConf(){
   const t=progress();
   const elapsed=DURATION-timeLeft;                 // segundos jugados
@@ -518,7 +539,7 @@ function updateHUD(){
   const needed=xpToNext(level);
   fluxEl.textContent=fmtSig(flux);
   if(circlesEl)circlesEl.textContent=circles;
-  multEl.textContent=streak>0?fmtStreak():'×1.00';
+  multEl.textContent=fmtMult(totalMult());
   xpFill.style.width=Math.min(xp/needed*100,100).toFixed(1)+'%';
   xpText.textContent=`Level ${level} · ${xp} / ${needed} orbs · ${projEssence()} ess proj.`;
   hearts.forEach((h,i)=>{h.classList.toggle('lost',i>=lives);h.classList.toggle('danger',lives===1&&i===0);});
@@ -644,22 +665,28 @@ function update(now){
   const cfg=getConf();const alive=aliveCount();const cps=1000/cfg.rate;
   spawnFill+=cps*realDt;if(spawnFill>1)spawnFill=1;
   if(spawnFill>=1&&alive<cfg.target){spawnFill=0;spawnOrb();}
+  const sbRect=btnRect(soundBtnEl),rtRect=btnRect(runtreeBtnEl);
   for(let i=orbs.length-1;i>=0;i--){const o=orbs[i];
     if(o.escaped){if(now-o.escapeT>440)orbs.splice(i,1);continue;}
     if(o.popped){orbs.splice(i,1);continue;}
     o.x+=o.vx*dt;o.y+=o.vy*dt;
     if(o.x-o.r<0){o.x=o.r;o.vx*=-1;}if(o.x+o.r>W){o.x=W-o.r;o.vx*=-1;}
     if(o.y-o.r<HUD_H){o.y=HUD_H+o.r;o.vy*=-1;}if(o.y+o.r>H){o.y=H-o.r;o.vy*=-1;}
+    bounceRect(o,sbRect);bounceRect(o,rtRect);
     const age=now-o.born;
     if(age>=o.life){o.escaped=true;o.escapeT=now;streak=0;lives=Math.max(0,lives-1);Sound.miss();screenFlash();heartBreak(o.x,o.y);burst(o.x,o.y,'#ff0066',16);updateHUD();if(lives<=0){endGame(false);return;}continue;}
     const fadeAt=o.life*.62;o.alpha=age>fadeAt?1-(age-fadeAt)/(o.life-fadeAt):1;o.phase=(o.phase+.052*dt)%(Math.PI*2);
   }
+  collideOrbs();
   for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.08*dt;p.alpha-=.02*dt;if(p.alpha<=0)particles.splice(i,1);}
-  const sec=Math.ceil(timeLeft);clkEl.textContent=fmtTime(timeLeft);clkEl.classList.toggle('low',timeLeft<=15);
+  const sec=Math.ceil(timeLeft);clkEl.textContent=fmtTime(timeLeft);
+  clkEl.classList.toggle('low',timeLeft<=15);clkEl.classList.toggle('low2',timeLeft<=5);clkEl.classList.toggle('low3',timeLeft<=3);
+  // tic-tac que se acelera: 1/s (<=10), más rápido (<=5) y aún más (<=3)
+  if(timeLeft<=5){tickAcc+=realDt;const iv=timeLeft<=3?0.18:0.4;if(tickAcc>=iv){tickAcc=0;Sound.tick();}}
   if(sec!==lastSec){
     lastSec=sec;bump(clkEl);cpsEl.textContent=cps.toFixed(1);
     if(sec===15)Sound.timelow();
-    if(sec<=10&&sec>0)Sound.tick();
+    if(sec<=10&&sec>5)Sound.tick();
   }
   fieldCountEl.textContent=alive+' / '+cfg.target;
   spawnFillEl.style.width=(spawnFill*100)+'%';
@@ -672,7 +699,7 @@ function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame
 
 function startGame(){
   Sound.init();
-  orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;lastSec=-1;spawnFill=0;
+  orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;lastSec=-1;spawnFill=0;tickAcc=0;
   runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0};runUp={};
   runMods.flux*=EFF.fluxMult();   // ×1.45 permanente del árbol de Essence
   DURATION=EFF.duration();timeLeft=DURATION;essMultRun=EFF.essMult();
