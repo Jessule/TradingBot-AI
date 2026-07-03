@@ -360,7 +360,7 @@
 <script>
 const LV_COLORS=['#00d4ff','#00b8ff','#4499ff','#7b6fff','#9b5de5','#c040d0','#ff0099','#ff0055','#ff3311','#ff7700','#ffcc00','#00f5a0'];
 function lvCol(l){return LV_COLORS[Math.min(l-1,LV_COLORS.length-1)];}
-const ORB={NORMAL:{fluxMult:1,color:null,glyph:null,shield:false,lifeScale:1,ess:1},BOOST:{fluxMult:5,color:'#ffcc00',glyph:'×5',shield:false,lifeScale:.75,ess:3},SHIELD:{fluxMult:0,color:'#00f5a0',glyph:'♥',shield:true,lifeScale:.85,ess:0}};
+const ORB={NORMAL:{fluxMult:1,color:null,glyph:null,shield:false,lifeScale:1,ess:1},BOOST:{fluxMult:5,color:'#ffcc00',glyph:'×5',shield:false,lifeScale:.75,ess:3},SHIELD:{fluxMult:0,color:'#00f5a0',glyph:'♥',shield:true,lifeScale:.85,ess:0},NOVA:{fluxMult:3,color:'#c060ff',glyph:'✸',shield:false,lifeScale:.8,ess:2}};
 const BASE_XP=10,XP_SCALE=1.4,MPL=1.25;
 const ESS_DIV=1.25;  // essence buff (~x4 respecto a antes)
 function xpToNext(lv){return Math.ceil(BASE_XP*Math.pow(XP_SCALE,lv-1));}
@@ -428,9 +428,9 @@ const TREE=[
   {id:'pflux', parent:null,     icon:'⚡',title:'×1.45 Flux',     step:'×1.45 flux',base:25, mult:1.9, max:3},
   {id:'plimit',parent:'pflux',  icon:'⭕',title:'+1 Circle limit',step:'+1 circle', base:45, mult:1,   max:1},
   {id:'phit',  parent:'pflux',  icon:'⭕',title:'Bigger hitbox',  step:'+1px',      base:60, mult:2.2, max:2},
-  {id:'pspawn',parent:'plimit', icon:'⏩',title:'Faster spawn',   step:'+0.1/sec',  base:70, mult:1.8, max:4},
-  {id:'pflux2',parent:'pspawn', icon:'⚡',title:'×1.6 Flux',      step:'×1.6 flux', base:140,mult:2.0, max:3},
-  {id:'pxp',   parent:'pspawn', icon:'🎯',title:'+XP gain',       step:'+50% xp',   base:110,mult:2.0, max:3},
+  {id:'pspawn',parent:'plimit', icon:'⏩',title:'Faster spawn',   step:'+0.1/sec',  base:50, mult:1.8, max:4},
+  {id:'pflux2',parent:'pspawn', icon:'⚡',title:'×1.6 Flux',      step:'×1.6 flux', base:120,mult:2.0, max:3},
+  {id:'pxp',   parent:'pspawn', icon:'🎯',title:'×1.5 XP',        step:'×1.5 xp',   base:90, mult:2.0, max:3},
 ];
 function lvl(id){const u=stor.load().up||{};return u[id]||0;}
 function setLvl(id,v){const s=stor.load();const u=s.up||{};u[id]=v;stor.save({up:u});}
@@ -458,9 +458,10 @@ const RUN_TREE=[
   {id:'slow',  parent:'power', icon:'🐢',title:'Slower circles', desc:'circles move slower', step:'-5% speed',    base:20, mult:1.5,  max:3, eff:()=>{runMods.speed*=0.95;}},
   {id:'fspawn',parent:'power', icon:'⏩',title:'Faster spawn',   desc:'more circles per sec',step:'+0.1/sec',     base:25, mult:1.65, max:4, eff:()=>{runMods.spawnBonus+=0.1;}},
   {id:'limit', parent:'slow',  icon:'⭕',title:'+1 Circle limit',desc:'+1 circle on field',  step:'+1 circle',    base:70, mult:1.0,  max:1, eff:()=>{runMods.target+=1;}},
-  {id:'life',  parent:'slow',  icon:'⏳',title:'+5% Lifetime',   desc:'circles last longer', step:'+5% lifetime', base:40, mult:1.7,  max:3, eff:()=>{runMods.life*=1.05;}},
-  {id:'rxp',   parent:'limit', icon:'🎯',title:'+XP gain',       desc:'level up faster',     step:'+50% xp',      base:55, mult:1.7,  max:4, eff:()=>{runMods.xpBonus+=0.5;}},
-  {id:'rflux2',parent:'fspawn',icon:'⚡',title:'×1.4 Flux',       desc:'more flux per tap',   step:'×1.4 flux',    base:90, mult:1.8,  max:3, eff:()=>{runMods.flux*=1.40;}},
+  {id:'life',  parent:'slow',  icon:'⏳',title:'×2.5 Lifetime', desc:'circles last much longer',step:'×2.5 lifetime',base:60, mult:1.8,  max:2, eff:()=>{runMods.life*=2.5;}},
+  {id:'rxp',   parent:'limit', icon:'🎯',title:'×1.5 XP',        desc:'level up faster',     step:'×1.5 xp',      base:55, mult:1.7,  max:4, eff:()=>{runMods.xpBonus+=0.5;}},
+  {id:'rflux2',parent:'fspawn',icon:'⚡',title:'×1.4 Flux',       desc:'more flux per tap',   step:'×1.4 flux',    base:300,mult:1.8,  max:3, eff:()=>{runMods.flux*=1.40;}},
+  {id:'rnova', parent:'rflux2',icon:'✸',title:'Nova orbs',      desc:'rare orb: pops ALL on screen',step:'+3% nova',base:220,mult:1.8,  max:3, eff:()=>{runMods.novaChance+=0.03;}},
 ];
 let runUp={};
 function runLvl(id){return runUp[id]||0;}
@@ -469,9 +470,9 @@ function nodeUnlocked(id){const n=runNode(id);if(!n||!n.parent)return true;retur
 function childrenOf(id){return RUN_TREE.filter(x=>x.parent===id);}
 function runCost(b){return Math.round(b.base*Math.pow(b.mult,runLvl(b.id)));}
 
-let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0,spawnBonus:0,xpBonus:0};
+let runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0,spawnBonus:0,xpBonus:0,novaChance:0};
 
-function pickType(){const r=Math.random();const boost=.04+EFF.boostChance()+(running?runMods.boost:0);if(r<.015)return 'SHIELD';if(r<.015+boost)return 'BOOST';return 'NORMAL';}
+function pickType(){const r=Math.random();const boost=.04+EFF.boostChance()+(running?runMods.boost:0);const nova=running?runMods.novaChance:0;if(r<.015)return 'SHIELD';if(r<.015+boost)return 'BOOST';if(r<.015+boost+nova)return 'NOVA';return 'NORMAL';}
 
 const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
 const overlay=document.getElementById('overlay'),banner=document.getElementById('banner'),flashOv=document.getElementById('flash-overlay');
@@ -570,10 +571,14 @@ function handleTap(ex,ey){
     }else{
       streak++;circles++;
       const gained=fluxGain(level,o.type)*runMods.flux*streakMult();flux+=gained;runEssRaw+=orbEssence(o.type);
-      if(o.type==='BOOST')Sound.boost();else Sound.tap(streak);
-      burst(o.x,o.y,col,o.type==='BOOST'?26:18);
-      floatText(o.x,o.y,(o.type==='BOOST'?'BOOST ':'+')+fmtSig(gained),o.type==='BOOST'?col:'#ffffff');
+      if(o.type==='BOOST')Sound.boost();else if(o.type==='NOVA')Sound.combo();else Sound.tap(streak);
+      burst(o.x,o.y,col,o.type==='BOOST'?26:o.type==='NOVA'?34:18);
+      floatText(o.x,o.y,(o.type==='BOOST'?'BOOST ':o.type==='NOVA'?'NOVA ':'+')+fmtSig(gained),o.type==='BOOST'?col:o.type==='NOVA'?'#c060ff':'#ffffff');
       bump(fluxEl);bump(circlesEl);bump(multEl);
+      if(o.type==='NOVA'){   // detona: revienta el resto de bolas en pantalla
+        screenFlash();
+        for(const q of orbs){if(q===o||q.popped||q.escaped||q.type==='SHIELD')continue;q.popped=true;streak++;circles++;const g2=fluxGain(level,q.type)*runMods.flux*streakMult();flux+=g2;runEssRaw+=orbEssence(q.type);xp+=1+EFF.xpBonus()+runMods.xpBonus;burst(q.x,q.y,ORB[q.type].color||lvCol(level),16);floatText(q.x,q.y,'+'+fmtSig(g2),'#c060ff');}
+      }
       if(streak>0&&streak%10===0)showCombo();
       xp+=1+EFF.xpBonus()+runMods.xpBonus;
       if(xp>=xpToNext(level)){xp=0;level++;Sound.level();flash(multEl,300);}
@@ -706,7 +711,7 @@ function loop(now){update(now);draw(now);if(running)animId=requestAnimationFrame
 function startGame(){
   Sound.init();
   orbs=[];particles=[];flux=0;xp=0;level=1;lives=3;streak=0;circles=0;runEssRaw=0;lastSec=-1;spawnFill=0;tickAcc=0;
-  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0,spawnBonus:0,xpBonus:0};runUp={};
+  runMods={speed:1,radius:1,flux:1,ess:1,life:1,boost:0,streakInc:0,target:0,spawnBonus:0,xpBonus:0,novaChance:0};runUp={};
   runMods.flux*=EFF.fluxMult();   // ×1.45 permanente del árbol de Essence
   DURATION=EFF.duration();timeLeft=DURATION;essMultRun=EFF.essMult();
   running=true;paused=true;   // congelado durante READY 3 2 1 GO
