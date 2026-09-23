@@ -226,6 +226,11 @@
   .up-bar { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); transition: width .2s; }
   .up.owned .up-bar { background: var(--mint); }
   .stat dd.bad { color: var(--warn); }
+  .up-lv { font-family: var(--display); font-size: 10px; letter-spacing: .06em; color: var(--mint); white-space: nowrap; }
+  .up-pips { display: flex; gap: 3px; margin-top: 4px; }
+  .up-pips:empty { display: none; }
+  .up-pips b { width: 10px; height: 4px; background: var(--edge); box-shadow: inset 0 0 0 1px var(--faint); }
+  .up-pips b.on { background: var(--mint); box-shadow: none; }
 
   .howto { color: var(--muted); font-size: 15px; }
   .howto p { margin: 6px 0 0; }
@@ -303,7 +308,7 @@
     </section>
 
     <section class="panel shop">
-      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag" id="ownedTag">0 / 4 owned</span></div>
+      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag" id="ownedTag">0 / 20 levels</span></div>
       <ul class="ups" id="ups"></ul>
     </section>
 
@@ -325,11 +330,18 @@
   const FLOOR = { soilMs: 5000, grimeMs: 11000, crumbleMs: 18000, sandMs: 24000 };
   const PILE_SLOW = 0.15, MIN_BELT = 0.4;
   const UPGRADES = [
-    { id: 'drum', name: 'Turbo Drum', desc: 'Wash cycle 20% faster', cost: 10, icon: 'drum' },
-    { id: 'belt', name: 'Wider Belt', desc: 'More clothes arrive', cost: 25, icon: 'belt' },
-    { id: 'washer2', name: 'Second Washer', desc: 'Wash two loads at once', cost: 60, icon: 'washer' },
-    { id: 'bot', name: 'Laundry Bot', desc: 'Sends clean loads for you', cost: 150, icon: 'bot' },
+    { id: 'drum', name: 'Turbo Drum', icon: 'drum', costs: [10, 25, 45, 70, 90],
+      desc: () => `Wash 10% faster · now ${(CFG.washMs / 1000).toFixed(1)}s` },
+    { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: [15, 35, 60, 80, 100],
+      desc: () => `+1 coin per load · now +${CFG.coinValue}` },
+    { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: [20, 40, 60, 80, 110],
+      desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
+    { id: 'washer2', name: 'Second Washer', icon: 'washer', costs: [45],
+      desc: () => 'Wash two loads at once' },
+    { id: 'bot', name: 'Laundry Bot', icon: 'bot', costs: [70, 90, 110, 120],
+      desc: (lv) => lv === 0 ? 'Sends clean loads for you' : `Bot moves 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
   ];
+  const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
 
   // ================= canvas & layout =================
   let W = 192, H = 128;
@@ -408,7 +420,7 @@
   };
 
   // ================= state =================
-  let save = { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: true, owned: {}, seen: {} };
+  let save = { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: true, lv: {}, seen: {} };
   let items = [];            // on the belt
   let floor = [];            // lying on the floor
   let piles = [];            // sand piles
@@ -432,14 +444,18 @@
   let nextId = 1;
   let now = 0;
 
-  const owned = (id) => !!save.owned[id];
+  const level = (id) => save.lv[id] || 0;
+  const owned = (id) => level(id) > 0;
   const washerCount = () => owned('washer2') ? 2 : 1;
   const sandAmount = () => piles.reduce((sum, pl) => sum + pl.amount, 0);
   const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * sandAmount());
   function applyUpgrades() {
     Object.assign(CFG, BASE);
-    if (owned('drum')) CFG.washMs = BASE.washMs * 0.8;
-    if (owned('belt')) { CFG.spawnMin = 1500; CFG.spawnVar = 1200; }
+    CFG.washMs = BASE.washMs * 0.9 ** level('drum');
+    CFG.coinValue = BASE.coinValue + level('soap');
+    const more = 1.15 ** level('belt');
+    CFG.spawnMin = BASE.spawnMin / more;
+    CFG.spawnVar = BASE.spawnVar / more;
   }
 
   // ================= helpers =================
@@ -601,6 +617,7 @@
     if (kind === 'drum') { P(2, 2, 10, 10, OUT); P(3, 3, 8, 8, '#b9bfd0'); P(4, 4, 6, 6, '#4f9fd6'); P(5, 5, 2, 1, '#fff'); P(9, 1, 3, 3, '#ffd23f'); }
     if (kind === 'belt') { P(1, 6, 12, 4, OUT); P(2, 7, 10, 2, '#9aa0b5'); P(3, 3, 3, 3, '#e05a5a'); P(8, 3, 3, 3, '#4a7fe0'); P(2, 10, 1, 3, OUT); P(11, 10, 1, 3, OUT); }
     if (kind === 'washer') { P(1, 2, 6, 10, OUT); P(2, 3, 4, 8, '#eef0f5'); P(3, 6, 2, 3, '#4f9fd6'); P(7, 2, 6, 10, OUT); P(8, 3, 4, 8, '#eef0f5'); P(9, 6, 2, 3, '#4f9fd6'); }
+    if (kind === 'soap') { P(4, 1, 6, 3, OUT); P(5, 2, 4, 1, '#e87ab8'); P(3, 4, 8, 9, OUT); P(4, 5, 6, 7, '#7fe0c4'); P(5, 7, 4, 3, '#ffffff'); P(10, 2, 2, 2, '#e8f7ff'); P(12, 5, 1, 1, '#e8f7ff'); }
     if (kind === 'bot') { P(3, 3, 8, 7, OUT); P(4, 4, 6, 5, '#7fe0c4'); P(5, 5, 1, 2, OUT); P(8, 5, 1, 2, OUT); P(6, 1, 2, 2, '#ffd23f'); P(4, 10, 2, 3, OUT); P(8, 10, 2, 3, OUT); }
     return c;
   }
@@ -611,42 +628,55 @@
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'up locked';
-    btn.innerHTML = `<span class="up-ico"></span><span><span class="up-name"></span><br><span class="up-desc"></span></span><span class="up-cost"><i></i><span></span></span><span class="up-bar"></span>`;
+    btn.innerHTML = `<span class="up-ico"></span><span><span class="up-name"></span> <span class="up-lv"></span><br><span class="up-desc"></span><span class="up-pips"></span></span><span class="up-cost"><i></i><span></span></span><span class="up-bar"></span>`;
     btn.querySelector('.up-ico').appendChild(drawIcon(u.icon));
     btn.querySelector('.up-name').textContent = u.name;
-    btn.querySelector('.up-desc').textContent = u.desc;
+    const pips = btn.querySelector('.up-pips');
+    if (u.costs.length > 1) u.costs.forEach(() => pips.appendChild(document.createElement('b')));
     btn.addEventListener('click', () => buy(u));
     li.appendChild(btn);
     $ups.appendChild(li);
-    shopEls[u.id] = { btn, cost: btn.querySelector('.up-cost span'), bar: btn.querySelector('.up-bar') };
+    shopEls[u.id] = {
+      btn, pips, cost: btn.querySelector('.up-cost span'), bar: btn.querySelector('.up-bar'),
+      lv: btn.querySelector('.up-lv'), desc: btn.querySelector('.up-desc'),
+    };
   }
+  const maxLevels = UPGRADES.reduce((n, u) => n + u.costs.length, 0);
   function renderShop() {
     let n = 0;
     for (const u of UPGRADES) {
       const el = shopEls[u.id];
-      const has = owned(u.id), can = !has && save.coins >= u.cost;
-      if (has) n++;
-      el.btn.className = 'up ' + (has ? 'owned' : can ? 'afford' : 'locked');
-      el.btn.disabled = has || !can;
-      el.btn.setAttribute('aria-label', `${u.name}: ${u.desc}. ${has ? 'Owned' : 'Costs ' + u.cost + ' coins'}`);
-      el.cost.textContent = has ? 'Owned' : fmt(u.cost);
-      el.bar.style.width = (has ? 100 : Math.min(100, save.coins / u.cost * 100)) + '%';
-      if (can) once('afford-' + u.id, `New upgrade ready: ${u.name}!`, 'good');
+      const lv = level(u.id), max = u.costs.length, maxed = lv >= max;
+      const cost = maxed ? 0 : u.costs[lv];
+      const can = !maxed && save.coins >= cost;
+      n += lv;
+      el.btn.className = 'up ' + (maxed ? 'owned' : can ? 'afford' : 'locked');
+      el.btn.disabled = maxed || !can;
+      el.lv.textContent = max > 1 ? `Lv ${lv}/${max}` : '';
+      el.desc.textContent = u.desc(lv);
+      [...el.pips.children].forEach((b, i) => b.classList.toggle('on', i < lv));
+      el.cost.textContent = maxed ? (max > 1 ? 'Max' : 'Owned') : fmt(cost);
+      el.btn.setAttribute('aria-label', `${u.name}, level ${lv} of ${max}: ${u.desc(lv)}. ${maxed ? 'Maxed' : 'Next level costs ' + cost + ' coins'}`);
+      el.bar.style.width = (maxed ? 100 : Math.min(100, save.coins / cost * 100)) + '%';
+      if (can) once(`afford-${u.id}-${lv}`, lv ? `${u.name} Lv ${lv + 1} is ready!` : `New upgrade ready: ${u.name}!`, 'good');
     }
-    $('ownedTag').textContent = `${n} / ${UPGRADES.length} owned`;
+    $('ownedTag').textContent = `${n} / ${maxLevels} levels`;
   }
   function buy(u) {
-    if (owned(u.id) || save.coins < u.cost) return;
-    save.coins -= u.cost;
-    save.owned[u.id] = true;
+    const lv = level(u.id);
+    if (lv >= u.costs.length || save.coins < u.costs[lv]) return;
+    save.coins -= u.costs[lv];
+    save.lv[u.id] = lv + 1;
     applyUpgrades();
     persist();
     renderStats();
-    toast(`Bought ${u.name}!`, 'good');
-    [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.09, 'square', 0.04, 0, i * 0.07));
+    toast(u.costs.length > 1 ? `${u.name} Lv ${lv + 1}!` : `Bought ${u.name}!`, 'good');
+    [523, 659, 784, 1047].forEach((f, i) => beep(f + lv * 60, 0.09, 'square', 0.04, 0, i * 0.07));
     if (u.id === 'washer2') { const w = WASHERS[1]; emit('spark', w.x + 15, w.y + 18, 16, { spread: 14, color: '#ffffff', vy: -30, life: 0.8 }); }
-    if (u.id === 'bot') { bot.x = BOTHOME.x; bot.y = BOTHOME.y; emit('spark', bot.x, bot.y - 8, 14, { spread: 8, color: '#7fe0c4', vy: -30, life: 0.8 }); }
+    if (u.id === 'bot') { if (lv === 0) { bot.x = BOTHOME.x; bot.y = BOTHOME.y; } emit('spark', bot.x, bot.y - 8, 14, { spread: 8, color: '#7fe0c4', vy: -30, life: 0.8 }); }
     if (u.id === 'drum') WASHERS.slice(0, washerCount()).forEach(w => emit('spark', w.x + 15, w.y + 4, 8, { spread: 10, color: '#ffd23f', vy: -25, life: 0.6 }));
+    if (u.id === 'soap') emit('spark', STATION.x + 15, STATION.y + 20, 10, { spread: 10, color: '#ffd84a', vy: -25, life: 0.7 });
+    if (u.id === 'belt') for (let k = 0; k < 5; k++) emit('spark', BELT.x0 + 10 + k * 15, BELT.y, 2, { spread: 3, color: '#f0c84a', vy: -20, life: 0.5 });
   }
 
   // ================= particles =================
@@ -1374,7 +1404,7 @@
   }
 
   function moveBot(tx, ty, dt) {
-    const dx = tx - bot.x, dy = ty - bot.y, d = Math.hypot(dx, dy), sp = 42 * dt;
+    const dx = tx - bot.x, dy = ty - bot.y, d = Math.hypot(dx, dy), sp = 42 * 1.25 ** Math.max(0, level('bot') - 1) * dt;
     if (Math.abs(dx) > 0.5) bot.face = Math.sign(dx);
     if (d <= sp) { bot.x = tx; bot.y = ty; return true; }
     bot.x += dx / d * sp; bot.y += dy / d * sp;
@@ -1643,7 +1673,8 @@
       }
     } catch (e) {}
     if (data && data.save) Object.assign(save, data.save);
-    save.owned = save.owned || {};
+    save.lv = save.lv || {};
+    if (save.owned) { for (const k in save.owned) if (save.owned[k] && !save.lv[k]) save.lv[k] = 1; delete save.owned; }
     save.seen = save.seen || {};
     $sfx.textContent = save.sound ? 'Sound on' : 'Sound off';
     $sfx.setAttribute('aria-pressed', String(save.sound));
