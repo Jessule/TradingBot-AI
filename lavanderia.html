@@ -58,12 +58,23 @@
   #coins.bump { animation: bump .35s steps(3); }
   @keyframes bump { 50% { transform: translateY(-4px) scale(1.25); } }
   .stage { position: relative; }
-  canvas {
+  #handIcon {
+    width: 28px; height: 24px;
+    image-rendering: pixelated;
+    background: #3a3b66;
+    box-shadow: 0 0 0 2px var(--edge);
     display: block;
+  }
+  #game {
+    display: block;
+    margin-inline: auto;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
     width: 100%;
     max-width: 100%;
     height: auto;
     aspect-ratio: 3 / 2;
+    cursor: default;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     border: 4px solid var(--edge);
@@ -101,6 +112,24 @@
     margin-bottom: 2px;
   }
   li b { color: var(--ink); font-weight: 600; }
+  /* móvil en vertical: mapa alto que cabe en la pantalla */
+  body[data-layout="tall"] { padding-block: 12px 24px; }
+  body[data-layout="tall"] main { gap: 10px; }
+  body[data-layout="tall"] header { flex-wrap: nowrap; }
+  body[data-layout="tall"] h1 { font-size: 19px; }
+  body[data-layout="tall"] h1 span { display: block; }
+  body[data-layout="tall"] .hud { gap: 6px; flex-wrap: nowrap; }
+  body[data-layout="tall"] .chip { padding: 4px 8px 6px; gap: 6px; font-size: 14px; }
+  body[data-layout="tall"] .chip small { display: none; }
+  body[data-layout="tall"] #hand { display: none; }
+  body[data-layout="tall"] #game {
+    aspect-ratio: 2 / 3;
+    width: min(100%, calc((100dvh - 150px) * 2 / 3));
+    border-width: 3px;
+  }
+  body[data-layout="tall"] #msg { font-size: 16px; min-height: 2.9em; text-align: center; }
+  body[data-layout="tall"] ol { grid-template-columns: 1fr 1fr; gap: 8px; }
+  body[data-layout="tall"] li { font-size: 14px; padding: 8px 10px; }
   @media (prefers-reduced-motion: reduce) { #coins.bump { animation: none; } }
 </style>
 
@@ -108,7 +137,7 @@
   <header>
     <h1>Pixel <span>Lavandería</span></h1>
     <div class="hud">
-      <div class="chip"><small>Mano</small><span id="hand">vacía</span></div>
+      <div class="chip"><small>Mano</small><canvas id="handIcon" width="14" height="12" aria-hidden="true"></canvas><span id="hand">vacía</span></div>
       <div class="chip"><span class="coin" aria-hidden="true"></span><span id="coins">0</span></div>
     </div>
   </header>
@@ -128,11 +157,11 @@
 
 <script>
 (() => {
-  const W = 192, H = 128;
+  let W = 192, H = 128;
   const cv = document.getElementById('game');
-  cv.width = W; cv.height = H;
-  const g = cv.getContext('2d');
-  g.imageSmoothingEnabled = false;
+  let g = cv.getContext('2d');
+  const handCv = document.getElementById('handIcon');
+  const handCtx = handCv.getContext('2d');
 
   const $coins = document.getElementById('coins');
   const $hand = document.getElementById('hand');
@@ -174,12 +203,40 @@
     ],
   };
 
-  const BELT = { x0: 0, x1: 84, y: 36, speed: 10 };
-  const BIN = { x: 88, y: 40, w: 17 };
-  const WASHER = { x: 74, y: 66, w: 30, h: 36 };
-  const STATION = { x: 140, y: 76, w: 30, h: 28 };
-  const PIPE = { x: 149, w: 12 };
+  // Dos mapas: horizontal (ordenador) y vertical (móvil)
+  const LAYOUTS = {
+    wide: {
+      W: 192, H: 128,
+      BELT: { x0: 0, x1: 84, y: 36, speed: 10 },
+      BIN: { x: 88, y: 40, w: 17 },
+      WASHER: { x: 74, y: 66, w: 30, h: 36 },
+      STATION: { x: 140, y: 76, w: 30, h: 28 },
+      PIPE: { x: 149, w: 12 },
+      WIN: { x: 100 }, PLANT: { x: 8, y: 110 },
+    },
+    tall: {
+      W: 128, H: 192,
+      BELT: { x0: 0, x1: 70, y: 36, speed: 9 },
+      BIN: { x: 74, y: 40, w: 17 },
+      WASHER: { x: 16, y: 84, w: 30, h: 36 },
+      STATION: { x: 92, y: 132, w: 30, h: 28 },
+      PIPE: { x: 101, w: 12 },
+      WIN: { x: 64 }, PLANT: { x: 10, y: 170 },
+    },
+  };
+  let layoutName = '', BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT;
+  function applyLayout() {
+    const name = window.innerWidth < 700 && window.innerHeight > window.innerWidth ? 'tall' : 'wide';
+    if (name === layoutName) return;
+    layoutName = name;
+    ({ W, H, BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT } = LAYOUTS[name]);
+    cv.width = W; cv.height = H;
+    g.imageSmoothingEnabled = false;
+    document.body.dataset.layout = name;
+  }
+  applyLayout();
   const WASH_MS = 5000;
+  let touchMode = false;
 
   let coins = 0;
   let items = [];
@@ -297,11 +354,13 @@
     R(0, 23, W, 4, '#3d3357');
     R(0, 23, W, 1, '#4d4270');
     // ventana
+    g.save(); g.translate(WIN.x - 100, 0);
     R(100, 3, 28, 16, '#3d3357');
     R(102, 5, 24, 12, '#26346a');
     disc(119, 9, 3, '#fff3c2'); disc(120, 8, 2, '#26346a');
     R(106, 7, 1, 1, '#ffffff'); R(111, 12, 1, 1, '#ffffff'); R(123, 14, 1, 1, '#c9d4ff');
     R(113, 5, 2, 12, '#3d3357'); R(102, 10, 24, 1, '#3d3357');
+    g.restore();
     // estantería con detergentes
     R(22, 15, 40, 2, '#3d3357'); R(24, 17, 2, 3, '#3d3357'); R(58, 17, 2, 3, '#3d3357');
     R(25, 6, 9, 9, OUT); R(26, 7, 7, 8, '#e05a5a'); R(27, 9, 5, 3, '#ffffff');
@@ -312,6 +371,7 @@
     R(0, 24, 8, 22, OUT);
     for (let i = 0; i < 4; i++) R(1 + i * 2 - (i % 2 ? 0 : 0), 25, 1, 20, i % 2 ? '#8fb6c9' : '#b7d4e2');
     // planta
+    g.save(); g.translate(PLANT.x - 8, PLANT.y - 110);
     R(8, 110, 12, 10, OUT); R(9, 111, 10, 8, '#c96b4a'); R(9, 111, 10, 2, '#e08a66');
     for (const [lx, ly, lw, lh] of [[11, 100, 3, 10], [7, 103, 4, 3], [15, 102, 5, 3], [14, 97, 3, 6], [5, 106, 5, 3], [17, 106, 5, 3]]) {
       R(lx - 1, ly - 1, lw + 2, lh + 2, OUT);
@@ -319,6 +379,7 @@
     for (const [lx, ly, lw, lh] of [[11, 100, 3, 10], [7, 103, 4, 3], [15, 102, 5, 3], [14, 97, 3, 6], [5, 106, 5, 3], [17, 106, 5, 3]]) {
       R(lx, ly, lw, lh, '#3f9a55');
     }
+    g.restore();
     // alfombrilla delante de la lavadora
     R(WASHER.x - 4, WASHER.y + WASHER.h + 2, WASHER.w + 8, 10, '#e87ab8');
     R(WASHER.x - 2, WASHER.y + WASHER.h + 4, WASHER.w + 4, 6, '#f29acb');
@@ -327,7 +388,7 @@
   function drawBelt(t) {
     const { x0, x1, y } = BELT;
     R(x0, y + 20, x1 - x0, 2, '#8bbfae');
-    for (const lx of [10, 42, 74]) { R(lx, y + 8, 3, 13, OUT); R(lx + 1, y + 8, 1, 12, '#8a8fa3'); }
+    for (const lx of [10, x1 / 2 | 0, x1 - 10]) { R(lx, y + 8, 3, 13, OUT); R(lx + 1, y + 8, 1, 12, '#8a8fa3'); }
     R(x0, y - 1, x1 - x0 + 2, 10, OUT);
     R(x0, y, x1 - x0, 3, '#55556a');
     const off = (t / 1000 * BELT.speed) % 6;
@@ -465,17 +526,18 @@
   // ---------- lógica ----------
   const itemY = (it) => BELT.y - it.h + it.drop;
   const itemBox = (it) => ({ x: it.x, y: itemY(it), w: it.w, h: it.h });
-  const stationBox = { x: STATION.x, y: 30, w: STATION.w, h: STATION.y + STATION.h - 30 };
 
   function targetAt(px, py) {
+    const pad = touchMode ? 7 : 4;
+    const stationBox = { x: STATION.x, y: 30, w: STATION.w, h: STATION.y + STATION.h - 30 };
     if (!held) {
       for (let i = items.length - 1; i >= 0; i--) {
         const it = items[i];
-        if (it.drop < 3 && inRect(px, py, itemBox(it), 4)) return { k: 'item', i, box: itemBox(it) };
+        if (it.drop < 3 && inRect(px, py, itemBox(it), pad + 1)) return { k: 'item', i, box: itemBox(it) };
       }
     }
-    if (inRect(px, py, WASHER, 4)) return { k: 'washer', box: WASHER };
-    if (inRect(px, py, stationBox, 3)) return { k: 'station', box: STATION };
+    if (inRect(px, py, WASHER, pad)) return { k: 'washer', box: WASHER };
+    if (inRect(px, py, stationBox, pad)) return { k: 'station', box: STATION };
     return null;
   }
 
@@ -612,6 +674,16 @@
     }
   }
 
+  // la prenda que llevas, dibujada en el marcador (en el móvil no hay cursor)
+  function drawHandIcon(t) {
+    handCtx.clearRect(0, 0, handCv.width, handCv.height);
+    if (!held) return;
+    const main = g;
+    g = handCtx;
+    drawItem(held, (handCv.width - held.w) / 2, (handCv.height - held.h) / 2 + 1, t);
+    g = main;
+  }
+
   let last = 0;
   function loop(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
@@ -619,27 +691,40 @@
     now = ts;
     update(dt);
     draw(ts);
+    drawHandIcon(ts);
     requestAnimationFrame(loop);
   }
 
   // ---------- entrada ----------
   function toLogical(e) {
     const r = cv.getBoundingClientRect();
-    const border = 4;
+    const border = parseFloat(getComputedStyle(cv).borderLeftWidth) || 0;
     return {
       x: (e.clientX - r.left - border) / (r.width - border * 2) * W,
       y: (e.clientY - r.top - border) / (r.height - border * 2) * H,
     };
   }
-  cv.addEventListener('pointermove', (e) => { const p = toLogical(e); ptr = { x: p.x, y: p.y, inside: true }; });
+  cv.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const p = toLogical(e); ptr = { x: p.x, y: p.y, inside: true };
+  });
   cv.addEventListener('pointerleave', () => { ptr.inside = false; });
   cv.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    touchMode = e.pointerType !== 'mouse';
     const p = toLogical(e);
-    ptr = { x: p.x, y: p.y, inside: true };
+    ptr = { x: p.x, y: p.y, inside: !touchMode };
     tap(p.x, p.y);
   });
 
+  window.addEventListener('resize', applyLayout);
+  cv.addEventListener('contextmenu', (e) => e.preventDefault());
+
   function start(data) {
+    if (window.matchMedia && matchMedia('(pointer: coarse)').matches) {
+      touchMode = true;
+      say('Toca una prenda sucia de la cinta para cogerla.');
+    }
     try { coins = parseInt(localStorage.getItem('lav-coins'), 10) || 0; } catch (e) { coins = 0; }
     if (data && typeof data.coins === 'number') coins = Math.max(coins, data.coins);
     // una prenda ya en la cinta para empezar
