@@ -310,7 +310,7 @@
     <section class="panel howto">
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>.</p>
-      <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand. Sand slows the belt, so <b>drag the dustpan</b> onto it to sweep it up.</p>
+      <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -345,7 +345,7 @@
       STATION: { x: 140, y: 74, w: 30, h: 28 },
       PIPE: { x: 149, w: 12 },
       WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 },
-      PAN: { x: 172, y: 110 }, BOT: { x: 124, y: 116 },
+      PAN: { x: 174, y: 112 }, BROOM: { x: 140, y: 120 }, TRASH: { x: 176, y: 84, w: 13, h: 16 }, BOT: { x: 124, y: 116 },
     },
     tall: {
       W: 128, H: 192,
@@ -355,18 +355,18 @@
       STATION: { x: 92, y: 134, w: 30, h: 28 },
       PIPE: { x: 101, w: 12 },
       WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null,
-      PAN: { x: 34, y: 176 }, BOT: { x: 72, y: 184 },
+      PAN: { x: 30, y: 176 }, BROOM: { x: 50, y: 186 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 86, y: 182 },
     },
   };
-  let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, PAN, BOTHOME;
+  let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, PANHOME, BROOMHOME, TRASH, BOTHOME;
   function applyLayout() {
     const name = window.innerWidth < 700 && window.innerHeight > window.innerWidth ? 'tall' : 'wide';
     if (name === layoutName) return;
     const prev = layoutName ? { W, H } : null;
     layoutName = name;
     const L = LAYOUTS[name];
-    ({ W, H, BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, PAN } = L);
-    BOTHOME = L.BOT;
+    ({ W, H, BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, TRASH } = L);
+    BOTHOME = L.BOT; PANHOME = L.PAN; BROOMHOME = L.BROOM;
     cv.width = W; cv.height = H;
     g.imageSmoothingEnabled = false;
     document.body.dataset.layout = name;
@@ -376,6 +376,8 @@
       for (const it of floor) { it.fx = Math.min(it.fx / prev.W * W, W - it.w - 2); it.fy = Math.max(30, Math.min(it.fy / prev.H * H, H - it.h - 2)); }
       for (const pl of piles) { pl.x = Math.min(pl.x / prev.W * W, W - 8); pl.y = Math.max(34, Math.min(pl.y / prev.H * H, H - 2)); }
       bot.x = BOTHOME.x; bot.y = BOTHOME.y; bot.s = bot.item ? 'toStation' : 'idle';
+      if (hand && hand.kind !== 'item') hand = null;
+      resetTools();
     }
   }
 
@@ -413,6 +415,14 @@
   let hand = null;           // what the player is holding
   let washers = [{ s: 'idle', item: null, t0: 0 }, { s: 'idle', item: null, t0: 0 }];
   let bot = { x: 0, y: 0, s: 'idle', wi: -1, item: null, face: 1 };
+  const PAN_CAP = 4;
+  let pan = { x: 0, y: 0, face: -1, load: 0 };   // dustpan lying on the floor
+  let broom = { x: 0, y: 0 };                     // broom head position
+  let trashOpenAt = -1e9, sweepSfxAt = 0, fullWarnAt = -1e9;
+  function resetTools() {
+    pan.x = PANHOME.x; pan.y = PANHOME.y; pan.face = -1;
+    broom.x = BROOMHOME.x; broom.y = BROOMHOME.y;
+  }
   let sends = [];
   let parts = [];
   let recent = [];
@@ -424,7 +434,8 @@
 
   const owned = (id) => !!save.owned[id];
   const washerCount = () => owned('washer2') ? 2 : 1;
-  const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * piles.length);
+  const sandAmount = () => piles.reduce((sum, pl) => sum + pl.amount, 0);
+  const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * sandAmount());
   function applyUpgrades() {
     Object.assign(CFG, BASE);
     if (owned('drum')) CFG.washMs = BASE.washMs * 0.8;
@@ -543,12 +554,13 @@
   let lastFloorText = '';
   function renderFloor() {
     const n = piles.length;
-    const txt = n ? `${n} sand pile${n > 1 ? 's' : ''} · belt -${Math.round((1 - beltFactor()) * 100)}%` : 'Clean';
+    let txt = n ? `${n} sand pile${n > 1 ? 's' : ''} · belt -${Math.round((1 - beltFactor()) * 100)}%` : 'Clean';
+    if (pan.load > 0) txt += ` · dustpan ${pan.load}/${PAN_CAP}`;
     if (txt === lastFloorText) return;
     lastFloorText = txt;
     const dd = $('stFloor');
     dd.textContent = txt;
-    dd.classList.toggle('bad', n > 0);
+    dd.classList.toggle('bad', n > 0 || pan.load >= PAN_CAP);
   }
   function renderRate() {
     recent = recent.filter(t => now - t < 60000);
@@ -722,34 +734,89 @@
     }
   }
 
-  function drawPile(pl, t) {
+  const pileSize = (pl) => Math.min(1.8, 0.7 + 0.3 * pl.amount);
+  function drawPile(pl) {
     const x = Math.round(pl.x), y = Math.round(pl.y);
-    oval(x, y + 1, 8, 1, 'rgba(20,50,60,.2)');
-    R(x - 7, y - 1, 14, 2, OUT); R(x - 5, y - 3, 10, 2, OUT); R(x - 3, y - 5, 6, 2, OUT);
-    R(x - 6, y - 1, 12, 1, SAND[2]);
-    R(x - 5, y - 2, 10, 1, SAND[1]); R(x - 4, y - 3, 8, 1, SAND[1]);
-    R(x - 3, y - 4, 6, 1, SAND[0]); R(x - 2, y - 5, 4, 1, SAND[0]);
-    R(x - 2, y - 4, 2, 1, SAND[3]);
-    const s = pl.seed;
-    R(x - 4 + (s * 7 | 0) % 8, y - 2, 1, 1, SAND[2]); R(x - 3 + (s * 13 | 0) % 6, y - 3, 1, 1, SAND[3]);
-    R(x + 3, y - 2, 1, 1, SAND[3]);
+    const s = pileSize(pl);
+    const hgt = Math.round(3 + 2 * s);
+    const wid = (i) => Math.max(2, Math.round(14 * s * (1 - (i / hgt) * 0.72)));
+    oval(x, y + 1, (wid(0) >> 1) + 1, 1, 'rgba(20,50,60,.2)');
+    for (let i = 0; i < hgt; i++) { const w = wid(i); R(x - (w >> 1) - 1, y - 1 - i, w + 2, 1, OUT); }
+    R(x - (wid(hgt - 1) >> 1), y - 1 - hgt, wid(hgt - 1), 1, OUT);
+    for (let i = 0; i < hgt; i++) {
+      const w = wid(i);
+      R(x - (w >> 1), y - 1 - i, w, 1, i < hgt * 0.35 ? SAND[2] : i < hgt * 0.75 ? SAND[1] : SAND[0]);
+    }
+    R(x - 2, y - hgt + 1, 2, 1, SAND[3]);
+    const sd = pl.seed;
+    R(x - 3 + (sd * 7 | 0) % 6, y - 2, 1, 1, SAND[3]);
+    R(x + 2 - (sd * 11 | 0) % 4, y - 3, 1, 1, SAND[2]);
   }
 
-  function drawPan(x, y, lifted) {
+  // dustpan: mouth on the left when face = -1, mirrored when face = 1
+  function drawPan(x, y, lifted, face, load) {
     x = Math.round(x); y = Math.round(y);
-    if (!lifted) oval(x + 7, y + 10, 8, 1, 'rgba(20,50,60,.22)');
-    // handle
+    if (!lifted) oval(x + 6, y + 10, 9, 1, 'rgba(20,50,60,.22)');
+    g.save();
+    if (face > 0) { g.translate(x * 2 + 12, 0); g.scale(-1, 1); }
     R(x + 9, y - 1, 6, 3, OUT); R(x + 10, y, 4, 1, '#f0c84a');
-    // tray
     R(x - 1, y + 1, 12, 9, OUT);
     R(x, y + 2, 10, 7, '#e05a5a');
     R(x, y + 2, 10, 1, '#f08a8a');
     R(x, y + 7, 10, 2, '#b43c3c');
     R(x + 1, y + 4, 1, 3, '#f08a8a');
-    // lip
-    R(x - 2, y + 9, 3, 2, OUT); R(x - 1, y + 9, 1, 1, '#9aa0b5');
+    if (load > 0) {
+      const hh = Math.min(6, 1 + load * 1.4 | 0);
+      R(x, y + 9 - hh, 9, hh, SAND[1]);
+      R(x, y + 9 - hh, 9, 1, SAND[0]);
+      R(x + 3, y + 9 - hh, 2, 1, SAND[3]);
+    }
+    R(x - 3, y + 8, 4, 3, OUT); R(x - 2, y + 9, 3, 1, '#9aa0b5');
+    g.restore();
   }
-  const panBox = () => ({ x: PAN.x - 2, y: PAN.y - 1, w: 17, h: 12 });
+  const panBox = () => ({ x: pan.x - 3, y: pan.y - 2, w: 19, h: 13 });
+  const mouthZone = () => pan.face < 0
+    ? { x: pan.x - 9, y: pan.y - 1, w: 11, h: 13 }
+    : { x: pan.x + 10, y: pan.y - 1, w: 11, h: 13 };
+
+  function drawBroomFloor(x, y) {
+    x = Math.round(x); y = Math.round(y);
+    oval(x + 8, y + 4, 12, 1, 'rgba(20,50,60,.2)');
+    R(x + 1, y - 1, 19, 3, OUT); R(x + 2, y, 17, 1, '#b07a5c');
+    R(x - 3, y - 5, 6, 10, OUT);
+    R(x - 2, y - 4, 4, 8, '#e8c35a');
+    R(x - 2, y - 4, 1, 8, '#f5dc8a'); R(x + 1, y - 4, 1, 8, '#b8923a');
+    R(x - 2, y - 1, 4, 1, '#c9528f');
+  }
+  function drawBroomHeld(x, y, t, moving) {
+    x = Math.round(x); y = Math.round(y);
+    oval(x, y + 3, 7, 1, 'rgba(20,30,50,.3)');
+    const hx = (i) => x + 2 + Math.round(i * 0.55);
+    for (let i = 0; i < 20; i++) R(hx(i) - 1, y - 4 - i, 3, 1, OUT);
+    for (let i = 0; i < 20; i++) R(hx(i), y - 4 - i, 1, 1, '#b07a5c');
+    R(x - 6, y - 5, 13, 4, OUT); R(x - 5, y - 4, 11, 2, '#c9528f');
+    R(x - 6, y - 1, 13, 4, OUT);
+    for (let i = -5; i <= 5; i++) {
+      const wig = moving ? ((i + (t / 50 | 0)) & 1) : 0;
+      R(x + i + (moving ? (t / 80 | 0) % 2 : 0), y - 1, 1, 3 - wig, i % 2 ? '#e8c35a' : '#f5dc8a');
+    }
+  }
+  const broomBox = () => ({ x: broom.x - 4, y: broom.y - 6, w: 25, h: 12 });
+
+  function drawTrash() {
+    const { x, y, w, h } = TRASH;
+    const lid = now - trashOpenAt < 450 ? -4 : 0;
+    oval(x + w / 2, y + h + 1, w / 2 + 2, 2, 'rgba(20,50,60,.22)');
+    R(x - 1, y + 2, w + 2, h - 1, OUT);
+    R(x, y + 3, w, h - 3, '#8a93a8');
+    for (let i = 0; i < 3; i++) R(x + 3 + i * 3, y + 5, 1, h - 8, '#6f778c');
+    R(x + 1, y + 3, 1, h - 3, '#b4bccd');
+    R(x, y + h - 2, w, 1, '#6f778c');
+    R(x - 2, y + lid, w + 4, 3, OUT);
+    R(x - 1, y + 1 + lid, w + 2, 1, '#b4bccd');
+    R(x + (w >> 1) - 1, y - 1 + lid, 3, 1, OUT);
+  }
+  const trashBox = () => ({ x: TRASH.x - 2, y: TRASH.y - 3, w: TRASH.w + 4, h: TRASH.h + 5 });
 
   function drawBot(t) {
     const x = Math.round(bot.x), y = Math.round(bot.y);
@@ -1024,7 +1091,7 @@
   const itemY = (it) => BELT.y - 1 - it.h + it.drop;
   const itemBox = (it) => ({ x: it.x, y: itemY(it), w: it.w, h: it.h });
   const floorBox = (it) => ({ x: it.fx, y: it.fy, w: it.w, h: it.h });
-  const pileBox = (pl) => ({ x: pl.x - 7, y: pl.y - 6, w: 14, h: 7 });
+  const pileBox = (pl) => { const s = pileSize(pl), w = Math.round(14 * s), hh = Math.round(3 + 2 * s); return { x: pl.x - w / 2, y: pl.y - hh - 2, w, h: hh + 3 }; };
   const stationBox = () => ({ x: STATION.x - 2, y: STATION.y - 26, w: STATION.w + 4, h: STATION.h + 26 });
   const washerBox = (i) => WASHERS[i];
   const beltZone = () => ({ x: BELT.x0 + 8, y: BELT.y - 14, w: BELT.x1 - BELT.x0 - 12, h: 20 });
@@ -1036,6 +1103,8 @@
       const it = items[i];
       if (it.drop < 3 && inRect(px, py, itemBox(it), pad + 1)) return { src: 'belt', i };
     }
+    if (inRect(px, py, panBox(), pad)) return { src: 'pan' };
+    if (inRect(px, py, broomBox(), pad)) return { src: 'broom' };
     let best = null;
     floor.forEach((it, i) => { if (inRect(px, py, floorBox(it), pad) && (!best || it.fy > floor[best.i].fy)) best = { src: 'floor', i }; });
     if (best) return best;
@@ -1043,7 +1112,6 @@
       const w = WASHERS[i];
       if (washers[i].s === 'done' && (inRect(px, py, w, pad) || inRect(px, py, { x: w.x, y: w.y - 20, w: w.w, h: 20 }, pad))) return { src: 'washer', i };
     }
-    if (inRect(px, py, panBox(), pad)) return { src: 'pan' };
     return null;
   }
   function dropTargetAt(px, py) {
@@ -1089,9 +1157,16 @@
       emit('spark', w.x + 15, w.y + 16, 6, { spread: 8, color: '#ffffff', vy: -20, life: 0.6 });
       beep(660, 0.05); beep(990, 0.08, 'square', 0.04, 0, 0.05);
     } else {
-      hand = { kind: 'pan' };
-      beep(330, 0.05, 'triangle', 0.05);
-      if (!piles.length) toast('No sand to sweep right now.');
+      if (pk.src === 'pan') {
+        hand = { kind: 'pan' };
+        beep(330, 0.05, 'triangle', 0.05);
+        if (!piles.length && !pan.load) toast('No sand to clean up right now.');
+      } else {
+        hand = { kind: 'broom', lastX: p.x, lastY: p.y };
+        beep(260, 0.05, 'triangle', 0.05);
+        if (!piles.length) toast('Nothing to sweep right now.');
+        else if (!save.seen.broom) once('broom', 'Push the sand into the dustpan\'s open side.', '');
+      }
     }
     Object.assign(hand, { dragging: true, moved: false, sx: p.x, sy: p.y, tx: p.x, ty: p.y });
   }
@@ -1126,21 +1201,101 @@
     beep(220, 0.06, 'triangle', 0.04);
   }
 
-  function sweep(i) {
-    const pl = piles.splice(i, 1)[0];
-    for (let k = 0; k < 14; k++) emit('sand', pl.x, pl.y - 2, 1, { spread: 6, vy: rand(-40, -15), vx: rand(-25, 25), life: 0.5, color: SAND[k % 4] });
-    emit('spark', pl.x, pl.y - 5, 4, { spread: 5, color: '#ffffff', vy: -20, life: 0.5 });
-    beep(900, 0.12, 'sawtooth', 0.025, -700);
-    beep(1200, 0.05, 'square', 0.03, 0, 0.12);
+  function placePan(p) {
+    pan.x = clamp(p.x - 6, 4, W - 18);
+    pan.y = clamp(p.y - 5, 30, H - 12);
+    let near = null, nd = 1e9;
+    for (const pl of piles) { const d = Math.hypot(pl.x - (pan.x + 6), pl.y - (pan.y + 8)); if (d < nd) { nd = d; near = pl; } }
+    if (near) pan.face = near.x < pan.x + 6 ? -1 : 1;
+    beep(200, 0.06, 'triangle', 0.05);
+    emit('dust', pan.x + 6, pan.y + 10, 3, { spread: 5, vy: -10, life: 0.4 });
+    if (near && nd < 30 && pan.load < PAN_CAP) once('panPlaced', 'Now grab the broom and push the sand in.', '');
+  }
+  function emptyPan() {
+    if (pan.load <= 0) { toast('The dustpan is already empty.'); return false; }
+    for (let k = 0; k < 16; k++) emit('sand', TRASH.x + TRASH.w / 2, TRASH.y - 2, 1, { spread: 4, vy: rand(-45, -20), vx: rand(-15, 15), life: 0.45, color: SAND[k % 4] });
+    emit('spark', TRASH.x + TRASH.w / 2, TRASH.y - 6, 5, { spread: 6, color: '#ffffff', vy: -25, life: 0.6 });
+    trashOpenAt = now;
+    pan.load = 0;
+    beep(520, 0.07, 'square', 0.04); beep(160, 0.18, 'sawtooth', 0.03, -80, 0.05); beep(880, 0.08, 'square', 0.035, 0, 0.2);
     renderFloor();
-    toast(piles.length ? `Swept! ${piles.length} pile${piles.length > 1 ? 's' : ''} left.` : 'Floor is clean. The belt is back to full speed.', 'good');
+    toast(piles.length ? `Emptied! ${piles.length} pile${piles.length > 1 ? 's' : ''} still on the floor.` : 'Trash taken out. The floor is spotless!', 'good');
+    return true;
+  }
+  function mergePiles() {
+    for (let i = 0; i < piles.length; i++) {
+      for (let j = piles.length - 1; j > i; j--) {
+        const a = piles[i], b = piles[j];
+        if (Math.hypot(a.x - b.x, a.y - b.y) < 5) {
+          a.x = (a.x * a.amount + b.x * b.amount) / (a.amount + b.amount);
+          a.y = Math.max(a.y, b.y);
+          a.amount += b.amount;
+          piles.splice(j, 1);
+        }
+      }
+    }
+  }
+  function collectIntoPan() {
+    if (hand && hand.kind === 'pan') return;
+    const z = mouthZone();
+    for (let i = piles.length - 1; i >= 0; i--) {
+      const pl = piles[i];
+      if (!inRect(pl.x, pl.y - 2, z, 0)) continue;
+      if (pan.load + pl.amount > PAN_CAP) {
+        if (now - fullWarnAt > 2500) { fullWarnAt = now; toast('The dustpan is full. Empty it in the trash can.', 'warn'); }
+        continue;
+      }
+      pan.load += pl.amount;
+      piles.splice(i, 1);
+      for (let k = 0; k < 10; k++) emit('sand', pan.x + 5, pan.y + 6, 1, { spread: 4, vy: rand(-30, -10), vx: rand(-10, 10), life: 0.4, color: SAND[k % 4], floorY: pan.y + 8 });
+      beep(700, 0.06, 'square', 0.035, 300);
+      renderFloor();
+      toast(piles.length ? `In the dustpan! ${piles.length} pile${piles.length > 1 ? 's' : ''} left.` : 'All in! Carry the dustpan to the trash can.', 'good');
+    }
+  }
+  function broomPush(a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
+    if (dist < 0.2) return;
+    const steps = Math.ceil(dist / 1.5);
+    let pushed = false;
+    const z = mouthZone(), mx = z.x + z.w / 2, my = z.y + z.h / 2;
+    for (let s = 1; s <= steps; s++) {
+      const hx = a.x + dx * s / steps, hy = a.y + dy * s / steps;
+      for (const pl of piles) {
+        // a sweep only moves sand toward the dustpan's open side
+        if ((mx - pl.x) * dx + (my - (pl.y - 2)) * dy <= 0) continue;
+        if (Math.abs(pl.x - hx) < 7 && Math.abs(pl.y - 2 - hy) < 5) {
+          pl.x = clamp(pl.x + dx / steps, 6, W - 6);
+          pl.y = clamp(pl.y + dy / steps, 33, H - 2);
+          pushed = true;
+        }
+      }
+    }
+    if (!pushed) return;
+    if (Math.random() < 0.7) emit('sand', b.x + rand(-4, 4), b.y, 1, { vx: dx * 3, vy: rand(-15, -5), life: 0.4, color: SAND[Math.random() * 3 | 0], floorY: b.y + 2 });
+    if (now - sweepSfxAt > 90) { sweepSfxAt = now; beep(rand(1500, 2300), 0.05, 'sawtooth', 0.012, -900); }
+    mergePiles();
+    collectIntoPan();
+    renderFloor();
   }
 
   function dropAt(p) {
     if (hand.kind === 'pan') {
-      const i = pileAt(p.x, p.y);
-      if (i >= 0) sweep(i);
       hand = null;
+      if (inRect(p.x, p.y, trashBox(), touchMode ? 6 : 3)) {
+        emptyPan();
+        pan.x = PANHOME.x; pan.y = PANHOME.y;
+      } else {
+        placePan(p);
+        collectIntoPan();
+      }
+      return;
+    }
+    if (hand.kind === 'broom') {
+      hand = null;
+      broom.x = clamp(p.x, 5, W - 21);
+      broom.y = clamp(p.y, 33, H - 5);
+      beep(180, 0.05, 'triangle', 0.04);
       return;
     }
     const it = hand.item;
@@ -1207,11 +1362,12 @@
       }
       if (it.age >= FLOOR.sandMs) {
         floor.splice(i, 1);
-        piles.push({ x: clamp(it.fx + it.w / 2, 8, W - 8), y: it.fy + it.h, seed: Math.random() });
+        piles.push({ x: clamp(it.fx + it.w / 2, 8, W - 8), y: it.fy + it.h, seed: Math.random(), amount: 1 });
+        mergePiles();
         for (let k = 0; k < 10; k++) emit('sand', it.fx + it.w / 2, it.fy + it.h - 2, 1, { spread: 5, vy: rand(-25, -8), life: 0.5, color: SAND[k % 4] });
         beep(110, 0.2, 'sawtooth', 0.03, -60);
         renderFloor();
-        if (!save.seen.sand) once('sand', 'It crumbled into sand! Drag the dustpan onto it.', 'warn');
+        if (!save.seen.sand) once('sand', 'It crumbled into sand! Put the dustpan next to it.', 'warn');
         else toast(`Sand slows the belt: -${Math.round((1 - beltFactor()) * 100)}%`, 'warn');
       }
     }
@@ -1316,7 +1472,10 @@
     drawRoom(t);
     // floor layer, back to front
     const layer = [
-      ...piles.map(pl => ({ y: pl.y, d: () => drawPile(pl, t) })),
+      ...piles.map(pl => ({ y: pl.y, d: () => drawPile(pl) })),
+      { y: TRASH.y + TRASH.h, d: drawTrash },
+      ...(hand && hand.kind === 'pan' ? [] : [{ y: pan.y + 10, d: () => drawPan(pan.x, pan.y, false, pan.face, pan.load) }]),
+      ...(hand && hand.kind === 'broom' ? [] : [{ y: broom.y + 4, d: () => drawBroomFloor(broom.x, broom.y) }]),
       ...floor.map(it => ({ y: it.fy + it.h, d: () => {
         const [x, y] = lerpFly(it, it.fx, it.fy, t);
         oval(x + it.w / 2, it.fy + it.h + 1, it.w / 2, 1, 'rgba(20,50,60,.2)');
@@ -1324,7 +1483,6 @@
       } })),
     ].sort((a, b) => a.y - b.y);
     for (const l of layer) l.d();
-    if (!(hand && hand.kind === 'pan')) drawPan(PAN.x, PAN.y, false);
 
     drawBelt(t);
     drawBinBack();
@@ -1341,8 +1499,10 @@
     if (hand) {
       const hp = handPos();
       if (hand.kind === 'pan') {
-        const over = pileAt(hp.x, hp.y);
-        piles.forEach((pl, i) => bracketBox(pileBox(pl), t, i === over));
+        if (pan.load > 0) bracketBox(TRASH, t, inRect(hp.x, hp.y, trashBox(), 3));
+        if (pan.load < PAN_CAP) piles.forEach(pl => bracketBox(pileBox(pl), t, false));
+      } else if (hand.kind === 'broom') {
+        if (piles.length && pan.load < PAN_CAP) bracketBox(mouthZone(), t, false);
       } else {
         const tg = dropTargetAt(hp.x, hp.y);
         for (let i = 0; i < washerCount(); i++) if (canLoad(i, hand.item)) bracketBox(WASHERS[i], t, tg && tg.k === 'washer' && tg.i === i);
@@ -1351,12 +1511,16 @@
     } else if (!touchMode && ptr.inside) {
       const pk = pickAt(ptr.x, ptr.y);
       if (pk) {
-        const b = pk.src === 'belt' ? itemBox(items[pk.i]) : pk.src === 'floor' ? floorBox(floor[pk.i]) : pk.src === 'washer' ? WASHERS[pk.i] : panBox();
+        const b = pk.src === 'belt' ? itemBox(items[pk.i]) : pk.src === 'floor' ? floorBox(floor[pk.i]) : pk.src === 'washer' ? WASHERS[pk.i] : pk.src === 'pan' ? panBox() : broomBox();
         bracketBox(b, t, true);
       }
     }
-    // point at the dustpan while sand is around
-    if (piles.length && !hand) arrow(PAN.x + 5, PAN.y - 9, t);
+    // cleaning hints: dustpan next to the sand, then broom, then trash
+    if (!hand && (piles.length || pan.load > 0)) {
+      const panNear = piles.some(pl => Math.hypot(pl.x - (pan.x + 6), pl.y - (pan.y + 8)) < 30);
+      if (!piles.length || pan.load >= PAN_CAP || !panNear) arrow(pan.x + 6, pan.y - 10, t);
+      else arrow(broom.x, broom.y - 11, t);
+    } else if (hand && hand.kind === 'pan' && pan.load > 0) arrow(TRASH.x + TRASH.w / 2, TRASH.y - 11, t);
 
     if (save.delivered < 3) {
       let hint = null;
@@ -1376,7 +1540,9 @@
       const hp = handPos();
       const lift = hand.dragging ? 0 : Math.round(Math.sin(t / 170) * 1.5);
       if (hand.kind === 'pan') {
-        drawPan(hp.x - 6, hp.y - 6 + lift, true);
+        drawPan(hp.x - 6, hp.y - 6 + lift, true, pan.face, pan.load);
+      } else if (hand.kind === 'broom') {
+        drawBroomHeld(hp.x, hp.y, t, hand.dragging && hand.moved);
       } else {
         const it = hand.item;
         oval(hp.x, hp.y + it.h / 2 + 4, it.w / 2 + 1, 1, 'rgba(20,30,50,.35)');
@@ -1419,7 +1585,7 @@
     if (hand) {
       const hp = handPos();
       if (Math.hypot(p.x - hp.x, p.y - hp.y) < (touchMode ? 12 : 7)) {
-        Object.assign(hand, { dragging: true, moved: false, sx: p.x, sy: p.y });
+        Object.assign(hand, { dragging: true, moved: false, sx: p.x, sy: p.y, lastX: p.x, lastY: p.y });
       } else {
         dropAt(p);
       }
@@ -1431,13 +1597,18 @@
       if (inRect(p.x, p.y, WASHERS[i], 3)) { toast(washers[i].s === 'washing' ? 'Still washing…' : 'Drag dirty clothes from the belt in here.'); return; }
     }
     if (inRect(p.x, p.y, stationBox(), 3)) toast('Bring a clean load here.');
-    else if (pileAt(p.x, p.y) >= 0) toast('Use the dustpan to sweep up sand.');
+    else if (pileAt(p.x, p.y) >= 0) toast('Sweep it into the dustpan with the broom.');
+    else if (inRect(p.x, p.y, trashBox(), 2)) toast('Bring a full dustpan here to empty it.');
   });
   cv.addEventListener('pointermove', (e) => {
     const p = toLogical(e);
     if (e.pointerType !== 'mouse' && !(hand && hand.dragging)) return;
     ptr = { x: p.x, y: p.y, inside: true };
     if (hand && hand.dragging && Math.hypot(p.x - hand.sx, p.y - hand.sy) > 3) hand.moved = true;
+    if (hand && hand.kind === 'broom' && hand.dragging) {
+      broomPush({ x: hand.lastX, y: hand.lastY }, p);
+      hand.lastX = p.x; hand.lastY = p.y;
+    }
   });
   const release = (e) => {
     if (!hand || !hand.dragging) return;
@@ -1479,6 +1650,7 @@
     applyLayout();
     applyUpgrades();
     bot.x = BOTHOME.x; bot.y = BOTHOME.y;
+    resetTools();
     if (window.matchMedia && matchMedia('(pointer: coarse)').matches) touchMode = true;
     const first = makeItem(); first.x = 28; items.push(first);
     renderStats(); renderRate();
