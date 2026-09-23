@@ -178,20 +178,35 @@
     letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--edge);
-    background: var(--pink);
+    background: var(--mint);
     padding: 2px 6px;
+    font-variant-numeric: tabular-nums;
   }
   .ups { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
   .up {
+    position: relative;
+    width: 100%;
     display: grid;
     grid-template-columns: 34px minmax(0, 1fr) auto;
     align-items: center;
     gap: 10px;
     background: var(--panel-2);
     border: 2px solid var(--edge);
-    padding: 8px 10px;
-    opacity: .72;
+    padding: 8px 10px 10px;
+    font: inherit;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform .1s, border-color .15s;
   }
+  .up:disabled { cursor: default; }
+  .up.locked { opacity: .62; }
+  .up.afford { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255, 210, 63, .18), 0 3px 0 var(--gold-dk); }
+  .up.afford:hover { transform: translateY(-2px); }
+  .up.afford:active { transform: translateY(1px); }
+  .up:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .up.owned { background: #213d3a; opacity: .9; }
   .up-ico {
     width: 34px; height: 34px;
     background: var(--edge);
@@ -206,6 +221,11 @@
     font-variant-numeric: tabular-nums;
   }
   .up-cost i { width: 10px; height: 10px; background: var(--gold); box-shadow: inset -2px -2px 0 var(--gold-dk); display: block; }
+  .up.owned .up-cost { color: var(--mint); }
+  .up.owned .up-cost i { display: none; }
+  .up-bar { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); transition: width .2s; }
+  .up.owned .up-bar { background: var(--mint); }
+  .stat dd.bad { color: var(--warn); }
 
   .howto { color: var(--muted); font-size: 15px; }
   .howto p { margin: 6px 0 0; }
@@ -278,32 +298,37 @@
         <div class="stat"><dt>Lifetime coins</dt><dd id="stLifetime">0</dd></div>
         <div class="stat"><dt>Dropped in basket</dt><dd id="stDropped">0</dd></div>
         <div class="stat"><dt>Wash cycle</dt><dd id="stWash">5.0s</dd></div>
+        <div class="stat"><dt>Floor</dt><dd id="stFloor">Clean</dd></div>
       </dl>
     </section>
 
     <section class="panel shop">
-      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag">Coming next</span></div>
+      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag" id="ownedTag">0 / 4 owned</span></div>
       <ul class="ups" id="ups"></ul>
     </section>
 
     <section class="panel howto">
       <p class="eyebrow">How to play</p>
-      <p><b>Drag</b> a dirty item from the belt into the washer.</p>
-      <p>When the light turns green, <b>drag</b> the clean load to the orange tube.</p>
-      <p>Each load sent up the tube pays <b>1 coin</b>. Tapping works too: tap the item, then tap where it goes.</p>
+      <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>.</p>
+      <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand. Sand slows the belt, so <b>drag the dustpan</b> onto it to sweep it up.</p>
+      <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
 </div>
 
 <script>
 (() => {
-  // ================= config (upgrades will tweak these) =================
-  const CFG = { beltSpeed: 10, spawnMin: 2600, spawnVar: 2000, washMs: 5000, coinValue: 1 };
+  // ================= config =================
+  const BASE = { beltSpeed: 10, spawnMin: 2600, spawnVar: 2000, washMs: 5000, coinValue: 1 };
+  const CFG = { ...BASE };
+  // floor timeline (ms on the floor)
+  const FLOOR = { soilMs: 5000, grimeMs: 11000, crumbleMs: 18000, sandMs: 24000 };
+  const PILE_SLOW = 0.15, MIN_BELT = 0.4;
   const UPGRADES = [
-    { name: 'Turbo Drum', desc: 'Wash cycle 20% faster', cost: 10, icon: 'drum' },
-    { name: 'Wider Belt', desc: 'More clothes arrive', cost: 25, icon: 'belt' },
-    { name: 'Second Washer', desc: 'Wash two loads at once', cost: 60, icon: 'washer' },
-    { name: 'Laundry Bot', desc: 'Sends clean loads for you', cost: 150, icon: 'bot' },
+    { id: 'drum', name: 'Turbo Drum', desc: 'Wash cycle 20% faster', cost: 10, icon: 'drum' },
+    { id: 'belt', name: 'Wider Belt', desc: 'More clothes arrive', cost: 25, icon: 'belt' },
+    { id: 'washer2', name: 'Second Washer', desc: 'Wash two loads at once', cost: 60, icon: 'washer' },
+    { id: 'bot', name: 'Laundry Bot', desc: 'Sends clean loads for you', cost: 150, icon: 'bot' },
   ];
 
   // ================= canvas & layout =================
@@ -316,31 +341,42 @@
       W: 192, H: 128,
       BELT: { x0: 0, x1: 84, y: 38 },
       BIN: { x: 88, y: 42, w: 17 },
-      WASHER: { x: 74, y: 64, w: 30, h: 36 },
+      WASHERS: [{ x: 74, y: 64, w: 30, h: 36 }, { x: 34, y: 64, w: 30, h: 36 }],
       STATION: { x: 140, y: 74, w: 30, h: 28 },
       PIPE: { x: 149, w: 12 },
       WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 },
+      PAN: { x: 172, y: 110 }, BOT: { x: 124, y: 116 },
     },
     tall: {
       W: 128, H: 192,
       BELT: { x0: 0, x1: 70, y: 38 },
       BIN: { x: 74, y: 42, w: 17 },
-      WASHER: { x: 16, y: 84, w: 30, h: 36 },
+      WASHERS: [{ x: 14, y: 84, w: 30, h: 36 }, { x: 56, y: 84, w: 30, h: 36 }],
       STATION: { x: 92, y: 134, w: 30, h: 28 },
       PIPE: { x: 101, w: 12 },
       WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null,
+      PAN: { x: 34, y: 176 }, BOT: { x: 72, y: 184 },
     },
   };
-  let layoutName = '', BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT, POSTER;
+  let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, PAN, BOTHOME;
   function applyLayout() {
     const name = window.innerWidth < 700 && window.innerHeight > window.innerWidth ? 'tall' : 'wide';
     if (name === layoutName) return;
+    const prev = layoutName ? { W, H } : null;
     layoutName = name;
-    ({ W, H, BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT, POSTER } = LAYOUTS[name]);
+    const L = LAYOUTS[name];
+    ({ W, H, BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, PAN } = L);
+    BOTHOME = L.BOT;
     cv.width = W; cv.height = H;
     g.imageSmoothingEnabled = false;
     document.body.dataset.layout = name;
     buildVignette();
+    // keep floor stuff inside the new map
+    if (prev) {
+      for (const it of floor) { it.fx = Math.min(it.fx / prev.W * W, W - it.w - 2); it.fy = Math.max(30, Math.min(it.fy / prev.H * H, H - it.h - 2)); }
+      for (const pl of piles) { pl.x = Math.min(pl.x / prev.W * W, W - 8); pl.y = Math.max(34, Math.min(pl.y / prev.H * H, H - 2)); }
+      bot.x = BOTHOME.x; bot.y = BOTHOME.y; bot.s = bot.item ? 'toStation' : 'idle';
+    }
   }
 
   // ================= DOM =================
@@ -350,6 +386,7 @@
 
   // ================= palette & sprites =================
   const OUT = '#1c1a2e';
+  const SAND = ['#e2c28a', '#cfa965', '#b48d4f', '#f0dcae'];
   const COLORS = ['#e05a5a', '#4a7fe0', '#f0c84a', '#5ac06a', '#e87ab8', '#9a6ae0', '#f08a3c'];
   const SPR = {
     shirt: ['..XX..XX..', '.XXXXXXXX.', 'XXXXXXXXXX', 'XX.XXXX.XX', '...XXXX...', '...XXXX...', '...SSSS...', '...XXXX...'],
@@ -369,18 +406,30 @@
   };
 
   // ================= state =================
-  let save = { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: true };
-  let items = [];
-  let hand = null;           // { item, src: 'belt'|'washer', srcX, dragging, moved, sx, sy, tx, ty }
-  let washer = { s: 'idle', item: null, t0: 0 };
+  let save = { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: true, owned: {}, seen: {} };
+  let items = [];            // on the belt
+  let floor = [];            // lying on the floor
+  let piles = [];            // sand piles
+  let hand = null;           // what the player is holding
+  let washers = [{ s: 'idle', item: null, t0: 0 }, { s: 'idle', item: null, t0: 0 }];
+  let bot = { x: 0, y: 0, s: 'idle', wi: -1, item: null, face: 1 };
   let sends = [];
   let parts = [];
-  let recent = [];           // timestamps of deliveries (for coins/min)
+  let recent = [];
   let spawnAt = 500;
   let ptr = { x: -99, y: -99, inside: false };
   let touchMode = false;
   let nextId = 1;
   let now = 0;
+
+  const owned = (id) => !!save.owned[id];
+  const washerCount = () => owned('washer2') ? 2 : 1;
+  const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * piles.length);
+  function applyUpgrades() {
+    Object.assign(CFG, BASE);
+    if (owned('drum')) CFG.washMs = BASE.washMs * 0.8;
+    if (owned('belt')) { CFG.spawnMin = 1500; CFG.spawnVar = 1200; }
+  }
 
   // ================= helpers =================
   const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); };
@@ -406,6 +455,7 @@
   }
   const inRect = (px, py, r, pad = 0) => px >= r.x - pad && px <= r.x + r.w + pad && py >= r.y - pad && py <= r.y + r.h + pad;
   const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   function fmt(n) {
     if (n < 1000) return String(Math.floor(n));
     const u = ['K', 'M', 'B', 'T'];
@@ -437,10 +487,13 @@
     const dirt = [];
     for (let i = 0; i < 6; i++) dirt.push(cells[Math.random() * cells.length | 0]);
     return {
-      id: nextId++, type, color: COLORS[Math.random() * COLORS.length | 0], dirt, clean: false,
+      id: nextId++, type, color: COLORS[Math.random() * COLORS.length | 0], cells, dirt, dirt0: dirt.slice(), clean: false,
+      rank: rows.map(r => [...r].map(() => Math.random())),
       w: rows[0].length, h: rows.length, x: -12, drop: 0, vy: 0, seed: Math.random() * 1000, fly: null,
+      age: 0, crumble: 0, fx: 0, fy: 0,
     };
   }
+  function freshen(it) { it.clean = true; it.age = 0; it.crumble = 0; it.dirt = it.dirt0.slice(); }
 
   // ================= sound =================
   let actx = null;
@@ -452,7 +505,7 @@
       const o = actx.createOscillator(), v = actx.createGain();
       o.type = type;
       o.frequency.setValueAtTime(freq, t0);
-      if (slide) o.frequency.linearRampToValueAtTime(freq + slide, t0 + dur);
+      if (slide) o.frequency.linearRampToValueAtTime(Math.max(30, freq + slide), t0 + dur);
       v.gain.setValueAtTime(vol, t0);
       v.gain.linearRampToValueAtTime(0, t0 + dur);
       o.connect(v).connect(actx.destination);
@@ -466,7 +519,13 @@
     $toast.textContent = msg;
     $toast.className = 'show ' + kind;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { $toast.className = kind; }, 2400);
+    toastTimer = setTimeout(() => { $toast.className = kind; }, 2600);
+  }
+  function once(key, msg, kind) {
+    if (save.seen[key]) return;
+    save.seen[key] = true;
+    persist();
+    toast(msg, kind);
   }
   function persist() {
     try { localStorage.setItem('pixel-laundromat', JSON.stringify(save)); } catch (e) {}
@@ -478,6 +537,18 @@
     $('stDropped').textContent = fmt(save.dropped);
     $('stWash').textContent = (CFG.washMs / 1000).toFixed(1) + 's';
     $('perLoad').textContent = '+' + CFG.coinValue;
+    renderFloor();
+    renderShop();
+  }
+  let lastFloorText = '';
+  function renderFloor() {
+    const n = piles.length;
+    const txt = n ? `${n} sand pile${n > 1 ? 's' : ''} · belt -${Math.round((1 - beltFactor()) * 100)}%` : 'Clean';
+    if (txt === lastFloorText) return;
+    lastFloorText = txt;
+    const dd = $('stFloor');
+    dd.textContent = txt;
+    dd.classList.toggle('bad', n > 0);
   }
   function renderRate() {
     recent = recent.filter(t => now - t < 60000);
@@ -509,13 +580,71 @@
     setTimeout(() => { el.remove(); addCoins(value); beep(1319, 0.08, 'square', 0.035); }, 620);
   }
 
+  // ================= shop =================
+  function drawIcon(kind) {
+    const c = document.createElement('canvas');
+    c.width = 14; c.height = 14;
+    const x = c.getContext('2d');
+    const P = (px, py, w, h, col) => { x.fillStyle = col; x.fillRect(px, py, w, h); };
+    if (kind === 'drum') { P(2, 2, 10, 10, OUT); P(3, 3, 8, 8, '#b9bfd0'); P(4, 4, 6, 6, '#4f9fd6'); P(5, 5, 2, 1, '#fff'); P(9, 1, 3, 3, '#ffd23f'); }
+    if (kind === 'belt') { P(1, 6, 12, 4, OUT); P(2, 7, 10, 2, '#9aa0b5'); P(3, 3, 3, 3, '#e05a5a'); P(8, 3, 3, 3, '#4a7fe0'); P(2, 10, 1, 3, OUT); P(11, 10, 1, 3, OUT); }
+    if (kind === 'washer') { P(1, 2, 6, 10, OUT); P(2, 3, 4, 8, '#eef0f5'); P(3, 6, 2, 3, '#4f9fd6'); P(7, 2, 6, 10, OUT); P(8, 3, 4, 8, '#eef0f5'); P(9, 6, 2, 3, '#4f9fd6'); }
+    if (kind === 'bot') { P(3, 3, 8, 7, OUT); P(4, 4, 6, 5, '#7fe0c4'); P(5, 5, 1, 2, OUT); P(8, 5, 1, 2, OUT); P(6, 1, 2, 2, '#ffd23f'); P(4, 10, 2, 3, OUT); P(8, 10, 2, 3, OUT); }
+    return c;
+  }
+  const shopEls = {};
+  const $ups = $('ups');
+  for (const u of UPGRADES) {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'up locked';
+    btn.innerHTML = `<span class="up-ico"></span><span><span class="up-name"></span><br><span class="up-desc"></span></span><span class="up-cost"><i></i><span></span></span><span class="up-bar"></span>`;
+    btn.querySelector('.up-ico').appendChild(drawIcon(u.icon));
+    btn.querySelector('.up-name').textContent = u.name;
+    btn.querySelector('.up-desc').textContent = u.desc;
+    btn.addEventListener('click', () => buy(u));
+    li.appendChild(btn);
+    $ups.appendChild(li);
+    shopEls[u.id] = { btn, cost: btn.querySelector('.up-cost span'), bar: btn.querySelector('.up-bar') };
+  }
+  function renderShop() {
+    let n = 0;
+    for (const u of UPGRADES) {
+      const el = shopEls[u.id];
+      const has = owned(u.id), can = !has && save.coins >= u.cost;
+      if (has) n++;
+      el.btn.className = 'up ' + (has ? 'owned' : can ? 'afford' : 'locked');
+      el.btn.disabled = has || !can;
+      el.btn.setAttribute('aria-label', `${u.name}: ${u.desc}. ${has ? 'Owned' : 'Costs ' + u.cost + ' coins'}`);
+      el.cost.textContent = has ? 'Owned' : fmt(u.cost);
+      el.bar.style.width = (has ? 100 : Math.min(100, save.coins / u.cost * 100)) + '%';
+      if (can) once('afford-' + u.id, `New upgrade ready: ${u.name}!`, 'good');
+    }
+    $('ownedTag').textContent = `${n} / ${UPGRADES.length} owned`;
+  }
+  function buy(u) {
+    if (owned(u.id) || save.coins < u.cost) return;
+    save.coins -= u.cost;
+    save.owned[u.id] = true;
+    applyUpgrades();
+    persist();
+    renderStats();
+    toast(`Bought ${u.name}!`, 'good');
+    [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.09, 'square', 0.04, 0, i * 0.07));
+    if (u.id === 'washer2') { const w = WASHERS[1]; emit('spark', w.x + 15, w.y + 18, 16, { spread: 14, color: '#ffffff', vy: -30, life: 0.8 }); }
+    if (u.id === 'bot') { bot.x = BOTHOME.x; bot.y = BOTHOME.y; emit('spark', bot.x, bot.y - 8, 14, { spread: 8, color: '#7fe0c4', vy: -30, life: 0.8 }); }
+    if (u.id === 'drum') WASHERS.slice(0, washerCount()).forEach(w => emit('spark', w.x + 15, w.y + 4, 8, { spread: 10, color: '#ffd23f', vy: -25, life: 0.6 }));
+  }
+
   // ================= particles =================
   function emit(kind, x, y, n, o = {}) {
     for (let i = 0; i < n; i++) {
       parts.push({
-        kind, x: x + rand(-(o.spread || 0), o.spread || 0), y,
+        kind, x: x + rand(-(o.spread || 0), o.spread || 0), y: y + rand(-(o.spreadY || 0), o.spreadY || 0),
         vx: o.vx != null ? o.vx : rand(-20, 20), vy: o.vy != null ? o.vy : rand(-30, -10),
         life: o.life || rand(0.5, 1), max: o.life || 1, color: o.color || '#ffffff', text: o.text, seed: Math.random() * 6,
+        floorY: o.floorY,
       });
     }
   }
@@ -524,9 +653,10 @@
       const p = parts[i];
       p.life -= dt;
       if (p.life <= 0) { parts.splice(i, 1); continue; }
-      if (p.kind === 'coin' || p.kind === 'dust') p.vy += 120 * dt;
+      if (p.kind === 'coin' || p.kind === 'dust' || p.kind === 'sand') p.vy += 120 * dt;
       if (p.kind === 'bubble') p.x += Math.sin(now / 200 + p.seed) * 6 * dt;
       p.x += p.vx * dt; p.y += p.vy * dt;
+      if (p.floorY != null && p.y > p.floorY) { p.y = p.floorY; p.vy = 0; p.vx *= 0.5; }
     }
   }
   function drawParts() {
@@ -538,9 +668,11 @@
         const c = p.color;
         if (p.life > p.max * 0.4) { R(x - 1, y, 3, 1, c); R(x, y - 1, 1, 3, c); } else R(x, y, 1, 1, c);
       } else if (p.kind === 'coin') {
-        R(x - 1, y - 1, 3, 3, OUT); R(x, y, 1, 1, '#ffd84a'); R(x - 1, y - 1, 2, 2, '#ffd84a');
+        R(x - 1, y - 1, 3, 3, OUT); R(x - 1, y - 1, 2, 2, '#ffd84a');
       } else if (p.kind === 'dust') {
         R(x, y, 1, 1, 'rgba(120,110,140,.8)');
+      } else if (p.kind === 'sand') {
+        R(x, y, 1, 1, p.color);
       } else if (p.kind === 'text') {
         if (p.life > 0.25 || ((now / 60) | 0) % 2) text(p.text, x, y, p.color);
       }
@@ -551,31 +683,94 @@
   function drawItem(it, x, y, t) {
     x = Math.round(x); y = Math.round(y);
     const rows = SPR[it.type];
+    const cr = it.crumble || 0;
+    const on = (ri, ci) => rows[ri] && rows[ri][ci] && rows[ri][ci] !== '.' && it.rank[ri][ci] >= cr;
     g.fillStyle = OUT;
     for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-      rows.forEach((row, ri) => { for (let ci = 0; ci < row.length; ci++) if (row[ci] !== '.') g.fillRect(x + ci + dx, y + ri + dy, 1, 1); });
+      rows.forEach((row, ri) => { for (let ci = 0; ci < row.length; ci++) if (on(ri, ci)) g.fillRect(x + ci + dx, y + ri + dy, 1, 1); });
     }
-    const dark = shade(it.color, 0.7), light = shade(it.color, 1.28), stripe = shade(it.color, 1.5);
+    const grime = !it.clean && it.age > FLOOR.grimeMs;
+    const base = grime ? shade(it.color, 0.78) : it.color;
+    const dark = shade(base, 0.7), light = shade(base, 1.28), stripe = shade(base, 1.5);
     rows.forEach((row, ri) => {
       for (let ci = 0; ci < row.length; ci++) {
-        const ch = row[ci];
-        if (ch === '.') continue;
-        const edgeR = !row[ci + 1] || row[ci + 1] === '.';
-        const edgeT = ri === 0 || rows[ri - 1][ci] === '.';
-        g.fillStyle = ch === 'S' ? stripe : edgeR ? dark : edgeT ? light : it.color;
+        if (!on(ri, ci)) continue;
+        const edgeR = !on(ri, ci + 1);
+        const edgeT = !on(ri - 1, ci);
+        g.fillStyle = row[ci] === 'S' ? stripe : edgeR ? dark : edgeT ? light : base;
         g.fillRect(x + ci, y + ri, 1, 1);
       }
     });
     if (!it.clean) {
       g.fillStyle = '#6b4a2b';
-      for (const [ri, ci] of it.dirt) g.fillRect(x + ci, y + ri, 1, 1);
+      for (const [ri, ci] of it.dirt) if (on(ri, ci)) g.fillRect(x + ci, y + ri, 1, 1);
       g.fillStyle = '#8a6440';
-      for (const [ri, ci] of it.dirt.slice(0, 2)) if (rows[ri][ci + 1] && rows[ri][ci + 1] !== '.') g.fillRect(x + ci + 1, y + ri, 1, 1);
-      const a = t / 140 + it.seed;
-      R(x + it.w / 2 + Math.cos(a) * 6, y - 3 + Math.sin(a * 1.7) * 2, 1, 1, OUT);
+      for (const [ri, ci] of it.dirt.slice(0, 3)) if (on(ri, ci + 1)) g.fillRect(x + ci + 1, y + ri, 1, 1);
+      // crumbling edges turn sandy
+      if (cr > 0) {
+        g.fillStyle = SAND[1];
+        rows.forEach((row, ri) => { for (let ci = 0; ci < row.length; ci++) if (on(ri, ci) && it.rank[ri][ci] < cr + 0.18) g.fillRect(x + ci, y + ri, 1, 1); });
+      }
+      const flies = grime ? 2 : 1;
+      for (let f = 0; f < flies; f++) {
+        const a = t / 140 + it.seed + f * 2.5;
+        R(x + it.w / 2 + Math.cos(a) * (6 + f * 2), y - 3 + Math.sin(a * 1.7) * 2 - f * 2, 1, 1, OUT);
+      }
     } else if (((t + it.seed * 7) / 260 | 0) % 2) {
       const sx = x + it.w, sy = y - 2;
       R(sx, sy - 1, 1, 3, '#ffffff'); R(sx - 1, sy, 3, 1, '#ffffff');
+    }
+  }
+
+  function drawPile(pl, t) {
+    const x = Math.round(pl.x), y = Math.round(pl.y);
+    oval(x, y + 1, 8, 1, 'rgba(20,50,60,.2)');
+    R(x - 7, y - 1, 14, 2, OUT); R(x - 5, y - 3, 10, 2, OUT); R(x - 3, y - 5, 6, 2, OUT);
+    R(x - 6, y - 1, 12, 1, SAND[2]);
+    R(x - 5, y - 2, 10, 1, SAND[1]); R(x - 4, y - 3, 8, 1, SAND[1]);
+    R(x - 3, y - 4, 6, 1, SAND[0]); R(x - 2, y - 5, 4, 1, SAND[0]);
+    R(x - 2, y - 4, 2, 1, SAND[3]);
+    const s = pl.seed;
+    R(x - 4 + (s * 7 | 0) % 8, y - 2, 1, 1, SAND[2]); R(x - 3 + (s * 13 | 0) % 6, y - 3, 1, 1, SAND[3]);
+    R(x + 3, y - 2, 1, 1, SAND[3]);
+  }
+
+  function drawPan(x, y, lifted) {
+    x = Math.round(x); y = Math.round(y);
+    if (!lifted) oval(x + 7, y + 10, 8, 1, 'rgba(20,50,60,.22)');
+    // handle
+    R(x + 9, y - 1, 6, 3, OUT); R(x + 10, y, 4, 1, '#f0c84a');
+    // tray
+    R(x - 1, y + 1, 12, 9, OUT);
+    R(x, y + 2, 10, 7, '#e05a5a');
+    R(x, y + 2, 10, 1, '#f08a8a');
+    R(x, y + 7, 10, 2, '#b43c3c');
+    R(x + 1, y + 4, 1, 3, '#f08a8a');
+    // lip
+    R(x - 2, y + 9, 3, 2, OUT); R(x - 1, y + 9, 1, 1, '#9aa0b5');
+  }
+  const panBox = () => ({ x: PAN.x - 2, y: PAN.y - 1, w: 17, h: 12 });
+
+  function drawBot(t) {
+    const x = Math.round(bot.x), y = Math.round(bot.y);
+    const moving = bot.s !== 'idle' || Math.hypot(bot.x - BOTHOME.x, bot.y - BOTHOME.y) > 0.5;
+    const bob = moving ? ((t / 120 | 0) % 2) : 0;
+    oval(x, y + 1, 6, 1, 'rgba(20,50,60,.25)');
+    R(x - 4, y - 2, 3, 3, OUT); R(x + 2, y - 2, 3, 3, OUT);
+    R(x - 3, y - 1, 1, 1, '#6d6896'); R(x + 3, y - 1, 1, 1, '#6d6896');
+    const by = y - 12 - bob;
+    R(x - 6, by, 13, 10, OUT);
+    R(x - 5, by + 1, 11, 8, '#7fe0c4');
+    R(x - 5, by + 1, 11, 1, '#c3f7e6');
+    R(x + 4, by + 1, 1, 8, '#56b89c');
+    R(x - 4, by + 3, 8, 4, OUT);
+    const blink = ((t / 1800) % 1) < 0.06;
+    if (!blink) { R(x - 3 + (bot.face > 0 ? 1 : 0), by + 4, 2, 2, '#7fe0c4'); R(x + 1 + (bot.face > 0 ? 1 : 0), by + 4, 2, 2, '#7fe0c4'); }
+    R(x, by - 3, 1, 3, OUT);
+    R(x - 1, by - 5, 3, 2, OUT); R(x, by - 5, 1, 1, (t / 400 | 0) % 2 ? '#ffd23f' : '#c98f0a');
+    if (bot.item) {
+      R(x - 7, by + 2, 1, 4, OUT); R(x + 7, by + 2, 1, 4, OUT);
+      drawItem(bot.item, x - bot.item.w / 2, by - bot.item.h - 2, t);
     }
   }
 
@@ -592,7 +787,6 @@
   }
 
   function drawRoom(t) {
-    // floor
     R(0, 27, W, H - 27, '#9fd3c2');
     for (let ty = 27; ty < H; ty += 16) {
       for (let tx = 0; tx < W; tx += 16) {
@@ -601,7 +795,6 @@
         R(tx, ty, 16, 1, '#84b7a6'); R(tx, ty, 1, 16, '#84b7a6');
       }
     }
-    // wall: wallpaper, wainscot, baseboard
     R(0, 0, W, 17, '#6b5b95');
     for (let x = 0; x < W; x += 8) R(x + 4, 0, 4, 17, '#655690');
     for (let x = 2; x < W; x += 8) for (let y = 4; y < 16; y += 6) R(x, y, 1, 1, '#7a6aa6');
@@ -610,7 +803,6 @@
     R(0, 17, W, 1, '#b07a5c'); R(0, 18, W, 1, '#6f4636');
     for (let x = 3; x < W; x += 14) { R(x, 20, 10, 3, '#7b4f3c'); R(x, 20, 10, 1, '#6a4233'); }
     R(0, 24, W, 3, '#3d3357'); R(0, 24, W, 1, '#51467a');
-    // window (night)
     const wx = WIN.x;
     R(wx, 2, 28, 14, '#3d3357');
     R(wx + 2, 4, 24, 10, '#26346a');
@@ -619,43 +811,39 @@
     R(wx + 5, 6, 1, 1, '#ffffff'); R(wx + 10, 11, 1, 1, '#c9d4ff'); R(wx + 23, 12, 1, 1, '#ffffff');
     R(wx + 13, 4, 2, 10, '#3d3357'); R(wx + 2, 9, 24, 1, '#3d3357');
     R(wx - 1, 15, 30, 2, '#51467a');
-    // poster
     if (POSTER) {
       const px = POSTER.x;
       R(px, 3, 16, 12, OUT); R(px + 1, 4, 14, 10, '#f6e7c1');
       disc(px + 8, 8, 3, '#ffd84a'); R(px + 8, 7, 1, 3, '#c9960f');
       R(px + 3, 12, 10, 1, '#c96b4a');
     }
-    // shelf with detergents
     R(22, 15, 40, 2, '#3d3357');
     R(25, 6, 9, 9, OUT); R(26, 7, 7, 8, '#e05a5a'); R(27, 9, 5, 3, '#ffffff'); R(26, 7, 7, 1, '#f08080');
     R(36, 8, 8, 7, OUT); R(37, 9, 6, 6, '#4a7fe0'); R(38, 10, 4, 2, '#ffffff');
     R(46, 4, 6, 11, OUT); R(47, 7, 4, 8, '#5ac06a'); R(48, 5, 2, 2, '#5ac06a'); R(48, 9, 2, 3, '#e7ffe9');
     R(54, 9, 7, 6, OUT); R(55, 10, 5, 5, '#f0c84a'); R(55, 10, 5, 1, '#ffe38a');
-    // moonlight on the floor
     g.fillStyle = 'rgba(210,225,255,.09)';
     g.beginPath();
-    g.moveTo(wx + 2, 16); g.lineTo(wx + 26, 16); g.lineTo(wx + 44, 27 + 34); g.lineTo(wx + 16, 27 + 34);
+    g.moveTo(wx + 2, 16); g.lineTo(wx + 26, 16); g.lineTo(wx + 44, 61); g.lineTo(wx + 16, 61);
     g.closePath(); g.fill();
-    // strip curtain where clothes come in
     R(0, 24, 9, 24, OUT);
     for (let i = 0; i < 4; i++) {
       const sway = Math.round(Math.sin(t / 400 + i) * 0.6);
       R(1 + i * 2 + sway, 25, 1, 22, i % 2 ? '#8fb6c9' : '#c7e2ee');
     }
-    // plant
     const ox = PLANT.x - 8, oy = PLANT.y - 110;
     oval(PLANT.x + 6, PLANT.y + 11, 8, 2, 'rgba(20,50,60,.2)');
     const leaves = [[11, 100, 3, 10], [7, 103, 4, 3], [15, 102, 5, 3], [14, 97, 3, 6], [5, 106, 5, 3], [17, 106, 5, 3]];
     for (const [lx, ly, lw, lh] of leaves) R(lx - 1 + ox, ly - 1 + oy, lw + 2, lh + 2, OUT);
     for (const [lx, ly, lw, lh] of leaves) { R(lx + ox, ly + oy, lw, lh, '#3f9a55'); R(lx + ox, ly + oy, lw, 1, '#5cc070'); }
     R(8 + ox, 110 + oy, 12, 10, OUT); R(9 + ox, 111 + oy, 10, 8, '#c96b4a'); R(9 + ox, 111 + oy, 10, 2, '#e08a66');
-    // rug
-    const { x, y, w, h } = WASHER;
-    R(x - 5, y + h + 2, w + 10, 11, '#c9528f');
-    R(x - 4, y + h + 3, w + 8, 9, '#e87ab8');
-    R(x - 2, y + h + 5, w + 4, 5, '#f29acb');
-    for (let fx = x - 4; fx < x + w + 5; fx += 2) R(fx, y + h + 13, 1, 1, '#c9528f');
+    for (let i = 0; i < washerCount(); i++) {
+      const { x, y, w, h } = WASHERS[i];
+      R(x - 4, y + h + 2, w + 8, 11, '#c9528f');
+      R(x - 3, y + h + 3, w + 6, 9, '#e87ab8');
+      R(x - 1, y + h + 5, w + 2, 5, '#f29acb');
+      for (let fx = x - 3; fx < x + w + 4; fx += 2) R(fx, y + h + 13, 1, 1, '#c9528f');
+    }
   }
 
   function drawBelt(t) {
@@ -667,15 +855,18 @@
     }
     R(x0, y - 2, x1 - x0 + 1, 11, OUT);
     R(x0, y - 1, x1 - x0, 3, '#4a4a60');
-    const off = (t / 1000 * CFG.beltSpeed) % 5;
     g.fillStyle = '#34344a';
-    for (let sx = x0 - 5 + off; sx < x1; sx += 5) if (sx >= x0) g.fillRect(Math.round(sx), y - 1, 2, 3);
+    for (let sx = x0 - 5 + beltOffset; sx < x1; sx += 5) if (sx >= x0) g.fillRect(Math.round(sx), y - 1, 2, 3);
     R(x0, y - 1, x1 - x0, 1, '#62627c');
     R(x0, y + 2, x1 - x0, 1, '#262636');
     R(x0, y + 3, x1 - x0, 5, '#9aa0b5');
     R(x0, y + 3, x1 - x0, 1, '#c8cddc');
     for (let sx = x0; sx < x1; sx += 4) R(sx, y + 5, 2, 2, ((sx / 4) | 0) % 2 ? '#2a2a3a' : '#f0c84a');
     disc(x1, y + 3, 4, OUT); disc(x1, y + 3, 3, '#b7bccb'); R(x1 - 1, y + 1, 1, 1, '#ffffff'); R(x1, y + 3, 1, 1, OUT);
+    if (piles.length) {
+      // sand jamming the belt
+      for (let i = 0; i < Math.min(piles.length, 4); i++) R(x0 + 14 + i * 16, y - 2, 3, 1, SAND[1]);
+    }
   }
 
   function drawBinBack() {
@@ -693,25 +884,24 @@
     R(x - 1, y + 3, w + 2, 1, '#f4c890');
   }
 
-  function drawWasher(t) {
-    const { x: bx, y, w, h } = WASHER;
-    const washing = washer.s === 'washing';
-    const x = bx + (washing ? ((t / 70 | 0) % 2) : 0);
+  function drawWasher(i, t) {
+    const wsh = washers[i];
+    const { x: bx, y, w, h } = WASHERS[i];
+    const washing = wsh.s === 'washing';
+    const x = bx + (washing ? ((t / 70 + i) | 0) % 2 : 0);
     oval(bx + w / 2, y + h + 2, w / 2 + 3, 3, 'rgba(20,50,60,.22)');
     R(x - 1, y - 1, w + 2, h + 2, OUT);
     R(x, y, w, h, '#eef0f5');
     R(x + 1, y + 10, 1, h - 12, '#ffffff');
     R(x + w - 4, y, 4, h, '#c9ced9');
-    // control panel
     R(x, y, w, 9, '#d4d8e2');
     R(x, y, w, 1, '#ffffff');
     R(x, y + 9, w, 1, OUT);
     R(x + 3, y + 2, 8, 5, '#b9bfd0'); R(x + 4, y + 3, 6, 1, '#9aa1b8');
-    disc(x + 16, y + 4, 2, OUT); R(x + 16, y + 3, 1, 1, '#9aa1b8');
-    const lamp = washer.s === 'idle' ? '#7a8199' : washing ? ((t / 250 | 0) % 2 ? '#ffb347' : '#b86f1c') : '#6fe08a';
+    disc(x + 16, y + 4, 2, OUT); R(x + 16, y + 3, 1, 1, owned('drum') ? '#ffd23f' : '#9aa1b8');
+    const lamp = wsh.s === 'idle' ? '#7a8199' : washing ? ((t / 250 | 0) % 2 ? '#ffb347' : '#b86f1c') : '#6fe08a';
     R(x + 21, y + 3, 5, 4, OUT); R(x + 22, y + 4, 3, 2, lamp);
-    if (washer.s === 'done') { g.fillStyle = 'rgba(111,224,138,.25)'; g.fillRect(x + 20, y + 2, 7, 6); }
-    // door
+    if (wsh.s === 'done') { g.fillStyle = 'rgba(111,224,138,.25)'; g.fillRect(x + 20, y + 2, 7, 6); }
     const cx = x + 14, cy = y + 22;
     disc(cx, cy, 11, OUT);
     disc(cx, cy, 10, '#b9bfd0');
@@ -721,36 +911,35 @@
     g.save();
     g.beginPath(); g.rect(cx - 7, cy - 7, 15, 15); g.clip();
     if (washing) {
-      const lvl = cy - 1 + Math.round(Math.sin(t / 200));
+      const lvl = cy - 1 + Math.round(Math.sin(t / 200 + i));
       R(cx - 7, lvl, 15, 9, '#3d86c2');
-      for (let i = -7; i < 8; i += 2) R(cx + i, lvl - (((i + (t / 90 | 0)) & 1)), 1, 1, '#e8f7ff');
-      const col = washer.item.color;
-      for (let i = 0; i < 3; i++) {
-        const a = t / 160 + i * 2.1;
+      for (let k = -7; k < 8; k += 2) R(cx + k, lvl - (((k + (t / 90 | 0)) & 1)), 1, 1, '#e8f7ff');
+      const col = wsh.item.color;
+      for (let k = 0; k < 3; k++) {
+        const a = t / (owned('drum') ? 120 : 160) + k * 2.1;
         R(cx + Math.round(Math.cos(a) * 4) - 1, cy + Math.round(Math.sin(a) * 4) - 1, 3, 2, col);
       }
-    } else if (washer.s === 'done') {
-      R(cx - 6, cy + 1, 13, 6, washer.item.color);
-      R(cx - 6, cy + 1, 13, 1, shade(washer.item.color, 1.3));
+    } else if (wsh.s === 'done') {
+      R(cx - 6, cy + 1, 13, 6, wsh.item.color);
+      R(cx - 6, cy + 1, 13, 1, shade(wsh.item.color, 1.3));
     } else {
       R(cx - 7, cy + 3, 15, 5, '#18303f');
     }
     g.restore();
     R(cx - 4, cy - 5, 2, 1, '#ffffff'); R(cx - 5, cy - 4, 1, 2, '#ffffff'); R(cx + 3, cy + 3, 1, 1, 'rgba(255,255,255,.6)');
     R(cx + 9, cy - 2, 2, 5, '#9aa1b8');
-    // kick plate & feet
     R(x + 1, y + h - 4, w - 5, 3, '#d4d8e2');
     R(x + 2, y + h + 1, 3, 2, OUT); R(x + w - 5, y + h + 1, 3, 2, OUT);
 
     if (washing) {
-      const p = Math.min(1, (t - washer.t0) / CFG.washMs);
+      const p = Math.min(1, (t - wsh.t0) / CFG.washMs);
       R(bx - 1, y - 9, w + 2, 6, OUT);
       R(bx, y - 8, w, 4, '#3d3357');
       R(bx, y - 8, Math.round(w * p), 4, '#6fe08a');
       R(bx, y - 8, Math.round(w * p), 1, '#b4f5c4');
-    } else if (washer.s === 'done') {
-      const bob = Math.round(Math.sin(t / 180) * 1.5);
-      const it = washer.item;
+    } else if (wsh.s === 'done') {
+      const bob = Math.round(Math.sin(t / 180 + i) * 1.5);
+      const it = wsh.item;
       const bw = it.w + 8, bxx = bx + ((w - bw) / 2 | 0), byy = y - 18 + bob;
       R(bxx - 1, byy - 1, bw + 2, 14, OUT);
       R(bxx, byy, bw, 12, '#ffffff');
@@ -763,7 +952,6 @@
   function drawStation(t, ready) {
     const { x: px, w: pw } = PIPE;
     const { x, y, w, h } = STATION;
-    // pipe to the ceiling with a glass window
     R(px - 1, 0, pw + 2, y, OUT);
     R(px, 0, pw, y, '#f2a541');
     R(px + 2, 0, 2, y, '#ffd08a');
@@ -774,13 +962,11 @@
     R(px + 1, gy, 2, 16, 'rgba(255,255,255,.28)');
     R(px + pw - 3, gy, 2, 16, 'rgba(0,0,0,.18)');
     oval(x + w / 2, y + h + 2, w / 2 + 3, 3, 'rgba(20,50,60,.22)');
-    // body
     R(x - 1, y - 1, w + 2, h + 2, OUT);
     R(x, y, w, h, '#f2a541');
     R(x, y, w, 2, '#ffd08a');
     R(x, y, 2, h, '#f8bd64');
     R(x + w - 4, y, 4, h, '#c77a22');
-    // intake mouth
     R(x + 5, y + 5, 18, 11, OUT);
     R(x + 6, y + 6, 16, 9, '#241b33');
     R(x + 6, y + 6, 16, 2, '#1a1326');
@@ -788,7 +974,6 @@
       const s = (t / 110 | 0) % 3;
       for (let i = 0; i < 3; i++) R(x + 9 + i * 4, y + 13 - ((i + s) % 3) * 2, 2, 1, '#ffd08a');
     }
-    // payout plate
     R(x + 5, y + 18, 18, 8, OUT);
     R(x + 6, y + 19, 16, 6, '#2d4f3f');
     disc(x + 10, y + 22, 2, '#ffd84a');
@@ -827,6 +1012,7 @@
       R(ax, sy > 0 ? ay : ay - 3, 1, 4, c);
     }
   }
+  const bracketBox = (b, t, solid) => brackets(b.x - 3, b.y - 3, b.w + 6, b.h + 6, t, solid);
   function arrow(cx, top, t) {
     const y = Math.round(top + Math.sin(t / 160) * 2);
     cx = Math.round(cx);
@@ -837,24 +1023,48 @@
   // ================= game logic =================
   const itemY = (it) => BELT.y - 1 - it.h + it.drop;
   const itemBox = (it) => ({ x: it.x, y: itemY(it), w: it.w, h: it.h });
+  const floorBox = (it) => ({ x: it.fx, y: it.fy, w: it.w, h: it.h });
+  const pileBox = (pl) => ({ x: pl.x - 7, y: pl.y - 6, w: 14, h: 7 });
   const stationBox = () => ({ x: STATION.x - 2, y: STATION.y - 26, w: STATION.w + 4, h: STATION.h + 26 });
+  const washerBox = (i) => WASHERS[i];
+  const beltZone = () => ({ x: BELT.x0 + 8, y: BELT.y - 14, w: BELT.x1 - BELT.x0 - 12, h: 20 });
+  const binBox = () => ({ x: BIN.x - 1, y: BIN.y - 4, w: BIN.w + 2, h: 22 });
 
   function pickAt(px, py) {
-    const pad = touchMode ? 8 : 4;
+    const pad = touchMode ? 7 : 3;
     for (let i = items.length - 1; i >= 0; i--) {
       const it = items[i];
-      if (it.drop < 3 && inRect(px, py, itemBox(it), pad)) return { src: 'belt', i };
+      if (it.drop < 3 && inRect(px, py, itemBox(it), pad + 1)) return { src: 'belt', i };
     }
-    if (washer.s === 'done' && (inRect(px, py, WASHER, pad) || inRect(px, py, { x: WASHER.x, y: WASHER.y - 20, w: WASHER.w, h: 20 }, pad))) return { src: 'washer' };
+    let best = null;
+    floor.forEach((it, i) => { if (inRect(px, py, floorBox(it), pad) && (!best || it.fy > floor[best.i].fy)) best = { src: 'floor', i }; });
+    if (best) return best;
+    for (let i = 0; i < washerCount(); i++) {
+      const w = WASHERS[i];
+      if (washers[i].s === 'done' && (inRect(px, py, w, pad) || inRect(px, py, { x: w.x, y: w.y - 20, w: w.w, h: 20 }, pad))) return { src: 'washer', i };
+    }
+    if (inRect(px, py, panBox(), pad)) return { src: 'pan' };
     return null;
   }
   function dropTargetAt(px, py) {
-    const pad = touchMode ? 8 : 5;
-    if (inRect(px, py, WASHER, pad)) return 'washer';
-    if (inRect(px, py, stationBox(), pad)) return 'station';
+    const pad = touchMode ? 7 : 4;
+    for (let i = 0; i < washerCount(); i++) if (inRect(px, py, washerBox(i), pad)) return { k: 'washer', i };
+    if (inRect(px, py, stationBox(), pad)) return { k: 'station' };
+    if (inRect(px, py, binBox(), 1)) return { k: 'bin' };
+    if (inRect(px, py, beltZone(), 0)) return { k: 'belt' };
     return null;
   }
-  const canDrop = (tg, it) => (tg === 'washer' && !it.clean && washer.s === 'idle') || (tg === 'station' && it.clean);
+  function pileAt(px, py) {
+    const pad = touchMode ? 8 : 5;
+    let best = -1, bd = 1e9;
+    piles.forEach((pl, i) => {
+      if (!inRect(px, py, pileBox(pl), pad)) return;
+      const d = Math.hypot(px - pl.x, py - pl.y);
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best;
+  }
+  const canLoad = (i, it) => !it.clean && washers[i].s === 'idle';
 
   function handPos() {
     if (!hand) return null;
@@ -863,66 +1073,195 @@
   }
 
   function grab(pk, p) {
-    let it;
     if (pk.src === 'belt') {
-      it = items.splice(pk.i, 1)[0];
-      hand = { item: it, src: 'belt', srcX: it.x };
+      const it = items.splice(pk.i, 1)[0];
+      hand = { kind: 'item', item: it, src: 'belt', srcX: it.x };
       beep(520, 0.05); beep(780, 0.06, 'square', 0.04, 0, 0.04);
-    } else {
-      it = washer.item;
-      it.clean = true;
-      washer = { s: 'idle', item: null, t0: 0 };
-      hand = { item: it, src: 'washer' };
-      emit('spark', WASHER.x + 15, WASHER.y + 16, 6, { spread: 8, color: '#ffffff', vy: -20, life: 0.6 });
+    } else if (pk.src === 'floor') {
+      const it = floor.splice(pk.i, 1)[0];
+      hand = { kind: 'item', item: it, src: 'floor', srcPos: { x: it.fx, y: it.fy } };
+      beep(440, 0.05); beep(660, 0.06, 'square', 0.04, 0, 0.04);
+    } else if (pk.src === 'washer') {
+      const it = washers[pk.i].item;
+      washers[pk.i] = { s: 'idle', item: null, t0: 0 };
+      hand = { kind: 'item', item: it, src: 'washer', srcI: pk.i };
+      const w = WASHERS[pk.i];
+      emit('spark', w.x + 15, w.y + 16, 6, { spread: 8, color: '#ffffff', vy: -20, life: 0.6 });
       beep(660, 0.05); beep(990, 0.08, 'square', 0.04, 0, 0.05);
+    } else {
+      hand = { kind: 'pan' };
+      beep(330, 0.05, 'triangle', 0.05);
+      if (!piles.length) toast('No sand to sweep right now.');
     }
     Object.assign(hand, { dragging: true, moved: false, sx: p.x, sy: p.y, tx: p.x, ty: p.y });
   }
 
+  function putOnFloor(it, px, py) {
+    it.fx = clamp(px - it.w / 2, 2, W - it.w - 2);
+    it.fy = clamp(py - it.h / 2, 30, H - it.h - 3);
+    it.drop = 0; it.vy = 0;
+    floor.push(it);
+    emit('dust', it.fx + it.w / 2, it.fy + it.h, 4, { spread: 4, vy: -12, life: 0.4 });
+    beep(160, 0.06, 'triangle', 0.045);
+    once('floor', 'On the floor it gets dirty and turns to sand. Don\'t leave it long!', 'warn');
+  }
+
   function returnHand(from) {
-    const it = hand.item;
-    if (hand.src === 'washer') {
-      it.clean = true;
-      washer = { s: 'done', item: it, t0: now };
-    } else {
-      it.x = hand.srcX; it.drop = 0; it.vy = 0;
-      it.fly = { x0: from.x - it.w / 2, y0: from.y - it.h / 2, t0: now };
-      items.push(it);
+    if (hand.kind === 'item') {
+      const it = hand.item;
+      if (hand.src === 'washer' && washers[hand.srcI].s === 'idle') {
+        washers[hand.srcI] = { s: 'done', item: it, t0: now };
+      } else if (hand.src === 'belt') {
+        it.x = hand.srcX; it.drop = 0; it.vy = 0;
+        it.fly = { x0: from.x - it.w / 2, y0: from.y - it.h / 2, t0: now };
+        items.push(it);
+      } else {
+        const pos = hand.srcPos || { x: from.x - it.w / 2, y: Math.max(from.y, 34) };
+        it.fx = pos.x; it.fy = pos.y;
+        it.fly = { x0: from.x - it.w / 2, y0: from.y - it.h / 2, t0: now };
+        floor.push(it);
+      }
     }
     hand = null;
     beep(220, 0.06, 'triangle', 0.04);
   }
 
+  function sweep(i) {
+    const pl = piles.splice(i, 1)[0];
+    for (let k = 0; k < 14; k++) emit('sand', pl.x, pl.y - 2, 1, { spread: 6, vy: rand(-40, -15), vx: rand(-25, 25), life: 0.5, color: SAND[k % 4] });
+    emit('spark', pl.x, pl.y - 5, 4, { spread: 5, color: '#ffffff', vy: -20, life: 0.5 });
+    beep(900, 0.12, 'sawtooth', 0.025, -700);
+    beep(1200, 0.05, 'square', 0.03, 0, 0.12);
+    renderFloor();
+    toast(piles.length ? `Swept! ${piles.length} pile${piles.length > 1 ? 's' : ''} left.` : 'Floor is clean. The belt is back to full speed.', 'good');
+  }
+
   function dropAt(p) {
-    const it = hand.item;
-    const tg = dropTargetAt(p.x, p.y);
-    if (tg && canDrop(tg, it)) {
-      if (tg === 'washer') {
-        washer = { s: 'washing', item: it, t0: now };
-        emit('bubble', WASHER.x + 15, WASHER.y + 18, 8, { spread: 6, vx: 0, vy: -14, life: 0.9 });
-        beep(300, 0.14, 'square', 0.045, 140);
-        if (save.delivered === 0) toast('Washing… wait for the bar to fill.');
-      } else {
-        sends.push({ item: it, t0: now, x0: p.x - it.w / 2, y0: p.y - it.h / 2, paid: false });
-        beep(180, 0.3, 'sawtooth', 0.03, 520);
-      }
+    if (hand.kind === 'pan') {
+      const i = pileAt(p.x, p.y);
+      if (i >= 0) sweep(i);
       hand = null;
       return;
     }
-    if (tg === 'washer') toast(it.clean ? 'Already clean. Send it up the tube.' : 'The washer is busy.', 'warn');
-    else if (tg === 'station') toast('Wash it first!', 'warn');
-    returnHand(p);
+    const it = hand.item;
+    const tg = dropTargetAt(p.x, p.y);
+    if (tg && tg.k === 'washer') {
+      if (canLoad(tg.i, it)) {
+        washers[tg.i] = { s: 'washing', item: it, t0: now };
+        const w = WASHERS[tg.i];
+        emit('bubble', w.x + 15, w.y + 18, 8, { spread: 6, vx: 0, vy: -14, life: 0.9 });
+        beep(300, 0.14, 'square', 0.045, 140);
+        if (save.delivered === 0) toast('Washing… wait for the bar to fill.');
+        hand = null;
+        return;
+      }
+      toast(it.clean ? 'Already clean. Send it up the tube.' : 'That washer is busy.', 'warn');
+      returnHand(p);
+      return;
+    }
+    if (tg && tg.k === 'station') {
+      if (it.clean) {
+        sends.push({ item: it, t0: now, x0: p.x - it.w / 2, y0: p.y - it.h / 2, paid: false });
+        beep(180, 0.3, 'sawtooth', 0.03, 520);
+        hand = null;
+        return;
+      }
+      toast('Wash it first!', 'warn');
+      returnHand(p);
+      return;
+    }
+    hand = null;
+    if (tg && tg.k === 'bin') {
+      save.dropped++; persist(); renderStats();
+      emit('dust', BIN.x + BIN.w / 2, BIN.y + 2, 5, { spread: 5, vy: -25, life: 0.5 });
+      beep(140, 0.08, 'triangle', 0.04);
+      return;
+    }
+    if (tg && tg.k === 'belt') {
+      it.x = clamp(p.x - it.w / 2, BELT.x0 + 2, BELT.x1 - it.w - 2);
+      it.drop = 0; it.vy = 0;
+      it.fly = { x0: p.x - it.w / 2, y0: p.y - it.h / 2, t0: now };
+      items.push(it);
+      beep(260, 0.05, 'triangle', 0.04);
+      return;
+    }
+    putOnFloor(it, p.x, p.y);
   }
 
+  function updateFloor(dt) {
+    for (let i = floor.length - 1; i >= 0; i--) {
+      const it = floor[i];
+      it.age += dt * 1000;
+      if (it.clean && it.age >= FLOOR.soilMs) {
+        it.clean = false;
+        emit('dust', it.fx + it.w / 2, it.fy + it.h / 2, 5, { spread: 4, vy: -10, life: 0.5 });
+        once('soil', 'Clean clothes get dirty again on the floor!', 'warn');
+      }
+      if (it.age >= FLOOR.grimeMs) {
+        const want = Math.min(it.cells.length, 6 + ((it.age - FLOOR.grimeMs) / 600 | 0));
+        while (it.dirt.length < want) it.dirt.push(it.cells[Math.random() * it.cells.length | 0]);
+      }
+      it.crumble = clamp((it.age - FLOOR.crumbleMs) / (FLOOR.sandMs - FLOOR.crumbleMs), 0, 1);
+      if (it.crumble > 0 && Math.random() < dt * 25) {
+        emit('sand', it.fx + rand(0, it.w), it.fy + rand(0, it.h), 1, { vx: rand(-4, 4), vy: 0, life: 0.6, color: SAND[Math.random() * 3 | 0], floorY: it.fy + it.h });
+      }
+      if (it.age >= FLOOR.sandMs) {
+        floor.splice(i, 1);
+        piles.push({ x: clamp(it.fx + it.w / 2, 8, W - 8), y: it.fy + it.h, seed: Math.random() });
+        for (let k = 0; k < 10; k++) emit('sand', it.fx + it.w / 2, it.fy + it.h - 2, 1, { spread: 5, vy: rand(-25, -8), life: 0.5, color: SAND[k % 4] });
+        beep(110, 0.2, 'sawtooth', 0.03, -60);
+        renderFloor();
+        if (!save.seen.sand) once('sand', 'It crumbled into sand! Drag the dustpan onto it.', 'warn');
+        else toast(`Sand slows the belt: -${Math.round((1 - beltFactor()) * 100)}%`, 'warn');
+      }
+    }
+  }
+
+  function moveBot(tx, ty, dt) {
+    const dx = tx - bot.x, dy = ty - bot.y, d = Math.hypot(dx, dy), sp = 42 * dt;
+    if (Math.abs(dx) > 0.5) bot.face = Math.sign(dx);
+    if (d <= sp) { bot.x = tx; bot.y = ty; return true; }
+    bot.x += dx / d * sp; bot.y += dy / d * sp;
+    return false;
+  }
+  function updateBot(dt) {
+    if (!owned('bot')) return;
+    if (bot.s === 'idle') {
+      let target = -1;
+      for (let i = 0; i < washerCount(); i++) if (washers[i].s === 'done') { target = i; break; }
+      if (target >= 0) { bot.s = 'toWasher'; bot.wi = target; }
+      else moveBot(BOTHOME.x, BOTHOME.y, dt);
+    } else if (bot.s === 'toWasher') {
+      const w = WASHERS[bot.wi];
+      if (washers[bot.wi].s !== 'done') { bot.s = 'idle'; return; }
+      if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
+        bot.item = washers[bot.wi].item;
+        washers[bot.wi] = { s: 'idle', item: null, t0: 0 };
+        bot.s = 'toStation';
+        beep(700, 0.05, 'square', 0.03);
+      }
+    } else if (bot.s === 'toStation') {
+      if (moveBot(STATION.x - 4, STATION.y + STATION.h + 6, dt)) {
+        sends.push({ item: bot.item, t0: now, x0: bot.x - bot.item.w / 2, y0: bot.y - 26, paid: false });
+        bot.item = null;
+        bot.s = 'idle';
+        beep(180, 0.3, 'sawtooth', 0.025, 520);
+      }
+    }
+  }
+
+  let beltOffset = 0;
   function update(dt) {
     if (now >= spawnAt) {
       items.push(makeItem());
-      spawnAt = now + CFG.spawnMin + Math.random() * CFG.spawnVar;
+      spawnAt = now + (CFG.spawnMin + Math.random() * CFG.spawnVar) / beltFactor();
     }
+    const speed = CFG.beltSpeed * beltFactor();
+    beltOffset = (beltOffset + speed * dt) % 5;
     for (let i = items.length - 1; i >= 0; i--) {
       const it = items[i];
       const cx = it.x + it.w / 2;
-      if (cx < BIN.x + BIN.w / 2) it.x += CFG.beltSpeed * dt;
+      if (cx < BIN.x + BIN.w / 2) it.x += speed * dt;
       if (cx > BELT.x1 + 1) { it.vy += 160 * dt; it.drop += it.vy * dt; }
       if (itemY(it) > BIN.y + 8) {
         items.splice(i, 1);
@@ -931,17 +1270,23 @@
         beep(140, 0.08, 'triangle', 0.04);
       }
     }
-    if (washer.s === 'washing') {
-      if (Math.random() < dt * 6) emit('bubble', WASHER.x + rand(6, 24), WASHER.y + 14, 1, { vx: 0, vy: rand(-18, -10), life: rand(0.6, 1.1) });
-      if (now - washer.t0 >= CFG.washMs) {
-        washer.s = 'done';
-        emit('spark', WASHER.x + 15, WASHER.y + 20, 10, { spread: 10, color: '#fff6b8', vy: -30, life: 0.7 });
-        beep(880, 0.08); beep(1175, 0.12, 'square', 0.045, 0, 0.09);
-        if (save.delivered < 3) toast('Ding! Drag the clean load to the tube.', 'good');
+    for (let i = 0; i < washerCount(); i++) {
+      const wsh = washers[i], w = WASHERS[i];
+      if (wsh.s === 'washing') {
+        if (Math.random() < dt * 6) emit('bubble', w.x + rand(6, 24), w.y + 14, 1, { vx: 0, vy: rand(-18, -10), life: rand(0.6, 1.1) });
+        if (now - wsh.t0 >= CFG.washMs) {
+          wsh.s = 'done';
+          freshen(wsh.item);
+          emit('spark', w.x + 15, w.y + 20, 10, { spread: 10, color: '#fff6b8', vy: -30, life: 0.7 });
+          beep(880, 0.08); beep(1175, 0.12, 'square', 0.045, 0, 0.09);
+          if (save.delivered < 3) toast('Ding! Drag the clean load to the tube.', 'good');
+        }
+      } else if (wsh.s === 'done' && Math.random() < dt * 2) {
+        emit('spark', w.x + rand(4, 26), w.y - rand(4, 16), 1, { vx: 0, vy: -6, color: '#ffffff', life: 0.5 });
       }
-    } else if (washer.s === 'done' && Math.random() < dt * 2) {
-      emit('spark', WASHER.x + rand(4, 26), WASHER.y - rand(4, 16), 1, { vx: 0, vy: -6, color: '#ffffff', life: 0.5 });
     }
+    updateFloor(dt);
+    updateBot(dt);
     for (let i = sends.length - 1; i >= 0; i--) {
       const s = sends[i], age = now - s.t0;
       if (age >= 250 && !s.paid) {
@@ -960,44 +1305,65 @@
     updateParts(dt);
   }
 
+  function lerpFly(it, x, y, t) {
+    if (!it.fly) return [x, y];
+    const p = (t - it.fly.t0) / 180;
+    if (p >= 1) { it.fly = null; return [x, y]; }
+    return [it.fly.x0 + (x - it.fly.x0) * p, it.fly.y0 + (y - it.fly.y0) * p];
+  }
+
   function draw(t) {
     drawRoom(t);
+    // floor layer, back to front
+    const layer = [
+      ...piles.map(pl => ({ y: pl.y, d: () => drawPile(pl, t) })),
+      ...floor.map(it => ({ y: it.fy + it.h, d: () => {
+        const [x, y] = lerpFly(it, it.fx, it.fy, t);
+        oval(x + it.w / 2, it.fy + it.h + 1, it.w / 2, 1, 'rgba(20,50,60,.2)');
+        drawItem(it, x, y, t);
+      } })),
+    ].sort((a, b) => a.y - b.y);
+    for (const l of layer) l.d();
+    if (!(hand && hand.kind === 'pan')) drawPan(PAN.x, PAN.y, false);
+
     drawBelt(t);
     drawBinBack();
-    for (const it of items) {
-      let x = it.x, y = itemY(it);
-      if (it.fly) {
-        const p = (t - it.fly.t0) / 180;
-        if (p >= 1) it.fly = null;
-        else { x = it.fly.x0 + (x - it.fly.x0) * p; y = it.fly.y0 + (y - it.fly.y0) * p; }
-      }
-      drawItem(it, x, y, t);
-    }
+    for (const it of items) { const [x, y] = lerpFly(it, it.x, itemY(it), t); drawItem(it, x, y, t); }
     drawBinFront();
-    const ready = !!(hand && hand.item.clean);
-    drawWasher(t);
+    const ready = !!(hand && hand.kind === 'item' && hand.item.clean);
+    for (let i = washerCount() - 1; i >= 0; i--) drawWasher(i, t);
     drawStation(t, ready);
+    if (owned('bot')) drawBot(t);
     drawSends(t);
     drawParts();
 
     // targets
     if (hand) {
       const hp = handPos();
-      const over = dropTargetAt(hp.x, hp.y);
-      if (canDrop('washer', hand.item)) brackets(WASHER.x - 3, WASHER.y - 3, WASHER.w + 6, WASHER.h + 6, t, over === 'washer');
-      if (canDrop('station', hand.item)) brackets(STATION.x - 3, STATION.y - 3, STATION.w + 6, STATION.h + 6, t, over === 'station');
+      if (hand.kind === 'pan') {
+        const over = pileAt(hp.x, hp.y);
+        piles.forEach((pl, i) => bracketBox(pileBox(pl), t, i === over));
+      } else {
+        const tg = dropTargetAt(hp.x, hp.y);
+        for (let i = 0; i < washerCount(); i++) if (canLoad(i, hand.item)) bracketBox(WASHERS[i], t, tg && tg.k === 'washer' && tg.i === i);
+        if (hand.item.clean) bracketBox(STATION, t, tg && tg.k === 'station');
+      }
     } else if (!touchMode && ptr.inside) {
       const pk = pickAt(ptr.x, ptr.y);
-      if (pk && pk.src === 'belt') { const b = itemBox(items[pk.i]); brackets(b.x - 3, b.y - 3, b.w + 6, b.h + 6, t, true); }
-      if (pk && pk.src === 'washer') brackets(WASHER.x - 3, WASHER.y - 3, WASHER.w + 6, WASHER.h + 6, t, true);
+      if (pk) {
+        const b = pk.src === 'belt' ? itemBox(items[pk.i]) : pk.src === 'floor' ? floorBox(floor[pk.i]) : pk.src === 'washer' ? WASHERS[pk.i] : panBox();
+        bracketBox(b, t, true);
+      }
     }
+    // point at the dustpan while sand is around
+    if (piles.length && !hand) arrow(PAN.x + 5, PAN.y - 9, t);
 
-    // tutorial arrows for the first few loads
     if (save.delivered < 3) {
       let hint = null;
-      if (hand && hand.item.clean) hint = [STATION.x + 14, STATION.y - 12];
-      else if (hand && washer.s === 'idle') hint = [WASHER.x + 15, WASHER.y - 12];
-      else if (!hand && washer.s === 'idle') {
+      const w0 = WASHERS[0];
+      if (hand && hand.kind === 'item' && hand.item.clean) hint = [STATION.x + 14, STATION.y - 12];
+      else if (hand && hand.kind === 'item' && washers[0].s === 'idle') hint = [w0.x + 15, w0.y - 12];
+      else if (!hand && washers[0].s === 'idle') {
         const first = items.filter(it => it.drop < 1 && it.x > 4).sort((a, b) => b.x - a.x)[0];
         if (first) hint = [first.x + first.w / 2, BELT.y - first.h - 11];
       }
@@ -1006,13 +1372,16 @@
 
     g.drawImage(vignette, 0, 0);
 
-    // the item you are carrying
     if (hand) {
       const hp = handPos();
-      const it = hand.item;
       const lift = hand.dragging ? 0 : Math.round(Math.sin(t / 170) * 1.5);
-      oval(hp.x, hp.y + it.h / 2 + 4, it.w / 2 + 1, 1, 'rgba(20,30,50,.35)');
-      drawItem(it, hp.x - it.w / 2, hp.y - it.h / 2 - 2 + lift, t);
+      if (hand.kind === 'pan') {
+        drawPan(hp.x - 6, hp.y - 6 + lift, true);
+      } else {
+        const it = hand.item;
+        oval(hp.x, hp.y + it.h / 2 + 4, it.w / 2 + 1, 1, 'rgba(20,30,50,.35)');
+        drawItem(it, hp.x - it.w / 2, hp.y - it.h / 2 - 2 + lift, t);
+      }
     }
 
     if (!touchMode) {
@@ -1058,9 +1427,11 @@
     }
     const pk = pickAt(p.x, p.y);
     if (pk) { grab(pk, p); return; }
-    if (washer.s === 'washing' && inRect(p.x, p.y, WASHER, 3)) toast('Still washing…');
-    else if (inRect(p.x, p.y, stationBox(), 3)) toast('Bring a clean load here.');
-    else if (inRect(p.x, p.y, WASHER, 3)) toast('Drag dirty clothes from the belt in here.');
+    for (let i = 0; i < washerCount(); i++) {
+      if (inRect(p.x, p.y, WASHERS[i], 3)) { toast(washers[i].s === 'washing' ? 'Still washing…' : 'Drag dirty clothes from the belt in here.'); return; }
+    }
+    if (inRect(p.x, p.y, stationBox(), 3)) toast('Bring a clean load here.');
+    else if (pileAt(p.x, p.y) >= 0) toast('Use the dustpan to sweep up sand.');
   });
   cv.addEventListener('pointermove', (e) => {
     const p = toLogical(e);
@@ -1090,30 +1461,6 @@
     if (save.sound) beep(660, 0.06);
   });
 
-  // ================= upgrade preview cards =================
-  function drawIcon(kind) {
-    const c = document.createElement('canvas');
-    c.width = 14; c.height = 14;
-    const x = c.getContext('2d');
-    const P = (px, py, w, h, col) => { x.fillStyle = col; x.fillRect(px, py, w, h); };
-    if (kind === 'drum') { P(2, 2, 10, 10, OUT); P(3, 3, 8, 8, '#b9bfd0'); P(4, 4, 6, 6, '#4f9fd6'); P(5, 5, 2, 1, '#fff'); P(9, 1, 3, 3, '#ffd23f'); }
-    if (kind === 'belt') { P(1, 6, 12, 4, OUT); P(2, 7, 10, 2, '#9aa0b5'); P(3, 3, 3, 3, '#e05a5a'); P(8, 3, 3, 3, '#4a7fe0'); P(2, 10, 1, 3, OUT); P(11, 10, 1, 3, OUT); }
-    if (kind === 'washer') { P(1, 2, 6, 10, OUT); P(2, 3, 4, 8, '#eef0f5'); P(3, 6, 2, 3, '#4f9fd6'); P(7, 2, 6, 10, OUT); P(8, 3, 4, 8, '#eef0f5'); P(9, 6, 2, 3, '#4f9fd6'); }
-    if (kind === 'bot') { P(3, 3, 8, 7, OUT); P(4, 4, 6, 5, '#7fe0c4'); P(5, 5, 1, 2, OUT); P(8, 5, 1, 2, OUT); P(6, 1, 2, 2, '#ffd23f'); P(4, 10, 2, 3, OUT); P(8, 10, 2, 3, OUT); }
-    return c;
-  }
-  const $ups = $('ups');
-  for (const u of UPGRADES) {
-    const li = document.createElement('li');
-    li.className = 'up';
-    li.innerHTML = `<span class="up-ico"></span><span><span class="up-name"></span><br><span class="up-desc"></span></span><span class="up-cost"><i></i><span></span></span>`;
-    li.querySelector('.up-ico').appendChild(drawIcon(u.icon));
-    li.querySelector('.up-name').textContent = u.name;
-    li.querySelector('.up-desc').textContent = u.desc;
-    li.querySelector('.up-cost span').textContent = fmt(u.cost);
-    $ups.appendChild(li);
-  }
-
   // ================= boot =================
   function start(data) {
     try {
@@ -1125,9 +1472,13 @@
       }
     } catch (e) {}
     if (data && data.save) Object.assign(save, data.save);
+    save.owned = save.owned || {};
+    save.seen = save.seen || {};
     $sfx.textContent = save.sound ? 'Sound on' : 'Sound off';
     $sfx.setAttribute('aria-pressed', String(save.sound));
     applyLayout();
+    applyUpgrades();
+    bot.x = BOTHOME.x; bot.y = BOTHOME.y;
     if (window.matchMedia && matchMedia('(pointer: coarse)').matches) touchMode = true;
     const first = makeItem(); first.x = 28; items.push(first);
     renderStats(); renderRate();
