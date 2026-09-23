@@ -304,6 +304,7 @@
         <div class="stat"><dt>Dropped in basket</dt><dd id="stDropped">0</dd></div>
         <div class="stat"><dt>Wash cycle</dt><dd id="stWash">5.0s</dd></div>
         <div class="stat"><dt>Floor</dt><dd id="stFloor">Clean</dd></div>
+        <div class="stat" id="botRow" hidden><dt>Robo Vac</dt><dd id="stBot">Docked</dd></div>
       </dl>
     </section>
 
@@ -338,8 +339,8 @@
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
     { id: 'washer2', name: 'Second Washer', icon: 'washer', costs: [45],
       desc: () => 'Wash two loads at once' },
-    { id: 'bot', name: 'Laundry Bot', icon: 'bot', costs: [70, 90, 110, 120],
-      desc: (lv) => lv === 0 ? 'Sends clean loads for you' : `Bot moves 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
+    { id: 'bot', name: 'Robo Vac', icon: 'bot', costs: [70, 90, 110, 120],
+      desc: (lv) => lv === 0 ? 'Robot that picks up, washes and sends clothes (~30s each)' : `Robo Vac 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
   ];
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
 
@@ -387,7 +388,7 @@
     if (prev) {
       for (const it of floor) { it.fx = Math.min(it.fx / prev.W * W, W - it.w - 2); it.fy = Math.max(30, Math.min(it.fy / prev.H * H, H - it.h - 2)); }
       for (const pl of piles) { pl.x = Math.min(pl.x / prev.W * W, W - 8); pl.y = Math.max(34, Math.min(pl.y / prev.H * H, H - 2)); }
-      bot.x = BOTHOME.x; bot.y = BOTHOME.y; bot.s = bot.item ? 'toStation' : 'idle';
+      bot.x = BOTHOME.x; bot.y = BOTHOME.y; setBot(bot.item ? (bot.item.clean ? 'toStation' : 'toWasher') : bot.wi >= 0 && washers[bot.wi].bot ? 'waitWash' : 'seek');
       if (hand && hand.kind !== 'item') hand = null;
       resetTools();
     }
@@ -426,7 +427,7 @@
   let piles = [];            // sand piles
   let hand = null;           // what the player is holding
   let washers = [{ s: 'idle', item: null, t0: 0 }, { s: 'idle', item: null, t0: 0 }];
-  let bot = { x: 0, y: 0, s: 'idle', wi: -1, item: null, face: 1 };
+  let bot = { x: 0, y: 0, s: 'dock', wi: -1, item: null, target: null, wait: 0, roam: null };
   const PAN_CAP = 4;
   let pan = { x: 0, y: 0, face: -1, load: 0 };   // dustpan lying on the floor
   let broom = { x: 0, y: 0 };                     // broom head position
@@ -566,6 +567,7 @@
     $('perLoad').textContent = '+' + CFG.coinValue;
     renderFloor();
     renderShop();
+    $('botRow').hidden = !owned('bot');
   }
   let lastFloorText = '';
   function renderFloor() {
@@ -618,7 +620,7 @@
     if (kind === 'belt') { P(1, 6, 12, 4, OUT); P(2, 7, 10, 2, '#9aa0b5'); P(3, 3, 3, 3, '#e05a5a'); P(8, 3, 3, 3, '#4a7fe0'); P(2, 10, 1, 3, OUT); P(11, 10, 1, 3, OUT); }
     if (kind === 'washer') { P(1, 2, 6, 10, OUT); P(2, 3, 4, 8, '#eef0f5'); P(3, 6, 2, 3, '#4f9fd6'); P(7, 2, 6, 10, OUT); P(8, 3, 4, 8, '#eef0f5'); P(9, 6, 2, 3, '#4f9fd6'); }
     if (kind === 'soap') { P(4, 1, 6, 3, OUT); P(5, 2, 4, 1, '#e87ab8'); P(3, 4, 8, 9, OUT); P(4, 5, 6, 7, '#7fe0c4'); P(5, 7, 4, 3, '#ffffff'); P(10, 2, 2, 2, '#e8f7ff'); P(12, 5, 1, 1, '#e8f7ff'); }
-    if (kind === 'bot') { P(3, 3, 8, 7, OUT); P(4, 4, 6, 5, '#7fe0c4'); P(5, 5, 1, 2, OUT); P(8, 5, 1, 2, OUT); P(6, 1, 2, 2, '#ffd23f'); P(4, 10, 2, 3, OUT); P(8, 10, 2, 3, OUT); }
+    if (kind === 'bot') { P(3, 3, 8, 1, OUT); P(2, 4, 10, 1, OUT); P(1, 5, 12, 5, OUT); P(2, 10, 10, 1, OUT); P(2, 5, 10, 3, '#4a4f66'); P(3, 4, 8, 1, '#4a4f66'); P(2, 8, 10, 2, '#2a2c3a'); P(2, 7, 10, 1, '#7fe0c4'); P(6, 5, 2, 1, '#6fe08a'); P(4, 5, 2, 1, '#6d7390'); }
     return c;
   }
   const shopEls = {};
@@ -848,27 +850,33 @@
   }
   const trashBox = () => ({ x: TRASH.x - 2, y: TRASH.y - 3, w: TRASH.w + 4, h: TRASH.h + 5 });
 
+  function drawDock() {
+    const x = Math.round(BOTHOME.x), y = Math.round(BOTHOME.y);
+    oval(x, y + 1, 10, 2, 'rgba(20,50,60,.18)');
+    R(x - 7, y - 9, 14, 7, OUT);
+    R(x - 6, y - 8, 12, 5, '#3a3d4f');
+    R(x - 6, y - 8, 12, 1, '#555a72');
+    R(x - 1, y - 7, 3, 1, bot.s === 'dock' ? '#6fe08a' : '#b86f1c');
+    R(x - 9, y - 2, 18, 3, OUT);
+    R(x - 8, y - 2, 16, 2, '#4a4f66');
+  }
   function drawBot(t) {
     const x = Math.round(bot.x), y = Math.round(bot.y);
-    const moving = bot.s !== 'idle' || Math.hypot(bot.x - BOTHOME.x, bot.y - BOTHOME.y) > 0.5;
-    const bob = moving ? ((t / 120 | 0) % 2) : 0;
-    oval(x, y + 1, 6, 1, 'rgba(20,50,60,.25)');
-    R(x - 4, y - 2, 3, 3, OUT); R(x + 2, y - 2, 3, 3, OUT);
-    R(x - 3, y - 1, 1, 1, '#6d6896'); R(x + 3, y - 1, 1, 1, '#6d6896');
-    const by = y - 12 - bob;
-    R(x - 6, by, 13, 10, OUT);
-    R(x - 5, by + 1, 11, 8, '#7fe0c4');
-    R(x - 5, by + 1, 11, 1, '#c3f7e6');
-    R(x + 4, by + 1, 1, 8, '#56b89c');
-    R(x - 4, by + 3, 8, 4, OUT);
-    const blink = ((t / 1800) % 1) < 0.06;
-    if (!blink) { R(x - 3 + (bot.face > 0 ? 1 : 0), by + 4, 2, 2, '#7fe0c4'); R(x + 1 + (bot.face > 0 ? 1 : 0), by + 4, 2, 2, '#7fe0c4'); }
-    R(x, by - 3, 1, 3, OUT);
-    R(x - 1, by - 5, 3, 2, OUT); R(x, by - 5, 1, 1, (t / 400 | 0) % 2 ? '#ffd23f' : '#c98f0a');
-    if (bot.item) {
-      R(x - 7, by + 2, 1, 4, OUT); R(x + 7, by + 2, 1, 4, OUT);
-      drawItem(bot.item, x - bot.item.w / 2, by - bot.item.h - 2, t);
+    const busy = bot.s !== 'dock';
+    oval(x, y + 1, 8, 2, 'rgba(20,40,50,.3)');
+    oval(x, y - 2, 8, 4, OUT);
+    oval(x, y - 2, 7, 3, '#2a2c3a');
+    oval(x, y - 4, 7, 3, '#4a4f66');
+    oval(x - 2, y - 5, 3, 1, '#6d7390');
+    R(x - 7, y - 2, 14, 1, '#7fe0c4');
+    const lamp = bot.s === 'dock' ? '#6fe08a' : bot.item ? ((t / 300 | 0) % 2 ? '#ffd23f' : '#c98f0a') : ((t / 500 | 0) % 2 ? '#7fe0c4' : '#3f9a85');
+    R(x + 1, y - 5, 3, 1, lamp);
+    if (busy) {
+      // side brushes spinning
+      const f = (t / 60 | 0) % 2;
+      R(x - 8 - f, y, 2, 1, '#9aa0b5'); R(x + 7 + f, y, 2, 1, '#9aa0b5');
     }
+    if (bot.item) drawItem(bot.item, x - bot.item.w / 2, y - 6 - bot.item.h, t);
   }
 
   let vignette = null;
@@ -934,6 +942,7 @@
     for (const [lx, ly, lw, lh] of leaves) R(lx - 1 + ox, ly - 1 + oy, lw + 2, lh + 2, OUT);
     for (const [lx, ly, lw, lh] of leaves) { R(lx + ox, ly + oy, lw, lh, '#3f9a55'); R(lx + ox, ly + oy, lw, 1, '#5cc070'); }
     R(8 + ox, 110 + oy, 12, 10, OUT); R(9 + ox, 111 + oy, 10, 8, '#c96b4a'); R(9 + ox, 111 + oy, 10, 2, '#e08a66');
+    if (owned('bot')) drawDock();
     for (let i = 0; i < washerCount(); i++) {
       const { x, y, w, h } = WASHERS[i];
       R(x - 4, y + h + 2, w + 8, 11, '#c9528f');
@@ -1403,36 +1412,135 @@
     }
   }
 
-  function moveBot(tx, ty, dt) {
-    const dx = tx - bot.x, dy = ty - bot.y, d = Math.hypot(dx, dy), sp = 42 * 1.25 ** Math.max(0, level('bot') - 1) * dt;
-    if (Math.abs(dx) > 0.5) bot.face = Math.sign(dx);
+  // ---- Robo Vac: roams, picks up one item, washes it, sends it (~30 s per item at level 1)
+  const BOT_SPEED = 8.5;
+  const BOT_TEXT = {
+    dock: 'Docked', seek: 'Looking for laundry', toFloor: 'Picking up from the floor', toBelt: 'Waiting at the belt',
+    grab: 'Grabbing', toWasher: 'Loading a washer', holdWasher: 'Waiting for a free washer', waitWash: 'Waiting for the wash',
+    toCollect: 'Collecting the clean load', toStation: 'Delivering to the tube', rest: 'Delivering to the tube',
+  };
+  function setBot(st, wait = 0) {
+    bot.wait = wait; bot.roam = null;
+    if (bot.s === st) return;
+    bot.s = st;
+    const el = $('stBot');
+    if (el) el.textContent = BOT_TEXT[st] || st;
+  }
+  function moveBot(tx, ty, dt, mult = 1) {
+    const dx = tx - bot.x, dy = ty - bot.y, d = Math.hypot(dx, dy);
+    const sp = BOT_SPEED * 1.25 ** Math.max(0, level('bot') - 1) * mult * dt;
     if (d <= sp) { bot.x = tx; bot.y = ty; return true; }
     bot.x += dx / d * sp; bot.y += dy / d * sp;
+    if (Math.random() < dt * 3) emit('dust', bot.x - dx / d * 7, bot.y, 1, { vx: 0, vy: -4, life: 0.4 });
     return false;
+  }
+  function roam(dt) {
+    if (bot.wait > 0) { bot.wait -= dt; return; }
+    if (!bot.roam) bot.roam = { x: rand(14, W - 14), y: rand(BELT.y + 28, H - 6) };
+    if (moveBot(bot.roam.x, bot.roam.y, dt, 0.7)) { bot.roam = null; bot.wait = rand(0.6, 1.6); }
+  }
+  function idleWasher() {
+    let best = -1, bd = 1e9;
+    for (let i = 0; i < washerCount(); i++) {
+      if (washers[i].s !== 'idle') continue;
+      const w = WASHERS[i], d = Math.hypot(w.x + w.w / 2 - bot.x, w.y + w.h + 8 - bot.y);
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  }
+  function botPick(it) {
+    bot.item = it;
+    it.fly = null;
+    emit('spark', bot.x, bot.y - 8, 5, { spread: 4, color: '#7fe0c4', vy: -18, life: 0.5 });
+    beep(620, 0.05, 'square', 0.025); beep(820, 0.05, 'square', 0.025, 0, 0.05);
+    setBot('grab', 0.9);
   }
   function updateBot(dt) {
     if (!owned('bot')) return;
-    if (bot.s === 'idle') {
-      let target = -1;
-      for (let i = 0; i < washerCount(); i++) if (washers[i].s === 'done') { target = i; break; }
-      if (target >= 0) { bot.s = 'toWasher'; bot.wi = target; }
-      else moveBot(BOTHOME.x, BOTHOME.y, dt);
-    } else if (bot.s === 'toWasher') {
-      const w = WASHERS[bot.wi];
-      if (washers[bot.wi].s !== 'done') { bot.s = 'idle'; return; }
-      if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
-        bot.item = washers[bot.wi].item;
-        washers[bot.wi] = { s: 'idle', item: null, t0: 0 };
-        bot.s = 'toStation';
-        beep(700, 0.05, 'square', 0.03);
+    switch (bot.s) {
+      case 'dock':
+      case 'seek': {
+        if (floor.length) {
+          let best = null, bd = 1e9;
+          for (const it of floor) { const d = Math.hypot(it.fx + it.w / 2 - bot.x, it.fy + it.h - bot.y); if (d < bd) { bd = d; best = it; } }
+          bot.target = best;
+          setBot('toFloor');
+        } else if (items.some(it => it.drop < 1)) {
+          setBot('toBelt');
+        } else {
+          if (moveBot(BOTHOME.x, BOTHOME.y, dt)) setBot('dock');
+        }
+        break;
       }
-    } else if (bot.s === 'toStation') {
-      if (moveBot(STATION.x - 4, STATION.y + STATION.h + 6, dt)) {
-        sends.push({ item: bot.item, t0: now, x0: bot.x - bot.item.w / 2, y0: bot.y - 26, paid: false });
-        bot.item = null;
-        bot.s = 'idle';
-        beep(180, 0.3, 'sawtooth', 0.025, 520);
+      case 'toFloor': {
+        const it = bot.target;
+        if (!floor.includes(it)) { setBot('seek'); break; }
+        if (moveBot(it.fx + it.w / 2, it.fy + it.h + 2, dt)) { floor.splice(floor.indexOf(it), 1); botPick(it); }
+        break;
       }
+      case 'toBelt': {
+        if (floor.length) { setBot('seek'); break; }
+        const cx = BELT.x1 - 10, cy = BELT.y + 24;
+        if (moveBot(cx, cy, dt)) {
+          const i = items.findIndex(it => it.drop < 1 && Math.abs(it.x + it.w / 2 - cx) < 4);
+          if (i >= 0) botPick(items.splice(i, 1)[0]);
+        }
+        break;
+      }
+      case 'grab':
+        bot.wait -= dt;
+        if (bot.wait <= 0) setBot(bot.item.clean ? 'toStation' : 'toWasher');
+        break;
+      case 'toWasher': {
+        if (bot.wi < 0 || washers[bot.wi].s !== 'idle') bot.wi = idleWasher();
+        if (bot.wi < 0) { setBot('holdWasher'); break; }
+        const w = WASHERS[bot.wi];
+        if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
+          if (washers[bot.wi].s === 'idle') {
+            washers[bot.wi] = { s: 'washing', item: bot.item, t0: now, bot: true };
+            bot.item = null;
+            emit('bubble', w.x + 15, w.y + 18, 6, { spread: 6, vx: 0, vy: -14, life: 0.9 });
+            beep(300, 0.12, 'square', 0.03, 140);
+            setBot('waitWash');
+          } else bot.wi = -1;
+        }
+        break;
+      }
+      case 'holdWasher':
+        roam(dt);
+        if (idleWasher() >= 0) { bot.wi = -1; setBot('toWasher'); }
+        break;
+      case 'waitWash': {
+        const ws = washers[bot.wi];
+        if (!ws || !ws.bot || ws.s === 'idle') { bot.wi = -1; setBot('seek'); break; }
+        if (ws.s === 'done') { setBot('toCollect'); break; }
+        roam(dt);
+        break;
+      }
+      case 'toCollect': {
+        const ws = washers[bot.wi];
+        if (!ws || !ws.bot || ws.s !== 'done') { bot.wi = -1; setBot('seek'); break; }
+        const w = WASHERS[bot.wi];
+        if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
+          const it = ws.item;
+          washers[bot.wi] = { s: 'idle', item: null, t0: 0 };
+          bot.wi = -1;
+          botPick(it);
+        }
+        break;
+      }
+      case 'toStation':
+        if (moveBot(STATION.x - 4, STATION.y + STATION.h + 6, dt)) {
+          sends.push({ item: bot.item, t0: now, x0: bot.x - bot.item.w / 2, y0: bot.y - 6 - bot.item.h, paid: false });
+          bot.item = null;
+          beep(180, 0.3, 'sawtooth', 0.025, 520);
+          setBot('rest', 0.8);
+        }
+        break;
+      case 'rest':
+        bot.wait -= dt;
+        if (bot.wait <= 0) setBot('seek');
+        break;
     }
   }
 
