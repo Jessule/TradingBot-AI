@@ -1,261 +1,402 @@
-<title>Pixel Lavandería</title>
+<title>Pixel Laundromat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;500;600&display=swap">
 <style>
   :root {
-    --bg: #191a2e;
-    --panel: #26274a;
-    --edge: #0e0f1d;
-    --ink: #f3eefc;
-    --muted: #a9a6c9;
-    --coin: #ffd84a;
+    --bg: #161527;
+    --bg-dot: rgba(190, 180, 255, .06);
+    --panel: #221f3d;
+    --panel-2: #2c2850;
+    --edge: #0b0a17;
+    --ink: #f5f0ff;
+    --muted: #a49fc8;
+    --faint: #6d6896;
+    --gold: #ffd23f;
+    --gold-dk: #c98f0a;
     --mint: #7fe0c4;
-    --warn: #ff9f7a;
+    --pink: #ff8fc7;
+    --warn: #ffab85;
+    --display: "Silkscreen", ui-monospace, "Courier New", monospace;
+    --body: "Pixelify Sans", ui-monospace, "Courier New", monospace;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
+    min-height: 100%;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle at 2px 2px, var(--bg-dot) 1.5px, transparent 0);
+    background-size: 18px 18px;
     color: var(--ink);
-    font-family: "Pixelify Sans", ui-monospace, "Courier New", monospace;
+    font-family: var(--body);
     font-size: 16px;
     line-height: 1.45;
     padding-inline: 16px;
-    padding-block: 20px 32px;
+    padding-block: 18px 32px;
   }
-  main { max-width: 960px; margin: 0 auto; display: grid; gap: 14px; }
-  header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  h1 {
-    font-family: "Silkscreen", ui-monospace, monospace;
-    font-weight: 700;
-    font-size: clamp(22px, 4.4vw, 34px);
-    letter-spacing: .03em;
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 18px;
+    align-items: start;
+  }
+  .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+  .panel {
+    background: var(--panel);
+    border: 3px solid var(--edge);
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.05), inset 0 -4px 0 rgba(0,0,0,.28), 0 4px 0 var(--edge);
+    padding: 14px 16px;
+  }
+  .eyebrow {
+    font-family: var(--display);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
     margin: 0;
+  }
+
+  /* brand row */
+  .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(22px, 3.6vw, 32px);
     line-height: 1;
+    letter-spacing: .02em;
     text-wrap: balance;
   }
   h1 span { color: var(--mint); }
-  .hud { display: flex; gap: 10px; flex-wrap: wrap; }
-  .chip {
-    background: var(--panel);
-    border: 3px solid var(--edge);
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,.28);
-    padding: 6px 12px 8px;
-    font-family: "Silkscreen", ui-monospace, monospace;
-    font-size: 15px;
-    display: flex; align-items: center; gap: 10px;
-    font-variant-numeric: tabular-nums;
+  .ghost {
+    font-family: var(--display);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: transparent;
+    border: 2px solid var(--faint);
+    padding: 6px 10px;
+    cursor: pointer;
   }
-  .chip small { color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
-  .coin {
-    width: 16px; height: 16px; background: var(--coin);
-    box-shadow: inset -3px -3px 0 #c9960f, inset 2px 2px 0 #fff6b8, 0 0 0 2px var(--edge);
-  }
-  #coins { color: var(--coin); min-width: 2ch; display: inline-block; }
-  #coins.bump { animation: bump .35s steps(3); }
-  @keyframes bump { 50% { transform: translateY(-4px) scale(1.25); } }
+  .ghost:hover { color: var(--ink); border-color: var(--muted); }
+  .ghost:focus-visible, .ghost:focus { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  /* stage */
   .stage { position: relative; }
-  #handIcon {
-    width: 28px; height: 24px;
-    image-rendering: pixelated;
-    background: #3a3b66;
-    box-shadow: 0 0 0 2px var(--edge);
-    display: block;
-  }
   #game {
     display: block;
-    margin-inline: auto;
-    -webkit-user-select: none; user-select: none;
-    -webkit-touch-callout: none;
     width: 100%;
     max-width: 100%;
     height: auto;
     aspect-ratio: 3 / 2;
-    cursor: default;
+    margin-inline: auto;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     border: 4px solid var(--edge);
-    box-shadow: 0 6px 0 var(--edge);
-    touch-action: manipulation;
+    box-shadow: 0 6px 0 var(--edge), 0 0 0 4px #2c2850, 0 6px 0 4px #2c2850;
+    background: #9fd3c2;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
-    background: #a8d8c8;
+    cursor: default;
   }
-  #msg {
-    min-height: 1.5em;
-    font-size: 17px;
+  #toast {
+    position: absolute;
+    left: 50%;
+    top: 14px;
+    transform: translate(-50%, 0);
+    max-width: calc(100% - 32px);
+    width: max-content;
+    text-align: center;
+    background: var(--edge);
     color: var(--ink);
-    transition: opacity .2s;
-  }
-  #msg.warn { color: var(--warn); }
-  ol {
-    margin: 0; padding: 0; list-style: none;
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;
-    counter-reset: step;
-  }
-  li {
-    counter-increment: step;
-    background: var(--panel);
-    border: 3px solid var(--edge);
-    padding: 10px 12px;
-    color: var(--muted);
     font-size: 15px;
+    padding: 6px 12px 7px;
+    border: 2px solid var(--panel-2);
+    box-shadow: 0 3px 0 rgba(0,0,0,.35);
+    opacity: 0;
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
   }
-  li::before {
-    content: "Paso " counter(step);
-    display: block;
-    font-family: "Silkscreen", ui-monospace, monospace;
-    font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--mint);
-    margin-bottom: 2px;
+  #toast.show { opacity: 1; transform: translate(-50%, 4px); }
+  #toast.warn { color: var(--warn); }
+  #toast.good { color: var(--gold); }
+
+  /* bank */
+  .bank { display: grid; gap: 6px; }
+  .bank-row { display: flex; align-items: center; gap: 12px; }
+  .coin {
+    flex: none;
+    width: 26px; height: 26px;
+    background: var(--gold);
+    box-shadow:
+      inset -4px -4px 0 var(--gold-dk),
+      inset 4px 4px 0 #fff3a8,
+      0 0 0 3px var(--edge);
+    position: relative;
   }
-  li b { color: var(--ink); font-weight: 600; }
-  /* móvil en vertical: mapa alto que cabe en la pantalla */
-  body[data-layout="tall"] { padding-block: 12px 24px; }
-  body[data-layout="tall"] main { gap: 10px; }
-  body[data-layout="tall"] header { flex-wrap: nowrap; }
-  body[data-layout="tall"] h1 { font-size: 19px; }
-  body[data-layout="tall"] h1 span { display: block; }
-  body[data-layout="tall"] .hud { gap: 6px; flex-wrap: nowrap; }
-  body[data-layout="tall"] .chip { padding: 4px 8px 6px; gap: 6px; font-size: 14px; }
-  body[data-layout="tall"] .chip small { display: none; }
-  body[data-layout="tall"] #hand { display: none; }
+  .coin::after {
+    content: "";
+    position: absolute; left: 50%; top: 50%;
+    width: 4px; height: 10px;
+    transform: translate(-50%, -50%);
+    background: var(--gold-dk);
+  }
+  #coins {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--gold);
+    text-shadow: 0 3px 0 var(--gold-dk), 0 6px 0 var(--edge);
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+  }
+  #coins.bump { animation: bump .3s steps(3); }
+  @keyframes bump { 50% { transform: translateY(-5px) scale(1.12); } }
+  .rate { color: var(--muted); font-size: 15px; font-variant-numeric: tabular-nums; }
+  .rate b { color: var(--mint); font-weight: 600; }
+
+  /* stats */
+  dl { margin: 10px 0 0; display: grid; gap: 6px; }
+  .stat { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; font-family: var(--display); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+  /* upgrades (locked preview) */
+  .shop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .tag {
+    font-family: var(--display);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--edge);
+    background: var(--pink);
+    padding: 2px 6px;
+  }
+  .ups { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+  .up {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel-2);
+    border: 2px solid var(--edge);
+    padding: 8px 10px;
+    opacity: .72;
+  }
+  .up-ico {
+    width: 34px; height: 34px;
+    background: var(--edge);
+    display: grid; place-items: center;
+  }
+  .up-ico canvas { width: 28px; height: 28px; image-rendering: pixelated; display: block; }
+  .up-name { font-weight: 600; font-size: 15px; line-height: 1.2; }
+  .up-desc { color: var(--muted); font-size: 13px; line-height: 1.3; }
+  .up-cost {
+    font-family: var(--display); font-size: 13px; color: var(--gold);
+    display: flex; align-items: center; gap: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .up-cost i { width: 10px; height: 10px; background: var(--gold); box-shadow: inset -2px -2px 0 var(--gold-dk); display: block; }
+
+  .howto { color: var(--muted); font-size: 15px; }
+  .howto p { margin: 6px 0 0; }
+  .howto b { color: var(--ink); font-weight: 600; }
+
+  .flycoin {
+    position: fixed;
+    z-index: 10;
+    width: 14px; height: 14px;
+    margin: -7px 0 0 -7px;
+    background: var(--gold);
+    box-shadow: inset -3px -3px 0 var(--gold-dk), inset 2px 2px 0 #fff3a8, 0 0 0 2px var(--edge);
+    pointer-events: none;
+    transition: transform .6s cubic-bezier(.45, -0.45, .7, 1);
+  }
+
+  /* one column */
+  @media (max-width: 860px) {
+    .app { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+    .col { display: contents; }
+    .brand { order: 0; }
+    .bank { order: 1; }
+    .stage { order: 2; }
+    .stats { order: 3; }
+    .shop { order: 4; }
+    .howto { order: 5; }
+    .bank { grid-template-columns: auto 1fr; align-items: center; padding: 10px 14px; }
+    .bank .eyebrow { display: none; }
+    .bank .rate { text-align: right; }
+    #coins { font-size: 34px; }
+  }
+  body[data-layout="tall"] { padding-block: 12px 28px; }
+  body[data-layout="tall"] h1 { font-size: 20px; }
   body[data-layout="tall"] #game {
     aspect-ratio: 2 / 3;
-    width: min(100%, calc((100dvh - 150px) * 2 / 3));
+    width: min(100%, calc((100dvh - 170px) * 2 / 3));
     border-width: 3px;
   }
-  body[data-layout="tall"] #msg { font-size: 16px; min-height: 2.9em; text-align: center; }
-  body[data-layout="tall"] ol { grid-template-columns: 1fr 1fr; gap: 8px; }
-  body[data-layout="tall"] li { font-size: 14px; padding: 8px 10px; }
-  @media (prefers-reduced-motion: reduce) { #coins.bump { animation: none; } }
+  body[data-layout="tall"] #toast { font-size: 14px; top: 10px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #coins.bump { animation: none; }
+    .flycoin { transition: none; }
+  }
 </style>
 
-<main>
-  <header>
-    <h1>Pixel <span>Lavandería</span></h1>
-    <div class="hud">
-      <div class="chip"><small>Mano</small><canvas id="handIcon" width="14" height="12" aria-hidden="true"></canvas><span id="hand">vacía</span></div>
-      <div class="chip"><span class="coin" aria-hidden="true"></span><span id="coins">0</span></div>
+<div class="app">
+  <div class="col">
+    <div class="brand">
+      <h1>Pixel <span>Laundromat</span></h1>
+      <button class="ghost" id="sfx" type="button" aria-pressed="true">Sound on</button>
     </div>
-  </header>
-
-  <div class="stage">
-    <canvas id="game" aria-label="Mapa de la lavandería: cinta transportadora, lavadora y tubo de envío"></canvas>
+    <div class="stage">
+      <canvas id="game" aria-label="Laundromat map: conveyor belt, washing machine and coin tube"></canvas>
+      <div id="toast" role="status"></div>
+    </div>
   </div>
-  <div id="msg" role="status">Haz clic en una prenda sucia de la cinta para cogerla.</div>
 
-  <ol>
-    <li><b>Coge</b> una prenda sucia de la cinta antes de que caiga al cesto.</li>
-    <li><b>Métela</b> en la lavadora y espera a que se llene la barra.</li>
-    <li><b>Sácala</b> cuando la luz se ponga verde.</li>
-    <li><b>Llévala</b> al tubo naranja: se la lleva y ganas 1 moneda.</li>
-  </ol>
-</main>
+  <div class="col">
+    <section class="panel bank" aria-label="Coins">
+      <p class="eyebrow">Coins</p>
+      <div class="bank-row"><span class="coin" id="bankCoin" aria-hidden="true"></span><span id="coins">0</span></div>
+      <div class="rate"><b id="rate">0</b> coins / min &middot; <span id="perLoad">+1</span> per load</div>
+    </section>
+
+    <section class="panel stats">
+      <p class="eyebrow">Shift report</p>
+      <dl>
+        <div class="stat"><dt>Loads delivered</dt><dd id="stDelivered">0</dd></div>
+        <div class="stat"><dt>Lifetime coins</dt><dd id="stLifetime">0</dd></div>
+        <div class="stat"><dt>Dropped in basket</dt><dd id="stDropped">0</dd></div>
+        <div class="stat"><dt>Wash cycle</dt><dd id="stWash">5.0s</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel shop">
+      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag">Coming next</span></div>
+      <ul class="ups" id="ups"></ul>
+    </section>
+
+    <section class="panel howto">
+      <p class="eyebrow">How to play</p>
+      <p><b>Drag</b> a dirty item from the belt into the washer.</p>
+      <p>When the light turns green, <b>drag</b> the clean load to the orange tube.</p>
+      <p>Each load sent up the tube pays <b>1 coin</b>. Tapping works too: tap the item, then tap where it goes.</p>
+    </section>
+  </div>
+</div>
 
 <script>
 (() => {
+  // ================= config (upgrades will tweak these) =================
+  const CFG = { beltSpeed: 10, spawnMin: 2600, spawnVar: 2000, washMs: 5000, coinValue: 1 };
+  const UPGRADES = [
+    { name: 'Turbo Drum', desc: 'Wash cycle 20% faster', cost: 10, icon: 'drum' },
+    { name: 'Wider Belt', desc: 'More clothes arrive', cost: 25, icon: 'belt' },
+    { name: 'Second Washer', desc: 'Wash two loads at once', cost: 60, icon: 'washer' },
+    { name: 'Laundry Bot', desc: 'Sends clean loads for you', cost: 150, icon: 'bot' },
+  ];
+
+  // ================= canvas & layout =================
   let W = 192, H = 128;
   const cv = document.getElementById('game');
   let g = cv.getContext('2d');
-  const handCv = document.getElementById('handIcon');
-  const handCtx = handCv.getContext('2d');
 
-  const $coins = document.getElementById('coins');
-  const $hand = document.getElementById('hand');
-  const $msg = document.getElementById('msg');
-
-  const OUT = '#1c1a2e';
-  const COLORS = ['#e05a5a', '#4a7fe0', '#f0c84a', '#5ac06a', '#e87ab8', '#9a6ae0'];
-  const NAMES = { shirt: 'camiseta', pants: 'pantalón', sock: 'calcetín' };
-  const SPR = {
-    shirt: [
-      '..XX..XX..',
-      '.XXXXXXXX.',
-      'XXXXXXXXXX',
-      'XX.XXXX.XX',
-      '...XXXX...',
-      '...XXXX...',
-      '...XXXX...',
-      '...XXXX...',
-    ],
-    pants: [
-      'XXXXXXXX',
-      'XXXXXXXX',
-      'XXX..XXX',
-      'XXX..XXX',
-      'XXX..XXX',
-      'XXX..XXX',
-      'XXX..XXX',
-      'XX....XX',
-    ],
-    sock: [
-      '.XXX..',
-      '.XXX..',
-      '.XXX..',
-      '.XXX..',
-      '.XXXX.',
-      'XXXXXX',
-      'XXXXXX',
-      '.XXXX.',
-    ],
-  };
-
-  // Dos mapas: horizontal (ordenador) y vertical (móvil)
   const LAYOUTS = {
     wide: {
       W: 192, H: 128,
-      BELT: { x0: 0, x1: 84, y: 36, speed: 10 },
-      BIN: { x: 88, y: 40, w: 17 },
-      WASHER: { x: 74, y: 66, w: 30, h: 36 },
-      STATION: { x: 140, y: 76, w: 30, h: 28 },
+      BELT: { x0: 0, x1: 84, y: 38 },
+      BIN: { x: 88, y: 42, w: 17 },
+      WASHER: { x: 74, y: 64, w: 30, h: 36 },
+      STATION: { x: 140, y: 74, w: 30, h: 28 },
       PIPE: { x: 149, w: 12 },
-      WIN: { x: 100 }, PLANT: { x: 8, y: 110 },
+      WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 },
     },
     tall: {
       W: 128, H: 192,
-      BELT: { x0: 0, x1: 70, y: 36, speed: 9 },
-      BIN: { x: 74, y: 40, w: 17 },
+      BELT: { x0: 0, x1: 70, y: 38 },
+      BIN: { x: 74, y: 42, w: 17 },
       WASHER: { x: 16, y: 84, w: 30, h: 36 },
-      STATION: { x: 92, y: 132, w: 30, h: 28 },
+      STATION: { x: 92, y: 134, w: 30, h: 28 },
       PIPE: { x: 101, w: 12 },
-      WIN: { x: 64 }, PLANT: { x: 10, y: 170 },
+      WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null,
     },
   };
-  let layoutName = '', BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT;
+  let layoutName = '', BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT, POSTER;
   function applyLayout() {
     const name = window.innerWidth < 700 && window.innerHeight > window.innerWidth ? 'tall' : 'wide';
     if (name === layoutName) return;
     layoutName = name;
-    ({ W, H, BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT } = LAYOUTS[name]);
+    ({ W, H, BELT, BIN, WASHER, STATION, PIPE, WIN, PLANT, POSTER } = LAYOUTS[name]);
     cv.width = W; cv.height = H;
     g.imageSmoothingEnabled = false;
     document.body.dataset.layout = name;
+    buildVignette();
   }
-  applyLayout();
-  const WASH_MS = 5000;
-  let touchMode = false;
 
-  let coins = 0;
+  // ================= DOM =================
+  const $ = (id) => document.getElementById(id);
+  const $coins = $('coins'), $rate = $('rate'), $toast = $('toast'), $bankCoin = $('bankCoin');
+  const $sfx = $('sfx');
+
+  // ================= palette & sprites =================
+  const OUT = '#1c1a2e';
+  const COLORS = ['#e05a5a', '#4a7fe0', '#f0c84a', '#5ac06a', '#e87ab8', '#9a6ae0', '#f08a3c'];
+  const SPR = {
+    shirt: ['..XX..XX..', '.XXXXXXXX.', 'XXXXXXXXXX', 'XX.XXXX.XX', '...XXXX...', '...XXXX...', '...SSSS...', '...XXXX...'],
+    pants: ['SSSSSSSS', 'XXXXXXXX', 'XXX..XXX', 'XXX..XXX', 'XXX..XXX', 'XXX..XXX', 'XXX..XXX', 'XX....XX'],
+    sock:  ['.SSS..', '.XXX..', '.XXX..', '.XXX..', '.XXXX.', 'XXXXXX', 'XXXXXX', '.SSSS.'],
+    towel: ['XXXXXXXXXX', 'XXXXXXXXXX', 'SSSSSSSSSS', 'XXXXXXXXXX', 'SSSSSSSSSS', 'XXXXXXXXXX', 'X.X.X.X.X.'],
+    dress: ['..X..X..', '..XXXX..', '.XXXXXX.', '..SSSS..', '.XXXXXX.', 'XXXXXXXX', 'XXXXXXXX', 'XXXXXXXX'],
+  };
+  const TYPES = Object.keys(SPR);
+  const FONT = {
+    '0': ['111', '101', '101', '101', '111'], '1': ['010', '110', '010', '010', '111'],
+    '2': ['111', '001', '111', '100', '111'], '3': ['111', '001', '111', '001', '111'],
+    '4': ['101', '101', '111', '001', '001'], '5': ['111', '100', '111', '001', '111'],
+    '6': ['111', '100', '111', '101', '111'], '7': ['111', '001', '001', '001', '001'],
+    '8': ['111', '101', '111', '101', '111'], '9': ['111', '101', '111', '001', '111'],
+    '+': ['000', '010', '111', '010', '000'], '!': ['1', '1', '1', '0', '1'],
+  };
+
+  // ================= state =================
+  let save = { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: true };
   let items = [];
-  let held = null;
+  let hand = null;           // { item, src: 'belt'|'washer', srcX, dragging, moved, sx, sy, tx, ty }
   let washer = { s: 'idle', item: null, t0: 0 };
-  let fx = [];
-  let spawnAt = 400;
+  let sends = [];
+  let parts = [];
+  let recent = [];           // timestamps of deliveries (for coins/min)
+  let spawnAt = 500;
   let ptr = { x: -99, y: -99, inside: false };
+  let touchMode = false;
   let nextId = 1;
   let now = 0;
-  let msgTimer = 0;
 
-  // ---------- helpers ----------
+  // ================= helpers =================
   const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); };
   function disc(cx, cy, r, c) {
     g.fillStyle = c;
+    cx = Math.round(cx); cy = Math.round(cy);
     for (let dy = -r; dy <= r; dy++) {
       const w = Math.floor(Math.sqrt(r * r - dy * dy) + 0.3);
       g.fillRect(cx - w, cy + dy, w * 2 + 1, 1);
+    }
+  }
+  function oval(cx, cy, rx, ry, c) {
+    g.fillStyle = c;
+    for (let dy = -ry; dy <= ry; dy++) {
+      const w = Math.round(rx * Math.sqrt(Math.max(0, 1 - (dy * dy) / (ry * ry + 0.5))));
+      g.fillRect(Math.round(cx - w), Math.round(cy + dy), w * 2, 1);
     }
   }
   function shade(hex, f) {
@@ -264,475 +405,736 @@
     return '#' + [n >> 16, (n >> 8) & 255, n & 255].map(v => ch(v).toString(16).padStart(2, '0')).join('');
   }
   const inRect = (px, py, r, pad = 0) => px >= r.x - pad && px <= r.x + r.w + pad && py >= r.y - pad && py <= r.y + r.h + pad;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  function fmt(n) {
+    if (n < 1000) return String(Math.floor(n));
+    const u = ['K', 'M', 'B', 'T'];
+    let i = -1;
+    while (n >= 1000 && i < u.length - 1) { n /= 1000; i++; }
+    return (n < 10 ? n.toFixed(2) : n < 100 ? n.toFixed(1) : Math.floor(n)) + u[i];
+  }
+  function text(str, x, y, col) {
+    x = Math.round(x); y = Math.round(y);
+    const drawPass = (c, ox, oy) => {
+      g.fillStyle = c;
+      let cx = x;
+      for (const ch of str) {
+        const gl = FONT[ch];
+        if (!gl) { cx += 3; continue; }
+        gl.forEach((row, ri) => { for (let ci = 0; ci < row.length; ci++) if (row[ci] === '1') g.fillRect(cx + ci + ox, y + ri + oy, 1, 1); });
+        cx += gl[0].length + 1;
+      }
+    };
+    for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1]]) drawPass(OUT, ox, oy);
+    drawPass(col, 0, 0);
+  }
 
   function makeItem() {
-    const type = ['shirt', 'pants', 'sock'][Math.random() * 3 | 0];
+    const type = TYPES[Math.random() * TYPES.length | 0];
     const rows = SPR[type];
     const cells = [];
-    rows.forEach((row, ri) => [...row].forEach((ch, ci) => { if (ch === 'X') cells.push([ri, ci]); }));
+    rows.forEach((row, ri) => [...row].forEach((ch, ci) => { if (ch !== '.') cells.push([ri, ci]); }));
     const dirt = [];
     for (let i = 0; i < 6; i++) dirt.push(cells[Math.random() * cells.length | 0]);
     return {
       id: nextId++, type, color: COLORS[Math.random() * COLORS.length | 0], dirt, clean: false,
-      w: rows[0].length, h: rows.length, x: -12, drop: 0, vy: 0, seed: Math.random() * 1000,
+      w: rows[0].length, h: rows.length, x: -12, drop: 0, vy: 0, seed: Math.random() * 1000, fly: null,
     };
   }
 
-  // ---------- sound ----------
+  // ================= sound =================
   let actx = null;
-  function beep(freq, dur = 0.08, type = 'square', vol = 0.05, slide = 0) {
+  function beep(freq, dur = 0.08, type = 'square', vol = 0.045, slide = 0, delay = 0) {
+    if (!save.sound) return;
     try {
       actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = actx.currentTime + delay;
       const o = actx.createOscillator(), v = actx.createGain();
-      o.type = type; o.frequency.value = freq;
-      if (slide) o.frequency.linearRampToValueAtTime(freq + slide, actx.currentTime + dur);
-      v.gain.value = vol;
-      v.gain.linearRampToValueAtTime(0, actx.currentTime + dur);
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t0);
+      if (slide) o.frequency.linearRampToValueAtTime(freq + slide, t0 + dur);
+      v.gain.setValueAtTime(vol, t0);
+      v.gain.linearRampToValueAtTime(0, t0 + dur);
       o.connect(v).connect(actx.destination);
-      o.start(); o.stop(actx.currentTime + dur);
-    } catch (e) { /* sin sonido */ }
+      o.start(t0); o.stop(t0 + dur + 0.02);
+    } catch (e) { /* no audio */ }
   }
 
-  // ---------- UI ----------
-  function say(text, warn = false) {
-    $msg.textContent = text;
-    $msg.classList.toggle('warn', warn);
-    msgTimer = now;
+  // ================= UI =================
+  let toastTimer = 0;
+  function toast(msg, kind = '') {
+    $toast.textContent = msg;
+    $toast.className = 'show ' + kind;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { $toast.className = kind; }, 2400);
   }
-  function renderHud() {
-    $coins.textContent = coins;
-    $hand.textContent = !held ? 'vacía' : `${NAMES[held.type]} ${held.clean ? 'limpio' : 'sucio'}`.replace(/o$/, held.type === 'shirt' ? 'a' : 'o');
+  function persist() {
+    try { localStorage.setItem('pixel-laundromat', JSON.stringify(save)); } catch (e) {}
   }
-  function saveCoins() { try { localStorage.setItem('lav-coins', String(coins)); } catch (e) {} }
+  function renderStats() {
+    $coins.textContent = fmt(save.coins);
+    $('stDelivered').textContent = fmt(save.delivered);
+    $('stLifetime').textContent = fmt(save.lifetime);
+    $('stDropped').textContent = fmt(save.dropped);
+    $('stWash').textContent = (CFG.washMs / 1000).toFixed(1) + 's';
+    $('perLoad').textContent = '+' + CFG.coinValue;
+  }
+  function renderRate() {
+    recent = recent.filter(t => now - t < 60000);
+    $rate.textContent = fmt(recent.length * CFG.coinValue);
+  }
+  function addCoins(n) {
+    save.coins += n;
+    save.lifetime += n;
+    persist();
+    renderStats();
+    $coins.classList.remove('bump'); void $coins.offsetWidth; $coins.classList.add('bump');
+  }
+  function screenPos(lx, ly) {
+    const r = cv.getBoundingClientRect();
+    const b = parseFloat(getComputedStyle(cv).borderLeftWidth) || 0;
+    return { x: r.left + b + lx / W * (r.width - 2 * b), y: r.top + b + ly / H * (r.height - 2 * b) };
+  }
+  function flyCoin(lx, ly, value) {
+    const s = screenPos(lx, ly);
+    const t = $bankCoin.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'flycoin';
+    el.style.left = s.x + 'px';
+    el.style.top = s.y + 'px';
+    document.body.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.transform = `translate(${t.left + t.width / 2 - s.x}px, ${t.top + t.height / 2 - s.y}px)`;
+    }));
+    setTimeout(() => { el.remove(); addCoins(value); beep(1319, 0.08, 'square', 0.035); }, 620);
+  }
 
-  // ---------- drawing ----------
+  // ================= particles =================
+  function emit(kind, x, y, n, o = {}) {
+    for (let i = 0; i < n; i++) {
+      parts.push({
+        kind, x: x + rand(-(o.spread || 0), o.spread || 0), y,
+        vx: o.vx != null ? o.vx : rand(-20, 20), vy: o.vy != null ? o.vy : rand(-30, -10),
+        life: o.life || rand(0.5, 1), max: o.life || 1, color: o.color || '#ffffff', text: o.text, seed: Math.random() * 6,
+      });
+    }
+  }
+  function updateParts(dt) {
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.life -= dt;
+      if (p.life <= 0) { parts.splice(i, 1); continue; }
+      if (p.kind === 'coin' || p.kind === 'dust') p.vy += 120 * dt;
+      if (p.kind === 'bubble') p.x += Math.sin(now / 200 + p.seed) * 6 * dt;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+    }
+  }
+  function drawParts() {
+    for (const p of parts) {
+      const x = Math.round(p.x), y = Math.round(p.y);
+      if (p.kind === 'bubble') {
+        R(x, y, 2, 2, 'rgba(232,247,255,.85)'); R(x, y, 1, 1, '#ffffff');
+      } else if (p.kind === 'spark') {
+        const c = p.color;
+        if (p.life > p.max * 0.4) { R(x - 1, y, 3, 1, c); R(x, y - 1, 1, 3, c); } else R(x, y, 1, 1, c);
+      } else if (p.kind === 'coin') {
+        R(x - 1, y - 1, 3, 3, OUT); R(x, y, 1, 1, '#ffd84a'); R(x - 1, y - 1, 2, 2, '#ffd84a');
+      } else if (p.kind === 'dust') {
+        R(x, y, 1, 1, 'rgba(120,110,140,.8)');
+      } else if (p.kind === 'text') {
+        if (p.life > 0.25 || ((now / 60) | 0) % 2) text(p.text, x, y, p.color);
+      }
+    }
+  }
+
+  // ================= drawing =================
   function drawItem(it, x, y, t) {
     x = Math.round(x); y = Math.round(y);
     const rows = SPR[it.type];
     g.fillStyle = OUT;
     for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-      rows.forEach((row, ri) => { for (let ci = 0; ci < row.length; ci++) if (row[ci] === 'X') g.fillRect(x + ci + dx, y + ri + dy, 1, 1); });
+      rows.forEach((row, ri) => { for (let ci = 0; ci < row.length; ci++) if (row[ci] !== '.') g.fillRect(x + ci + dx, y + ri + dy, 1, 1); });
     }
-    const dark = shade(it.color, 0.72), light = shade(it.color, 1.25);
+    const dark = shade(it.color, 0.7), light = shade(it.color, 1.28), stripe = shade(it.color, 1.5);
     rows.forEach((row, ri) => {
       for (let ci = 0; ci < row.length; ci++) {
-        if (row[ci] !== 'X') continue;
-        const edgeR = row[ci + 1] !== 'X';
-        const edgeT = ri === 0 || rows[ri - 1][ci] !== 'X';
-        g.fillStyle = edgeR ? dark : edgeT ? light : it.color;
+        const ch = row[ci];
+        if (ch === '.') continue;
+        const edgeR = !row[ci + 1] || row[ci + 1] === '.';
+        const edgeT = ri === 0 || rows[ri - 1][ci] === '.';
+        g.fillStyle = ch === 'S' ? stripe : edgeR ? dark : edgeT ? light : it.color;
         g.fillRect(x + ci, y + ri, 1, 1);
       }
     });
     if (!it.clean) {
       g.fillStyle = '#6b4a2b';
       for (const [ri, ci] of it.dirt) g.fillRect(x + ci, y + ri, 1, 1);
-      // mosca
+      g.fillStyle = '#8a6440';
+      for (const [ri, ci] of it.dirt.slice(0, 2)) if (rows[ri][ci + 1] && rows[ri][ci + 1] !== '.') g.fillRect(x + ci + 1, y + ri, 1, 1);
       const a = t / 140 + it.seed;
-      R(x + it.w / 2 + Math.cos(a) * 6, y - 3 + Math.sin(a * 1.7) * 2, 1, 1, '#1c1a2e');
+      R(x + it.w / 2 + Math.cos(a) * 6, y - 3 + Math.sin(a * 1.7) * 2, 1, 1, OUT);
     } else if (((t + it.seed * 7) / 260 | 0) % 2) {
       const sx = x + it.w, sy = y - 2;
       R(sx, sy - 1, 1, 3, '#ffffff'); R(sx - 1, sy, 3, 1, '#ffffff');
     }
   }
 
-  function drawRoom() {
-    // suelo
-    R(0, 26, W, H - 26, '#a8d8c8');
-    for (let ty = 26; ty < H; ty += 16) {
+  let vignette = null;
+  function buildVignette() {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    const gr = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+    gr.addColorStop(0, 'rgba(22,21,39,0)');
+    gr.addColorStop(1, 'rgba(22,21,39,.38)');
+    x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    vignette = c;
+  }
+
+  function drawRoom(t) {
+    // floor
+    R(0, 27, W, H - 27, '#9fd3c2');
+    for (let ty = 27; ty < H; ty += 16) {
       for (let tx = 0; tx < W; tx += 16) {
-        if (((tx + ty - 26) / 16) % 2 === 0) R(tx, ty, 16, 16, '#9dcfbe');
-        R(tx, ty, 16, 1, '#8bbfae'); R(tx, ty, 1, 16, '#8bbfae');
+        if ((((tx + ty - 27) / 16) | 0) % 2 === 0) R(tx, ty, 16, 16, '#96cab9');
+        R(tx + 1, ty + 1, 14, 1, 'rgba(255,255,255,.13)');
+        R(tx, ty, 16, 1, '#84b7a6'); R(tx, ty, 1, 16, '#84b7a6');
       }
     }
-    // pared
-    R(0, 0, W, 26, '#6b5b95');
-    for (let by = 0; by < 24; by += 6) {
-      R(0, by + 5, W, 1, '#5a4b82');
-      const off = (by / 6) % 2 ? 6 : 0;
-      for (let bx = off; bx < W; bx += 12) R(bx, by, 1, 5, '#5a4b82');
+    // wall: wallpaper, wainscot, baseboard
+    R(0, 0, W, 17, '#6b5b95');
+    for (let x = 0; x < W; x += 8) R(x + 4, 0, 4, 17, '#655690');
+    for (let x = 2; x < W; x += 8) for (let y = 4; y < 16; y += 6) R(x, y, 1, 1, '#7a6aa6');
+    R(0, 0, W, 2, '#4d4270');
+    R(0, 17, W, 7, '#8a5a44');
+    R(0, 17, W, 1, '#b07a5c'); R(0, 18, W, 1, '#6f4636');
+    for (let x = 3; x < W; x += 14) { R(x, 20, 10, 3, '#7b4f3c'); R(x, 20, 10, 1, '#6a4233'); }
+    R(0, 24, W, 3, '#3d3357'); R(0, 24, W, 1, '#51467a');
+    // window (night)
+    const wx = WIN.x;
+    R(wx, 2, 28, 14, '#3d3357');
+    R(wx + 2, 4, 24, 10, '#26346a');
+    R(wx + 2, 11, 24, 3, '#2c3c78');
+    disc(wx + 19, 7, 3, '#fff3c2'); disc(wx + 20, 6, 2, '#26346a');
+    R(wx + 5, 6, 1, 1, '#ffffff'); R(wx + 10, 11, 1, 1, '#c9d4ff'); R(wx + 23, 12, 1, 1, '#ffffff');
+    R(wx + 13, 4, 2, 10, '#3d3357'); R(wx + 2, 9, 24, 1, '#3d3357');
+    R(wx - 1, 15, 30, 2, '#51467a');
+    // poster
+    if (POSTER) {
+      const px = POSTER.x;
+      R(px, 3, 16, 12, OUT); R(px + 1, 4, 14, 10, '#f6e7c1');
+      disc(px + 8, 8, 3, '#ffd84a'); R(px + 8, 7, 1, 3, '#c9960f');
+      R(px + 3, 12, 10, 1, '#c96b4a');
     }
-    R(0, 23, W, 4, '#3d3357');
-    R(0, 23, W, 1, '#4d4270');
-    // ventana
-    g.save(); g.translate(WIN.x - 100, 0);
-    R(100, 3, 28, 16, '#3d3357');
-    R(102, 5, 24, 12, '#26346a');
-    disc(119, 9, 3, '#fff3c2'); disc(120, 8, 2, '#26346a');
-    R(106, 7, 1, 1, '#ffffff'); R(111, 12, 1, 1, '#ffffff'); R(123, 14, 1, 1, '#c9d4ff');
-    R(113, 5, 2, 12, '#3d3357'); R(102, 10, 24, 1, '#3d3357');
-    g.restore();
-    // estantería con detergentes
-    R(22, 15, 40, 2, '#3d3357'); R(24, 17, 2, 3, '#3d3357'); R(58, 17, 2, 3, '#3d3357');
-    R(25, 6, 9, 9, OUT); R(26, 7, 7, 8, '#e05a5a'); R(27, 9, 5, 3, '#ffffff');
+    // shelf with detergents
+    R(22, 15, 40, 2, '#3d3357');
+    R(25, 6, 9, 9, OUT); R(26, 7, 7, 8, '#e05a5a'); R(27, 9, 5, 3, '#ffffff'); R(26, 7, 7, 1, '#f08080');
     R(36, 8, 8, 7, OUT); R(37, 9, 6, 6, '#4a7fe0'); R(38, 10, 4, 2, '#ffffff');
     R(46, 4, 6, 11, OUT); R(47, 7, 4, 8, '#5ac06a'); R(48, 5, 2, 2, '#5ac06a'); R(48, 9, 2, 3, '#e7ffe9');
-    R(54, 9, 7, 6, OUT); R(55, 10, 5, 5, '#f0c84a');
-    // cortina de tiras por donde entra la ropa
-    R(0, 24, 8, 22, OUT);
-    for (let i = 0; i < 4; i++) R(1 + i * 2 - (i % 2 ? 0 : 0), 25, 1, 20, i % 2 ? '#8fb6c9' : '#b7d4e2');
-    // planta
-    g.save(); g.translate(PLANT.x - 8, PLANT.y - 110);
-    R(8, 110, 12, 10, OUT); R(9, 111, 10, 8, '#c96b4a'); R(9, 111, 10, 2, '#e08a66');
-    for (const [lx, ly, lw, lh] of [[11, 100, 3, 10], [7, 103, 4, 3], [15, 102, 5, 3], [14, 97, 3, 6], [5, 106, 5, 3], [17, 106, 5, 3]]) {
-      R(lx - 1, ly - 1, lw + 2, lh + 2, OUT);
+    R(54, 9, 7, 6, OUT); R(55, 10, 5, 5, '#f0c84a'); R(55, 10, 5, 1, '#ffe38a');
+    // moonlight on the floor
+    g.fillStyle = 'rgba(210,225,255,.09)';
+    g.beginPath();
+    g.moveTo(wx + 2, 16); g.lineTo(wx + 26, 16); g.lineTo(wx + 44, 27 + 34); g.lineTo(wx + 16, 27 + 34);
+    g.closePath(); g.fill();
+    // strip curtain where clothes come in
+    R(0, 24, 9, 24, OUT);
+    for (let i = 0; i < 4; i++) {
+      const sway = Math.round(Math.sin(t / 400 + i) * 0.6);
+      R(1 + i * 2 + sway, 25, 1, 22, i % 2 ? '#8fb6c9' : '#c7e2ee');
     }
-    for (const [lx, ly, lw, lh] of [[11, 100, 3, 10], [7, 103, 4, 3], [15, 102, 5, 3], [14, 97, 3, 6], [5, 106, 5, 3], [17, 106, 5, 3]]) {
-      R(lx, ly, lw, lh, '#3f9a55');
-    }
-    g.restore();
-    // alfombrilla delante de la lavadora
-    R(WASHER.x - 4, WASHER.y + WASHER.h + 2, WASHER.w + 8, 10, '#e87ab8');
-    R(WASHER.x - 2, WASHER.y + WASHER.h + 4, WASHER.w + 4, 6, '#f29acb');
+    // plant
+    const ox = PLANT.x - 8, oy = PLANT.y - 110;
+    oval(PLANT.x + 6, PLANT.y + 11, 8, 2, 'rgba(20,50,60,.2)');
+    const leaves = [[11, 100, 3, 10], [7, 103, 4, 3], [15, 102, 5, 3], [14, 97, 3, 6], [5, 106, 5, 3], [17, 106, 5, 3]];
+    for (const [lx, ly, lw, lh] of leaves) R(lx - 1 + ox, ly - 1 + oy, lw + 2, lh + 2, OUT);
+    for (const [lx, ly, lw, lh] of leaves) { R(lx + ox, ly + oy, lw, lh, '#3f9a55'); R(lx + ox, ly + oy, lw, 1, '#5cc070'); }
+    R(8 + ox, 110 + oy, 12, 10, OUT); R(9 + ox, 111 + oy, 10, 8, '#c96b4a'); R(9 + ox, 111 + oy, 10, 2, '#e08a66');
+    // rug
+    const { x, y, w, h } = WASHER;
+    R(x - 5, y + h + 2, w + 10, 11, '#c9528f');
+    R(x - 4, y + h + 3, w + 8, 9, '#e87ab8');
+    R(x - 2, y + h + 5, w + 4, 5, '#f29acb');
+    for (let fx = x - 4; fx < x + w + 5; fx += 2) R(fx, y + h + 13, 1, 1, '#c9528f');
   }
 
   function drawBelt(t) {
     const { x0, x1, y } = BELT;
-    R(x0, y + 20, x1 - x0, 2, '#8bbfae');
-    for (const lx of [10, x1 / 2 | 0, x1 - 10]) { R(lx, y + 8, 3, 13, OUT); R(lx + 1, y + 8, 1, 12, '#8a8fa3'); }
-    R(x0, y - 1, x1 - x0 + 2, 10, OUT);
-    R(x0, y, x1 - x0, 3, '#55556a');
-    const off = (t / 1000 * BELT.speed) % 6;
-    g.fillStyle = '#3a3a48';
-    for (let sx = x0 - 6 + off; sx < x1; sx += 6) if (sx >= x0) g.fillRect(Math.round(sx), y, 2, 3);
-    R(x0, y + 3, x1 - x0, 5, '#8a8fa3');
-    R(x0, y + 3, x1 - x0, 1, '#b7bccb');
-    for (let rx = 4; rx < x1; rx += 12) R(rx, y + 5, 1, 1, OUT);
-    disc(x1, y + 3, 4, OUT); disc(x1, y + 3, 3, '#b7bccb'); R(x1, y + 3, 1, 1, OUT);
+    R(x0, y + 19, x1 - x0, 3, 'rgba(20,50,60,.16)');
+    for (const lx of [12, x1 / 2 | 0, x1 - 10]) {
+      R(lx, y + 8, 3, 13, OUT); R(lx + 1, y + 8, 1, 12, '#8a8fa3');
+      R(lx - 1, y + 19, 5, 2, OUT);
+    }
+    R(x0, y - 2, x1 - x0 + 1, 11, OUT);
+    R(x0, y - 1, x1 - x0, 3, '#4a4a60');
+    const off = (t / 1000 * CFG.beltSpeed) % 5;
+    g.fillStyle = '#34344a';
+    for (let sx = x0 - 5 + off; sx < x1; sx += 5) if (sx >= x0) g.fillRect(Math.round(sx), y - 1, 2, 3);
+    R(x0, y - 1, x1 - x0, 1, '#62627c');
+    R(x0, y + 2, x1 - x0, 1, '#262636');
+    R(x0, y + 3, x1 - x0, 5, '#9aa0b5');
+    R(x0, y + 3, x1 - x0, 1, '#c8cddc');
+    for (let sx = x0; sx < x1; sx += 4) R(sx, y + 5, 2, 2, ((sx / 4) | 0) % 2 ? '#2a2a3a' : '#f0c84a');
+    disc(x1, y + 3, 4, OUT); disc(x1, y + 3, 3, '#b7bccb'); R(x1 - 1, y + 1, 1, 1, '#ffffff'); R(x1, y + 3, 1, 1, OUT);
   }
 
   function drawBinBack() {
-    R(BIN.x, BIN.y, BIN.w, 4, OUT);
-    R(BIN.x + 1, BIN.y + 1, BIN.w - 2, 3, '#3d3357');
+    oval(BIN.x + BIN.w / 2, BIN.y + 18, 11, 2, 'rgba(20,50,60,.2)');
+    R(BIN.x - 1, BIN.y, BIN.w + 2, 5, OUT);
+    R(BIN.x, BIN.y + 1, BIN.w, 3, '#2a2440');
   }
   function drawBinFront() {
     const { x, y, w } = BIN;
     R(x - 1, y + 4, w + 2, 14, OUT);
     R(x, y + 4, w, 13, '#c98a4a');
     for (let i = 0; i < 4; i++) R(x, y + 6 + i * 3, w, 1, '#a86c33');
-    R(x, y + 4, w, 1, '#e3aa6a');
+    for (let i = 1; i < w; i += 4) R(x + i, y + 5, 1, 12, '#b67a3e');
+    R(x - 1, y + 3, w + 2, 2, '#e3aa6a');
+    R(x - 1, y + 3, w + 2, 1, '#f4c890');
   }
 
   function drawWasher(t) {
     const { x: bx, y, w, h } = WASHER;
     const washing = washer.s === 'washing';
     const x = bx + (washing ? ((t / 70 | 0) % 2) : 0);
+    oval(bx + w / 2, y + h + 2, w / 2 + 3, 3, 'rgba(20,50,60,.22)');
     R(x - 1, y - 1, w + 2, h + 2, OUT);
     R(x, y, w, h, '#eef0f5');
+    R(x + 1, y + 10, 1, h - 12, '#ffffff');
     R(x + w - 4, y, 4, h, '#c9ced9');
+    // control panel
     R(x, y, w, 9, '#d4d8e2');
+    R(x, y, w, 1, '#ffffff');
     R(x, y + 9, w, 1, OUT);
-    R(x + 3, y + 3, 4, 4, OUT); R(x + 4, y + 4, 2, 2, '#7a8199');
-    R(x + 10, y + 4, 8, 2, '#9aa1b8');
+    R(x + 3, y + 2, 8, 5, '#b9bfd0'); R(x + 4, y + 3, 6, 1, '#9aa1b8');
+    disc(x + 16, y + 4, 2, OUT); R(x + 16, y + 3, 1, 1, '#9aa1b8');
     const lamp = washer.s === 'idle' ? '#7a8199' : washing ? ((t / 250 | 0) % 2 ? '#ffb347' : '#b86f1c') : '#6fe08a';
     R(x + 21, y + 3, 5, 4, OUT); R(x + 22, y + 4, 3, 2, lamp);
-    // puerta
+    if (washer.s === 'done') { g.fillStyle = 'rgba(111,224,138,.25)'; g.fillRect(x + 20, y + 2, 7, 6); }
+    // door
     const cx = x + 14, cy = y + 22;
     disc(cx, cy, 11, OUT);
-    disc(cx, cy, 10, '#9aa1b8');
+    disc(cx, cy, 10, '#b9bfd0');
+    disc(cx - 1, cy - 1, 9, '#dfe3ec');
     disc(cx, cy, 8, OUT);
-    disc(cx, cy, 7, washing ? '#4f9fd6' : '#2d4f6a');
+    disc(cx, cy, 7, washing ? '#4f9fd6' : '#1f3b52');
+    g.save();
+    g.beginPath(); g.rect(cx - 7, cy - 7, 15, 15); g.clip();
     if (washing) {
-      g.save();
-      g.beginPath(); g.rect(cx - 7, cy - 7, 15, 15); g.clip();
-      R(cx - 7, cy - 1 + Math.round(Math.sin(t / 200)), 15, 8, '#3d86c2');
+      const lvl = cy - 1 + Math.round(Math.sin(t / 200));
+      R(cx - 7, lvl, 15, 9, '#3d86c2');
+      for (let i = -7; i < 8; i += 2) R(cx + i, lvl - (((i + (t / 90 | 0)) & 1)), 1, 1, '#e8f7ff');
       const col = washer.item.color;
       for (let i = 0; i < 3; i++) {
         const a = t / 160 + i * 2.1;
         R(cx + Math.round(Math.cos(a) * 4) - 1, cy + Math.round(Math.sin(a) * 4) - 1, 3, 2, col);
       }
-      for (let i = 0; i < 3; i++) {
-        const by = cy + 6 - ((t / 20 + i * 30) % 14);
-        R(cx - 4 + i * 4, Math.round(by), 1, 1, '#e8f7ff');
-      }
-      g.restore();
     } else if (washer.s === 'done') {
-      g.save(); g.beginPath(); g.rect(cx - 7, cy - 7, 15, 15); g.clip();
-      R(cx - 5, cy + 1, 11, 5, washer.item.color);
-      g.restore();
+      R(cx - 6, cy + 1, 13, 6, washer.item.color);
+      R(cx - 6, cy + 1, 13, 1, shade(washer.item.color, 1.3));
+    } else {
+      R(cx - 7, cy + 3, 15, 5, '#18303f');
     }
-    R(cx - 4, cy - 5, 2, 1, '#ffffff'); R(cx - 5, cy - 4, 1, 2, '#ffffff');
-    // patas
+    g.restore();
+    R(cx - 4, cy - 5, 2, 1, '#ffffff'); R(cx - 5, cy - 4, 1, 2, '#ffffff'); R(cx + 3, cy + 3, 1, 1, 'rgba(255,255,255,.6)');
+    R(cx + 9, cy - 2, 2, 5, '#9aa1b8');
+    // kick plate & feet
+    R(x + 1, y + h - 4, w - 5, 3, '#d4d8e2');
     R(x + 2, y + h + 1, 3, 2, OUT); R(x + w - 5, y + h + 1, 3, 2, OUT);
 
     if (washing) {
-      const p = Math.min(1, (t - washer.t0) / WASH_MS);
-      R(bx - 1, y - 8, w + 2, 5, OUT);
-      R(bx, y - 7, w, 3, '#3d3357');
-      R(bx, y - 7, Math.round(w * p), 3, '#6fe08a');
+      const p = Math.min(1, (t - washer.t0) / CFG.washMs);
+      R(bx - 1, y - 9, w + 2, 6, OUT);
+      R(bx, y - 8, w, 4, '#3d3357');
+      R(bx, y - 8, Math.round(w * p), 4, '#6fe08a');
+      R(bx, y - 8, Math.round(w * p), 1, '#b4f5c4');
     } else if (washer.s === 'done') {
       const bob = Math.round(Math.sin(t / 180) * 1.5);
       const it = washer.item;
-      const bw = it.w + 8, bxx = bx + (w - bw) / 2 | 0, byy = y - 18 + bob;
+      const bw = it.w + 8, bxx = bx + ((w - bw) / 2 | 0), byy = y - 18 + bob;
       R(bxx - 1, byy - 1, bw + 2, 14, OUT);
       R(bxx, byy, bw, 12, '#ffffff');
-      R(bxx + bw / 2 - 1 | 0, byy + 12, 3, 2, OUT); R(bxx + bw / 2 | 0, byy + 12, 1, 1, '#ffffff');
+      R(bxx, byy + 10, bw, 2, '#dfe3ec');
+      R(bxx + (bw / 2 | 0) - 1, byy + 12, 3, 2, OUT); R(bxx + (bw / 2 | 0), byy + 12, 1, 1, '#ffffff');
       drawItem(it, bxx + 4, byy + 2, t);
     }
   }
 
-  function drawStation(t) {
-    // tubo que sube al techo
+  function drawStation(t, ready) {
     const { x: px, w: pw } = PIPE;
-    R(px - 1, 0, pw + 2, STATION.y, OUT);
-    R(px, 0, pw, STATION.y, '#f2a541');
-    R(px + 2, 0, 2, STATION.y, '#ffd08a');
-    R(px + pw - 3, 0, 3, STATION.y, '#c77a22');
-    for (let ry = 6; ry < STATION.y; ry += 18) R(px - 1, ry, pw + 2, 2, '#8a4d12');
-    // estación
     const { x, y, w, h } = STATION;
+    // pipe to the ceiling with a glass window
+    R(px - 1, 0, pw + 2, y, OUT);
+    R(px, 0, pw, y, '#f2a541');
+    R(px + 2, 0, 2, y, '#ffd08a');
+    R(px + pw - 3, 0, 3, y, '#c77a22');
+    for (let ry = 4; ry < y; ry += 16) { R(px - 2, ry, pw + 4, 3, OUT); R(px - 1, ry + 1, pw + 2, 1, '#d6a13f'); }
+    const gy = y - 24;
+    R(px, gy, pw, 16, '#28475a');
+    R(px + 1, gy, 2, 16, 'rgba(255,255,255,.28)');
+    R(px + pw - 3, gy, 2, 16, 'rgba(0,0,0,.18)');
+    oval(x + w / 2, y + h + 2, w / 2 + 3, 3, 'rgba(20,50,60,.22)');
+    // body
     R(x - 1, y - 1, w + 2, h + 2, OUT);
     R(x, y, w, h, '#f2a541');
     R(x, y, w, 2, '#ffd08a');
+    R(x, y, 2, h, '#f8bd64');
     R(x + w - 4, y, 4, h, '#c77a22');
-    // boca
-    const ready = held && held.clean;
+    // intake mouth
     R(x + 5, y + 5, 18, 11, OUT);
     R(x + 6, y + 6, 16, 9, '#241b33');
-    if (ready || fx.some(f => f.k === 'send')) {
-      const s = (t / 120 | 0) % 3;
-      for (let i = 0; i < 3; i++) R(x + 9 + i * 4, y + 12 - ((i + s) % 3) * 2, 2, 1, '#ffd08a');
+    R(x + 6, y + 6, 16, 2, '#1a1326');
+    if (ready || sends.length) {
+      const s = (t / 110 | 0) % 3;
+      for (let i = 0; i < 3; i++) R(x + 9 + i * 4, y + 13 - ((i + s) % 3) * 2, 2, 1, '#ffd08a');
     }
-    // pantalla con moneda
-    R(x + 5, y + 19, 18, 6, OUT); R(x + 6, y + 20, 16, 4, '#2d4f3f');
-    R(x + 8, y + 21, 2, 2, '#ffd84a');
-    R(x + 12, y + 21, 1, 2, ready ? '#6fe08a' : '#3f6f5a'); R(x + 14, y + 21, 1, 2, ready ? '#6fe08a' : '#3f6f5a');
-    R(x + 16, y + 21, 1, 2, ready ? '#6fe08a' : '#3f6f5a'); R(x + 18, y + 21, 1, 2, ready ? '#6fe08a' : '#3f6f5a');
+    // payout plate
+    R(x + 5, y + 18, 18, 8, OUT);
+    R(x + 6, y + 19, 16, 6, '#2d4f3f');
+    disc(x + 10, y + 22, 2, '#ffd84a');
+    text('+' + CFG.coinValue, x + 14, y + 20, ready ? '#6fe08a' : '#8fd6a8');
     R(x + 2, y + h + 1, 4, 2, OUT); R(x + w - 6, y + h + 1, 4, 2, OUT);
   }
 
-  function drawCoin(cx, cy) {
-    disc(cx, cy, 4, OUT);
-    disc(cx, cy, 3, '#ffd84a');
-    R(cx + 1, cy - 1, 2, 3, '#c9960f');
-    R(cx - 2, cy - 2, 1, 2, '#fff6b8');
-  }
-
-  function brackets(x, y, w, h, t) {
-    if ((t / 220 | 0) % 2) return;
-    const c = '#ffe066';
-    x = Math.round(x); y = Math.round(y);
-    for (const [ax, ay, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) {
-      R(sx > 0 ? ax : ax - 2, ay, 3, 1, c);
-      R(ax, sy > 0 ? ay : ay - 2, 1, 3, c);
+  function drawSends(t) {
+    for (const s of sends) {
+      const age = t - s.t0;
+      if (age < 250) {
+        const p = age / 250;
+        const tx = STATION.x + 14 - s.item.w / 2, ty = STATION.y + 7;
+        drawItem(s.item, s.x0 + (tx - s.x0) * p, s.y0 + (ty - s.y0) * p, t);
+      } else {
+        const p = (age - 250) / 650;
+        const cyy = STATION.y - p * (STATION.y + 10);
+        const gy = STATION.y - 24;
+        if (cyy > gy - 6 && cyy < gy + 18) {
+          g.save(); g.beginPath(); g.rect(PIPE.x, gy, PIPE.w, 16); g.clip();
+          R(PIPE.x + 2, cyy - 4, PIPE.w - 4, 8, OUT);
+          R(PIPE.x + 3, cyy - 3, PIPE.w - 6, 6, '#dfe8f0');
+          R(PIPE.x + 4, cyy - 2, PIPE.w - 8, 4, s.item.color);
+          g.restore();
+        }
+      }
     }
   }
 
+  function brackets(x, y, w, h, t, solid) {
+    if (!solid && (t / 220 | 0) % 2) return;
+    const c = solid ? '#ffffff' : '#ffe066';
+    x = Math.round(x); y = Math.round(y);
+    for (const [ax, ay, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) {
+      R(sx > 0 ? ax : ax - 3, ay, 4, 1, c);
+      R(ax, sy > 0 ? ay : ay - 3, 1, 4, c);
+    }
+  }
   function arrow(cx, top, t) {
     const y = Math.round(top + Math.sin(t / 160) * 2);
+    cx = Math.round(cx);
     R(cx - 3, y - 1, 7, 3, OUT); R(cx - 2, y + 2, 5, 1, OUT); R(cx - 1, y + 3, 3, 1, OUT); R(cx, y + 4, 1, 1, OUT);
     R(cx - 2, y, 5, 1, '#ffe066'); R(cx - 1, y + 1, 3, 1, '#ffe066'); R(cx, y + 2, 1, 1, '#ffe066');
   }
 
-  // ---------- lógica ----------
-  const itemY = (it) => BELT.y - it.h + it.drop;
+  // ================= game logic =================
+  const itemY = (it) => BELT.y - 1 - it.h + it.drop;
   const itemBox = (it) => ({ x: it.x, y: itemY(it), w: it.w, h: it.h });
+  const stationBox = () => ({ x: STATION.x - 2, y: STATION.y - 26, w: STATION.w + 4, h: STATION.h + 26 });
 
-  function targetAt(px, py) {
-    const pad = touchMode ? 7 : 4;
-    const stationBox = { x: STATION.x, y: 30, w: STATION.w, h: STATION.y + STATION.h - 30 };
-    if (!held) {
-      for (let i = items.length - 1; i >= 0; i--) {
-        const it = items[i];
-        if (it.drop < 3 && inRect(px, py, itemBox(it), pad + 1)) return { k: 'item', i, box: itemBox(it) };
-      }
+  function pickAt(px, py) {
+    const pad = touchMode ? 8 : 4;
+    for (let i = items.length - 1; i >= 0; i--) {
+      const it = items[i];
+      if (it.drop < 3 && inRect(px, py, itemBox(it), pad)) return { src: 'belt', i };
     }
-    if (inRect(px, py, WASHER, pad)) return { k: 'washer', box: WASHER };
-    if (inRect(px, py, stationBox, pad)) return { k: 'station', box: STATION };
+    if (washer.s === 'done' && (inRect(px, py, WASHER, pad) || inRect(px, py, { x: WASHER.x, y: WASHER.y - 20, w: WASHER.w, h: 20 }, pad))) return { src: 'washer' };
     return null;
   }
+  function dropTargetAt(px, py) {
+    const pad = touchMode ? 8 : 5;
+    if (inRect(px, py, WASHER, pad)) return 'washer';
+    if (inRect(px, py, stationBox(), pad)) return 'station';
+    return null;
+  }
+  const canDrop = (tg, it) => (tg === 'washer' && !it.clean && washer.s === 'idle') || (tg === 'station' && it.clean);
 
-  function isUseful(tg) {
-    if (!tg) return false;
-    if (tg.k === 'item') return true;
-    if (tg.k === 'washer') return (washer.s === 'idle' && held && !held.clean) || (washer.s === 'done' && !held);
-    if (tg.k === 'station') return !!(held && held.clean);
-    return false;
+  function handPos() {
+    if (!hand) return null;
+    if (hand.dragging || (!touchMode && ptr.inside)) return { x: ptr.x, y: ptr.y };
+    return { x: hand.tx, y: hand.ty };
   }
 
-  function tap(px, py) {
-    const tg = targetAt(px, py);
-    if (!tg) {
-      if (held) say(held.clean ? 'Lleva la ropa limpia al tubo naranja.' : 'Lleva la ropa sucia a la lavadora.');
+  function grab(pk, p) {
+    let it;
+    if (pk.src === 'belt') {
+      it = items.splice(pk.i, 1)[0];
+      hand = { item: it, src: 'belt', srcX: it.x };
+      beep(520, 0.05); beep(780, 0.06, 'square', 0.04, 0, 0.04);
+    } else {
+      it = washer.item;
+      it.clean = true;
+      washer = { s: 'idle', item: null, t0: 0 };
+      hand = { item: it, src: 'washer' };
+      emit('spark', WASHER.x + 15, WASHER.y + 16, 6, { spread: 8, color: '#ffffff', vy: -20, life: 0.6 });
+      beep(660, 0.05); beep(990, 0.08, 'square', 0.04, 0, 0.05);
+    }
+    Object.assign(hand, { dragging: true, moved: false, sx: p.x, sy: p.y, tx: p.x, ty: p.y });
+  }
+
+  function returnHand(from) {
+    const it = hand.item;
+    if (hand.src === 'washer') {
+      it.clean = true;
+      washer = { s: 'done', item: it, t0: now };
+    } else {
+      it.x = hand.srcX; it.drop = 0; it.vy = 0;
+      it.fly = { x0: from.x - it.w / 2, y0: from.y - it.h / 2, t0: now };
+      items.push(it);
+    }
+    hand = null;
+    beep(220, 0.06, 'triangle', 0.04);
+  }
+
+  function dropAt(p) {
+    const it = hand.item;
+    const tg = dropTargetAt(p.x, p.y);
+    if (tg && canDrop(tg, it)) {
+      if (tg === 'washer') {
+        washer = { s: 'washing', item: it, t0: now };
+        emit('bubble', WASHER.x + 15, WASHER.y + 18, 8, { spread: 6, vx: 0, vy: -14, life: 0.9 });
+        beep(300, 0.14, 'square', 0.045, 140);
+        if (save.delivered === 0) toast('Washing… wait for the bar to fill.');
+      } else {
+        sends.push({ item: it, t0: now, x0: p.x - it.w / 2, y0: p.y - it.h / 2, paid: false });
+        beep(180, 0.3, 'sawtooth', 0.03, 520);
+      }
+      hand = null;
       return;
     }
-    if (tg.k === 'item') {
-      held = items.splice(tg.i, 1)[0];
-      beep(520, 0.07); beep(780, 0.07);
-      say('¡Cogida! Llévala a la lavadora.');
-    } else if (tg.k === 'washer') {
-      if (washer.s === 'idle') {
-        if (held && !held.clean) {
-          washer = { s: 'washing', item: held, t0: now };
-          held = null;
-          beep(300, 0.12, 'square', 0.05, 120);
-          say('Lavando… espera a que se llene la barra.');
-        } else if (held) say('Esa ropa ya está limpia. Llévala al tubo.', true);
-        else say('La lavadora está vacía. Coge ropa sucia de la cinta.', true);
-      } else if (washer.s === 'washing') {
-        say('Todavía está lavando…', true);
-      } else if (washer.s === 'done') {
-        if (!held) {
-          held = washer.item; held.clean = true;
-          washer = { s: 'idle', item: null, t0: 0 };
-          beep(660, 0.06); beep(990, 0.09);
-          say('¡Limpia! Llévala al tubo naranja.');
-        } else say('Tienes las manos llenas. Suelta primero lo que llevas.', true);
-      }
-    } else if (tg.k === 'station') {
-      if (held && held.clean) {
-        fx.push({ k: 'send', item: held, t0: now, x0: px - held.w / 2, y0: py - held.h / 2, paid: false });
-        held = null;
-        beep(200, 0.25, 'sawtooth', 0.03, 500);
-      } else if (held) say('Primero hay que lavarla.', true);
-      else say('Trae ropa limpia al tubo.', true);
-    }
-    renderHud();
+    if (tg === 'washer') toast(it.clean ? 'Already clean. Send it up the tube.' : 'The washer is busy.', 'warn');
+    else if (tg === 'station') toast('Wash it first!', 'warn');
+    returnHand(p);
   }
 
   function update(dt) {
     if (now >= spawnAt) {
       items.push(makeItem());
-      spawnAt = now + 2600 + Math.random() * 2000;
+      spawnAt = now + CFG.spawnMin + Math.random() * CFG.spawnVar;
     }
     for (let i = items.length - 1; i >= 0; i--) {
       const it = items[i];
       const cx = it.x + it.w / 2;
-      if (cx < BIN.x + BIN.w / 2) it.x += BELT.speed * dt;
+      if (cx < BIN.x + BIN.w / 2) it.x += CFG.beltSpeed * dt;
       if (cx > BELT.x1 + 1) { it.vy += 160 * dt; it.drop += it.vy * dt; }
       if (itemY(it) > BIN.y + 8) {
         items.splice(i, 1);
+        save.dropped++; persist(); renderStats();
+        emit('dust', BIN.x + BIN.w / 2, BIN.y + 2, 5, { spread: 5, vy: -25, life: 0.5 });
         beep(140, 0.08, 'triangle', 0.04);
       }
     }
-    if (washer.s === 'washing' && now - washer.t0 >= WASH_MS) {
-      washer.s = 'done';
-      beep(880, 0.08); setTimeout(() => beep(1175, 0.12), 90);
-      say('¡Ding! La ropa está lista. Sácala de la lavadora.');
+    if (washer.s === 'washing') {
+      if (Math.random() < dt * 6) emit('bubble', WASHER.x + rand(6, 24), WASHER.y + 14, 1, { vx: 0, vy: rand(-18, -10), life: rand(0.6, 1.1) });
+      if (now - washer.t0 >= CFG.washMs) {
+        washer.s = 'done';
+        emit('spark', WASHER.x + 15, WASHER.y + 20, 10, { spread: 10, color: '#fff6b8', vy: -30, life: 0.7 });
+        beep(880, 0.08); beep(1175, 0.12, 'square', 0.045, 0, 0.09);
+        if (save.delivered < 3) toast('Ding! Drag the clean load to the tube.', 'good');
+      }
+    } else if (washer.s === 'done' && Math.random() < dt * 2) {
+      emit('spark', WASHER.x + rand(4, 26), WASHER.y - rand(4, 16), 1, { vx: 0, vy: -6, color: '#ffffff', life: 0.5 });
     }
-    for (let i = fx.length - 1; i >= 0; i--) {
-      const f = fx[i], age = now - f.t0;
-      if (f.k === 'send') {
-        if (age >= 300 && !f.paid) {
-          f.paid = true;
-          coins++; saveCoins(); renderHud();
-          $coins.classList.remove('bump'); void $coins.offsetWidth; $coins.classList.add('bump');
-          fx.push({ k: 'coin', t0: now });
-          beep(988, 0.07); setTimeout(() => beep(1319, 0.12), 70);
-          say('¡+1 moneda! Coge otra prenda de la cinta.');
-        }
-        if (age > 1000) fx.splice(i, 1);
-      } else if (f.k === 'coin' && age > 900) fx.splice(i, 1);
+    for (let i = sends.length - 1; i >= 0; i--) {
+      const s = sends[i], age = now - s.t0;
+      if (age >= 250 && !s.paid) {
+        s.paid = true;
+        const cx = STATION.x + 12, cy = STATION.y + 4;
+        emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + CFG.coinValue });
+        emit('coin', cx, cy, 6, { spread: 3, life: 0.7 });
+        flyCoin(cx, cy, CFG.coinValue);
+        save.delivered++;
+        recent.push(now);
+        persist(); renderStats(); renderRate();
+        if (save.delivered === 1) toast('First coin! Keep the laundry moving.', 'good');
+      }
+      if (age > 900) sends.splice(i, 1);
     }
+    updateParts(dt);
   }
 
   function draw(t) {
-    drawRoom();
+    drawRoom(t);
     drawBelt(t);
     drawBinBack();
-    for (const it of items) drawItem(it, it.x, itemY(it), t);
-    drawBinFront();
-    drawWasher(t);
-    drawStation(t);
-
-    for (const f of fx) {
-      const age = t - f.t0;
-      if (f.k === 'send') {
-        if (age < 300) {
-          const p = age / 300;
-          const tx = STATION.x + 14 - f.item.w / 2, ty = STATION.y + 7;
-          drawItem(f.item, f.x0 + (tx - f.x0) * p, f.y0 + (ty - f.y0) * p, t);
-        } else {
-          const p = (age - 300) / 700;
-          const by = STATION.y - 4 - p * (STATION.y + 6);
-          R(PIPE.x - 3, by - 3, PIPE.w + 6, 7, OUT);
-          R(PIPE.x - 2, by - 2, PIPE.w + 4, 5, '#f2a541');
-          R(PIPE.x + 1, by - 1, PIPE.w - 2, 3, f.item.color);
-        }
-      } else if (f.k === 'coin') {
-        const p = age / 900;
-        if (p < 0.75 || (age / 60 | 0) % 2) drawCoin(STATION.x + 14, Math.round(STATION.y - 6 - p * 20));
+    for (const it of items) {
+      let x = it.x, y = itemY(it);
+      if (it.fly) {
+        const p = (t - it.fly.t0) / 180;
+        if (p >= 1) it.fly = null;
+        else { x = it.fly.x0 + (x - it.fly.x0) * p; y = it.fly.y0 + (y - it.fly.y0) * p; }
       }
+      drawItem(it, x, y, t);
+    }
+    drawBinFront();
+    const ready = !!(hand && hand.item.clean);
+    drawWasher(t);
+    drawStation(t, ready);
+    drawSends(t);
+    drawParts();
+
+    // targets
+    if (hand) {
+      const hp = handPos();
+      const over = dropTargetAt(hp.x, hp.y);
+      if (canDrop('washer', hand.item)) brackets(WASHER.x - 3, WASHER.y - 3, WASHER.w + 6, WASHER.h + 6, t, over === 'washer');
+      if (canDrop('station', hand.item)) brackets(STATION.x - 3, STATION.y - 3, STATION.w + 6, STATION.h + 6, t, over === 'station');
+    } else if (!touchMode && ptr.inside) {
+      const pk = pickAt(ptr.x, ptr.y);
+      if (pk && pk.src === 'belt') { const b = itemBox(items[pk.i]); brackets(b.x - 3, b.y - 3, b.w + 6, b.h + 6, t, true); }
+      if (pk && pk.src === 'washer') brackets(WASHER.x - 3, WASHER.y - 3, WASHER.w + 6, WASHER.h + 6, t, true);
     }
 
-    // pista: flecha sobre el siguiente objetivo
-    let hint = null;
-    if (held && held.clean) hint = [STATION.x + 14, STATION.y - 12];
-    else if (held && washer.s === 'idle') hint = [WASHER.x + 15, WASHER.y - 12];
-    else if (!held && washer.s === 'done') hint = null;
-    else if (!held) {
-      const first = items.filter(it => it.drop < 1 && it.x > 4).sort((a, b) => b.x - a.x)[0];
-      if (first) hint = [Math.round(first.x + first.w / 2), BELT.y - first.h - 10];
+    // tutorial arrows for the first few loads
+    if (save.delivered < 3) {
+      let hint = null;
+      if (hand && hand.item.clean) hint = [STATION.x + 14, STATION.y - 12];
+      else if (hand && washer.s === 'idle') hint = [WASHER.x + 15, WASHER.y - 12];
+      else if (!hand && washer.s === 'idle') {
+        const first = items.filter(it => it.drop < 1 && it.x > 4).sort((a, b) => b.x - a.x)[0];
+        if (first) hint = [first.x + first.w / 2, BELT.y - first.h - 11];
+      }
+      if (hint) arrow(hint[0], hint[1], t);
     }
-    if (hint) arrow(hint[0], hint[1], t);
 
-    // resaltado bajo el cursor
-    if (ptr.inside) {
-      const tg = targetAt(ptr.x, ptr.y);
-      if (isUseful(tg)) brackets(tg.box.x - 3, tg.box.y - 3, tg.box.w + 6, tg.box.h + 6, t);
-      cv.style.cursor = held ? 'none' : isUseful(tg) ? 'pointer' : 'default';
-      if (held) drawItem(held, ptr.x - held.w / 2, ptr.y - held.h / 2, t);
+    g.drawImage(vignette, 0, 0);
+
+    // the item you are carrying
+    if (hand) {
+      const hp = handPos();
+      const it = hand.item;
+      const lift = hand.dragging ? 0 : Math.round(Math.sin(t / 170) * 1.5);
+      oval(hp.x, hp.y + it.h / 2 + 4, it.w / 2 + 1, 1, 'rgba(20,30,50,.35)');
+      drawItem(it, hp.x - it.w / 2, hp.y - it.h / 2 - 2 + lift, t);
+    }
+
+    if (!touchMode) {
+      const pk = !hand && ptr.inside && pickAt(ptr.x, ptr.y);
+      cv.style.cursor = hand ? (hand.dragging ? 'grabbing' : 'none') : pk ? 'grab' : 'default';
     }
   }
 
-  // la prenda que llevas, dibujada en el marcador (en el móvil no hay cursor)
-  function drawHandIcon(t) {
-    handCtx.clearRect(0, 0, handCv.width, handCv.height);
-    if (!held) return;
-    const main = g;
-    g = handCtx;
-    drawItem(held, (handCv.width - held.w) / 2, (handCv.height - held.h) / 2 + 1, t);
-    g = main;
-  }
-
-  let last = 0;
+  let last = 0, rateTick = 0;
   function loop(ts) {
     const dt = Math.min(0.05, (ts - last) / 1000 || 0);
     last = ts;
     now = ts;
     update(dt);
     draw(ts);
-    drawHandIcon(ts);
+    if (ts - rateTick > 1000) { rateTick = ts; renderRate(); }
     requestAnimationFrame(loop);
   }
 
-  // ---------- entrada ----------
+  // ================= input =================
   function toLogical(e) {
     const r = cv.getBoundingClientRect();
-    const border = parseFloat(getComputedStyle(cv).borderLeftWidth) || 0;
+    const b = parseFloat(getComputedStyle(cv).borderLeftWidth) || 0;
     return {
-      x: (e.clientX - r.left - border) / (r.width - border * 2) * W,
-      y: (e.clientY - r.top - border) / (r.height - border * 2) * H,
+      x: (e.clientX - r.left - b) / (r.width - b * 2) * W,
+      y: (e.clientY - r.top - b) / (r.height - b * 2) * H,
     };
   }
-  cv.addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse') return;
-    const p = toLogical(e); ptr = { x: p.x, y: p.y, inside: true };
-  });
-  cv.addEventListener('pointerleave', () => { ptr.inside = false; });
   cv.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     touchMode = e.pointerType !== 'mouse';
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
     const p = toLogical(e);
-    ptr = { x: p.x, y: p.y, inside: !touchMode };
-    tap(p.x, p.y);
+    ptr = { x: p.x, y: p.y, inside: true };
+    if (hand) {
+      const hp = handPos();
+      if (Math.hypot(p.x - hp.x, p.y - hp.y) < (touchMode ? 12 : 7)) {
+        Object.assign(hand, { dragging: true, moved: false, sx: p.x, sy: p.y });
+      } else {
+        dropAt(p);
+      }
+      return;
+    }
+    const pk = pickAt(p.x, p.y);
+    if (pk) { grab(pk, p); return; }
+    if (washer.s === 'washing' && inRect(p.x, p.y, WASHER, 3)) toast('Still washing…');
+    else if (inRect(p.x, p.y, stationBox(), 3)) toast('Bring a clean load here.');
+    else if (inRect(p.x, p.y, WASHER, 3)) toast('Drag dirty clothes from the belt in here.');
+  });
+  cv.addEventListener('pointermove', (e) => {
+    const p = toLogical(e);
+    if (e.pointerType !== 'mouse' && !(hand && hand.dragging)) return;
+    ptr = { x: p.x, y: p.y, inside: true };
+    if (hand && hand.dragging && Math.hypot(p.x - hand.sx, p.y - hand.sy) > 3) hand.moved = true;
+  });
+  const release = (e) => {
+    if (!hand || !hand.dragging) return;
+    const p = toLogical(e);
+    ptr = { x: p.x, y: p.y, inside: e.pointerType === 'mouse' };
+    hand.dragging = false;
+    if (hand.moved) dropAt(p);
+    else { hand.tx = p.x; hand.ty = p.y; }
+  };
+  cv.addEventListener('pointerup', release);
+  cv.addEventListener('pointercancel', release);
+  cv.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && !(hand && hand.dragging)) ptr.inside = false; });
+  cv.addEventListener('contextmenu', (e) => e.preventDefault());
+  window.addEventListener('resize', applyLayout);
+
+  $sfx.addEventListener('click', () => {
+    save.sound = !save.sound;
+    $sfx.textContent = save.sound ? 'Sound on' : 'Sound off';
+    $sfx.setAttribute('aria-pressed', String(save.sound));
+    persist();
+    if (save.sound) beep(660, 0.06);
   });
 
-  window.addEventListener('resize', applyLayout);
-  cv.addEventListener('contextmenu', (e) => e.preventDefault());
+  // ================= upgrade preview cards =================
+  function drawIcon(kind) {
+    const c = document.createElement('canvas');
+    c.width = 14; c.height = 14;
+    const x = c.getContext('2d');
+    const P = (px, py, w, h, col) => { x.fillStyle = col; x.fillRect(px, py, w, h); };
+    if (kind === 'drum') { P(2, 2, 10, 10, OUT); P(3, 3, 8, 8, '#b9bfd0'); P(4, 4, 6, 6, '#4f9fd6'); P(5, 5, 2, 1, '#fff'); P(9, 1, 3, 3, '#ffd23f'); }
+    if (kind === 'belt') { P(1, 6, 12, 4, OUT); P(2, 7, 10, 2, '#9aa0b5'); P(3, 3, 3, 3, '#e05a5a'); P(8, 3, 3, 3, '#4a7fe0'); P(2, 10, 1, 3, OUT); P(11, 10, 1, 3, OUT); }
+    if (kind === 'washer') { P(1, 2, 6, 10, OUT); P(2, 3, 4, 8, '#eef0f5'); P(3, 6, 2, 3, '#4f9fd6'); P(7, 2, 6, 10, OUT); P(8, 3, 4, 8, '#eef0f5'); P(9, 6, 2, 3, '#4f9fd6'); }
+    if (kind === 'bot') { P(3, 3, 8, 7, OUT); P(4, 4, 6, 5, '#7fe0c4'); P(5, 5, 1, 2, OUT); P(8, 5, 1, 2, OUT); P(6, 1, 2, 2, '#ffd23f'); P(4, 10, 2, 3, OUT); P(8, 10, 2, 3, OUT); }
+    return c;
+  }
+  const $ups = $('ups');
+  for (const u of UPGRADES) {
+    const li = document.createElement('li');
+    li.className = 'up';
+    li.innerHTML = `<span class="up-ico"></span><span><span class="up-name"></span><br><span class="up-desc"></span></span><span class="up-cost"><i></i><span></span></span>`;
+    li.querySelector('.up-ico').appendChild(drawIcon(u.icon));
+    li.querySelector('.up-name').textContent = u.name;
+    li.querySelector('.up-desc').textContent = u.desc;
+    li.querySelector('.up-cost span').textContent = fmt(u.cost);
+    $ups.appendChild(li);
+  }
 
+  // ================= boot =================
   function start(data) {
-    if (window.matchMedia && matchMedia('(pointer: coarse)').matches) {
-      touchMode = true;
-      say('Toca una prenda sucia de la cinta para cogerla.');
-    }
-    try { coins = parseInt(localStorage.getItem('lav-coins'), 10) || 0; } catch (e) { coins = 0; }
-    if (data && typeof data.coins === 'number') coins = Math.max(coins, data.coins);
-    // una prenda ya en la cinta para empezar
-    const first = makeItem(); first.x = 30; items.push(first);
-    renderHud();
+    try {
+      const raw = localStorage.getItem('pixel-laundromat');
+      if (raw) Object.assign(save, JSON.parse(raw));
+      else {
+        const old = parseInt(localStorage.getItem('lav-coins'), 10) || 0;
+        save.coins = save.lifetime = old;
+      }
+    } catch (e) {}
+    if (data && data.save) Object.assign(save, data.save);
+    $sfx.textContent = save.sound ? 'Sound on' : 'Sound off';
+    $sfx.setAttribute('aria-pressed', String(save.sound));
+    applyLayout();
+    if (window.matchMedia && matchMedia('(pointer: coarse)').matches) touchMode = true;
+    const first = makeItem(); first.x = 28; items.push(first);
+    renderStats(); renderRate();
+    toast(save.delivered ? 'Welcome back! The belt is running.' : 'Drag a dirty item from the belt into the washer.');
     requestAnimationFrame(loop);
   }
-  try { window.claude?.hot?.snapshot?.(() => ({ coins })); } catch (e) {}
+  try { window.claude?.hot?.snapshot?.(() => ({ save })); } catch (e) {}
   window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 })();
 </script>
