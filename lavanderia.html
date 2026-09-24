@@ -560,7 +560,7 @@
   const UPGRADES = [
     { id: 'drum', name: 'Turbo Drum', icon: 'drum', costs: [10, 25, 45, 70, 90],
       desc: () => `Wash 10% faster · now ${(CFG.washMs / 1000).toFixed(1)}s` },
-    { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: Array.from({ length: 20 }, (_, i) => Math.round(10 * 1.22 ** i)),
+    { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: Array.from({ length: 20 }, (_, i) => Math.round(10 * 1.35 ** i)),
       desc: () => `x${SOAP_MULT} coins per cloth` },
     { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55, 85, 115],
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
