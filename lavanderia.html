@@ -384,7 +384,7 @@
     </section>
 
     <section class="panel shop">
-      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag" id="ownedTag">0 / 20 levels</span></div>
+      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag" id="ownedTag">0 / 24 levels</span></div>
       <ul class="ups" id="ups"></ul>
     </section>
 
@@ -398,7 +398,7 @@
 
     <section class="panel howto">
       <p class="eyebrow">How to play</p>
-      <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>.</p>
+      <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
@@ -428,7 +428,7 @@
 <script>
 (() => {
   // ================= config =================
-  const BASE = { beltSpeed: 10, spawnMin: 2600, spawnVar: 2000, washMs: 5000, coinValue: 1 };
+  const BASE = { beltSpeed: 10, spawnMin: 2600, spawnVar: 2000, washMs: 5000, coinValue: 1, capacity: 1 };
   const CFG = { ...BASE };
   // floor timeline (ms on the floor)
   const FLOOR = { soilMs: 5000, grimeMs: 11000, crumbleMs: 18000, sandMs: 24000 };
@@ -438,6 +438,8 @@
       desc: () => `Wash 10% faster · now ${(CFG.washMs / 1000).toFixed(1)}s` },
     { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: [15, 35, 60, 80, 100],
       desc: () => `+1 coin per load · now +${CFG.coinValue}` },
+    { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55, 85, 115],
+      desc: () => `+1 item per wash · now ${CFG.capacity}` },
     { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: [20, 40, 60, 80, 110],
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
     { id: 'washer2', name: 'Second Washer', icon: 'washer', costs: [45],
@@ -460,7 +462,7 @@
       WASHERS: [{ x: 74, y: 64, w: 30, h: 36 }, { x: 34, y: 64, w: 30, h: 36 }],
       STATION: { x: 140, y: 74, w: 30, h: 28 },
       PIPE: { x: 149, w: 12 },
-      WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 },
+      WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 }, DUST: { x0: 110, x1: 134, y0: 36, y1: 60 },
       PAN: { x: 174, y: 112 }, BROOM: { x: 140, y: 120 }, TRASH: { x: 176, y: 84, w: 13, h: 16 }, BOT: { x: 124, y: 116 },
     },
     tall: {
@@ -470,18 +472,18 @@
       WASHERS: [{ x: 14, y: 84, w: 30, h: 36 }, { x: 56, y: 84, w: 30, h: 36 }],
       STATION: { x: 92, y: 134, w: 30, h: 28 },
       PIPE: { x: 101, w: 12 },
-      WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null,
+      WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null, DUST: { x0: 60, x1: 92, y0: 64, y1: 72 },
       PAN: { x: 30, y: 176 }, BROOM: { x: 50, y: 186 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 86, y: 182 },
     },
   };
-  let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, PANHOME, BROOMHOME, TRASH, BOTHOME;
+  let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, PANHOME, BROOMHOME, TRASH, BOTHOME;
   function applyLayout() {
     const name = window.innerWidth < 700 && window.innerHeight > window.innerWidth ? 'tall' : 'wide';
     if (name === layoutName) return;
     const prev = layoutName ? { W, H } : null;
     layoutName = name;
     const L = LAYOUTS[name];
-    ({ W, H, BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, TRASH } = L);
+    ({ W, H, BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, TRASH } = L);
     BOTHOME = L.BOT; PANHOME = L.PAN; BROOMHOME = L.BROOM;
     cv.width = W; cv.height = H;
     g.imageSmoothingEnabled = false;
@@ -521,6 +523,7 @@
     '6': ['111', '100', '111', '101', '111'], '7': ['111', '001', '001', '001', '001'],
     '8': ['111', '101', '111', '101', '111'], '9': ['111', '101', '111', '001', '111'],
     '+': ['000', '010', '111', '010', '000'], '!': ['1', '1', '1', '0', '1'],
+    '/': ['001', '001', '010', '100', '100'], 'x': ['000', '101', '010', '101', '000'],
   };
 
   // ================= state =================
@@ -529,7 +532,11 @@
   let floor = [];            // lying on the floor
   let piles = [];            // sand piles
   let hand = null;           // what the player is holding
-  let washers = [{ s: 'idle', item: null, t0: 0 }, { s: 'idle', item: null, t0: 0 }];
+  const newWasher = () => ({ s: 'idle', item: null, t0: 0, load: [] });
+  let washers = [newWasher(), newWasher()];
+  const countOf = (it) => it.count || 1;
+  const loadCount = (w) => (w.load || []).reduce((n, it) => n + countOf(it), 0);
+  let dustEv = null, dustAt = 0;
   let bot = { x: 0, y: 0, s: 'dock', wi: -1, item: null, target: null, wait: 0, roam: null };
   const PAN_CAP = 4;
   let pan = { x: 0, y: 0, face: -1, load: 0 };   // dustpan lying on the floor
@@ -557,6 +564,7 @@
     Object.assign(CFG, BASE);
     CFG.washMs = BASE.washMs * 0.9 ** level('drum');
     CFG.coinValue = BASE.coinValue + level('soap');
+    CFG.capacity = BASE.capacity + level('cap');
     const more = 1.15 ** level('belt');
     CFG.spawnMin = BASE.spawnMin / more;
     CFG.spawnVar = BASE.spawnVar / more;
@@ -728,6 +736,7 @@
     if (kind === 'drum') { P(2, 2, 10, 10, OUT); P(3, 3, 8, 8, '#b9bfd0'); P(4, 4, 6, 6, '#4f9fd6'); P(5, 5, 2, 1, '#fff'); P(9, 1, 3, 3, '#ffd23f'); }
     if (kind === 'belt') { P(1, 6, 12, 4, OUT); P(2, 7, 10, 2, '#9aa0b5'); P(3, 3, 3, 3, '#e05a5a'); P(8, 3, 3, 3, '#4a7fe0'); P(2, 10, 1, 3, OUT); P(11, 10, 1, 3, OUT); }
     if (kind === 'washer') { P(1, 2, 6, 10, OUT); P(2, 3, 4, 8, '#eef0f5'); P(3, 6, 2, 3, '#4f9fd6'); P(7, 2, 6, 10, OUT); P(8, 3, 4, 8, '#eef0f5'); P(9, 6, 2, 3, '#4f9fd6'); }
+    if (kind === 'cap') { P(2, 2, 10, 11, OUT); P(3, 3, 8, 9, '#eef0f5'); P(4, 6, 6, 5, '#1f3b52'); P(5, 8, 4, 2, '#e05a5a'); P(8, 7, 2, 2, '#4a7fe0'); P(9, 0, 5, 5, OUT); P(11, 1, 1, 3, '#6fe08a'); P(10, 2, 3, 1, '#6fe08a'); }
     if (kind === 'soap') { P(4, 1, 6, 3, OUT); P(5, 2, 4, 1, '#e87ab8'); P(3, 4, 8, 9, OUT); P(4, 5, 6, 7, '#7fe0c4'); P(5, 7, 4, 3, '#ffffff'); P(10, 2, 2, 2, '#e8f7ff'); P(12, 5, 1, 1, '#e8f7ff'); }
     if (kind === 'bot') { P(3, 3, 8, 1, OUT); P(2, 4, 10, 1, OUT); P(1, 5, 12, 5, OUT); P(2, 10, 10, 1, OUT); P(2, 5, 10, 3, '#4a4f66'); P(3, 4, 8, 1, '#4a4f66'); P(2, 8, 10, 2, '#2a2c3a'); P(2, 7, 10, 1, '#7fe0c4'); P(6, 5, 2, 1, '#6fe08a'); P(4, 5, 2, 1, '#6d7390'); }
     return c;
@@ -873,6 +882,7 @@
       const sx = x + it.w, sy = y - 2;
       R(sx, sy - 1, 1, 3, '#ffffff'); R(sx - 1, sy, 3, 1, '#ffffff');
     }
+    if (countOf(it) > 1) text('x' + countOf(it), x + it.w - 3, y + it.h - 3, '#ffd84a');
   }
 
   const pileSize = (pl) => Math.min(1.8, 0.7 + 0.3 * pl.amount);
@@ -1024,6 +1034,13 @@
     disc(wx + 19, 7, 3, '#fff3c2'); disc(wx + 20, 6, 2, '#26346a');
     R(wx + 5, 6, 1, 1, '#ffffff'); R(wx + 10, 11, 1, 1, '#c9d4ff'); R(wx + 23, 12, 1, 1, '#ffffff');
     R(wx + 13, 4, 2, 10, '#3d3357'); R(wx + 2, 9, 24, 1, '#3d3357');
+    if (dustEv) {
+      // window swung open, dust swirling in
+      R(wx + 2, 4, 11, 10, '#5a6f9e');
+      R(wx - 4, 3, 6, 12, '#3d3357'); R(wx - 3, 4, 4, 10, '#8ea4d0');
+      const f = (t / 120 | 0) % 4;
+      for (let k = 0; k < 3; k++) R(wx + 3 + ((f + k * 3) % 9), 6 + k * 3, 3, 1, SAND[3]);
+    }
     R(wx - 1, 15, 30, 2, '#51467a');
     if (POSTER) {
       const px = POSTER.x;
@@ -1124,7 +1141,10 @@
     disc(cx, cy, 8, OUT);
     disc(cx, cy, 7, washing ? '#4f9fd6' : '#1f3b52');
     g.save();
-    g.beginPath(); g.rect(cx - 7, cy - 7, 15, 15); g.clip();
+    // clip to the round porthole, row by row so the edge stays pixel-crisp
+    g.beginPath();
+    for (let dy = -7; dy <= 7; dy++) { const hw = Math.floor(Math.sqrt(49 - dy * dy) + 0.3); g.rect(cx - hw, cy + dy, hw * 2 + 1, 1); }
+    g.clip();
     if (washing) {
       const lvl = cy - 1 + Math.round(Math.sin(t / 200 + i));
       R(cx - 7, lvl, 15, 9, '#3d86c2');
@@ -1139,6 +1159,7 @@
       R(cx - 6, cy + 1, 13, 1, shade(wsh.item.color, 1.3));
     } else {
       R(cx - 7, cy + 3, 15, 5, '#18303f');
+      wsh.load.forEach((it, k) => { R(cx - 5 + (k % 3) * 4, cy + 3 - (k / 3 | 0) * 2, 4, 3, it.color); R(cx - 5 + (k % 3) * 4, cy + 3 - (k / 3 | 0) * 2, 4, 1, shade(it.color, 1.3)); });
     }
     g.restore();
     R(cx - 4, cy - 5, 2, 1, '#ffffff'); R(cx - 5, cy - 4, 1, 2, '#ffffff'); R(cx + 3, cy + 3, 1, 1, 'rgba(255,255,255,.6)');
@@ -1146,6 +1167,22 @@
     R(x + 1, y + h - 4, w - 5, 3, '#d4d8e2');
     R(x + 2, y + h + 1, 3, 2, OUT); R(x + w - 5, y + h + 1, 3, 2, OUT);
 
+    if (wsh.s === 'idle') {
+      const n = loadCount(wsh);
+      const label = `${n}/${CFG.capacity}`;
+      const lw = label.length * 4 + 5;
+      R(bx - 1, y - 12, lw + 2, 10, OUT);
+      R(bx, y - 11, lw, 8, '#2d2a4f');
+      text(label, bx + 3, y - 10, n ? '#7fe0c4' : '#c9c4ea');
+      if (n) {
+        const b = goBox(i), pulse = (t / 300 | 0) % 2;
+        R(b.x - 1, b.y - 1, b.w + 2, b.h + 2, OUT);
+        R(b.x, b.y, b.w, b.h, pulse ? '#6fe08a' : '#4fc070');
+        R(b.x, b.y, b.w, 1, '#b4f5c4');
+        R(b.x, b.y + b.h - 2, b.w, 2, '#2f8a4a');
+        for (let k = 0; k < 3; k++) R(b.x + 4 + k, b.y + 2 + k, 1, 5 - k * 2, OUT);
+      }
+    }
     if (washing) {
       const p = Math.min(1, (t - wsh.t0) / CFG.washMs);
       R(bx - 1, y - 9, w + 2, 6, OUT);
@@ -1280,7 +1317,20 @@
     });
     return best;
   }
-  const canLoad = (i, it) => !it.clean && washers[i].s === 'idle';
+  const canLoad = (i, it) => !it.clean && washers[i].s === 'idle' && loadCount(washers[i]) + countOf(it) <= CFG.capacity;
+  const goBox = (i) => { const w = WASHERS[i]; return { x: w.x + w.w - 12, y: w.y - 12, w: 12, h: 10 }; };
+  function startWash(i, byBot) {
+    const wsh = washers[i];
+    if (wsh.s !== 'idle' || !wsh.load.length) return;
+    const total = loadCount(wsh);
+    const item = wsh.load[0];
+    item.count = total;
+    washers[i] = { s: 'washing', item, t0: now, load: [], bot: !!byBot };
+    const w = WASHERS[i];
+    emit('bubble', w.x + 15, w.y + 18, 8 + total * 2, { spread: 6, vx: 0, vy: -14, life: 0.9 });
+    beep(300, 0.14, 'square', 0.045, 140);
+    if (!byBot && save.delivered === 0) toast('Washing… wait for the bar to fill.');
+  }
 
   function handPos() {
     if (!hand) return null;
@@ -1299,7 +1349,7 @@
       beep(440, 0.05); beep(660, 0.06, 'square', 0.04, 0, 0.04);
     } else if (pk.src === 'washer') {
       const it = washers[pk.i].item;
-      washers[pk.i] = { s: 'idle', item: null, t0: 0 };
+      washers[pk.i] = newWasher();
       hand = { kind: 'item', item: it, src: 'washer', srcI: pk.i };
       const w = WASHERS[pk.i];
       emit('spark', w.x + 15, w.y + 16, 6, { spread: 8, color: '#ffffff', vy: -20, life: 0.6 });
@@ -1333,7 +1383,7 @@
     if (hand.kind === 'item') {
       const it = hand.item;
       if (hand.src === 'washer' && washers[hand.srcI].s === 'idle') {
-        washers[hand.srcI] = { s: 'done', item: it, t0: now };
+        washers[hand.srcI] = { s: 'done', item: it, t0: now, load: [] };
       } else if (hand.src === 'belt') {
         it.x = hand.srcX; it.drop = 0; it.vy = 0;
         it.fly = { x0: from.x - it.w / 2, y0: from.y - it.h / 2, t0: now };
@@ -1450,15 +1500,24 @@
     const tg = dropTargetAt(p.x, p.y);
     if (tg && tg.k === 'washer') {
       if (canLoad(tg.i, it)) {
-        washers[tg.i] = { s: 'washing', item: it, t0: now };
-        const w = WASHERS[tg.i];
-        emit('bubble', w.x + 15, w.y + 18, 8, { spread: 6, vx: 0, vy: -14, life: 0.9 });
-        beep(300, 0.14, 'square', 0.045, 140);
-        if (save.delivered === 0) toast('Washing… wait for the bar to fill.');
+        const wsh = washers[tg.i];
+        wsh.load.push(it);
         hand = null;
+        const n = loadCount(wsh);
+        if (n >= CFG.capacity) startWash(tg.i, false);
+        else {
+          const w = WASHERS[tg.i];
+          emit('bubble', w.x + 15, w.y + 20, 3, { spread: 5, vx: 0, vy: -10, life: 0.6 });
+          beep(240, 0.06, 'triangle', 0.05);
+          if (!save.seen.capGo) once('capGo', 'Add more clothes, or press the green button to start.', '');
+          else toast(`${n}/${CFG.capacity} in the washer`);
+        }
         return;
       }
-      toast(it.clean ? 'Already clean. Send it up the tube.' : 'That washer is busy.', 'warn');
+      const wsh = washers[tg.i];
+      toast(it.clean ? 'Already clean. Send it up the tube.'
+        : wsh.s !== 'idle' ? 'That washer is busy.'
+        : `It doesn't fit: ${loadCount(wsh)}/${CFG.capacity} already inside.`, 'warn');
       returnHand(p);
       return;
     }
@@ -1475,7 +1534,7 @@
     }
     hand = null;
     if (tg && tg.k === 'bin') {
-      save.dropped++; persist(); renderStats();
+      save.dropped += countOf(it); persist(); renderStats();
       emit('dust', BIN.x + BIN.w / 2, BIN.y + 2, 5, { spread: 5, vy: -25, life: 0.5 });
       beep(140, 0.08, 'triangle', 0.04);
       return;
@@ -1510,7 +1569,7 @@
       }
       if (it.age >= FLOOR.sandMs) {
         floor.splice(i, 1);
-        piles.push({ x: clamp(it.fx + it.w / 2, 8, W - 8), y: it.fy + it.h, seed: Math.random(), amount: 1 });
+        piles.push({ x: clamp(it.fx + it.w / 2, 8, W - 8), y: it.fy + it.h, seed: Math.random(), amount: Math.min(countOf(it), 3) });
         mergePiles();
         for (let k = 0; k < 10; k++) emit('sand', it.fx + it.w / 2, it.fy + it.h - 2, 1, { spread: 5, vy: rand(-25, -8), life: 0.5, color: SAND[k % 4] });
         beep(110, 0.2, 'sawtooth', 0.03, -60);
@@ -1551,7 +1610,7 @@
   function idleWasher() {
     let best = -1, bd = 1e9;
     for (let i = 0; i < washerCount(); i++) {
-      if (washers[i].s !== 'idle') continue;
+      if (washers[i].s !== 'idle' || washers[i].load.length) continue;
       const w = WASHERS[i], d = Math.hypot(w.x + w.w / 2 - bot.x, w.y + w.h + 8 - bot.y);
       if (d < bd) { bd = d; best = i; }
     }
@@ -1601,15 +1660,14 @@
         if (bot.wait <= 0) setBot(bot.item.clean ? 'toStation' : 'toWasher');
         break;
       case 'toWasher': {
-        if (bot.wi < 0 || washers[bot.wi].s !== 'idle') bot.wi = idleWasher();
+        if (bot.wi < 0 || washers[bot.wi].s !== 'idle' || washers[bot.wi].load.length) bot.wi = idleWasher();
         if (bot.wi < 0) { setBot('holdWasher'); break; }
         const w = WASHERS[bot.wi];
         if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
-          if (washers[bot.wi].s === 'idle') {
-            washers[bot.wi] = { s: 'washing', item: bot.item, t0: now, bot: true };
+          if (washers[bot.wi].s === 'idle' && !washers[bot.wi].load.length) {
+            washers[bot.wi].load.push(bot.item);
             bot.item = null;
-            emit('bubble', w.x + 15, w.y + 18, 6, { spread: 6, vx: 0, vy: -14, life: 0.9 });
-            beep(300, 0.12, 'square', 0.03, 140);
+            startWash(bot.wi, true);
             setBot('waitWash');
           } else bot.wi = -1;
         }
@@ -1632,7 +1690,7 @@
         const w = WASHERS[bot.wi];
         if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
           const it = ws.item;
-          washers[bot.wi] = { s: 'idle', item: null, t0: 0 };
+          washers[bot.wi] = newWasher();
           bot.wi = -1;
           botPick(it);
         }
@@ -1651,6 +1709,34 @@
         if (bot.wait <= 0) setBot('seek');
         break;
     }
+  }
+
+  // ---- dust sometimes blows in through the window and settles as sand
+  function updateDust() {
+    if (!session || save.delivered < 5) return;
+    if (!dustEv) {
+      if (now < dustAt) return;
+      dustAt = now + rand(45000, 75000);
+      if (piles.length >= 6) return;
+      dustEv = { t0: now, x: rand(DUST.x0, DUST.x1), y: rand(DUST.y0, DUST.y1) };
+      beep(90, 0.5, 'sawtooth', 0.02, 60);
+      return;
+    }
+    const age = now - dustEv.t0;
+    if (age < 2400) {
+      if (Math.random() < 0.5) {
+        const sx = WIN.x + rand(4, 24), sy = 15;
+        const tt = rand(0.7, 1.1);
+        emit('sand', sx, sy, 1, { vx: (dustEv.x - sx) / tt + rand(-6, 6), vy: (dustEv.y - sy) / tt - 50 * tt, life: tt + 0.2, color: SAND[Math.random() * 4 | 0], floorY: dustEv.y });
+      }
+      return;
+    }
+    piles.push({ x: dustEv.x, y: dustEv.y, seed: Math.random(), amount: 1 });
+    mergePiles();
+    renderFloor();
+    dustEv = null;
+    if (!save.seen.windowDust) once('windowDust', 'Dust blew in through the window! Sweep it into the dustpan.', 'warn');
+    else toast(`Dust blew in. Belt -${Math.round((1 - beltFactor()) * 100)}%`, 'warn');
   }
 
   let beltOffset = 0;
@@ -1690,15 +1776,18 @@
     }
     updateFloor(dt);
     updateBot(dt);
+    updateDust();
     for (let i = sends.length - 1; i >= 0; i--) {
       const s = sends[i], age = now - s.t0;
       if (age >= 250 && !s.paid) {
         s.paid = true;
         const cx = STATION.x + 12, cy = STATION.y + 4;
-        emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + CFG.coinValue });
+        const n = countOf(s.item), value = CFG.coinValue * n;
+        emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + value });
         emit('coin', cx, cy, 6, { spread: 3, life: 0.7 });
-        flyCoin(cx, cy, CFG.coinValue);
-        save.delivered++;
+        flyCoin(cx, cy, value);
+        save.delivered += n;
+        for (let k = 1; k < n; k++) recent.push(now);
         recent.push(now);
         persist(); renderStats(); renderRate();
         if (save.delivered === 1) toast('First coin! Keep the laundry moving.', 'good');
@@ -1841,6 +1930,9 @@
     const pk = pickAt(p.x, p.y);
     if (pk) { grab(pk, p); return; }
     for (let i = 0; i < washerCount(); i++) {
+      if (washers[i].s === 'idle' && washers[i].load.length && (inRect(p.x, p.y, goBox(i), touchMode ? 5 : 2) || inRect(p.x, p.y, WASHERS[i], 3))) { startWash(i, false); return; }
+    }
+    for (let i = 0; i < washerCount(); i++) {
       if (inRect(p.x, p.y, WASHERS[i], 3)) { toast(washers[i].s === 'washing' ? 'Still washing…' : 'Drag dirty clothes from the belt in here.'); return; }
     }
     if (inRect(p.x, p.y, stationBox(), 3)) toast('Bring a clean load here.');
@@ -1907,25 +1999,27 @@
 
   // compact binary form of a save
   function packSave(sv) {
-    const out = [1];
+    const out = [2];
     const vint = (n) => { n = Math.max(0, Math.floor(n || 0)); while (n >= 128) { out.push((n % 128) | 128); n = Math.floor(n / 128); } out.push(n); };
     vint(sv.coins); vint(sv.lifetime); vint(sv.delivered); vint(sv.dropped);
     const L = sv.lv || {};
-    const w = (L.drum & 7) | ((L.soap & 7) << 3) | ((L.belt & 7) << 6) | ((L.washer2 & 1) << 9) | ((L.bot & 7) << 10) | ((sv.sound ? 1 : 0) << 13);
-    out.push(w & 255, w >> 8);
+    const w = (L.drum & 7) | ((L.soap & 7) << 3) | ((L.belt & 7) << 6) | ((L.washer2 & 1) << 9) | ((L.bot & 7) << 10) | ((sv.sound ? 1 : 0) << 13) | ((L.cap & 7) << 14);
+    out.push(w & 255, (w >> 8) & 255, (w >> 16) & 255);
     return new Uint8Array(out);
   }
   function unpackSave(b) {
     let i = 0;
-    if (b[i++] !== 1) throw new Error('version');
+    const ver = b[i++];
+    if (ver !== 1 && ver !== 2) throw new Error('version');
     const vint = () => { let n = 0, m = 1, x; do { if (i >= b.length) throw new Error('short'); x = b[i++]; n += (x & 127) * m; m *= 128; } while (x & 128); return n; };
     const coins = vint(), lifetime = vint(), delivered = vint(), dropped = vint();
-    if (i + 2 !== b.length) throw new Error('length');
-    const w = b[i] | (b[i + 1] << 8);
+    const wb = ver === 1 ? 2 : 3;
+    if (i + wb !== b.length) throw new Error('length');
+    const w = b[i] | (b[i + 1] << 8) | (ver === 2 ? b[i + 2] << 16 : 0);
     const cap = (id, v) => Math.min(v, UPGRADES.find(u => u.id === id).costs.length);
     return {
       coins, lifetime, delivered, dropped, sound: !!((w >> 13) & 1), seen: {},
-      lv: { drum: cap('drum', w & 7), soap: cap('soap', (w >> 3) & 7), belt: cap('belt', (w >> 6) & 7), washer2: cap('washer2', (w >> 9) & 1), bot: cap('bot', (w >> 10) & 7) },
+      lv: { drum: cap('drum', w & 7), soap: cap('soap', (w >> 3) & 7), belt: cap('belt', (w >> 6) & 7), washer2: cap('washer2', (w >> 9) & 1), bot: cap('bot', (w >> 10) & 7), cap: cap('cap', (w >> 14) & 7) },
     };
   }
   const B32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -1988,7 +2082,8 @@
   function resetWorld() {
     items = []; floor = []; piles = []; sends = []; parts = []; recent = [];
     hand = null;
-    washers = [{ s: 'idle', item: null, t0: 0 }, { s: 'idle', item: null, t0: 0 }];
+    washers = [newWasher(), newWasher()];
+    dustEv = null; dustAt = now + rand(30000, 50000);
     bot = { x: BOTHOME.x, y: BOTHOME.y, s: 'dock', wi: -1, item: null, target: null, wait: 0, roam: null };
     const el = $('stBot'); if (el) el.textContent = 'Docked';
     pan.load = 0;
