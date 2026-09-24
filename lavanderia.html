@@ -247,6 +247,77 @@
     transition: transform .6s cubic-bezier(.45, -0.45, .7, 1);
   }
 
+  [hidden] { display: none !important; }
+
+  /* account panel */
+  .account .acc-name { margin: 8px 0 0; font-size: 15px; color: var(--muted); }
+  .account .acc-name b { color: var(--ink); font-weight: 600; }
+  .code-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  .code-row code {
+    flex: 1; min-width: 0;
+    font-family: var(--display); font-size: 13px; letter-spacing: .06em;
+    color: var(--gold);
+    background: var(--edge);
+    padding: 8px 10px;
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+  .acc-hint { margin: 8px 0 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .who { color: var(--mint); border-color: var(--mint); max-width: 11em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .brand-actions { display: flex; gap: 8px; align-items: center; flex: none; }
+  .brand h1 { min-width: 0; }
+  body[data-layout="tall"] .brand-actions .ghost { padding: 6px 8px; }
+  body[data-layout="tall"] .who { max-width: 8em; }
+
+  /* sign in overlay */
+  .auth {
+    position: fixed; inset: 0; z-index: 20;
+    display: grid; place-items: center;
+    padding: 16px;
+    overflow-y: auto;
+    background: rgba(11, 10, 23, .84);
+    backdrop-filter: blur(2px);
+  }
+  .auth-card { width: 100%; max-width: 380px; display: grid; gap: 12px; padding: 20px 18px 18px; }
+  .auth-card h2 { margin: 0; font-family: var(--display); font-size: 26px; line-height: 1; }
+  .auth-card h2 span { color: var(--mint); }
+  .auth-sub { margin: 0; color: var(--muted); font-size: 15px; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid var(--panel-2); }
+  .tabs button {
+    background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -2px;
+    padding: 8px 4px; color: var(--muted); cursor: pointer;
+    font-family: var(--display); font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .tabs button[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+  .tabs button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+  #authForm { display: grid; gap: 10px; }
+  .field { display: grid; gap: 4px; }
+  .field label { font-size: 14px; color: var(--muted); }
+  .field label small { color: var(--faint); font-size: 12px; }
+  .field input {
+    width: 100%;
+    background: var(--edge); color: var(--ink);
+    border: 2px solid var(--panel-2);
+    padding: 10px 12px;
+    font-family: var(--body); font-size: 16px;
+  }
+  .field input:focus { outline: none; border-color: var(--gold); }
+  #fCode { font-family: var(--display); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+  .auth-err { margin: 0; min-height: 1.3em; color: var(--warn); font-size: 14px; }
+  .primary {
+    background: var(--gold); color: var(--edge);
+    border: 3px solid var(--edge);
+    box-shadow: inset 0 -4px 0 var(--gold-dk), 0 3px 0 var(--edge);
+    padding: 10px 14px 12px;
+    font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: .06em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .primary:hover { filter: brightness(1.06); }
+  .primary:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 var(--gold-dk), 0 1px 0 var(--edge); }
+  .primary:disabled { opacity: .6; cursor: wait; }
+  .primary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .auth-foot { margin: 0; font-size: 13px; color: var(--faint); line-height: 1.4; }
+
   /* one column */
   @media (max-width: 860px) {
     .app { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
@@ -256,7 +327,8 @@
     .stage { order: 2; }
     .stats { order: 3; }
     .shop { order: 4; }
-    .howto { order: 5; }
+    .howto { order: 6; }
+    .account { order: 5; }
     .bank { grid-template-columns: auto 1fr; align-items: center; padding: 10px 14px; }
     .bank .eyebrow { display: none; }
     .bank .rate { text-align: right; }
@@ -281,7 +353,10 @@
   <div class="col">
     <div class="brand">
       <h1>Pixel <span>Laundromat</span></h1>
-      <button class="ghost" id="sfx" type="button" aria-pressed="true">Sound on</button>
+      <div class="brand-actions">
+        <button class="ghost who" id="who" type="button" hidden></button>
+        <button class="ghost" id="sfx" type="button" aria-pressed="true">Sound on</button>
+      </div>
     </div>
     <div class="stage">
       <canvas id="game" aria-label="Laundromat map: conveyor belt, washing machine and coin tube"></canvas>
@@ -313,12 +388,40 @@
       <ul class="ups" id="ups"></ul>
     </section>
 
+    <section class="panel account" id="accountPanel" hidden>
+      <div class="shop-head"><p class="eyebrow">Account</p><button class="ghost" id="logoutBtn" type="button">Log out</button></div>
+      <p class="acc-name">Signed in as <b id="accName"></b></p>
+      <p class="eyebrow" style="margin-top: 12px">Transfer code</p>
+      <div class="code-row"><code id="accCode">…</code><button class="ghost" id="copyCode" type="button">Copy</button></div>
+      <p class="acc-hint">To play on another device, log in there with your name, your password and this code. The code carries your progress, so it changes as you play: copy the newest one.</p>
+    </section>
+
     <section class="panel howto">
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>.</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
+  </div>
+</div>
+
+<div class="auth" id="auth" role="dialog" aria-modal="true" aria-labelledby="authTitle" hidden>
+  <div class="auth-card panel">
+    <h2 id="authTitle">Pixel <span>Laundromat</span></h2>
+    <p class="auth-sub">Sign in to keep your laundry empire.</p>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabLogin" aria-selected="true">Log in</button>
+      <button type="button" role="tab" id="tabSignup" aria-selected="false">Sign up</button>
+    </div>
+    <form id="authForm" novalidate>
+      <div class="field"><label for="fName">Name</label><input id="fName" name="name" autocomplete="username" maxlength="16" spellcheck="false" autocapitalize="off"></div>
+      <div class="field"><label for="fPass">Password</label><input id="fPass" name="password" type="password" autocomplete="current-password"></div>
+      <div class="field" id="rowPass2" hidden><label for="fPass2">Repeat password</label><input id="fPass2" name="password2" type="password" autocomplete="new-password"></div>
+      <div class="field" id="rowCode"><label for="fCode">Transfer code <small>(only on a new device)</small></label><input id="fCode" name="code" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX"></div>
+      <p class="auth-err" id="authErr" role="alert"></p>
+      <button class="primary" type="submit" id="authSubmit">Log in</button>
+    </form>
+    <p class="auth-foot">Accounts live on this device. On another device, your transfer code brings your progress with you.</p>
   </div>
 </div>
 
@@ -556,7 +659,13 @@
     toast(msg, kind);
   }
   function persist() {
-    try { localStorage.setItem('pixel-laundromat', JSON.stringify(save)); } catch (e) {}
+    if (!session) return;
+    const accs = loadAccounts();
+    const acc = accs[session];
+    if (!acc) return;
+    acc.save = save;
+    saveAccounts(accs);
+    scheduleCode();
   }
   function renderStats() {
     $coins.textContent = fmt(save.coins);
@@ -1770,22 +1879,249 @@
     if (save.sound) beep(660, 0.06);
   });
 
-  // ================= boot =================
-  function start(data) {
-    try {
-      const raw = localStorage.getItem('pixel-laundromat');
-      if (raw) Object.assign(save, JSON.parse(raw));
-      else {
-        const old = parseInt(localStorage.getItem('lav-coins'), 10) || 0;
-        save.coins = save.lifetime = old;
-      }
-    } catch (e) {}
-    if (data && data.save) Object.assign(save, data.save);
-    save.lv = save.lv || {};
-    if (save.owned) { for (const k in save.owned) if (save.owned[k] && !save.lv[k]) save.lv[k] = 1; delete save.owned; }
-    save.seen = save.seen || {};
+  // ================= accounts =================
+  // Accounts are kept in this browser. A transfer code carries the progress to
+  // another device, sealed with the account's name and password.
+  const ACC_KEY = 'pixel-laundromat-accounts', SES_KEY = 'pixel-laundromat-session', LEGACY_KEY = 'pixel-laundromat';
+  let session = null;
+  let memAccounts = null;
+  function loadAccounts() {
+    try { const raw = localStorage.getItem(ACC_KEY); return raw ? JSON.parse(raw) : (memAccounts || {}); }
+    catch (e) { return memAccounts || (memAccounts = {}); }
+  }
+  function saveAccounts(a) {
+    memAccounts = a;
+    try { localStorage.setItem(ACC_KEY, JSON.stringify(a)); } catch (e) {}
+  }
+  const utf8 = new TextEncoder();
+  const hex = (b) => [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  const b64 = (b) => btoa(String.fromCharCode(...b));
+  const unb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const sha = async (str) => new Uint8Array(await crypto.subtle.digest('SHA-256', utf8.encode(str)));
+  async function hashPassword(pass, saltB64) {
+    const key = await crypto.subtle.importKey('raw', utf8.encode(pass), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: unb64(saltB64), iterations: 60000, hash: 'SHA-256' }, key, 256);
+    return b64(new Uint8Array(bits));
+  }
+  const codeKey = async (key, pass) => hex(await sha('pl1|' + key + '|' + pass));
+
+  // compact binary form of a save
+  function packSave(sv) {
+    const out = [1];
+    const vint = (n) => { n = Math.max(0, Math.floor(n || 0)); while (n >= 128) { out.push((n % 128) | 128); n = Math.floor(n / 128); } out.push(n); };
+    vint(sv.coins); vint(sv.lifetime); vint(sv.delivered); vint(sv.dropped);
+    const L = sv.lv || {};
+    const w = (L.drum & 7) | ((L.soap & 7) << 3) | ((L.belt & 7) << 6) | ((L.washer2 & 1) << 9) | ((L.bot & 7) << 10) | ((sv.sound ? 1 : 0) << 13);
+    out.push(w & 255, w >> 8);
+    return new Uint8Array(out);
+  }
+  function unpackSave(b) {
+    let i = 0;
+    if (b[i++] !== 1) throw new Error('version');
+    const vint = () => { let n = 0, m = 1, x; do { if (i >= b.length) throw new Error('short'); x = b[i++]; n += (x & 127) * m; m *= 128; } while (x & 128); return n; };
+    const coins = vint(), lifetime = vint(), delivered = vint(), dropped = vint();
+    if (i + 2 !== b.length) throw new Error('length');
+    const w = b[i] | (b[i + 1] << 8);
+    const cap = (id, v) => Math.min(v, UPGRADES.find(u => u.id === id).costs.length);
+    return {
+      coins, lifetime, delivered, dropped, sound: !!((w >> 13) & 1), seen: {},
+      lv: { drum: cap('drum', w & 7), soap: cap('soap', (w >> 3) & 7), belt: cap('belt', (w >> 6) & 7), washer2: cap('washer2', (w >> 9) & 1), bot: cap('bot', (w >> 10) & 7) },
+    };
+  }
+  const B32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  function toB32(bytes) {
+    let bits = 0, val = 0, out = '';
+    for (const x of bytes) { val = (val << 8) | x; bits += 8; while (bits >= 5) { out += B32[(val >>> (bits - 5)) & 31]; bits -= 5; } val &= (1 << bits) - 1; }
+    if (bits) out += B32[(val << (5 - bits)) & 31];
+    return out;
+  }
+  function fromB32(str) {
+    const clean = str.toUpperCase().replace(/O/g, '0').replace(/[IL]/g, '1').replace(/[^0-9A-Z]/g, '');
+    let bits = 0, val = 0; const out = [];
+    for (const ch of clean) {
+      const v = B32.indexOf(ch);
+      if (v < 0) throw new Error('char');
+      val = (val << 5) | v; bits += 5;
+      if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; val &= (1 << bits) - 1; }
+    }
+    return new Uint8Array(out);
+  }
+  async function makeCode(sv, ck) {
+    const p = packSave(sv);
+    const stream = await sha(ck + '|s');
+    const check = (await sha(ck + '|c|' + hex(p))).slice(0, 4);
+    const bytes = new Uint8Array(p.length + 4);
+    p.forEach((x, i) => { bytes[i] = x ^ stream[i]; });
+    bytes.set(check, p.length);
+    return toB32(bytes).match(/.{1,4}/g).join('-');
+  }
+  async function readCode(code, ck) {
+    const bytes = fromB32(code);
+    if (bytes.length < 11) throw new Error('short');
+    const stream = await sha(ck + '|s');
+    const p = bytes.slice(0, -4).map((x, i) => x ^ stream[i]);
+    const check = (await sha(ck + '|c|' + hex(p))).slice(0, 4);
+    if (hex(check) !== hex(bytes.slice(-4))) throw new Error('check');
+    return unpackSave(p);
+  }
+
+  let codeTimer = 0;
+  function scheduleCode() {
+    clearTimeout(codeTimer);
+    codeTimer = setTimeout(renderCode, 400);
+  }
+  async function renderCode() {
+    if (!session) return;
+    const acc = loadAccounts()[session];
+    if (!acc) return;
+    try { $('accCode').textContent = await makeCode(save, acc.ck); } catch (e) { $('accCode').textContent = 'Unavailable in this browser'; }
+  }
+
+  function freshSave() { return { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: save.sound, lv: {}, seen: {} }; }
+  function normalizeSave(sv) {
+    sv.lv = sv.lv || {};
+    if (sv.owned) { for (const k in sv.owned) if (sv.owned[k] && !sv.lv[k]) sv.lv[k] = 1; delete sv.owned; }
+    sv.seen = sv.seen || {};
+    if (sv.delivered >= 3) Object.assign(sv.seen, { floor: true, soil: true, sand: true, panPlaced: true, broom: true });
+    return sv;
+  }
+  function resetWorld() {
+    items = []; floor = []; piles = []; sends = []; parts = []; recent = [];
+    hand = null;
+    washers = [{ s: 'idle', item: null, t0: 0 }, { s: 'idle', item: null, t0: 0 }];
+    bot = { x: BOTHOME.x, y: BOTHOME.y, s: 'dock', wi: -1, item: null, target: null, wait: 0, roam: null };
+    const el = $('stBot'); if (el) el.textContent = 'Docked';
+    pan.load = 0;
+    resetTools();
+    spawnAt = now + 400;
+    const first = makeItem(); first.x = 28; items.push(first);
+  }
+  function enterGame(key, note) {
+    const acc = loadAccounts()[key];
+    session = key;
+    try { localStorage.setItem(SES_KEY, key); } catch (e) {}
+    save = normalizeSave(Object.assign(freshSave(), acc.save || {}));
+    applyUpgrades();
+    resetWorld();
     $sfx.textContent = save.sound ? 'Sound on' : 'Sound off';
     $sfx.setAttribute('aria-pressed', String(save.sound));
+    $('who').textContent = acc.name;
+    $('who').hidden = false;
+    $('accName').textContent = acc.name;
+    $('accountPanel').hidden = false;
+    $('auth').hidden = true;
+    renderStats(); renderRate(); renderCode();
+    toast(note || (save.delivered ? `Welcome back, ${acc.name}!` : 'Drag a dirty item from the belt into the washer.'), note ? 'good' : '');
+  }
+  function logout() {
+    persist();
+    session = null;
+    try { localStorage.removeItem(SES_KEY); } catch (e) {}
+    save = normalizeSave(freshSave());
+    applyUpgrades();
+    resetWorld();
+    renderStats();
+    $('who').hidden = true;
+    $('accountPanel').hidden = true;
+    showAuth('login');
+  }
+
+  // ---- sign in / sign up form
+  let authMode = 'login';
+  function showAuth(mode) {
+    authMode = mode;
+    $('tabLogin').setAttribute('aria-selected', String(mode === 'login'));
+    $('tabSignup').setAttribute('aria-selected', String(mode === 'signup'));
+    $('rowPass2').hidden = mode !== 'signup';
+    $('rowCode').hidden = mode !== 'login';
+    $('fPass').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+    $('authSubmit').textContent = mode === 'signup' ? 'Create account' : 'Log in';
+    $('authErr').textContent = '';
+    $('auth').hidden = false;
+    setTimeout(() => { try { $('fName').focus({ preventScroll: true }); } catch (e) {} }, 50);
+  }
+  $('tabLogin').addEventListener('click', () => showAuth('login'));
+  $('tabSignup').addEventListener('click', () => showAuth('signup'));
+  $('logoutBtn').addEventListener('click', logout);
+  $('who').addEventListener('click', () => $('accountPanel').scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  $('copyCode').addEventListener('click', () => {
+    const txt = $('accCode').textContent;
+    const done = () => { $('copyCode').textContent = 'Copied'; setTimeout(() => { $('copyCode').textContent = 'Copy'; }, 1500); };
+    const fallback = () => {
+      const r = document.createRange(); r.selectNodeContents($('accCode'));
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      toast('Code selected. Copy it from here.');
+    };
+    try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
+  });
+
+  $('authForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = (m) => { $('authErr').textContent = m; };
+    const name = $('fName').value.trim().replace(/\s+/g, ' ');
+    const pass = $('fPass').value;
+    const key = name.toLowerCase();
+    if (!/^[A-Za-z0-9 _.-]{3,16}$/.test(name)) return err('Use 3 to 16 letters, numbers, spaces, dots, dashes or underscores.');
+    if (pass.length < 4) return err('The password needs at least 4 characters.');
+    if (!(window.crypto && crypto.subtle)) return err('This browser can’t create secure accounts.');
+    const btn = $('authSubmit');
+    btn.disabled = true;
+    try {
+      const accs = loadAccounts();
+      if (authMode === 'signup') {
+        if ($('fPass2').value !== pass) return err('The passwords don’t match.');
+        if (accs[key]) return err('That name already has an account on this device. Log in instead.');
+        const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
+        // the first account on a device takes over progress from before accounts existed
+        let start = null, note = `Account created. Welcome, ${name}!`;
+        if (!Object.keys(accs).length) {
+          try {
+            const raw = localStorage.getItem(LEGACY_KEY);
+            if (raw) { start = normalizeSave(JSON.parse(raw)); localStorage.removeItem(LEGACY_KEY); note = 'Account created. Your earlier progress is in it.'; }
+          } catch (x) {}
+        }
+        accs[key] = { name, salt, hash: await hashPassword(pass, salt), ck: await codeKey(key, pass), save: start || freshSave(), created: Date.now() };
+        saveAccounts(accs);
+        $('authForm').reset();
+        enterGame(key, note);
+        beep(784, 0.08); beep(1047, 0.1, 'square', 0.04, 0, 0.08);
+        return;
+      }
+      // log in
+      const codeTxt = $('fCode').value.trim();
+      const ck = await codeKey(key, pass);
+      let acc = accs[key];
+      if (acc) {
+        if (await hashPassword(pass, acc.salt) !== acc.hash) return err('Wrong name or password.');
+        let note = null;
+        if (codeTxt) {
+          let fromCode;
+          try { fromCode = await readCode(codeTxt, ck); } catch (x) { return err('That transfer code doesn’t belong to this account.'); }
+          if ((fromCode.lifetime || 0) >= ((acc.save && acc.save.lifetime) || 0)) {
+            acc.save = Object.assign(acc.save || {}, fromCode, { seen: (acc.save && acc.save.seen) || {} });
+            note = 'Progress loaded from your transfer code.';
+          } else note = 'This device already had newer progress, so it was kept.';
+          saveAccounts(accs);
+        }
+        $('authForm').reset();
+        enterGame(key, note);
+        return;
+      }
+      if (!codeTxt) return err('No account with that name on this device. On a new device, also enter your transfer code.');
+      let fromCode;
+      try { fromCode = await readCode(codeTxt, ck); } catch (x) { return err('Name, password or transfer code is wrong.'); }
+      const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
+      accs[key] = { name, salt, hash: await hashPassword(pass, salt), ck, save: normalizeSave(fromCode), created: Date.now() };
+      saveAccounts(accs);
+      $('authForm').reset();
+      enterGame(key, 'Progress loaded from your transfer code.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ================= boot =================
+  function start(data) {
     applyLayout();
     applyUpgrades();
     bot.x = BOTHOME.x; bot.y = BOTHOME.y;
@@ -1793,8 +2129,15 @@
     if (window.matchMedia && matchMedia('(pointer: coarse)').matches) touchMode = true;
     const first = makeItem(); first.x = 28; items.push(first);
     renderStats(); renderRate();
-    toast(save.delivered ? 'Welcome back! The belt is running.' : 'Drag a dirty item from the belt into the washer.');
     requestAnimationFrame(loop);
+    let key = null;
+    try { key = localStorage.getItem(SES_KEY); } catch (e) {}
+    if (key && loadAccounts()[key]) {
+      enterGame(key);
+      if (data && data.save) { save = normalizeSave(data.save); applyUpgrades(); renderStats(); }
+    } else {
+      showAuth(Object.keys(loadAccounts()).length ? 'login' : 'signup');
+    }
   }
   try { window.claude?.hot?.snapshot?.(() => ({ save })); } catch (e) {}
   window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
