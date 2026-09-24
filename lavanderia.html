@@ -564,7 +564,7 @@
       desc: () => `x${SOAP_MULT} coins per cloth` },
     { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55, 85, 115],
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
-    { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: Array.from({ length: 10 }, (_, i) => Math.round(15 * 1.35 ** i)),
+    { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: Array.from({ length: 20 }, (_, i) => Math.round(10 * 1.35 ** i)),
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
     { id: 'washer2', name: 'Extra Washer', icon: 'washer', costs: [45, 110, 220],
       desc: () => 'Another washing machine' },
@@ -704,8 +704,8 @@
     CFG.coinValue = BASE.coinValue * SOAP_MULT ** level('soap');
     CFG.capacity = BASE.capacity + level('cap');
     const more = 1.15 ** level('belt');
-    // the belt also speeds up (half the rate) so clothes don't pile on top of each other
-    CFG.beltSpeed = BASE.beltSpeed * Math.sqrt(more);
+    // the belt also speeds up so clothes keep some room between them
+    CFG.beltSpeed = BASE.beltSpeed * more ** 0.6;
     CFG.spawnMin = BASE.spawnMin / more;
     CFG.spawnVar = BASE.spawnVar / more;
   }
@@ -1997,7 +1997,8 @@
   function update(dt) {
     const jammed = beltJammed();
     if (jammed) spawnAt += dt * 1000;
-    else if (now >= spawnAt) {
+    else if (now >= spawnAt && !items.some(it => it.x < 1 && it.drop < 1)) {
+      // a new item only comes out once the last one has moved clear of the curtain
       items.push(makeItem());
       spawnAt = now + (CFG.spawnMin + Math.random() * CFG.spawnVar) / beltFactor();
     }
