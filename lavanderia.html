@@ -112,9 +112,10 @@
     left: 50%;
     top: 14px;
     transform: translate(-50%, 0);
-    max-width: calc(100% - 32px);
+    max-width: calc(100% - 340px);
     width: max-content;
     text-align: center;
+    z-index: 4;
     background: var(--edge);
     color: var(--ink);
     font-size: 15px;
@@ -202,7 +203,11 @@
   [hidden] { display: none !important; }
 
   /* ===== in-game upgrade menu ===== */
-  .screen { position: relative; width: 100%; margin-inline: auto; }
+  .screen { position: relative; width: 100%; margin-inline: auto; container-type: inline-size; }
+  /* keep action messages clear of the Upgrades button: beside it when wide, below it when narrow */
+  @container (max-width: 640px) {
+    #toast { top: 54px; max-width: calc(100% - 24px); }
+  }
   .up-open {
     position: absolute; left: 12px; top: 12px; z-index: 3;
     display: flex; align-items: center; gap: 8px;
@@ -354,7 +359,6 @@
   body[data-layout="tall"] .shop-wallet { font-size: 18px; }
   body[data-layout="tall"] .shop-grid { grid-template-columns: 1fr; }
   body[data-layout="tall"] .uc-next { font-size: 26px; }
-  body[data-layout="tall"] #toast { top: 52px; }
   @media (prefers-reduced-motion: reduce) {
     .shop, .shop-panel, .uc, .uc.afford, .uc.pop, .uc.pop .uc-next, .up-badge, .spark { animation: none !important; }
   }
@@ -447,7 +451,7 @@
   body[data-layout="tall"] h1 { font-size: 20px; }
   body[data-layout="tall"] #game { aspect-ratio: 2 / 3; border-width: 3px; }
   body[data-layout="tall"] .screen { width: min(100%, calc((100dvh - 170px) * 2 / 3)); }
-  body[data-layout="tall"] #toast { font-size: 14px; top: 10px; }
+  body[data-layout="tall"] #toast { font-size: 14px; }
 
   @media (prefers-reduced-motion: reduce) {
     #coins.bump { animation: none; }
