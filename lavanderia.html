@@ -560,25 +560,26 @@
   const UPGRADES = [
     { id: 'drum', name: 'Turbo Drum', icon: 'drum', costs: [10, 25, 45, 70, 90],
       desc: () => `Wash 10% faster · now ${(CFG.washMs / 1000).toFixed(1)}s` },
-    { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: [15, 35, 60, 80, 100],
-      desc: () => `+1 coin per load · now +${CFG.coinValue}` },
+    { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: Array.from({ length: 10 }, (_, i) => Math.round(15 * 1.5 ** i)),
+      desc: () => `x${SOAP_MULT} coins per cloth` },
     { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55, 85, 115],
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
     { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: [20, 40, 60, 80, 110],
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
-    { id: 'washer2', name: 'Second Washer', icon: 'washer', costs: [45],
-      desc: () => 'Wash two loads at once' },
+    { id: 'washer2', name: 'Extra Washer', icon: 'washer', costs: [45, 110, 220],
+      desc: () => 'Another washing machine' },
     { id: 'bot', name: 'Robo Vac', icon: 'bot', costs: [70, 90, 110, 120],
       desc: (lv) => lv === 0 ? 'Robot that picks up, washes and sends clothes (~30s each)' : `Robo Vac 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
   ];
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
+  const SOAP_MULT = 1.35;
   // how each upgrade reads in the shop: the stat it changes and its value at a level
   const STATS = {
     drum: { title: 'Wash Speed', blurb: 'Every wash cycle 10% faster', show: (lv) => (BASE.washMs * 0.9 ** lv / 1000).toFixed(1) + 's' },
-    soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth', show: (lv) => 'x' + (BASE.coinValue + lv) },
+    soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth (x1.35 each level)', show: (lv) => 'x' + fmtMult(SOAP_MULT ** lv) },
     cap: { title: 'Washer Capacity', blurb: 'More clothes in every wash', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
     belt: { title: 'Clothes Flow', blurb: 'More clothes arrive on the belt', show: (lv) => 'x' + (1.15 ** lv).toFixed(2) },
-    washer2: { title: 'Washers', blurb: 'A second washing machine', show: (lv) => String(1 + lv) },
+    washer2: { title: 'Washers', blurb: 'Another washing machine, up to 4', show: (lv) => String(1 + lv) },
     bot: { title: 'Robo Vac', blurb: 'Robot that washes clothes for you', show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed' },
   };
 
@@ -592,21 +593,21 @@
       W: 192, H: 128,
       BELT: { x0: 0, x1: 84, y: 38 },
       BIN: { x: 88, y: 42, w: 17 },
-      WASHERS: [{ x: 74, y: 64, w: 30, h: 36 }, { x: 34, y: 64, w: 30, h: 36 }],
+      WASHERS: [{ x: 74, y: 64, w: 30, h: 36 }, { x: 34, y: 64, w: 30, h: 36 }, { x: 108, y: 64, w: 30, h: 36 }, { x: 1, y: 64, w: 30, h: 36 }],
       STATION: { x: 140, y: 74, w: 30, h: 28 },
       PIPE: { x: 149, w: 12 },
-      WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 }, DUST: { x0: 110, x1: 134, y0: 36, y1: 60 },
-      PAN: { x: 174, y: 112 }, BROOM: { x: 140, y: 120 }, TRASH: { x: 176, y: 84, w: 13, h: 16 }, BOT: { x: 124, y: 116 },
+      WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 }, DUST: { x0: 110, x1: 134, y0: 32, y1: 46 },
+      PAN: { x: 174, y: 112 }, BROOM: { x: 140, y: 120 }, TRASH: { x: 176, y: 84, w: 13, h: 16 }, BOT: { x: 120, y: 123 },
     },
     tall: {
       W: 128, H: 192,
       BELT: { x0: 0, x1: 70, y: 38 },
       BIN: { x: 74, y: 42, w: 17 },
-      WASHERS: [{ x: 14, y: 84, w: 30, h: 36 }, { x: 56, y: 84, w: 30, h: 36 }],
+      WASHERS: [{ x: 14, y: 84, w: 30, h: 36 }, { x: 56, y: 84, w: 30, h: 36 }, { x: 14, y: 130, w: 30, h: 36 }, { x: 56, y: 130, w: 30, h: 36 }],
       STATION: { x: 92, y: 134, w: 30, h: 28 },
       PIPE: { x: 101, w: 12 },
       WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null, DUST: { x0: 60, x1: 92, y0: 64, y1: 72 },
-      PAN: { x: 30, y: 176 }, BROOM: { x: 50, y: 186 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 86, y: 182 },
+      PAN: { x: 6, y: 180 }, BROOM: { x: 50, y: 186 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 90, y: 188 },
     },
   };
   let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, PANHOME, BROOMHOME, TRASH, BOTHOME;
@@ -656,7 +657,7 @@
     '6': ['111', '100', '111', '101', '111'], '7': ['111', '001', '001', '001', '001'],
     '8': ['111', '101', '111', '101', '111'], '9': ['111', '101', '111', '001', '111'],
     '+': ['000', '010', '111', '010', '000'], '!': ['1', '1', '1', '0', '1'],
-    '/': ['001', '001', '010', '100', '100'], 'x': ['000', '101', '010', '101', '000'],
+    '/': ['001', '001', '010', '100', '100'], '.': ['0', '0', '0', '0', '1'], 'x': ['000', '101', '010', '101', '000'],
   };
 
   // ================= state =================
@@ -666,10 +667,14 @@
   let piles = [];            // sand piles
   let hand = null;           // what the player is holding
   const newWasher = () => ({ s: 'idle', item: null, t0: 0, load: [] });
-  let washers = [newWasher(), newWasher()];
+  let washers = [newWasher(), newWasher(), newWasher(), newWasher()];
   const countOf = (it) => it.count || 1;
   const loadCount = (w) => (w.load || []).reduce((n, it) => n + countOf(it), 0);
   let dustEv = null, dustAt = 0;
+  // sand resting on top of the belt or a washer: { where: 'belt'|'washer', i, rel, amount, seed }
+  let topSand = [];
+  const beltJammed = () => topSand.some(t => t.where === 'belt');
+  const washerSandy = (i) => topSand.some(t => t.where === 'washer' && t.i === i);
   let bot = { x: 0, y: 0, s: 'dock', wi: -1, item: null, target: null, wait: 0, roam: null };
   const PAN_CAP = 4;
   let pan = { x: 0, y: 0, face: -1, load: 0 };   // dustpan lying on the floor
@@ -690,13 +695,13 @@
 
   const level = (id) => save.lv[id] || 0;
   const owned = (id) => level(id) > 0;
-  const washerCount = () => owned('washer2') ? 2 : 1;
+  const washerCount = () => 1 + level('washer2');
   const sandAmount = () => piles.reduce((sum, pl) => sum + pl.amount, 0);
   const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * sandAmount());
   function applyUpgrades() {
     Object.assign(CFG, BASE);
     CFG.washMs = BASE.washMs * 0.9 ** level('drum');
-    CFG.coinValue = BASE.coinValue + level('soap');
+    CFG.coinValue = BASE.coinValue * SOAP_MULT ** level('soap');
     CFG.capacity = BASE.capacity + level('cap');
     const more = 1.15 ** level('belt');
     CFG.spawnMin = BASE.spawnMin / more;
@@ -727,6 +732,9 @@
   }
   const inRect = (px, py, r, pad = 0) => px >= r.x - pad && px <= r.x + r.w + pad && py >= r.y - pad && py <= r.y + r.h + pad;
   const rand = (a, b) => a + Math.random() * (b - a);
+  // short number for coin amounts that can be fractional: 1.4, 13.5, 240
+  const fmtVal = (v) => v >= 100 ? fmt(Math.round(v)) : String(Math.round(v * 10) / 10);
+  const fmtMult = (m) => m >= 100 ? String(Math.round(m)) : m >= 10 ? m.toFixed(1) : m.toFixed(2);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   function fmt(n) {
     if (n < 1000) return String(Math.floor(n));
@@ -814,7 +822,7 @@
     $('stLifetime').textContent = fmt(save.lifetime);
     $('stDropped').textContent = fmt(save.dropped);
     $('stWash').textContent = (CFG.washMs / 1000).toFixed(1) + 's';
-    $('perLoad').textContent = '+' + CFG.coinValue;
+    $('perLoad').textContent = '+' + fmtVal(CFG.coinValue);
     renderFloor();
     renderShop();
     $('botRow').hidden = !owned('bot');
@@ -824,11 +832,15 @@
     const n = piles.length;
     let txt = n ? `${n} sand pile${n > 1 ? 's' : ''} · belt -${Math.round((1 - beltFactor()) * 100)}%` : 'Clean';
     if (pan.load > 0) txt += ` · dustpan ${pan.load}/${PAN_CAP}`;
+    const sandyW = topSand.filter(t => t.where === 'washer').length;
+    if (sandyW) txt = `${sandyW} sandy washer${sandyW > 1 ? 's' : ''} · ` + txt;
+    if (beltJammed()) txt = 'Belt jammed · ' + txt;
+    txt = txt.replace(' · Clean', '');
     if (txt === lastFloorText) return;
     lastFloorText = txt;
     const dd = $('stFloor');
     dd.textContent = txt;
-    dd.classList.toggle('bad', n > 0 || pan.load >= PAN_CAP);
+    dd.classList.toggle('bad', n > 0 || pan.load >= PAN_CAP || topSand.length > 0);
   }
   function renderRate() {
     recent = recent.filter(t => now - t < 60000);
@@ -950,7 +962,7 @@
     sparkle(shopEls[u.id].next);
     renderStats();
     [523, 659, 784, 1047].forEach((f, i) => beep(f + lv * 60, 0.09, 'square', 0.04, 0, i * 0.07));
-    if (u.id === 'washer2') { const w = WASHERS[1]; emit('spark', w.x + 15, w.y + 18, 16, { spread: 14, color: '#ffffff', vy: -30, life: 0.8 }); }
+    if (u.id === 'washer2') { const w = WASHERS[lv + 1]; emit('spark', w.x + 15, w.y + 18, 16, { spread: 14, color: '#ffffff', vy: -30, life: 0.8 }); }
     if (u.id === 'bot') { if (lv === 0) { bot.x = BOTHOME.x; bot.y = BOTHOME.y; } emit('spark', bot.x, bot.y - 8, 14, { spread: 8, color: '#7fe0c4', vy: -30, life: 0.8 }); }
     if (u.id === 'drum') WASHERS.slice(0, washerCount()).forEach(w => emit('spark', w.x + 15, w.y + 4, 8, { spread: 10, color: '#ffd23f', vy: -25, life: 0.6 }));
     if (u.id === 'soap') emit('spark', STATION.x + 15, STATION.y + 20, 10, { spread: 10, color: '#ffd84a', vy: -25, life: 0.7 });
@@ -1088,6 +1100,19 @@
   }
 
   // dustpan: mouth on the left when face = -1, mirrored when face = 1
+  function topSandPos(ts) {
+    if (ts.where === 'belt') return { x: BELT.x0 + 10 + ts.rel * (BELT.x1 - BELT.x0 - 20), y: BELT.y - 1 };
+    const w = WASHERS[ts.i];
+    return { x: w.x + 5 + ts.rel * (w.w - 10), y: w.y };
+  }
+  function drawTopSand(where, i, t) {
+    for (const ts of topSand) {
+      if (ts.where !== where || (where === 'washer' && ts.i !== i)) continue;
+      const p = topSandPos(ts);
+      drawPile({ x: p.x, y: p.y, amount: ts.amount, seed: ts.seed });
+      if (((t / 350) | 0) % 2) R(p.x - 1, p.y - 11, 3, 3, '#ff8f6b');
+    }
+  }
   function drawPan(x, y, lifted, face, load) {
     x = Math.round(x); y = Math.round(y);
     if (!lifted) oval(x + 6, y + 10, 9, 1, 'rgba(20,50,60,.22)');
@@ -1246,11 +1271,15 @@
       R(1 + i * 2 + sway, 25, 1, 22, i % 2 ? '#8fb6c9' : '#c7e2ee');
     }
     const ox = PLANT.x - 8, oy = PLANT.y - 110;
+    const plantBox = { x: PLANT.x - 4, y: PLANT.y - 14, w: 22, h: 26 };
+    const plantBlocked = WASHERS.slice(0, washerCount()).some(w => w.x < plantBox.x + plantBox.w && w.x + w.w + 4 > plantBox.x && w.y < plantBox.y + plantBox.h && w.y + w.h + 14 > plantBox.y);
+    if (!plantBlocked) {
     oval(PLANT.x + 6, PLANT.y + 11, 8, 2, 'rgba(20,50,60,.2)');
     const leaves = [[11, 100, 3, 10], [7, 103, 4, 3], [15, 102, 5, 3], [14, 97, 3, 6], [5, 106, 5, 3], [17, 106, 5, 3]];
     for (const [lx, ly, lw, lh] of leaves) R(lx - 1 + ox, ly - 1 + oy, lw + 2, lh + 2, OUT);
     for (const [lx, ly, lw, lh] of leaves) { R(lx + ox, ly + oy, lw, lh, '#3f9a55'); R(lx + ox, ly + oy, lw, 1, '#5cc070'); }
     R(8 + ox, 110 + oy, 12, 10, OUT); R(9 + ox, 111 + oy, 10, 8, '#c96b4a'); R(9 + ox, 111 + oy, 10, 2, '#e08a66');
+    }
     if (owned('bot')) drawDock();
     for (let i = 0; i < washerCount(); i++) {
       const { x, y, w, h } = WASHERS[i];
@@ -1314,7 +1343,7 @@
     R(x, y + 9, w, 1, OUT);
     R(x + 3, y + 2, 8, 5, '#b9bfd0'); R(x + 4, y + 3, 6, 1, '#9aa1b8');
     disc(x + 16, y + 4, 2, OUT); R(x + 16, y + 3, 1, 1, owned('drum') ? '#ffd23f' : '#9aa1b8');
-    const lamp = wsh.s === 'idle' ? '#7a8199' : washing ? ((t / 250 | 0) % 2 ? '#ffb347' : '#b86f1c') : '#6fe08a';
+    const lamp = washerSandy(i) ? ((t / 250 | 0) % 2 ? '#ff5a5a' : '#8a2a2a') : wsh.s === 'idle' ? '#7a8199' : washing ? ((t / 250 | 0) % 2 ? '#ffb347' : '#b86f1c') : '#6fe08a';
     R(x + 21, y + 3, 5, 4, OUT); R(x + 22, y + 4, 3, 2, lamp);
     if (wsh.s === 'done') { g.fillStyle = 'rgba(111,224,138,.25)'; g.fillRect(x + 20, y + 2, 7, 6); }
     const cx = x + 14, cy = y + 22;
@@ -1411,8 +1440,13 @@
     }
     R(x + 5, y + 18, 18, 8, OUT);
     R(x + 6, y + 19, 16, 6, '#2d4f3f');
-    disc(x + 10, y + 22, 2, '#ffd84a');
-    text('+' + CFG.coinValue, x + 14, y + 20, ready ? '#6fe08a' : '#8fd6a8');
+    // payout plate: coin + value when it fits, otherwise just the value, centred
+    const val = fmtVal(CFG.coinValue);
+    const tw = [...val].reduce((n, ch) => n + (FONT[ch] ? FONT[ch][0].length + 1 : 3), -1);
+    const withCoin = tw <= 9;
+    const tx = x + 6 + Math.floor((16 - tw - (withCoin ? 6 : 0)) / 2) + (withCoin ? 6 : 0);
+    if (withCoin) disc(tx - 4, y + 22, 2, '#ffd84a');
+    text(val, tx, y + 20, ready ? '#6fe08a' : '#8fd6a8');
     R(x + 2, y + h + 1, 4, 2, OUT); R(x + w - 6, y + h + 1, 4, 2, OUT);
   }
 
@@ -1500,11 +1534,12 @@
     });
     return best;
   }
-  const canLoad = (i, it) => !it.clean && washers[i].s === 'idle' && loadCount(washers[i]) + countOf(it) <= CFG.capacity;
+  const canLoad = (i, it) => !it.clean && washers[i].s === 'idle' && !washerSandy(i) && loadCount(washers[i]) + countOf(it) <= CFG.capacity;
   const goBox = (i) => { const w = WASHERS[i]; return { x: w.x + w.w - 12, y: w.y - 12, w: 12, h: 10 }; };
   function startWash(i, byBot) {
     const wsh = washers[i];
     if (wsh.s !== 'idle' || !wsh.load.length) return;
+    if (washerSandy(i)) { if (!byBot) toast('Brush the sand off this washer first.', 'warn'); return; }
     const total = loadCount(wsh);
     const item = wsh.load[0];
     item.count = total;
@@ -1642,6 +1677,20 @@
     const z = mouthZone(), mx = z.x + z.w / 2, my = z.y + z.h / 2;
     for (let s = 1; s <= steps; s++) {
       const hx = a.x + dx * s / steps, hy = a.y + dy * s / steps;
+      for (let k = topSand.length - 1; k >= 0; k--) {
+        const ts = topSand[k], tp = topSandPos(ts);
+        if (Math.abs(tp.x - hx) < 8 && Math.abs(tp.y - 3 - hy) < 7) {
+          topSand.splice(k, 1);
+          const fy = ts.where === 'belt' ? BELT.y + 24 : WASHERS[ts.i].y + WASHERS[ts.i].h + 16;
+          const fx = clamp(tp.x + Math.sign(dx || 1) * 6, 8, W - 8);
+          for (let q = 0; q < 12; q++) emit('sand', tp.x, tp.y - 2, 1, { spread: 4, vx: (fx - tp.x) * 1.5 + rand(-8, 8), vy: rand(-30, -5), life: 0.9, color: SAND[q % 4], floorY: fy });
+          piles.push({ x: fx, y: Math.min(fy, H - 3), seed: Math.random(), amount: ts.amount });
+          mergePiles();
+          beep(500, 0.08, 'sawtooth', 0.02, -300);
+          toast(ts.where === 'belt' && !beltJammed() ? 'Belt cleared! Now sweep the sand into the dustpan.' : 'Brushed off! Now sweep it into the dustpan.', 'good');
+          pushed = true;
+        }
+      }
       for (const pl of piles) {
         // a sweep only moves sand toward the dustpan's open side
         if ((mx - pl.x) * dx + (my - (pl.y - 2)) * dy <= 0) continue;
@@ -1700,6 +1749,7 @@
       const wsh = washers[tg.i];
       toast(it.clean ? 'Already clean. Send it up the tube.'
         : wsh.s !== 'idle' ? 'That washer is busy.'
+        : washerSandy(tg.i) ? 'Sand on this washer! Brush it off with the broom.'
         : `It doesn't fit: ${loadCount(wsh)}/${CFG.capacity} already inside.`, 'warn');
       returnHand(p);
       return;
@@ -1793,7 +1843,7 @@
   function idleWasher() {
     let best = -1, bd = 1e9;
     for (let i = 0; i < washerCount(); i++) {
-      if (washers[i].s !== 'idle' || washers[i].load.length) continue;
+      if (washers[i].s !== 'idle' || washers[i].load.length || washerSandy(i)) continue;
       const w = WASHERS[i], d = Math.hypot(w.x + w.w / 2 - bot.x, w.y + w.h + 8 - bot.y);
       if (d < bd) { bd = d; best = i; }
     }
@@ -1900,8 +1950,12 @@
     if (!dustEv) {
       if (now < dustAt) return;
       dustAt = now + rand(45000, 75000);
-      if (piles.length >= 6) return;
-      dustEv = { t0: now, x: rand(DUST.x0, DUST.x1), y: rand(DUST.y0, DUST.y1) };
+      if (piles.length + topSand.length >= 6) return;
+      const r = Math.random();
+      if (r < 0.35 && !beltJammed()) dustEv = { t0: now, where: 'belt', rel: rand(0.1, 0.9) };
+      else if (r < 0.65) { const i = Math.random() * washerCount() | 0; dustEv = { t0: now, where: 'washer', i, rel: rand(0.2, 0.8) }; }
+      else dustEv = { t0: now, where: 'floor', x: rand(DUST.x0, DUST.x1), y: rand(DUST.y0, DUST.y1) };
+      if (dustEv.where !== 'floor') { const pos = topSandPos(dustEv); dustEv.x = pos.x; dustEv.y = pos.y; }
       beep(90, 0.5, 'sawtooth', 0.02, 60);
       return;
     }
@@ -1914,26 +1968,43 @@
       }
       return;
     }
-    piles.push({ x: dustEv.x, y: dustEv.y, seed: Math.random(), amount: 1 });
+    const ev = dustEv;
+    dustEv = null;
+    if (ev.where === 'belt') {
+      topSand.push({ where: 'belt', rel: ev.rel, amount: 1, seed: Math.random() });
+      renderFloor();
+      toast('Sand jammed the belt! Brush it off with the broom.', 'warn');
+      return;
+    }
+    if (ev.where === 'washer') {
+      const pile = topSand.find(t => t.where === 'washer' && t.i === ev.i);
+      if (pile) pile.amount = Math.min(3, pile.amount + 1);
+      else topSand.push({ where: 'washer', i: ev.i, rel: ev.rel, amount: 1, seed: Math.random() });
+      renderFloor();
+      toast('Sand landed on a washer! Brush it off with the broom.', 'warn');
+      return;
+    }
+    piles.push({ x: ev.x, y: ev.y, seed: Math.random(), amount: 1 });
     mergePiles();
     renderFloor();
-    dustEv = null;
     if (!save.seen.windowDust) once('windowDust', 'Dust blew in through the window! Sweep it into the dustpan.', 'warn');
     else toast(`Dust blew in. Belt -${Math.round((1 - beltFactor()) * 100)}%`, 'warn');
   }
 
   let beltOffset = 0;
   function update(dt) {
-    if (now >= spawnAt) {
+    const jammed = beltJammed();
+    if (jammed) spawnAt += dt * 1000;
+    else if (now >= spawnAt) {
       items.push(makeItem());
       spawnAt = now + (CFG.spawnMin + Math.random() * CFG.spawnVar) / beltFactor();
     }
     const speed = CFG.beltSpeed * beltFactor();
-    beltOffset = (beltOffset + speed * dt) % 5;
+    if (!jammed) beltOffset = (beltOffset + speed * dt) % 5;
     for (let i = items.length - 1; i >= 0; i--) {
       const it = items[i];
       const cx = it.x + it.w / 2;
-      if (cx < BIN.x + BIN.w / 2) it.x += speed * dt;
+      if (cx < BIN.x + BIN.w / 2 && !(jammed && cx <= BELT.x1 + 1)) it.x += speed * dt;
       if (cx > BELT.x1 + 1) { it.vy += 160 * dt; it.drop += it.vy * dt; }
       if (itemY(it) > BIN.y + 8) {
         items.splice(i, 1);
@@ -1966,7 +2037,7 @@
         s.paid = true;
         const cx = STATION.x + 12, cy = STATION.y + 4;
         const n = countOf(s.item), value = CFG.coinValue * n;
-        emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + value });
+        emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + fmtVal(value) });
         emit('coin', cx, cy, 6, { spread: 3, life: 0.7 });
         flyCoin(cx, cy, value);
         save.delivered += n;
@@ -2006,9 +2077,10 @@
     drawBelt(t);
     drawBinBack();
     for (const it of items) { const [x, y] = lerpFly(it, it.x, itemY(it), t); drawItem(it, x, y, t); }
+    drawTopSand('belt', 0, t);
     drawBinFront();
     const ready = !!(hand && hand.kind === 'item' && hand.item.clean);
-    for (let i = washerCount() - 1; i >= 0; i--) drawWasher(i, t);
+    [...Array(washerCount()).keys()].sort((a, b) => WASHERS[a].y - WASHERS[b].y || b - a).forEach(i => { drawWasher(i, t); drawTopSand('washer', i, t); });
     drawStation(t, ready);
     if (owned('bot')) drawBot(t);
     drawSends(t);
@@ -2022,6 +2094,7 @@
         if (pan.load < PAN_CAP) piles.forEach(pl => bracketBox(pileBox(pl), t, false));
       } else if (hand.kind === 'broom') {
         if (piles.length && pan.load < PAN_CAP) bracketBox(mouthZone(), t, false);
+        for (const ts of topSand) { const tp = topSandPos(ts); brackets(tp.x - 9, tp.y - 12, 18, 13, t, false); }
       } else {
         const tg = dropTargetAt(hp.x, hp.y);
         for (let i = 0; i < washerCount(); i++) if (canLoad(i, hand.item)) bracketBox(WASHERS[i], t, tg && tg.k === 'washer' && tg.i === i);
@@ -2035,7 +2108,8 @@
       }
     }
     // cleaning hints: dustpan next to the sand, then broom, then trash
-    if (!hand && (piles.length || pan.load > 0)) {
+    if (!hand && topSand.length) arrow(broom.x, broom.y - 11, t);
+    else if (!hand && (piles.length || pan.load > 0)) {
       const panNear = piles.some(pl => Math.hypot(pl.x - (pan.x + 6), pl.y - (pan.y + 8)) < 30);
       if (!piles.length || pan.load >= PAN_CAP || !panNear) arrow(pan.x + 6, pan.y - 10, t);
       else arrow(broom.x, broom.y - 11, t);
@@ -2181,21 +2255,29 @@
   const codeKey = async (key, pass) => hex(await sha('pl1|' + key + '|' + pass));
 
   // compact binary form of a save
+  const LV_ORDER = ['drum', 'soap', 'belt', 'washer2', 'bot', 'cap'];
   function packSave(sv) {
-    const out = [2];
+    const out = [3];
     const vint = (n) => { n = Math.max(0, Math.floor(n || 0)); while (n >= 128) { out.push((n % 128) | 128); n = Math.floor(n / 128); } out.push(n); };
     vint(sv.coins); vint(sv.lifetime); vint(sv.delivered); vint(sv.dropped);
+    out.push(sv.sound ? 1 : 0);
     const L = sv.lv || {};
-    const w = (L.drum & 7) | ((L.soap & 7) << 3) | ((L.belt & 7) << 6) | ((L.washer2 & 1) << 9) | ((L.bot & 7) << 10) | ((sv.sound ? 1 : 0) << 13) | ((L.cap & 7) << 14);
-    out.push(w & 255, (w >> 8) & 255, (w >> 16) & 255);
+    for (const id of LV_ORDER) out.push(L[id] || 0);
     return new Uint8Array(out);
   }
   function unpackSave(b) {
     let i = 0;
     const ver = b[i++];
-    if (ver !== 1 && ver !== 2) throw new Error('version');
+    if (ver !== 1 && ver !== 2 && ver !== 3) throw new Error('version');
     const vint = () => { let n = 0, m = 1, x; do { if (i >= b.length) throw new Error('short'); x = b[i++]; n += (x & 127) * m; m *= 128; } while (x & 128); return n; };
     const coins = vint(), lifetime = vint(), delivered = vint(), dropped = vint();
+    if (ver === 3) {
+      if (i + 1 + LV_ORDER.length !== b.length) throw new Error('length');
+      const sound = !!b[i++];
+      const lv = {};
+      for (const id of LV_ORDER) lv[id] = Math.min(b[i++], UPGRADES.find(u => u.id === id).costs.length);
+      return { coins, lifetime, delivered, dropped, sound, seen: {}, lv };
+    }
     const wb = ver === 1 ? 2 : 3;
     if (i + wb !== b.length) throw new Error('length');
     const w = b[i] | (b[i + 1] << 8) | (ver === 2 ? b[i + 2] << 16 : 0);
@@ -2265,8 +2347,8 @@
   function resetWorld() {
     items = []; floor = []; piles = []; sends = []; parts = []; recent = [];
     hand = null;
-    washers = [newWasher(), newWasher()];
-    dustEv = null; dustAt = now + rand(30000, 50000);
+    washers = [newWasher(), newWasher(), newWasher(), newWasher()];
+    dustEv = null; dustAt = now + rand(30000, 50000); topSand = [];
     bot = { x: BOTHOME.x, y: BOTHOME.y, s: 'dock', wi: -1, item: null, target: null, wait: 0, roam: null };
     const el = $('stBot'); if (el) el.textContent = 'Docked';
     pan.load = 0;
