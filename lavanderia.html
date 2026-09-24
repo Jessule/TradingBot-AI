@@ -182,55 +182,7 @@
     padding: 2px 6px;
     font-variant-numeric: tabular-nums;
   }
-  .ups { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
-  .up {
-    position: relative;
-    width: 100%;
-    display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
-    background: var(--panel-2);
-    border: 2px solid var(--edge);
-    padding: 8px 10px 10px;
-    font: inherit;
-    color: var(--ink);
-    text-align: left;
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform .1s, border-color .15s;
-  }
-  .up:disabled { cursor: default; }
-  .up.locked { opacity: .62; }
-  .up.afford { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255, 210, 63, .18), 0 3px 0 var(--gold-dk); }
-  .up.afford:hover { transform: translateY(-2px); }
-  .up.afford:active { transform: translateY(1px); }
-  .up:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  .up.owned { background: #213d3a; opacity: .9; }
-  .up-ico {
-    width: 34px; height: 34px;
-    background: var(--edge);
-    display: grid; place-items: center;
-  }
-  .up-ico canvas { width: 28px; height: 28px; image-rendering: pixelated; display: block; }
-  .up-name { font-weight: 600; font-size: 15px; line-height: 1.2; }
-  .up-desc { color: var(--muted); font-size: 13px; line-height: 1.3; }
-  .up-cost {
-    font-family: var(--display); font-size: 13px; color: var(--gold);
-    display: flex; align-items: center; gap: 5px;
-    font-variant-numeric: tabular-nums;
-  }
-  .up-cost i { width: 10px; height: 10px; background: var(--gold); box-shadow: inset -2px -2px 0 var(--gold-dk); display: block; }
-  .up.owned .up-cost { color: var(--mint); }
-  .up.owned .up-cost i { display: none; }
-  .up-bar { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--gold); transition: width .2s; }
-  .up.owned .up-bar { background: var(--mint); }
   .stat dd.bad { color: var(--warn); }
-  .up-lv { font-family: var(--display); font-size: 10px; letter-spacing: .06em; color: var(--mint); white-space: nowrap; }
-  .up-pips { display: flex; gap: 3px; margin-top: 4px; }
-  .up-pips:empty { display: none; }
-  .up-pips b { width: 10px; height: 4px; background: var(--edge); box-shadow: inset 0 0 0 1px var(--faint); }
-  .up-pips b.on { background: var(--mint); box-shadow: none; }
 
   .howto { color: var(--muted); font-size: 15px; }
   .howto p { margin: 6px 0 0; }
@@ -248,6 +200,164 @@
   }
 
   [hidden] { display: none !important; }
+
+  /* ===== in-game upgrade menu ===== */
+  .screen { position: relative; width: 100%; margin-inline: auto; }
+  .up-open {
+    position: absolute; left: 12px; top: 12px; z-index: 3;
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px 8px;
+    font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--edge); background: var(--gold);
+    border: 3px solid var(--edge);
+    box-shadow: inset 0 -4px 0 var(--gold-dk), 0 3px 0 var(--edge);
+    cursor: pointer;
+  }
+  .up-open:hover { filter: brightness(1.07); }
+  .up-open:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 var(--gold-dk), 0 1px 0 var(--edge); }
+  .up-open:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .up-open-ico { width: 12px; height: 12px; background: var(--edge); clip-path: polygon(50% 0, 100% 55%, 68% 55%, 68% 100%, 32% 100%, 32% 55%, 0 55%); }
+  .up-badge {
+    position: absolute; right: -10px; top: -10px;
+    min-width: 22px; height: 22px; padding: 0 5px;
+    display: grid; place-items: center;
+    background: var(--pink); color: var(--edge);
+    border: 3px solid var(--edge);
+    font-size: 11px;
+    animation: badge 1.2s steps(2) infinite;
+  }
+  @keyframes badge { 50% { transform: translateY(-3px); } }
+
+  .shop {
+    position: absolute; inset: 4px; z-index: 5;
+    display: grid;
+    background: rgba(11, 10, 23, .72);
+    animation: shopFade .18s ease-out both;
+    overflow: hidden;
+  }
+  .shop.closing { animation: shopFade .16s ease-in reverse both; }
+  @keyframes shopFade { from { opacity: 0; } }
+  .shop-panel {
+    margin: 10px;
+    background: var(--panel);
+    border: 3px solid var(--edge);
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.05), 0 0 0 3px #2c2850;
+    display: flex; flex-direction: column;
+    min-height: 0;
+    padding: 14px 14px 0;
+    animation: shutter .42s steps(7) both;
+  }
+  .shop.closing .shop-panel { animation: shutter .2s steps(4) reverse both; }
+  @keyframes shutter {
+    from { clip-path: inset(48% 0 48% 0); transform: scale(.96); }
+    to { clip-path: inset(0 0 0 0); transform: scale(1); }
+  }
+  .shop-top { display: flex; align-items: center; gap: 12px; }
+  .shop-top > div:first-child { flex: 1; min-width: 0; }
+  .shop-top h2 { margin: 2px 0 0; font-family: var(--display); font-size: 26px; line-height: 1; color: var(--ink); }
+  .shop-wallet {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--display); font-weight: 700; font-size: 22px; color: var(--gold);
+    text-shadow: 0 2px 0 var(--gold-dk);
+    font-variant-numeric: tabular-nums;
+  }
+  .coin.sm { width: 16px; height: 16px; box-shadow: inset -3px -3px 0 var(--gold-dk), inset 2px 2px 0 #fff3a8, 0 0 0 2px var(--edge); }
+  .coin.sm::after { width: 3px; height: 6px; }
+  .shop-close {
+    width: 36px; height: 36px; flex: none;
+    background: var(--edge); color: var(--ink);
+    border: 2px solid var(--faint);
+    font-size: 22px; line-height: 1; cursor: pointer;
+  }
+  .shop-close:hover { border-color: var(--ink); }
+  .shop-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .shop-sub { margin: 6px 0 10px; color: var(--muted); font-size: 13px; font-family: var(--display); letter-spacing: .06em; text-transform: uppercase; }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+    padding: 2px 2px 14px;
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+  .uc {
+    --i: 0;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "ico lv" "title title" "blurb blurb" "next next" "now now" "buy buy";
+    align-items: center;
+    gap: 2px 8px;
+    text-align: left;
+    padding: 10px 12px 12px;
+    background: var(--panel-2);
+    border: 3px solid var(--edge);
+    box-shadow: 0 3px 0 var(--edge);
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+    overflow: hidden;
+    animation: cardIn .4s steps(5) both;
+    animation-delay: calc(var(--i) * 55ms + 120ms);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } }
+  .uc:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .uc:disabled { cursor: default; }
+  .uc-ico { grid-area: ico; width: 34px; height: 34px; background: var(--edge); display: grid; place-items: center; }
+  .uc-ico canvas { width: 28px; height: 28px; image-rendering: pixelated; display: block; }
+  .uc-lv { grid-area: lv; font-family: var(--display); font-size: 11px; color: var(--mint); letter-spacing: .06em; }
+  .uc-title { grid-area: title; margin-top: 6px; font-family: var(--display); font-weight: 700; font-size: 18px; line-height: 1.1; }
+  .uc-blurb { grid-area: blurb; color: var(--muted); font-size: 13px; line-height: 1.3; }
+  .uc-next {
+    grid-area: next; margin-top: 6px;
+    font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1;
+    color: var(--gold); text-shadow: 0 3px 0 var(--gold-dk);
+    font-variant-numeric: tabular-nums;
+  }
+  .uc-now { grid-area: now; font-family: var(--display); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+  .uc-now b { color: var(--ink); font-weight: 400; }
+  .uc-buy {
+    grid-area: buy; margin-top: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 6px 8px 8px;
+    font-family: var(--display); font-weight: 700; font-size: 14px;
+    background: var(--edge); color: var(--faint);
+    border: 2px solid var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .uc-buy i { width: 10px; height: 10px; background: var(--gold); box-shadow: inset -2px -2px 0 var(--gold-dk); display: block; }
+  .uc-bar { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--gold); transition: width .25s; }
+  .uc.afford { border-color: var(--gold); animation: cardIn .4s steps(5) both, glow 1.4s steps(2) infinite; animation-delay: calc(var(--i) * 55ms + 120ms), 0s; }
+  @keyframes glow { 50% { box-shadow: 0 3px 0 var(--edge), 0 0 0 3px rgba(255, 210, 63, .28); } }
+  .uc.afford .uc-buy { background: var(--gold); color: var(--edge); border-color: var(--edge); box-shadow: inset 0 -3px 0 var(--gold-dk); }
+  .uc.afford .uc-buy i { background: var(--edge); box-shadow: none; }
+  .uc.afford:hover { transform: translateY(-2px); }
+  .uc.locked .uc-next { color: #c9b25a; text-shadow: 0 3px 0 #6b5a1c; }
+  .uc.maxed { background: #213d3a; }
+  .uc.maxed .uc-next { color: var(--mint); text-shadow: 0 3px 0 #2f7a64; }
+  .uc.maxed .uc-buy { color: var(--mint); border-color: #2f7a64; }
+  .uc.maxed .uc-bar { background: var(--mint); }
+  .uc.pop { animation: pop .45s steps(4); }
+  @keyframes pop { 30% { transform: scale(1.05); background: #3b3570; } 60% { transform: scale(.98); } }
+  .uc.pop .uc-next { animation: flip .45s steps(4); }
+  @keyframes flip { 0% { transform: translateY(0); opacity: 1; } 45% { transform: translateY(-12px); opacity: 0; } 55% { transform: translateY(12px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  .spark { position: absolute; width: 6px; height: 6px; background: var(--gold); pointer-events: none; animation: spark .6s steps(6) forwards; }
+  @keyframes spark { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+
+  body[data-layout="tall"] .up-open { left: 8px; top: 8px; font-size: 11px; padding: 5px 8px 7px; }
+  body[data-layout="tall"] .shop-panel { margin: 6px; padding: 12px 10px 0; }
+  body[data-layout="tall"] .shop-top h2 { font-size: 20px; }
+  body[data-layout="tall"] .shop-wallet { font-size: 18px; }
+  body[data-layout="tall"] .shop-grid { grid-template-columns: 1fr; }
+  body[data-layout="tall"] .uc-next { font-size: 26px; }
+  body[data-layout="tall"] #toast { top: 52px; }
+  @media (prefers-reduced-motion: reduce) {
+    .shop, .shop-panel, .uc, .uc.afford, .uc.pop, .uc.pop .uc-next, .up-badge, .spark { animation: none !important; }
+  }
 
   /* account panel */
   .account .acc-name { margin: 8px 0 0; font-size: 15px; color: var(--muted); }
@@ -326,7 +436,6 @@
     .bank { order: 1; }
     .stage { order: 2; }
     .stats { order: 3; }
-    .shop { order: 4; }
     .howto { order: 6; }
     .account { order: 5; }
     .bank { grid-template-columns: auto 1fr; align-items: center; padding: 10px 14px; }
@@ -336,11 +445,8 @@
   }
   body[data-layout="tall"] { padding-block: 12px 28px; }
   body[data-layout="tall"] h1 { font-size: 20px; }
-  body[data-layout="tall"] #game {
-    aspect-ratio: 2 / 3;
-    width: min(100%, calc((100dvh - 170px) * 2 / 3));
-    border-width: 3px;
-  }
+  body[data-layout="tall"] #game { aspect-ratio: 2 / 3; border-width: 3px; }
+  body[data-layout="tall"] .screen { width: min(100%, calc((100dvh - 170px) * 2 / 3)); }
   body[data-layout="tall"] #toast { font-size: 14px; top: 10px; }
 
   @media (prefers-reduced-motion: reduce) {
@@ -359,8 +465,27 @@
       </div>
     </div>
     <div class="stage">
-      <canvas id="game" aria-label="Laundromat map: conveyor belt, washing machine and coin tube"></canvas>
-      <div id="toast" role="status"></div>
+      <div class="screen" id="screen">
+        <canvas id="game" aria-label="Laundromat map: conveyor belt, washing machine and coin tube"></canvas>
+        <div id="toast" role="status"></div>
+        <button class="up-open" id="upOpen" type="button" aria-haspopup="dialog" aria-controls="shop">
+          <span class="up-open-ico" aria-hidden="true"></span>Upgrades<span class="up-badge" id="upBadge" hidden>0</span>
+        </button>
+        <div class="shop" id="shop" role="dialog" aria-modal="true" aria-labelledby="shopTitle" hidden>
+          <div class="shop-panel">
+            <div class="shop-top">
+              <div>
+                <p class="eyebrow">Laundromat</p>
+                <h2 id="shopTitle">Upgrades</h2>
+              </div>
+              <div class="shop-wallet"><span class="coin sm" aria-hidden="true"></span><span id="shopCoins">0</span></div>
+              <button class="shop-close" id="shopClose" type="button" aria-label="Close upgrades">&times;</button>
+            </div>
+            <p class="shop-sub"><span id="ownedTag">0 / 24 levels</span></p>
+            <div class="shop-grid" id="ups"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -381,11 +506,6 @@
         <div class="stat"><dt>Floor</dt><dd id="stFloor">Clean</dd></div>
         <div class="stat" id="botRow" hidden><dt>Robo Vac</dt><dd id="stBot">Docked</dd></div>
       </dl>
-    </section>
-
-    <section class="panel shop">
-      <div class="shop-head"><p class="eyebrow">Upgrades</p><span class="tag" id="ownedTag">0 / 24 levels</span></div>
-      <ul class="ups" id="ups"></ul>
     </section>
 
     <section class="panel account" id="accountPanel" hidden>
@@ -448,6 +568,15 @@
       desc: (lv) => lv === 0 ? 'Robot that picks up, washes and sends clothes (~30s each)' : `Robo Vac 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
   ];
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
+  // how each upgrade reads in the shop: the stat it changes and its value at a level
+  const STATS = {
+    drum: { title: 'Wash Speed', blurb: 'Every wash cycle 10% faster', show: (lv) => (BASE.washMs * 0.9 ** lv / 1000).toFixed(1) + 's' },
+    soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth', show: (lv) => 'x' + (BASE.coinValue + lv) },
+    cap: { title: 'Washer Capacity', blurb: 'More clothes in every wash', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
+    belt: { title: 'Clothes Flow', blurb: 'More clothes arrive on the belt', show: (lv) => 'x' + (1.15 ** lv).toFixed(2) },
+    washer2: { title: 'Washers', blurb: 'A second washing machine', show: (lv) => String(1 + lv) },
+    bot: { title: 'Robo Vac', blurb: 'Robot that washes clothes for you', show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed' },
+  };
 
   // ================= canvas & layout =================
   let W = 192, H = 128;
@@ -743,44 +872,66 @@
   }
   const shopEls = {};
   const $ups = $('ups');
-  for (const u of UPGRADES) {
-    const li = document.createElement('li');
+  UPGRADES.forEach((u, i) => {
+    const st = STATS[u.id];
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'up locked';
-    btn.innerHTML = `<span class="up-ico"></span><span><span class="up-name"></span> <span class="up-lv"></span><br><span class="up-desc"></span><span class="up-pips"></span></span><span class="up-cost"><i></i><span></span></span><span class="up-bar"></span>`;
-    btn.querySelector('.up-ico').appendChild(drawIcon(u.icon));
-    btn.querySelector('.up-name').textContent = u.name;
-    const pips = btn.querySelector('.up-pips');
-    if (u.costs.length > 1) u.costs.forEach(() => pips.appendChild(document.createElement('b')));
+    btn.className = 'uc locked';
+    btn.style.setProperty('--i', i);
+    btn.innerHTML = `<span class="uc-ico"></span><span class="uc-lv"></span><span class="uc-title"></span><span class="uc-blurb"></span><span class="uc-next"></span><span class="uc-now"></span><span class="uc-buy"><i></i><b></b></span><span class="uc-bar"></span>`;
+    btn.querySelector('.uc-ico').appendChild(drawIcon(u.icon));
+    btn.querySelector('.uc-title').textContent = st.title;
+    btn.querySelector('.uc-blurb').textContent = st.blurb;
     btn.addEventListener('click', () => buy(u));
-    li.appendChild(btn);
-    $ups.appendChild(li);
+    $ups.appendChild(btn);
     shopEls[u.id] = {
-      btn, pips, cost: btn.querySelector('.up-cost span'), bar: btn.querySelector('.up-bar'),
-      lv: btn.querySelector('.up-lv'), desc: btn.querySelector('.up-desc'),
+      btn, lv: btn.querySelector('.uc-lv'), next: btn.querySelector('.uc-next'), now: btn.querySelector('.uc-now'),
+      cost: btn.querySelector('.uc-buy b'), bar: btn.querySelector('.uc-bar'),
     };
-  }
+  });
   const maxLevels = UPGRADES.reduce((n, u) => n + u.costs.length, 0);
+  let lastAffordable = 0;
   function renderShop() {
-    let n = 0;
+    let n = 0, affordable = 0;
     for (const u of UPGRADES) {
-      const el = shopEls[u.id];
+      const el = shopEls[u.id], st = STATS[u.id];
       const lv = level(u.id), max = u.costs.length, maxed = lv >= max;
       const cost = maxed ? 0 : u.costs[lv];
       const can = !maxed && save.coins >= cost;
       n += lv;
-      el.btn.className = 'up ' + (maxed ? 'owned' : can ? 'afford' : 'locked');
+      if (can) affordable++;
+      const cls = 'uc ' + (maxed ? 'maxed' : can ? 'afford' : 'locked') + (el.btn.classList.contains('pop') ? ' pop' : '');
+      if (el.btn.className !== cls) el.btn.className = cls;
       el.btn.disabled = maxed || !can;
-      el.lv.textContent = max > 1 ? `Lv ${lv}/${max}` : '';
-      el.desc.textContent = u.desc(lv);
-      [...el.pips.children].forEach((b, i) => b.classList.toggle('on', i < lv));
-      el.cost.textContent = maxed ? (max > 1 ? 'Max' : 'Owned') : fmt(cost);
-      el.btn.setAttribute('aria-label', `${u.name}, level ${lv} of ${max}: ${u.desc(lv)}. ${maxed ? 'Maxed' : 'Next level costs ' + cost + ' coins'}`);
+      el.lv.textContent = max > 1 ? `Lv ${lv}/${max}` : (lv ? 'Owned' : '');
+      el.next.textContent = st.show(maxed ? lv : lv + 1);
+      el.now.innerHTML = maxed ? 'Maxed out' : `now <b>${st.show(lv)}</b>`;
+      el.cost.textContent = maxed ? 'MAX' : fmt(cost);
       el.bar.style.width = (maxed ? 100 : Math.min(100, save.coins / cost * 100)) + '%';
+      el.btn.setAttribute('aria-label', `${st.title}: ${maxed ? 'maxed at ' + st.show(lv) : st.show(lv) + ' now, ' + st.show(lv + 1) + ' next, costs ' + cost + ' coins'}`);
       if (can) once(`afford-${u.id}-${lv}`, lv ? `${u.name} Lv ${lv + 1} is ready!` : `New upgrade ready: ${u.name}!`, 'good');
     }
-    $('ownedTag').textContent = `${n} / ${maxLevels} levels`;
+    $('ownedTag').textContent = `${n} / ${maxLevels} levels bought`;
+    $('shopCoins').textContent = fmt(save.coins);
+    const badge = $('upBadge');
+    badge.hidden = !affordable;
+    badge.textContent = affordable;
+    lastAffordable = affordable;
+  }
+  function sparkle(el) {
+    const r = el.getBoundingClientRect(), host = $('screen').getBoundingClientRect();
+    for (let k = 0; k < 10; k++) {
+      const d = document.createElement('span');
+      d.className = 'spark';
+      const a = (k / 10) * Math.PI * 2;
+      d.style.left = (r.left - host.left + r.width / 2) + 'px';
+      d.style.top = (r.top - host.top + r.height / 2) + 'px';
+      d.style.setProperty('--dx', Math.round(Math.cos(a) * 60) + 'px');
+      d.style.setProperty('--dy', Math.round(Math.sin(a) * 45) + 'px');
+      if (k % 3 === 0) d.style.background = 'var(--mint)';
+      $('screen').appendChild(d);
+      setTimeout(() => d.remove(), 700);
+    }
   }
   function buy(u) {
     const lv = level(u.id);
@@ -789,8 +940,11 @@
     save.lv[u.id] = lv + 1;
     applyUpgrades();
     persist();
+    const el = shopEls[u.id].btn;
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+    setTimeout(() => el.classList.remove('pop'), 480);
+    sparkle(shopEls[u.id].next);
     renderStats();
-    toast(u.costs.length > 1 ? `${u.name} Lv ${lv + 1}!` : `Bought ${u.name}!`, 'good');
     [523, 659, 784, 1047].forEach((f, i) => beep(f + lv * 60, 0.09, 'square', 0.04, 0, i * 0.07));
     if (u.id === 'washer2') { const w = WASHERS[1]; emit('spark', w.x + 15, w.y + 18, 16, { spread: 14, color: '#ffffff', vy: -30, life: 0.8 }); }
     if (u.id === 'bot') { if (lv === 0) { bot.x = BOTHOME.x; bot.y = BOTHOME.y; } emit('spark', bot.x, bot.y - 8, 14, { spread: 8, color: '#7fe0c4', vy: -30, life: 0.8 }); }
@@ -798,6 +952,31 @@
     if (u.id === 'soap') emit('spark', STATION.x + 15, STATION.y + 20, 10, { spread: 10, color: '#ffd84a', vy: -25, life: 0.7 });
     if (u.id === 'belt') for (let k = 0; k < 5; k++) emit('spark', BELT.x0 + 10 + k * 15, BELT.y, 2, { spread: 3, color: '#f0c84a', vy: -20, life: 0.5 });
   }
+
+  // open / close the in-screen upgrade menu
+  let shopCloseTimer = 0;
+  function openShop() {
+    clearTimeout(shopCloseTimer);
+    const sh = $('shop');
+    sh.classList.remove('closing');
+    // restart the card entrance animation
+    Object.values(shopEls).forEach(e => { e.btn.style.animation = 'none'; void e.btn.offsetWidth; e.btn.style.animation = ''; });
+    sh.hidden = false;
+    renderShop();
+    beep(392, 0.06, 'square', 0.035); beep(587, 0.08, 'square', 0.035, 0, 0.06);
+    setTimeout(() => { try { $('shopClose').focus({ preventScroll: true }); } catch (e) {} }, 60);
+  }
+  function closeShop() {
+    const sh = $('shop');
+    if (sh.hidden || sh.classList.contains('closing')) return;
+    sh.classList.add('closing');
+    beep(587, 0.05, 'square', 0.03); beep(392, 0.07, 'square', 0.03, 0, 0.05);
+    shopCloseTimer = setTimeout(() => { sh.hidden = true; sh.classList.remove('closing'); try { $('upOpen').focus({ preventScroll: true }); } catch (e) {} }, 200);
+  }
+  $('upOpen').addEventListener('click', openShop);
+  $('shopClose').addEventListener('click', closeShop);
+  $('shop').addEventListener('click', (e) => { if (e.target === $('shop')) closeShop(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('shop').hidden) closeShop(); });
 
   // ================= particles =================
   function emit(kind, x, y, n, o = {}) {
