@@ -564,7 +564,7 @@
       desc: () => `x${SOAP_MULT} coins per cloth` },
     { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55, 85, 115],
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
-    { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: [20, 40, 60, 80, 110],
+    { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: Array.from({ length: 10 }, (_, i) => Math.round(15 * 1.35 ** i)),
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
     { id: 'washer2', name: 'Extra Washer', icon: 'washer', costs: [45, 110, 220],
       desc: () => 'Another washing machine' },
@@ -578,7 +578,7 @@
     drum: { title: 'Wash Speed', blurb: 'Every wash cycle 10% faster', show: (lv) => (BASE.washMs * 0.9 ** lv / 1000).toFixed(1) + 's' },
     soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth (x1.15 each level)', show: (lv) => 'x' + fmtMult(SOAP_MULT ** lv) },
     cap: { title: 'Washer Capacity', blurb: 'More clothes in every wash', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
-    belt: { title: 'Clothes Flow', blurb: 'More clothes arrive on the belt', show: (lv) => 'x' + (1.15 ** lv).toFixed(2) },
+    belt: { title: 'Clothes Flow', blurb: 'More clothes on a faster belt (x1.15 each level)', show: (lv) => 'x' + fmtMult(1.15 ** lv) },
     washer2: { title: 'Washers', blurb: 'Another washing machine, up to 4', show: (lv) => String(1 + lv) },
     bot: { title: 'Robo Vac', blurb: 'Robot that washes clothes for you', show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed' },
   };
@@ -704,6 +704,8 @@
     CFG.coinValue = BASE.coinValue * SOAP_MULT ** level('soap');
     CFG.capacity = BASE.capacity + level('cap');
     const more = 1.15 ** level('belt');
+    // the belt also speeds up (half the rate) so clothes don't pile on top of each other
+    CFG.beltSpeed = BASE.beltSpeed * Math.sqrt(more);
     CFG.spawnMin = BASE.spawnMin / more;
     CFG.spawnVar = BASE.spawnVar / more;
   }
