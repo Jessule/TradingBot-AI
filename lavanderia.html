@@ -202,6 +202,43 @@
 
   [hidden] { display: none !important; }
 
+  /* ===== prestige ===== */
+  .pr-open { left: auto; right: 12px; background: #b58cff; box-shadow: inset 0 -4px 0 #6d45b8, 0 3px 0 var(--edge); }
+  .pr-open:active { box-shadow: inset 0 -2px 0 #6d45b8, 0 1px 0 var(--edge); }
+  .pr-badge { background: var(--gold); right: auto; left: -10px; }
+  .hanger { width: 16px; height: 11px; flex: none; position: relative; background: var(--edge); clip-path: polygon(50% 0, 60% 18%, 100% 100%, 0 100%, 40% 18%); }
+  .hanger.big { width: 22px; height: 15px; background: var(--gold); }
+  .pr-wallet { color: #d7b8ff; text-shadow: 0 2px 0 #5b3a9a; }
+  .prestige .shop-panel { border-color: #2a1747; box-shadow: inset 0 3px 0 rgba(255,255,255,.05), 0 0 0 3px #6d45b8; }
+  .pr-hero {
+    grid-column: 1 / -1;
+    display: grid; gap: 8px;
+    padding: 14px;
+    background: linear-gradient(180deg, #3a2466, #2c2850);
+    border: 3px solid var(--edge);
+    box-shadow: 0 3px 0 var(--edge);
+    animation: cardIn .4s steps(5) both .1s;
+  }
+  .pr-gain { margin: 0; font-family: var(--display); font-weight: 700; font-size: 36px; line-height: 1; color: #d7b8ff; text-shadow: 0 3px 0 #5b3a9a; }
+  .pr-gain small { font-size: 14px; color: var(--muted); text-shadow: none; }
+  .pr-line { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
+  .pr-line b { color: var(--ink); font-weight: 600; }
+  .pr-bar { height: 8px; background: var(--edge); border: 2px solid #5b3a9a; }
+  .pr-bar span { display: block; height: 100%; width: 0; background: #b58cff; transition: width .3s; }
+  .pr-go { background: #b58cff; box-shadow: inset 0 -4px 0 #6d45b8, 0 3px 0 var(--edge); justify-self: start; }
+  .pr-go.confirm { background: var(--warn); box-shadow: inset 0 -4px 0 #b8603f, 0 3px 0 var(--edge); animation: glow 0.8s steps(2) infinite; }
+  .uc.perk .uc-next { color: #d7b8ff; text-shadow: 0 3px 0 #5b3a9a; }
+  .uc.perk .uc-buy i { background: #b58cff; box-shadow: none; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .uc.perk .uc-bar { background: #b58cff; }
+  .uc.perk.afford { border-color: #b58cff; }
+  .uc.perk.afford .uc-buy { background: #b58cff; color: var(--edge); border-color: var(--edge); box-shadow: inset 0 -3px 0 #6d45b8; }
+  .uc.perk.afford .uc-buy i { background: var(--edge); }
+  .uc.perk.maxed .uc-next { color: var(--mint); text-shadow: 0 3px 0 #2f7a64; }
+  .flash { position: absolute; inset: 4px; z-index: 8; pointer-events: none; background: #fff6d6; animation: flash .9s steps(6) forwards; }
+  @keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
+  body[data-layout="tall"] .pr-open { left: auto; right: 8px; }
+  body[data-layout="tall"] .pr-gain { font-size: 30px; }
+
   /* ===== in-game upgrade menu ===== */
   .screen { position: relative; width: 100%; margin-inline: auto; container-type: inline-size; }
   /* keep action messages clear of the Upgrades button: beside it when wide, below it when narrow */
@@ -490,6 +527,31 @@
         <button class="up-open" id="upOpen" type="button" aria-haspopup="dialog" aria-controls="shop">
           <span class="up-open-ico" aria-hidden="true"></span>Upgrades<span class="up-badge" id="upBadge" hidden>0</span>
         </button>
+        <button class="up-open pr-open" id="prOpen" type="button" aria-haspopup="dialog" aria-controls="prShop" hidden>
+          <span class="hanger" aria-hidden="true"></span>Prestige<span class="up-badge pr-badge" id="prBadge" hidden>+0</span>
+        </button>
+        <div class="shop prestige" id="prShop" role="dialog" aria-modal="true" aria-labelledby="prTitle" hidden>
+          <div class="shop-panel">
+            <div class="shop-top">
+              <div>
+                <p class="eyebrow">Start over, come back stronger</p>
+                <h2 id="prTitle">Prestige</h2>
+              </div>
+              <div class="shop-wallet pr-wallet"><span class="hanger big" aria-hidden="true"></span><span id="prHangers">0</span></div>
+              <button class="shop-close" id="prClose" type="button" aria-label="Close prestige">&times;</button>
+            </div>
+            <p class="shop-sub">Golden Hangers buy permanent perks</p>
+            <div class="shop-grid" id="perks">
+              <section class="pr-hero">
+                <p class="pr-gain">+<span id="prGain">0</span> <small>Golden Hangers</small></p>
+                <p class="pr-line" id="prNext"></p>
+                <div class="pr-bar"><span id="prBar"></span></div>
+                <p class="pr-line">Prestige resets your coins, upgrades and the floor. You keep your Golden Hangers, perks and stats. Prestiges so far: <b id="prCount">0</b>. With <b>Prestige Power</b> they multiply your coins (now <b id="prBonus">x1.00</b>).</p>
+                <button class="primary pr-go" id="prGo" type="button">Prestige</button>
+              </section>
+            </div>
+          </div>
+        </div>
         <div class="shop" id="shop" role="dialog" aria-modal="true" aria-labelledby="shopTitle" hidden>
           <div class="shop-panel">
             <div class="shop-top">
@@ -522,6 +584,8 @@
         <div class="stat"><dt>Lifetime coins</dt><dd id="stLifetime">0</dd></div>
         <div class="stat"><dt>Dropped in basket</dt><dd id="stDropped">0</dd></div>
         <div class="stat"><dt>Wash cycle</dt><dd id="stWash">5.0s</dd></div>
+        <div class="stat" id="prRow" hidden><dt>Golden Hangers</dt><dd id="stHangers">0</dd></div>
+        <div class="stat" id="prRow2" hidden><dt>Prestiges</dt><dd id="stPrestiges">0</dd></div>
         <div class="stat"><dt>Floor</dt><dd id="stFloor">Clean</dd></div>
         <div class="stat" id="botRow" hidden><dt>Robo Vac</dt><dd id="stBot">Docked</dd></div>
       </dl>
@@ -539,6 +603,7 @@
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
+      <p>Deliver loads back to back for a <b>combo</b> (up to x2), and watch for <b>golden clothes</b>: they pay x10. Earn 500 coins in a run to unlock <b>Prestige</b>.</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -587,6 +652,21 @@
       desc: (lv) => lv === 0 ? 'Robot that picks up, washes and sends clothes by itself (~30s each)' : `Robo Vac 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
   ];
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
+  // permanent perks bought with Golden Hangers (kept through prestige)
+  const PERKS = [
+    { id: 'power', name: 'Prestige Power', title: 'Prestige Bonus', blurb: 'More coins for every prestige you have (x2 at 30)', costs: [5], show: (lv) => lv ? 'x' + fmtMult(powerMult()) : 'Off', showNext: () => 'x' + fmtMult(powerMult()), icon: 'hanger' },
+    { id: 'softener', name: 'Fabric Softener', title: 'Coin Bonus', blurb: '+25% coins on every load, forever', costs: [3, 6, 10, 16, 25], show: (lv) => 'x' + fmtMult(1.25 ** lv), icon: 'soap' },
+    { id: 'lucky', name: 'Lucky Socks', title: 'Golden Clothes', blurb: 'More golden clothes (they pay x10)', costs: [2, 4, 7, 11, 16], show: (lv) => (1 + 3 * lv) + '% chance', icon: 'lucky' },
+    { id: 'auto', name: 'Smart Washers', title: 'Auto Start', blurb: 'Washers start 3s after you add clothes', costs: [6], show: (lv) => lv ? 'On' : 'Off', icon: 'washer' },
+    { id: 'filter', name: 'Window Screen', title: 'Dust Filter', blurb: 'Less dust blows in the window', costs: [3, 6, 10], show: (lv) => lv ? '-' + Math.round((1 - 1 / (1 + 0.5 * lv)) * 100) + '% dust' : 'Normal', icon: 'filter' },
+    { id: 'head', name: 'Starter Fund', title: 'Head Start', blurb: 'Begin every new run with coins', costs: [2, 4, 6, 9, 13], show: (lv) => (100 * lv) + ' coins', icon: 'coin' },
+    { id: 'robo', name: 'Robo Loyalty', title: 'Keep Robo Vac', blurb: 'Your Robo Vac stays after prestige', costs: [8], show: (lv) => lv ? 'Kept' : 'Lost', icon: 'bot' },
+  ];
+  const PERK_ORDER = PERKS.map(p => p.id);
+  const PRESTIGE_AT = 500;
+  // first prestige (500 coins in a run) gives 5 hangers; 4x the coins gives 2x the hangers
+  const hangersFor = (run) => Math.floor(5 * Math.sqrt(Math.max(0, run) / PRESTIGE_AT) + 1e-9);
+  const hangerAt = (n) => Math.ceil(PRESTIGE_AT * (n / 5) ** 2);
   const SOAP_MULT = 1.15;
   // how each upgrade reads in the shop: the stat it changes and its value at a level
   const STATS = {
@@ -684,6 +764,7 @@
   const newWasher = () => ({ s: 'idle', item: null, t0: 0, load: [] });
   let washers = [newWasher(), newWasher(), newWasher(), newWasher()];
   const countOf = (it) => it.count || 1;
+  const goldOf = (it) => it.goldN != null ? it.goldN : (it.gold ? countOf(it) : 0);
   const loadCount = (w) => (w.load || []).reduce((n, it) => n + countOf(it), 0);
   let dustEv = null, dustAt = 0, dustDone = false;
   // sand resting on top of the belt or a washer: { where: 'belt'|'washer', i, rel, amount, seed }
@@ -710,13 +791,19 @@
 
   const level = (id) => save.lv[id] || 0;
   const owned = (id) => level(id) > 0;
+  const perk = (id) => (save.perks && save.perks[id]) || 0;
+  // Prestige Power: 2^(prestiges / 30), so x2 at 30 prestiges
+  const powerMult = () => 2 ** ((save.prestiges || 0) / 30);
+  const prestigeMult = () => (perk('power') ? powerMult() : 1) * 1.25 ** perk('softener');
+  const goldChance = () => 0.01 + 0.03 * perk('lucky');
+  let combo = 0, lastPay = -1e9;
   const washerCount = () => 1 + level('washer2');
   const sandAmount = () => piles.reduce((sum, pl) => sum + pl.amount, 0);
   const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * sandAmount());
   function applyUpgrades() {
     Object.assign(CFG, BASE);
     CFG.washMs = BASE.washMs * 0.9 ** level('drum');
-    CFG.coinValue = BASE.coinValue * SOAP_MULT ** level('soap');
+    CFG.coinValue = BASE.coinValue * SOAP_MULT ** level('soap') * prestigeMult();
     CFG.capacity = BASE.capacity + level('cap');
     const more = 1.15 ** level('belt');
     // the belt also speeds up so clothes keep some room between them
@@ -785,6 +872,7 @@
     for (let i = 0; i < 6; i++) dirt.push(cells[Math.random() * cells.length | 0]);
     return {
       id: nextId++, type, color: COLORS[Math.random() * COLORS.length | 0], cells, dirt, dirt0: dirt.slice(), clean: false,
+      gold: Math.random() < goldChance(),
       rank: rows.map(r => [...r].map(() => Math.random())),
       w: rows[0].length, h: rows.length, x: -12, drop: 0, vy: 0, seed: Math.random() * 1000, fly: null,
       age: 0, crumble: 0, fx: 0, fy: 0,
@@ -842,6 +930,7 @@
     $('perLoad').textContent = '+' + fmtVal(CFG.coinValue);
     renderFloor();
     renderShop();
+    renderPrestige();
     $('botRow').hidden = !owned('bot');
   }
   let lastFloorText = '';
@@ -863,9 +952,136 @@
     recent = recent.filter(t => now - t < 60000);
     $rate.textContent = fmt(recent.length * CFG.coinValue);
   }
+  // ---- prestige panel + perk shop
+  const perkEls = {};
+  PERKS.forEach((q, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'uc perk locked';
+    btn.style.setProperty('--i', i + 1);
+    btn.innerHTML = `<span class="uc-ico"></span><span class="uc-lv"></span><span class="uc-title"></span><span class="uc-blurb"></span><span class="uc-next"></span><span class="uc-now"></span><span class="uc-buy"><i></i><b></b></span><span class="uc-bar"></span>`;
+    btn.querySelector('.uc-ico').appendChild(drawIcon(q.icon));
+    btn.querySelector('.uc-title').textContent = q.title;
+    btn.querySelector('.uc-blurb').textContent = q.blurb;
+    btn.addEventListener('click', () => buyPerk(q));
+    $('perks').appendChild(btn);
+    perkEls[q.id] = { btn, lv: btn.querySelector('.uc-lv'), next: btn.querySelector('.uc-next'), now: btn.querySelector('.uc-now'), cost: btn.querySelector('.uc-buy b'), bar: btn.querySelector('.uc-bar') };
+  });
+  function renderPrestige() {
+    const run = save.runEarned || 0;
+    const unlocked = run >= PRESTIGE_AT || save.prestiges > 0 || save.hangers > 0;
+    $('prOpen').hidden = !unlocked;
+    const gain = run >= PRESTIGE_AT ? hangersFor(run) : 0;
+    const badge = $('prBadge');
+    badge.hidden = !gain;
+    badge.textContent = '+' + gain;
+    $('prRow').hidden = $('prRow2').hidden = !unlocked;
+    $('stHangers').textContent = fmt(save.hangers || 0);
+    $('stPrestiges').textContent = fmt(save.prestiges || 0);
+    if ($('prShop').hidden) return;
+    $('prHangers').textContent = fmt(save.hangers || 0);
+    $('prGain').textContent = gain;
+    $('prBonus').textContent = 'x' + fmtMult(perk('power') ? powerMult() : 1);
+    $('prCount').textContent = fmt(save.prestiges || 0);
+    if (run < PRESTIGE_AT) {
+      $('prNext').textContent = `Earn ${fmt(PRESTIGE_AT)} coins this run to prestige (${fmt(run)} so far).`;
+      $('prBar').style.width = Math.min(100, run / PRESTIGE_AT * 100) + '%';
+    } else {
+      const nextAt = hangerAt(gain + 1), prevAt = hangerAt(gain);
+      $('prNext').textContent = `Next hanger at ${fmt(nextAt)} coins earned this run (${fmt(run)} so far).`;
+      $('prBar').style.width = Math.min(100, (run - prevAt) / (nextAt - prevAt) * 100) + '%';
+    }
+    const go = $('prGo');
+    go.disabled = !gain;
+    if (!go.classList.contains('confirm')) go.textContent = gain ? `Prestige for +${gain}` : 'Not yet';
+    for (const q of PERKS) {
+      const el = perkEls[q.id], lv = perk(q.id), max = q.costs.length, maxed = lv >= max;
+      const cost = maxed ? 0 : q.costs[lv], can = !maxed && (save.hangers || 0) >= cost;
+      const cls = 'uc perk ' + (maxed ? 'maxed' : can ? 'afford' : 'locked') + (el.btn.classList.contains('pop') ? ' pop' : '');
+      if (el.btn.className !== cls) el.btn.className = cls;
+      el.btn.disabled = maxed || !can;
+      el.lv.textContent = max > 1 ? `Lv ${lv}/${max}` : (lv ? 'Owned' : '');
+      el.next.textContent = maxed ? q.show(lv) : (q.showNext ? q.showNext(lv) : q.show(lv + 1));
+      el.now.innerHTML = maxed ? 'Maxed out' : `now <b>${q.show(lv)}</b>`;
+      el.cost.textContent = maxed ? 'MAX' : cost;
+      el.bar.style.width = (maxed ? 100 : Math.min(100, (save.hangers || 0) / cost * 100)) + '%';
+      el.btn.setAttribute('aria-label', `${q.title}: ${maxed ? 'maxed' : q.show(lv) + ' now, ' + q.show(lv + 1) + ' next, costs ' + cost + ' Golden Hangers'}`);
+    }
+  }
+  function buyPerk(q) {
+    const lv = perk(q.id);
+    if (lv >= q.costs.length || (save.hangers || 0) < q.costs[lv]) return;
+    save.hangers -= q.costs[lv];
+    save.perks[q.id] = lv + 1;
+    applyUpgrades();
+    persist();
+    const el = perkEls[q.id].btn;
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+    setTimeout(() => el.classList.remove('pop'), 480);
+    sparkle(perkEls[q.id].next);
+    renderStats();
+    [440, 554, 659, 880].forEach((f, i) => beep(f + lv * 40, 0.1, 'triangle', 0.05, 0, i * 0.07));
+  }
+  let prConfirmTimer = 0;
+  $('prGo').addEventListener('click', () => {
+    const go = $('prGo');
+    if (!go.classList.contains('confirm')) {
+      go.classList.add('confirm');
+      go.textContent = 'Tap again to reset';
+      clearTimeout(prConfirmTimer);
+      prConfirmTimer = setTimeout(() => { go.classList.remove('confirm'); renderPrestige(); }, 3000);
+      return;
+    }
+    clearTimeout(prConfirmTimer);
+    go.classList.remove('confirm');
+    doPrestige();
+  });
+  function doPrestige() {
+    const gain = save.runEarned >= PRESTIGE_AT ? hangersFor(save.runEarned) : 0;
+    if (!gain) return;
+    save.hangers = (save.hangers || 0) + gain;
+    save.prestiges = (save.prestiges || 0) + 1;
+    save.runEarned = 0;
+    save.coins = 100 * perk('head');
+    save.lv = perk('robo') && level('bot') ? { bot: 1 } : {};
+    combo = 0;
+    applyUpgrades();
+    resetWorld();
+    persist();
+    closePanel('prShop');
+    const f = document.createElement('div');
+    f.className = 'flash';
+    $('screen').appendChild(f);
+    setTimeout(() => f.remove(), 950);
+    [523, 659, 784, 1047, 1319].forEach((fq, i) => beep(fq, 0.12, 'square', 0.045, 0, i * 0.09));
+    renderStats(); renderRate();
+    toast(`Prestige ${save.prestiges}! +${gain} Golden Hangers.`, 'good');
+  }
+  function openPanel(id, closeId) {
+    const sh = $(id);
+    sh.classList.remove('closing');
+    sh.querySelectorAll('.uc, .pr-hero').forEach(e => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; });
+    sh.hidden = false;
+    renderShop(); renderPrestige();
+    beep(392, 0.06, 'square', 0.035); beep(587, 0.08, 'square', 0.035, 0, 0.06);
+    setTimeout(() => { try { $(closeId).focus({ preventScroll: true }); } catch (e) {} }, 60);
+  }
+  function closePanel(id) {
+    const sh = $(id);
+    if (sh.hidden || sh.classList.contains('closing')) return;
+    sh.classList.add('closing');
+    setTimeout(() => { sh.hidden = true; sh.classList.remove('closing'); }, 200);
+  }
+  $('prOpen').addEventListener('click', () => openPanel('prShop', 'prClose'));
+  $('prClose').addEventListener('click', () => closePanel('prShop'));
+  $('prShop').addEventListener('click', (e) => { if (e.target === $('prShop')) closePanel('prShop'); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('prShop').hidden) closePanel('prShop'); });
+
   function addCoins(n) {
     save.coins += n;
     save.lifetime += n;
+    save.runEarned = (save.runEarned || 0) + n;
+    if (save.runEarned >= PRESTIGE_AT) once('prestige', 'Prestige unlocked! Open the purple Prestige button.', 'good');
     persist();
     renderStats();
     $coins.classList.remove('bump'); void $coins.offsetWidth; $coins.classList.add('bump');
@@ -898,6 +1114,10 @@
     if (kind === 'drum') { P(2, 2, 10, 10, OUT); P(3, 3, 8, 8, '#b9bfd0'); P(4, 4, 6, 6, '#4f9fd6'); P(5, 5, 2, 1, '#fff'); P(9, 1, 3, 3, '#ffd23f'); }
     if (kind === 'belt') { P(1, 6, 12, 4, OUT); P(2, 7, 10, 2, '#9aa0b5'); P(3, 3, 3, 3, '#e05a5a'); P(8, 3, 3, 3, '#4a7fe0'); P(2, 10, 1, 3, OUT); P(11, 10, 1, 3, OUT); }
     if (kind === 'washer') { P(1, 2, 6, 10, OUT); P(2, 3, 4, 8, '#eef0f5'); P(3, 6, 2, 3, '#4f9fd6'); P(7, 2, 6, 10, OUT); P(8, 3, 4, 8, '#eef0f5'); P(9, 6, 2, 3, '#4f9fd6'); }
+    if (kind === 'lucky') { P(4, 1, 5, 8, OUT); P(5, 2, 3, 7, '#ffd23f'); P(2, 8, 8, 5, OUT); P(3, 9, 6, 3, '#ffd23f'); P(5, 3, 1, 2, '#fff6b8'); P(11, 1, 1, 3, '#fff'); P(10, 2, 3, 1, '#fff'); }
+    if (kind === 'filter') { P(1, 2, 12, 10, OUT); P(2, 3, 10, 8, '#26346a'); for (let k = 3; k < 12; k += 2) P(k, 3, 1, 8, '#9aa0b5'); for (let k = 4; k < 11; k += 2) P(2, k, 10, 1, '#9aa0b5'); }
+    if (kind === 'hanger') { P(6, 1, 2, 3, OUT); P(6, 1, 2, 1, '#ffd23f'); P(5, 4, 4, 2, OUT); P(2, 6, 10, 2, OUT); P(0, 8, 14, 3, OUT); P(1, 9, 12, 1, '#ffd23f'); P(3, 7, 8, 1, '#ffd23f'); P(6, 5, 2, 1, '#ffd23f'); }
+    if (kind === 'coin') { P(3, 3, 8, 8, OUT); P(4, 4, 6, 6, '#ffd23f'); P(6, 5, 2, 4, '#c98f0a'); P(4, 4, 2, 2, '#fff3a8'); }
     if (kind === 'cap') { P(2, 2, 10, 11, OUT); P(3, 3, 8, 9, '#eef0f5'); P(4, 6, 6, 5, '#1f3b52'); P(5, 8, 4, 2, '#e05a5a'); P(8, 7, 2, 2, '#4a7fe0'); P(9, 0, 5, 5, OUT); P(11, 1, 1, 3, '#6fe08a'); P(10, 2, 3, 1, '#6fe08a'); }
     if (kind === 'soap') { P(4, 1, 6, 3, OUT); P(5, 2, 4, 1, '#e87ab8'); P(3, 4, 8, 9, OUT); P(4, 5, 6, 7, '#7fe0c4'); P(5, 7, 4, 3, '#ffffff'); P(10, 2, 2, 2, '#e8f7ff'); P(12, 5, 1, 1, '#e8f7ff'); }
     if (kind === 'bot') { P(3, 3, 8, 1, OUT); P(2, 4, 10, 1, OUT); P(1, 5, 12, 5, OUT); P(2, 10, 10, 1, OUT); P(2, 5, 10, 3, '#4a4f66'); P(3, 4, 8, 1, '#4a4f66'); P(2, 8, 10, 2, '#2a2c3a'); P(2, 7, 10, 1, '#7fe0c4'); P(6, 5, 2, 1, '#6fe08a'); P(4, 5, 2, 1, '#6d7390'); }
@@ -1063,6 +1283,7 @@
     for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
       rows.forEach((row, ri) => { for (let ci = 0; ci < row.length; ci++) if (on(ri, ci)) g.fillRect(x + ci + dx, y + ri + dy, 1, 1); });
     }
+    if (it.gold) it.color = '#ffc93c';
     const grime = !it.clean && it.age > FLOOR.grimeMs;
     const base = grime ? shade(it.color, 0.78) : it.color;
     const dark = shade(base, 0.7), light = shade(base, 1.28), stripe = shade(base, 1.5);
@@ -1093,6 +1314,13 @@
     } else if (((t + it.seed * 7) / 260 | 0) % 2) {
       const sx = x + it.w, sy = y - 2;
       R(sx, sy - 1, 1, 3, '#ffffff'); R(sx - 1, sy, 3, 1, '#ffffff');
+    }
+    if (it.gold) {
+      // golden shimmer
+      const k = ((t / 90) + it.seed) % (it.w + it.h);
+      const sx = k < it.w ? x + k : x + it.w, sy = k < it.w ? y - 1 : y + (k - it.w);
+      R(sx, sy, 1, 1, '#ffffff');
+      if (((t + it.seed * 13) / 200 | 0) % 3 === 0) { R(x - 2, y + 1, 1, 3, '#fff6b8'); R(x - 3, y + 2, 3, 1, '#fff6b8'); }
     }
     if (countOf(it) > 1) text('x' + countOf(it), x + it.w - 3, y + it.h - 3, '#ffd84a');
   }
@@ -1566,8 +1794,11 @@
     if (wsh.s !== 'idle' || !wsh.load.length) return;
     if (washerSandy(i)) { if (!byBot) toast('Brush the sand off this washer first.', 'warn'); return; }
     const total = loadCount(wsh);
+    const goldN = wsh.load.reduce((n, it) => n + goldOf(it), 0);
     const item = wsh.load[0];
     item.count = total;
+    item.goldN = goldN;
+    item.gold = goldN > 0;
     washers[i] = { s: 'washing', item, t0: now, load: [], bot: !!byBot };
     const w = WASHERS[i];
     emit('bubble', w.x + 15, w.y + 18, 8 + total * 2, { spread: 6, vx: 0, vy: -14, life: 0.9 });
@@ -1759,6 +1990,7 @@
       if (canLoad(tg.i, it)) {
         const wsh = washers[tg.i];
         wsh.load.push(it);
+        wsh.lastAdd = now;
         hand = null;
         const n = loadCount(wsh);
         if (n >= CFG.capacity) startWash(tg.i, false);
@@ -1950,7 +2182,7 @@
     if (!session || save.delivered < 5) return;
     if (!dustEv) {
       if (now < dustAt) return;
-      dustAt = now + rand(35000, 55000);
+      dustAt = now + rand(35000, 55000) * (1 + 0.5 * perk('filter'));
       if (piles.length + topSand.length >= 6) return;
       const r = Math.random();
       const firstDust = !dustDone;
@@ -2020,6 +2252,7 @@
     }
     for (let i = 0; i < washerCount(); i++) {
       const wsh = washers[i], w = WASHERS[i];
+      if (wsh.s === 'idle' && wsh.load.length && perk('auto') && now - (wsh.lastAdd || 0) > 3000) startWash(i, false);
       if (wsh.s === 'washing') {
         if (Math.random() < dt * 6) emit('bubble', w.x + rand(6, 24), w.y + 14, 1, { vx: 0, vy: rand(-18, -10), life: rand(0.6, 1.1) });
         if (now - wsh.t0 >= CFG.washMs) {
@@ -2041,7 +2274,15 @@
       if (age >= 250 && !s.paid) {
         s.paid = true;
         const cx = STATION.x + 12, cy = STATION.y + 4;
-        const n = countOf(s.item), value = CFG.coinValue * n;
+        const n = countOf(s.item), gn = goldOf(s.item);
+        combo = now - lastPay < 8000 ? Math.min(combo + 1, 10) : 0;
+        lastPay = now;
+        const value = CFG.coinValue * (n + 9 * gn) * (1 + 0.1 * combo);
+        if (gn) {
+          emit('spark', cx, cy - 4, 14, { spread: 8, color: '#ffd23f', vy: -35, life: 0.9 });
+          if (!save.seen.gold) once('gold', 'Golden clothes! They pay x10.', 'good');
+        }
+        if (combo >= 3 && combo % 3 === 0) beep(1568, 0.08, 'square', 0.03, 0, 0.12);
         emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + fmtVal(value) });
         emit('coin', cx, cy, 6, { spread: 3, life: 0.7 });
         flyCoin(cx, cy, value);
@@ -2092,6 +2333,15 @@
     stand.sort((a, b) => a.y - b.y).forEach(o => o.d());
     drawSends(t);
     drawParts();
+    if (combo > 0 && now - lastPay < 8000) {
+      const left = 1 - (now - lastPay) / 8000;
+      const label = 'x' + (1 + 0.1 * combo).toFixed(1);
+      const bx = STATION.x - 2, by = STATION.y - 16;
+      R(bx - 1, by - 1, 22, 11, OUT);
+      R(bx, by, 20, 9, '#3a2466');
+      text(label, bx + 2, by + 1, ((t / 150) | 0) % 2 ? '#ffd23f' : '#fff6b8');
+      R(bx, by + 7, Math.round(20 * left), 2, '#b58cff');
+    }
 
     // targets
     if (hand) {
@@ -2264,20 +2514,32 @@
   // compact binary form of a save
   const LV_ORDER = ['drum', 'soap', 'belt', 'washer2', 'bot', 'cap'];
   function packSave(sv) {
-    const out = [3];
+    const out = [4];
     const vint = (n) => { n = Math.max(0, Math.floor(n || 0)); while (n >= 128) { out.push((n % 128) | 128); n = Math.floor(n / 128); } out.push(n); };
     vint(sv.coins); vint(sv.lifetime); vint(sv.delivered); vint(sv.dropped);
+    vint(sv.runEarned); vint(sv.hangers); vint(sv.prestiges);
     out.push(sv.sound ? 1 : 0);
     const L = sv.lv || {};
     for (const id of LV_ORDER) out.push(L[id] || 0);
+    const P = sv.perks || {};
+    for (const id of PERK_ORDER) out.push(P[id] || 0);
     return new Uint8Array(out);
   }
   function unpackSave(b) {
     let i = 0;
     const ver = b[i++];
-    if (ver !== 1 && ver !== 2 && ver !== 3) throw new Error('version');
+    if (ver < 1 || ver > 4) throw new Error('version');
     const vint = () => { let n = 0, m = 1, x; do { if (i >= b.length) throw new Error('short'); x = b[i++]; n += (x & 127) * m; m *= 128; } while (x & 128); return n; };
     const coins = vint(), lifetime = vint(), delivered = vint(), dropped = vint();
+    if (ver === 4) {
+      const runEarned = vint(), hangers = vint(), prestiges = vint();
+      if (i + 1 + LV_ORDER.length + PERK_ORDER.length !== b.length) throw new Error('length');
+      const sound = !!b[i++];
+      const lv = {}, perks = {};
+      for (const id of LV_ORDER) lv[id] = Math.min(b[i++], UPGRADES.find(u => u.id === id).costs.length);
+      for (const id of PERK_ORDER) perks[id] = Math.min(b[i++], PERKS.find(q => q.id === id).costs.length);
+      return { coins, lifetime, delivered, dropped, runEarned, hangers, prestiges, sound, seen: {}, lv, perks };
+    }
     if (ver === 3) {
       if (i + 1 + LV_ORDER.length !== b.length) throw new Error('length');
       const sound = !!b[i++];
@@ -2361,9 +2623,13 @@
     try { $('accCode').textContent = await makeCode(save, acc.ck); } catch (e) { $('accCode').textContent = 'Unavailable in this browser'; }
   }
 
-  function freshSave() { return { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: save.sound, lv: {}, seen: {} }; }
+  function freshSave() { return { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: save.sound, lv: {}, seen: {}, runEarned: 0, hangers: 0, prestiges: 0, perks: {} }; }
   function normalizeSave(sv) {
     sv.lv = sv.lv || {};
+    sv.perks = sv.perks || {};
+    sv.hangers = sv.hangers || 0;
+    sv.prestiges = sv.prestiges || 0;
+    if (sv.runEarned == null) sv.runEarned = sv.prestiges ? 0 : (sv.lifetime || 0);
     if (sv.owned) { for (const k in sv.owned) if (sv.owned[k] && !sv.lv[k]) sv.lv[k] = 1; delete sv.owned; }
     sv.seen = sv.seen || {};
     if (sv.delivered >= 3) Object.assign(sv.seen, { floor: true, soil: true, sand: true, panPlaced: true, broom: true });
