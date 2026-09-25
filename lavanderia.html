@@ -578,7 +578,7 @@
                 <p class="pr-gain">+<span id="prGain">0</span> <small>Golden Hangers</small></p>
                 <p class="pr-line" id="prNext"></p>
                 <div class="pr-bar"><span id="prBar"></span></div>
-                <p class="pr-line">Prestige resets your coins, upgrades and the floor. You keep your Golden Hangers, perks and stats. Prestiges so far: <b id="prCount">0</b>. With <b>Prestige Power</b> they multiply your coins (now <b id="prBonus">x1.00</b>).</p>
+                <p class="pr-line">Prestige resets your coins, upgrades and the floor. You keep your Golden Hangers, perks and stats. Prestiges so far: <b id="prCount">0</b>. With <b>Hanger Power</b> the hangers you hold multiply your coins (now <b id="prBonus">x1.00</b>).</p>
                 <button class="primary pr-go" id="prGo" type="button">Prestige</button>
               </section>
               <section class="pr-miles">
@@ -615,12 +615,11 @@
     <section class="panel stats">
       <p class="eyebrow">Shift report</p>
       <dl>
-        <div class="stat" id="hangerRow" hidden><dt><span class="hanger" aria-hidden="true"></span>Golden hangers</dt><dd id="stHangers">0</dd></div>
         <div class="stat"><dt>Loads delivered</dt><dd id="stDelivered">0</dd></div>
         <div class="stat"><dt>Lifetime coins</dt><dd id="stLifetime">0</dd></div>
         <div class="stat"><dt>Dropped in basket</dt><dd id="stDropped">0</dd></div>
         <div class="stat"><dt>Wash cycle</dt><dd id="stWash">5.0s</dd></div>
-        <div class="stat" id="prRow" hidden><dt>Golden Hangers</dt><dd id="stHangers">0</dd></div>
+        <div class="stat" id="prRow" hidden><dt><span class="hanger" aria-hidden="true"></span>Golden Hangers</dt><dd id="stHangers">0</dd></div>
         <div class="stat" id="prRow2" hidden><dt>Prestiges</dt><dd id="stPrestiges">0</dd></div>
         <div class="stat"><dt>Floor</dt><dd id="stFloor">Clean</dd></div>
         <div class="stat" id="botRow" hidden><dt>Robo Vac</dt><dd id="stBot">Docked</dd></div>
@@ -693,7 +692,7 @@
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
   // permanent perks bought with Golden Hangers (kept through prestige)
   const PERKS = [
-    { id: 'power', name: 'Prestige Power', title: 'Prestige Bonus', blurb: 'More coins for every prestige you have', costs: [5], show: (lv) => lv ? 'x' + fmtMult(powerMult()) : 'Off', showNext: () => 'x' + fmtMult(powerMult()), icon: 'hanger' },
+    { id: 'power', name: 'Hanger Power', title: 'Hanger Power', blurb: 'More coins for every hanger you hold (30 = x2)', costs: [5], show: (lv) => lv ? 'x' + fmtMult(powerMult()) : 'Off', showNext: () => 'x' + fmtMult(powerMult()), icon: 'hanger' },
     { id: 'washers', name: 'Extra Washer', title: 'Washers', blurb: 'One more washing machine, up to 4', costs: [6, 14, 30], show: (lv) => String(1 + lv), icon: 'washer' },
     { id: 'robo', name: 'Robo Vac', title: 'Robo Vac', blurb: 'Robot that picks up, washes and delivers clothes by itself', costs: [8, 12, 18, 26], show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed', icon: 'bot' },
     { id: 'softener', name: 'Fabric Softener', title: 'Coin Bonus', blurb: 'x1.25 coins per level, forever', costs: [3, 6, 10, 16, 25], show: (lv) => 'x' + fmtMult(1.25 ** lv), icon: 'soap' },
@@ -836,8 +835,8 @@
   const level = (id) => save.lv[id] || 0;
   const owned = (id) => level(id) > 0;
   const perk = (id) => (save.perks && save.perks[id]) || 0;
-  // Prestige Power: 1 + 0.2 * log2(1 + prestiges) -> x1.2 at 1, x1.63 at 8, x2 at 30
-  const powerMult = () => 1 + 0.2 * Math.log2(1 + (save.prestiges || 0));
+  // based on the hangers you hold right now: +x0.0333 each, so 30 hangers = x2
+  const powerMult = () => 1 + (save.hangers || 0) / 30;
   const milestoneBonus = (kind) => MILESTONES.filter(m => m.kind === kind && (save.hangersEarned || 0) >= m.at)
     .reduce((a, m) => kind === 'cap' ? a + m.v : a * m.v, kind === 'cap' ? 0 : 1);
   const prestigeMult = () => (perk('power') ? powerMult() : 1) * 1.25 ** perk('softener') * milestoneBonus('coins');
@@ -973,8 +972,6 @@
     $('stDropped').textContent = fmt(save.dropped);
     $('stWash').textContent = (washTime(CFG.capacity) / 1000).toFixed(1) + 's' + (CFG.capacity > 1 ? ` (${CFG.capacity} clothes)` : '');
     $('coinMult').textContent = '(x' + fmtVal(CFG.coinValue) + ')';
-    $('hangerRow').hidden = !((save.hangers || 0) > 0 || (save.prestiges || 0) > 0 || (save.hangersEarned || 0) > 0);
-    $('stHangers').textContent = fmt(save.hangers || 0);
     renderFloor();
     renderShop();
     renderPrestige();
