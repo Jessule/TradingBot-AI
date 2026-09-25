@@ -201,6 +201,7 @@
   }
 
   [hidden] { display: none !important; }
+  .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; opacity: 1 !important; }
 
   /* ===== prestige ===== */
   .up-open.pr-open { left: 12px; right: auto; top: 58px; background: #b58cff; box-shadow: inset 0 -4px 0 #6d45b8, 0 3px 0 var(--edge); }
@@ -531,7 +532,7 @@
     <div class="stage">
       <div class="screen" id="screen">
         <canvas id="game" aria-label="Laundromat map: conveyor belt, washing machine and coin tube"></canvas>
-        <div id="toast" role="status"></div>
+        <div id="toast" class="sr-only" role="status"></div>
         <button class="up-open" id="upOpen" type="button" aria-haspopup="dialog" aria-controls="shop">
           <span class="up-open-ico" aria-hidden="true"></span>Upgrades<span class="up-badge" id="upBadge" hidden>0</span>
         </button>
@@ -907,11 +908,10 @@
 
   // ================= UI =================
   let toastTimer = 0;
-  function toast(msg, kind = '') {
+  // Pop-up action messages are switched off: the game shows state with arrows,
+  // lamps, badges and the shift report instead. Kept for screen readers only.
+  function toast(msg) {
     $toast.textContent = msg;
-    $toast.className = 'show ' + kind;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { $toast.className = kind; }, 2600);
   }
   function once(key, msg, kind) {
     if (save.seen[key]) return;
