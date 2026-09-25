@@ -378,8 +378,6 @@
     font: inherit;
     cursor: pointer;
     overflow: hidden;
-    animation: cardIn .4s steps(5) both;
-    animation-delay: calc(var(--i) * 55ms + 120ms);
   }
   @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } }
   .uc:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
@@ -409,7 +407,7 @@
   }
   .uc-buy i { width: 10px; height: 10px; background: var(--gold); box-shadow: inset -2px -2px 0 var(--gold-dk); display: block; }
   .uc-bar { position: absolute; left: 0; bottom: 0; height: 4px; background: var(--gold); transition: width .25s; }
-  .uc.afford { border-color: var(--gold); animation: cardIn .4s steps(5) both, glow 1.4s steps(2) infinite; animation-delay: calc(var(--i) * 55ms + 120ms), 0s; }
+  .uc.afford { border-color: var(--gold); animation: glow 1.4s steps(2) infinite; }
   @keyframes glow { 50% { box-shadow: 0 3px 0 var(--edge), 0 0 0 3px rgba(255, 210, 63, .28); } }
   .uc.afford .uc-buy { background: var(--gold); color: var(--edge); border-color: var(--edge); box-shadow: inset 0 -3px 0 var(--gold-dk); }
   .uc.afford .uc-buy i { background: var(--edge); box-shadow: none; }
@@ -662,10 +660,17 @@
   // floor timeline (ms on the floor)
   const FLOOR = { soilMs: 5000, grimeMs: 11000, crumbleMs: 18000, sandMs: 24000 };
   const PILE_SLOW = 0.15, MIN_BELT = 0.4;
+  // prices that rise slowly at first and then faster: ratio r0, r0+dr, r0+2dr, ...
+  function accelCosts(base, r0, dr, n) {
+    const out = [];
+    let c = base;
+    for (let i = 0; i < n; i++) { out.push(Math.max(Math.round(c), (out[i - 1] || 0) + 1)); c *= r0 + dr * i; }
+    return out;
+  }
   const UPGRADES = [
-    { id: 'drum', name: 'Turbo Drum', icon: 'drum', costs: [10, 25, 45, 70, 90],
+    { id: 'drum', name: 'Turbo Drum', icon: 'drum', costs: accelCosts(10, 1.25, 0.1, 10),
       desc: () => `Wash 10% faster · now ${(CFG.washMs / 1000).toFixed(1)}s` },
-    { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: Array.from({ length: 20 }, (_, i) => Math.round(3 * 1.438 ** i)),
+    { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: accelCosts(3, 1.12, 0.035, 20),
       desc: () => `x${SOAP_MULT} coins per cloth` },
     { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55],
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
@@ -717,7 +722,7 @@
       STATION: { x: 140, y: 74, w: 30, h: 28 },
       PIPE: { x: 149, w: 12 },
       WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 }, DUST: { x0: 110, x1: 134, y0: 32, y1: 46 },
-      PAN: { x: 174, y: 112 }, BROOM: { x: 140, y: 120 }, TRASH: { x: 176, y: 84, w: 13, h: 16 }, BOT: { x: 120, y: 123 },
+      PAN: { x: 175, y: 110 }, BROOM: { x: 152, y: 123 }, TRASH: { x: 176, y: 84, w: 13, h: 16 }, BOT: { x: 120, y: 123 },
     },
     tall: {
       W: 128, H: 192,
@@ -727,7 +732,7 @@
       STATION: { x: 92, y: 134, w: 30, h: 28 },
       PIPE: { x: 101, w: 12 },
       WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null, DUST: { x0: 60, x1: 92, y0: 64, y1: 72 },
-      PAN: { x: 6, y: 180 }, BROOM: { x: 50, y: 186 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 90, y: 188 },
+      PAN: { x: 91, y: 173 }, BROOM: { x: 72, y: 187 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 30, y: 187 },
     },
   };
   let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, PANHOME, BROOMHOME, TRASH, BOTHOME;
@@ -1122,7 +1127,6 @@
   function openPanel(id, closeId) {
     const sh = $(id);
     sh.classList.remove('closing');
-    sh.querySelectorAll('.uc, .pr-hero').forEach(e => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; });
     sh.hidden = false;
     renderShop(); renderPrestige();
     beep(392, 0.06, 'square', 0.035); beep(587, 0.08, 'square', 0.035, 0, 0.06);
@@ -1285,8 +1289,6 @@
     clearTimeout(shopCloseTimer);
     const sh = $('shop');
     sh.classList.remove('closing');
-    // restart the card entrance animation
-    Object.values(shopEls).forEach(e => { e.btn.style.animation = 'none'; void e.btn.offsetWidth; e.btn.style.animation = ''; });
     sh.hidden = false;
     renderShop();
     beep(392, 0.06, 'square', 0.035); beep(587, 0.08, 'square', 0.035, 0, 0.06);
