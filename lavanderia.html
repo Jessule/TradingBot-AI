@@ -226,6 +226,16 @@
     box-shadow: 0 3px 0 var(--edge);
     animation: cardIn .4s steps(5) both .1s;
   }
+  .pr-miles { grid-column: 1 / -1; padding: 12px 14px; background: var(--panel-2); border: 3px solid var(--edge); box-shadow: 0 3px 0 var(--edge); animation: cardIn .4s steps(5) both .15s; }
+  .ms-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+  .ms { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 8px; font-size: 15px; color: var(--muted); }
+  .ms-dot { width: 18px; height: 18px; display: grid; place-items: center; background: var(--edge); border: 2px solid #5b3a9a; font-family: var(--display); font-size: 11px; color: #d7b8ff; }
+  .ms.done { color: var(--ink); }
+  .ms.done .ms-dot { background: var(--mint); border-color: var(--edge); color: var(--edge); }
+  .ms-at { font-family: var(--body); font-weight: 600; color: #d7b8ff; font-variant-numeric: tabular-nums; }
+  .ms.done .ms-at { color: var(--mint); }
+  .ms-bar { grid-column: 2 / -1; height: 4px; background: var(--edge); }
+  .ms-bar span { display: block; height: 100%; background: #b58cff; }
   .pr-gain { margin: 0; font-family: var(--display); font-weight: 700; font-size: 36px; line-height: 1; color: #d7b8ff; text-shadow: 0 3px 0 #5b3a9a; }
   .pr-gain small { font-size: 14px; color: var(--muted); text-shadow: none; }
   .pr-line { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.4; }
@@ -537,7 +547,7 @@
           <span class="up-open-ico" aria-hidden="true"></span>Upgrades<span class="up-badge" id="upBadge" hidden>0</span>
         </button>
         <button class="up-open pr-open" id="prOpen" type="button" aria-haspopup="dialog" aria-controls="prShop" hidden>
-          <span class="hanger" aria-hidden="true"></span><span class="pr-label">Hangers</span><span class="pr-req" id="prReq" hidden><span class="lock" aria-hidden="true"></span>500</span><span class="up-badge pr-badge" id="prBadge" hidden>0</span>
+          <span class="hanger" aria-hidden="true"></span><span class="pr-label">Hangers</span><span class="pr-req" id="prReq" hidden><span class="lock" aria-hidden="true"></span>250</span><span class="up-badge pr-badge" id="prBadge" hidden>0</span>
         </button>
         <div class="shop prestige" id="prShop" role="dialog" aria-modal="true" aria-labelledby="prTitle" hidden>
           <div class="shop-panel">
@@ -557,6 +567,10 @@
                 <div class="pr-bar"><span id="prBar"></span></div>
                 <p class="pr-line">Prestige resets your coins, upgrades and the floor. You keep your Golden Hangers, perks and stats. Prestiges so far: <b id="prCount">0</b>. With <b>Prestige Power</b> they multiply your coins (now <b id="prBonus">x1.00</b>).</p>
                 <button class="primary pr-go" id="prGo" type="button">Prestige</button>
+              </section>
+              <section class="pr-miles">
+                <p class="eyebrow">Milestones &middot; <span id="msEarned">0</span> hangers earned in total</p>
+                <ol class="ms-list" id="msList"></ol>
               </section>
             </div>
           </div>
@@ -612,7 +626,7 @@
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
-      <p>Watch for <b>golden clothes</b>: they pay x10. Reach 500 coins to unlock <b>Golden Hangers</b> (prestige).</p>
+      <p>Watch for <b>golden clothes</b>: they pay x10. Reach 250 coins to unlock <b>Golden Hangers</b> (prestige).</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -651,29 +665,34 @@
       desc: () => `Wash 10% faster · now ${(CFG.washMs / 1000).toFixed(1)}s` },
     { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: Array.from({ length: 20 }, (_, i) => Math.round(10 * 1.35 ** i)),
       desc: () => `x${SOAP_MULT} coins per cloth` },
-    { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55, 85, 115],
+    { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55],
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
     { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: Array.from({ length: 20 }, (_, i) => Math.round(10 * 1.35 ** i)),
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
-    { id: 'washer2', name: 'Extra Washer', icon: 'washer', costs: [45, 110, 220],
-      desc: () => 'Another washing machine' },
-    { id: 'bot', name: 'Robo Vac', icon: 'bot', costs: [70, 90, 110, 120],
-      desc: (lv) => lv === 0 ? 'Robot that picks up, washes and sends clothes by itself (~30s each)' : `Robo Vac 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
   ];
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
   // permanent perks bought with Golden Hangers (kept through prestige)
   const PERKS = [
     { id: 'power', name: 'Prestige Power', title: 'Prestige Bonus', blurb: 'More coins for every prestige you have', costs: [5], show: (lv) => lv ? 'x' + fmtMult(powerMult()) : 'Off', showNext: () => 'x' + fmtMult(powerMult()), icon: 'hanger' },
+    { id: 'washers', name: 'Extra Washer', title: 'Washers', blurb: 'One more washing machine, up to 4', costs: [6, 14, 30], show: (lv) => String(1 + lv), icon: 'washer' },
+    { id: 'robo', name: 'Robo Vac', title: 'Robo Vac', blurb: 'Robot that picks up, washes and delivers clothes by itself', costs: [8, 12, 18, 26], show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed', icon: 'bot' },
     { id: 'softener', name: 'Fabric Softener', title: 'Coin Bonus', blurb: '+25% coins on every load, forever', costs: [3, 6, 10, 16, 25], show: (lv) => 'x' + fmtMult(1.25 ** lv), icon: 'soap' },
     { id: 'lucky', name: 'Lucky Socks', title: 'Golden Clothes', blurb: 'More golden clothes (they pay x10)', costs: [2, 4, 7, 11, 16], show: (lv) => (1 + 3 * lv) + '% chance', icon: 'lucky' },
-    { id: 'auto', name: 'Smart Washers', title: 'Auto Start', blurb: 'Washers start 3s after you add clothes', costs: [6], show: (lv) => lv ? 'On' : 'Off', icon: 'washer' },
-    { id: 'filter', name: 'Window Screen', title: 'Dust Filter', blurb: 'Less dust blows in the window', costs: [3, 6, 10], show: (lv) => lv ? '-' + Math.round((1 - 1 / (1 + 0.5 * lv)) * 100) + '% dust' : 'Normal', icon: 'filter' },
-    { id: 'head', name: 'Starter Fund', title: 'Head Start', blurb: 'Begin every new run with coins', costs: [2, 4, 6, 9, 13], show: (lv) => (100 * lv) + ' coins', icon: 'coin' },
-    { id: 'robo', name: 'Robo Loyalty', title: 'Keep Robo Vac', blurb: 'Your Robo Vac stays after prestige', costs: [8], show: (lv) => lv ? 'Kept' : 'Lost', icon: 'bot' },
+    { id: 'filter', name: 'Window Screen', title: 'Dust Filter', blurb: '-10% dust through the window per level', costs: [3, 6, 10], show: (lv) => lv ? '-' + 10 * lv + '% dust' : 'Normal', icon: 'filter' },
+  ];
+  // perk order used by v4 transfer codes, before the perk list changed
+  const PERK_ORDER_V4 = ['power', 'softener', 'lucky', 'auto', 'filter', 'head', 'robo'];
+  // permanent rewards for Golden Hangers earned in total (never lost)
+  const MILESTONES = [
+    { at: 10, kind: 'coins', v: 1.3, label: 'x1.3 coins' },
+    { at: 25, kind: 'cap', v: 1, label: '+1 washer capacity' },
+    { at: 50, kind: 'coins', v: 1.5, label: 'x1.5 coins' },
+    { at: 100, kind: 'robo', v: 1.5, label: 'Robo Vac 50% faster' },
+    { at: 200, kind: 'coins', v: 2, label: 'x2 coins' },
   ];
   const PERK_ORDER = PERKS.map(p => p.id);
-  const PRESTIGE_AT = 500;
-  // based on the coins you hold: 500 coins give 10 hangers; 4x the coins gives 2x the hangers
+  const PRESTIGE_AT = 250;
+  // based on the coins you hold: 250 coins give 10 hangers; 4x the coins gives 2x the hangers
   const hangersFor = (c) => Math.floor(10 * Math.sqrt(Math.max(0, c) / PRESTIGE_AT) + 1e-9);
   const hangerAt = (n) => Math.ceil(PRESTIGE_AT * (n / 10) ** 2);
   const SOAP_MULT = 1.15;
@@ -681,10 +700,8 @@
   const STATS = {
     drum: { title: 'Wash Speed', blurb: 'Every wash cycle 10% faster', show: (lv) => (BASE.washMs * 0.9 ** lv / 1000).toFixed(1) + 's' },
     soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth', show: (lv) => 'x' + fmtMult(SOAP_MULT ** lv) },
-    cap: { title: 'Washer Capacity', blurb: 'More clothes in every wash', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
+    cap: { title: 'Washer Capacity', blurb: 'More clothes per wash (up to 3). Bigger loads take a bit longer', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
     belt: { title: 'Clothes Flow', blurb: 'More clothes on a faster belt', show: (lv) => 'x' + fmtMult(1.15 ** lv) },
-    washer2: { title: 'Washers', blurb: 'Another washing machine, up to 4', show: (lv) => String(1 + lv) },
-    bot: { title: 'Robo Vac', blurb: 'Robot that picks up, washes and delivers clothes by itself', show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed' },
   };
 
   // ================= canvas & layout =================
@@ -801,18 +818,21 @@
   const level = (id) => save.lv[id] || 0;
   const owned = (id) => level(id) > 0;
   const perk = (id) => (save.perks && save.perks[id]) || 0;
-  // Prestige Power: 2^(prestiges / 30), so x2 at 30 prestiges
-  const powerMult = () => 2 ** ((save.prestiges || 0) / 30);
-  const prestigeMult = () => (perk('power') ? powerMult() : 1) * 1.25 ** perk('softener');
+  // Prestige Power: 1 + 0.2 * log2(1 + prestiges) -> x1.2 at 1, x1.63 at 8, x2 at 30
+  const powerMult = () => 1 + 0.2 * Math.log2(1 + (save.prestiges || 0));
+  const milestoneBonus = (kind) => MILESTONES.filter(m => m.kind === kind && (save.hangersEarned || 0) >= m.at)
+    .reduce((a, m) => kind === 'cap' ? a + m.v : a * m.v, kind === 'cap' ? 0 : 1);
+  const prestigeMult = () => (perk('power') ? powerMult() : 1) * 1.25 ** perk('softener') * milestoneBonus('coins');
+  const botLevel = () => perk('robo');
   const goldChance = () => 0.01 + 0.03 * perk('lucky');
-  const washerCount = () => 1 + level('washer2');
+  const washerCount = () => 1 + perk('washers');
   const sandAmount = () => piles.reduce((sum, pl) => sum + pl.amount, 0);
   const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * sandAmount());
   function applyUpgrades() {
     Object.assign(CFG, BASE);
     CFG.washMs = BASE.washMs * 0.9 ** level('drum');
     CFG.coinValue = BASE.coinValue * SOAP_MULT ** level('soap') * prestigeMult();
-    CFG.capacity = BASE.capacity + level('cap');
+    CFG.capacity = BASE.capacity + level('cap') + milestoneBonus('cap');
     const more = 1.15 ** level('belt');
     // the belt also speeds up so clothes keep some room between them
     CFG.beltSpeed = BASE.beltSpeed * more ** 0.6;
@@ -938,7 +958,7 @@
     renderFloor();
     renderShop();
     renderPrestige();
-    $('botRow').hidden = !owned('bot');
+    $('botRow').hidden = !(botLevel() > 0);
   }
   let lastFloorText = '';
   function renderFloor() {
@@ -981,7 +1001,7 @@
     const shown = unlocked || run >= 100;
     $('prOpen').hidden = !shown;
     $('prOpen').classList.toggle('locked', !unlocked);
-    $('prOpen').setAttribute('aria-label', unlocked ? 'Golden Hangers' : 'Golden Hangers, locked: needs 500 coins');
+    $('prOpen').setAttribute('aria-label', unlocked ? 'Golden Hangers' : `Golden Hangers, locked: needs ${PRESTIGE_AT} coins`);
     $('prReq').hidden = unlocked;
     $('screen').classList.toggle('has-pr', shown);
     const gain = run >= PRESTIGE_AT ? hangersFor(run) : 0;
@@ -995,6 +1015,28 @@
     $('stPrestiges').textContent = fmt(save.prestiges || 0);
     if ($('prShop').hidden) return;
     $('prHangers').textContent = fmt(save.hangers || 0);
+    const earned = save.hangersEarned || 0;
+    $('msEarned').textContent = fmt(earned);
+    const list = $('msList');
+    list.textContent = '';
+    let nextShown = false;
+    MILESTONES.forEach(m => {
+      const done = earned >= m.at;
+      const li = document.createElement('li');
+      li.className = 'ms' + (done ? ' done' : '');
+      li.innerHTML = `<span class="ms-dot">${done ? '&#10003;' : ''}</span><span></span><span class="ms-at"></span>`;
+      li.children[1].textContent = m.label;
+      li.children[2].textContent = `${m.at} hangers`;
+      if (!done && !nextShown) {
+        nextShown = true;
+        const bar = document.createElement('div');
+        bar.className = 'ms-bar';
+        bar.innerHTML = '<span></span>';
+        bar.firstChild.style.width = Math.min(100, earned / m.at * 100) + '%';
+        li.appendChild(bar);
+      }
+      list.appendChild(li);
+    });
     $('prGain').textContent = gain;
     $('prBonus').textContent = 'x' + fmtMult(perk('power') ? powerMult() : 1);
     $('prCount').textContent = fmt(save.prestiges || 0);
@@ -1034,6 +1076,8 @@
     el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
     setTimeout(() => el.classList.remove('pop'), 480);
     sparkle(perkEls[q.id].next);
+    if (q.id === 'washers') { const w = WASHERS[lv + 1]; emit('spark', w.x + 15, w.y + 18, 16, { spread: 14, color: '#ffffff', vy: -30, life: 0.8 }); }
+    if (q.id === 'robo' && lv === 0) { bot.x = BOTHOME.x; bot.y = BOTHOME.y; }
     renderStats();
     [440, 554, 659, 880].forEach((f, i) => beep(f + lv * 40, 0.1, 'triangle', 0.05, 0, i * 0.07));
   }
@@ -1054,11 +1098,14 @@
   function doPrestige() {
     const gain = save.coins >= PRESTIGE_AT ? hangersFor(save.coins) : 0;
     if (!gain) return;
+    const before = save.hangersEarned || 0;
     save.hangers = (save.hangers || 0) + gain;
+    save.hangersEarned = before + gain;
+    const reached = MILESTONES.filter(m => before < m.at && save.hangersEarned >= m.at);
     save.prestiges = (save.prestiges || 0) + 1;
     save.runEarned = 0;
-    save.coins = 100 * perk('head');
-    save.lv = perk('robo') && level('bot') ? { bot: 1 } : {};
+    save.coins = 0;
+    save.lv = {};
     applyUpgrades();
     resetWorld();
     persist();
@@ -1070,6 +1117,7 @@
     [523, 659, 784, 1047, 1319].forEach((fq, i) => beep(fq, 0.12, 'square', 0.045, 0, i * 0.09));
     renderStats(); renderRate();
     toast(`Prestige ${save.prestiges}! +${gain} Golden Hangers.`, 'good');
+    if (reached.length) setTimeout(() => [784, 988, 1175, 1568].forEach((fq, i) => beep(fq, 0.14, 'triangle', 0.05, 0, i * 0.1)), 600);
   }
   function openPanel(id, closeId) {
     const sh = $(id);
@@ -1226,8 +1274,6 @@
     sparkle(shopEls[u.id].next);
     renderStats();
     [523, 659, 784, 1047].forEach((f, i) => beep(f + lv * 60, 0.09, 'square', 0.04, 0, i * 0.07));
-    if (u.id === 'washer2') { const w = WASHERS[lv + 1]; emit('spark', w.x + 15, w.y + 18, 16, { spread: 14, color: '#ffffff', vy: -30, life: 0.8 }); }
-    if (u.id === 'bot') { if (lv === 0) { bot.x = BOTHOME.x; bot.y = BOTHOME.y; } emit('spark', bot.x, bot.y - 8, 14, { spread: 8, color: '#7fe0c4', vy: -30, life: 0.8 }); }
     if (u.id === 'drum') WASHERS.slice(0, washerCount()).forEach(w => emit('spark', w.x + 15, w.y + 4, 8, { spread: 10, color: '#ffd23f', vy: -25, life: 0.6 }));
     if (u.id === 'soap') emit('spark', STATION.x + 15, STATION.y + 20, 10, { spread: 10, color: '#ffd84a', vy: -25, life: 0.7 });
     if (u.id === 'belt') for (let k = 0; k < 5; k++) emit('spark', BELT.x0 + 10 + k * 15, BELT.y, 2, { spread: 3, color: '#f0c84a', vy: -20, life: 0.5 });
@@ -1560,7 +1606,7 @@
     for (const [lx, ly, lw, lh] of leaves) { R(lx + ox, ly + oy, lw, lh, '#3f9a55'); R(lx + ox, ly + oy, lw, 1, '#5cc070'); }
     R(8 + ox, 110 + oy, 12, 10, OUT); R(9 + ox, 111 + oy, 10, 8, '#c96b4a'); R(9 + ox, 111 + oy, 10, 2, '#e08a66');
     }
-    if (owned('bot')) drawDock();
+    if ((botLevel() > 0)) drawDock();
     for (let i = 0; i < washerCount(); i++) {
       const { x, y, w, h } = WASHERS[i];
       R(x - 4, y + h + 2, w + 8, 11, '#c9528f');
@@ -1676,7 +1722,7 @@
       }
     }
     if (washing) {
-      const p = Math.min(1, (t - wsh.t0) / CFG.washMs);
+      const p = Math.min(1, (t - wsh.t0) / (wsh.dur || CFG.washMs));
       R(bx - 1, y - 9, w + 2, 6, OUT);
       R(bx, y - 8, w, 4, '#3d3357');
       R(bx, y - 8, Math.round(w * p), 4, '#6fe08a');
@@ -1814,6 +1860,7 @@
     });
     return best;
   }
+  const washTime = (n) => CFG.washMs * Math.max(1, n) ** 0.6;
   const canLoad = (i, it) => !it.clean && washers[i].s === 'idle' && !washerSandy(i) && loadCount(washers[i]) + countOf(it) <= CFG.capacity;
   const goBox = (i) => { const w = WASHERS[i]; return { x: w.x + w.w - 12, y: w.y - 12, w: 12, h: 10 }; };
   function startWash(i, byBot) {
@@ -1826,7 +1873,8 @@
     item.count = total;
     item.goldN = goldN;
     item.gold = goldN > 0;
-    washers[i] = { s: 'washing', item, t0: now, load: [], bot: !!byBot };
+    // bigger loads take longer, but each extra cloth adds less time (n^0.6)
+    washers[i] = { s: 'washing', item, t0: now, load: [], bot: !!byBot, dur: washTime(total) };
     const w = WASHERS[i];
     emit('bubble', w.x + 15, w.y + 18, 8 + total * 2, { spread: 6, vx: 0, vy: -14, life: 0.9 });
     beep(300, 0.14, 'square', 0.045, 140);
@@ -2104,7 +2152,7 @@
     dock: 'Docked', seek: 'Looking for laundry', toFloor: 'Picking up from the floor', toBelt: 'Waiting at the belt',
     grab: 'Grabbing', washing: 'Washing it inside', toStation: 'Delivering to the tube', rest: 'Delivering to the tube',
   };
-  const botBoost = () => 1.25 ** Math.max(0, level('bot') - 1);
+  const botBoost = () => 1.25 ** Math.max(0, botLevel() - 1) * milestoneBonus('robo');
   function setBot(st, wait = 0) {
     bot.wait = wait; bot.roam = null;
     if (bot.s === st) return;
@@ -2138,7 +2186,7 @@
     setBot('grab', 0.9);
   }
   function updateBot(dt) {
-    if (!owned('bot')) return;
+    if (!(botLevel() > 0)) return;
     switch (bot.s) {
       case 'dock':
       case 'seek': {
@@ -2209,7 +2257,7 @@
     if (!session || save.delivered < 5) return;
     if (!dustEv) {
       if (now < dustAt) return;
-      dustAt = now + rand(35000, 55000) * (1 + 0.5 * perk('filter'));
+      dustAt = now + rand(35000, 55000) / (1 - 0.1 * perk('filter'));
       if (piles.length + topSand.length >= 6) return;
       const r = Math.random();
       const firstDust = !dustDone;
@@ -2279,10 +2327,9 @@
     }
     for (let i = 0; i < washerCount(); i++) {
       const wsh = washers[i], w = WASHERS[i];
-      if (wsh.s === 'idle' && wsh.load.length && perk('auto') && now - (wsh.lastAdd || 0) > 3000) startWash(i, false);
       if (wsh.s === 'washing') {
         if (Math.random() < dt * 6) emit('bubble', w.x + rand(6, 24), w.y + 14, 1, { vx: 0, vy: rand(-18, -10), life: rand(0.6, 1.1) });
-        if (now - wsh.t0 >= CFG.washMs) {
+        if (now - wsh.t0 >= (wsh.dur || CFG.washMs)) {
           wsh.s = 'done';
           freshen(wsh.item);
           emit('spark', w.x + 15, w.y + 20, 10, { spread: 10, color: '#fff6b8', vy: -30, life: 0.7 });
@@ -2353,7 +2400,7 @@
     // things standing on the floor, back to front, so the robot passes behind machines it is behind
     const stand = [...Array(washerCount()).keys()].map(i => ({ y: WASHERS[i].y + WASHERS[i].h, d: () => { drawWasher(i, t); drawTopSand('washer', i, t); } }));
     stand.push({ y: STATION.y + STATION.h, d: () => drawStation(t, ready) });
-    if (owned('bot')) stand.push({ y: bot.y, d: () => drawBot(t) });
+    if ((botLevel() > 0)) stand.push({ y: bot.y, d: () => drawBot(t) });
     stand.sort((a, b) => a.y - b.y).forEach(o => o.d());
     drawSends(t);
     drawParts();
@@ -2529,10 +2576,10 @@
   // compact binary form of a save
   const LV_ORDER = ['drum', 'soap', 'belt', 'washer2', 'bot', 'cap'];
   function packSave(sv) {
-    const out = [4];
+    const out = [5];
     const vint = (n) => { n = Math.max(0, Math.floor(n || 0)); while (n >= 128) { out.push((n % 128) | 128); n = Math.floor(n / 128); } out.push(n); };
     vint(sv.coins); vint(sv.lifetime); vint(sv.delivered); vint(sv.dropped);
-    vint(sv.runEarned); vint(sv.hangers); vint(sv.prestiges);
+    vint(sv.runEarned); vint(sv.hangers); vint(sv.prestiges); vint(sv.hangersEarned);
     out.push(sv.sound ? 1 : 0);
     const L = sv.lv || {};
     for (const id of LV_ORDER) out.push(L[id] || 0);
@@ -2543,29 +2590,35 @@
   function unpackSave(b) {
     let i = 0;
     const ver = b[i++];
-    if (ver < 1 || ver > 4) throw new Error('version');
+    if (ver < 1 || ver > 5) throw new Error('version');
+    const upMax = (id, v) => { const u = UPGRADES.find(x => x.id === id); return u ? Math.min(v, u.costs.length) : v; };
+    const perkMax = (id, v) => { const q = PERKS.find(x => x.id === id); return q ? Math.min(v, q.costs.length) : v; };
     const vint = () => { let n = 0, m = 1, x; do { if (i >= b.length) throw new Error('short'); x = b[i++]; n += (x & 127) * m; m *= 128; } while (x & 128); return n; };
     const coins = vint(), lifetime = vint(), delivered = vint(), dropped = vint();
-    if (ver === 4) {
+    if (ver === 4 || ver === 5) {
       const runEarned = vint(), hangers = vint(), prestiges = vint();
-      if (i + 1 + LV_ORDER.length + PERK_ORDER.length !== b.length) throw new Error('length');
+      const hangersEarned = ver === 5 ? vint() : undefined;
+      const order = ver === 5 ? PERK_ORDER : PERK_ORDER_V4;
+      if (i + 1 + LV_ORDER.length + order.length !== b.length) throw new Error('length');
       const sound = !!b[i++];
       const lv = {}, perks = {};
-      for (const id of LV_ORDER) lv[id] = Math.min(b[i++], UPGRADES.find(u => u.id === id).costs.length);
-      for (const id of PERK_ORDER) perks[id] = Math.min(b[i++], PERKS.find(q => q.id === id).costs.length);
-      return { coins, lifetime, delivered, dropped, runEarned, hangers, prestiges, sound, seen: {}, lv, perks };
+      for (const id of LV_ORDER) lv[id] = upMax(id, b[i++]);
+      for (const id of order) perks[id] = perkMax(id, b[i++]);
+      const out = { coins, lifetime, delivered, dropped, runEarned, hangers, prestiges, sound, seen: {}, lv, perks };
+      if (hangersEarned != null) out.hangersEarned = hangersEarned;
+      return out;
     }
     if (ver === 3) {
       if (i + 1 + LV_ORDER.length !== b.length) throw new Error('length');
       const sound = !!b[i++];
       const lv = {};
-      for (const id of LV_ORDER) lv[id] = Math.min(b[i++], UPGRADES.find(u => u.id === id).costs.length);
+      for (const id of LV_ORDER) lv[id] = upMax(id, b[i++]);
       return { coins, lifetime, delivered, dropped, sound, seen: {}, lv };
     }
     const wb = ver === 1 ? 2 : 3;
     if (i + wb !== b.length) throw new Error('length');
     const w = b[i] | (b[i + 1] << 8) | (ver === 2 ? b[i + 2] << 16 : 0);
-    const cap = (id, v) => Math.min(v, UPGRADES.find(u => u.id === id).costs.length);
+    const cap = upMax;
     return {
       coins, lifetime, delivered, dropped, sound: !!((w >> 13) & 1), seen: {},
       lv: { drum: cap('drum', w & 7), soap: cap('soap', (w >> 3) & 7), belt: cap('belt', (w >> 6) & 7), washer2: cap('washer2', (w >> 9) & 1), bot: cap('bot', (w >> 10) & 7), cap: cap('cap', (w >> 14) & 7) },
@@ -2638,11 +2691,24 @@
     try { $('accCode').textContent = await makeCode(save, acc.ck); } catch (e) { $('accCode').textContent = 'Unavailable in this browser'; }
   }
 
-  function freshSave() { return { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: save.sound, lv: {}, seen: {}, runEarned: 0, hangers: 0, prestiges: 0, perks: {} }; }
+  function freshSave() { return { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: save.sound, lv: {}, seen: {}, runEarned: 0, hangers: 0, prestiges: 0, hangersEarned: 0, perks: {} }; }
   function normalizeSave(sv) {
     sv.lv = sv.lv || {};
     sv.perks = sv.perks || {};
     sv.hangers = sv.hangers || 0;
+    // count hangers earned before washers/robot bought with coins are converted to perks
+    if (sv.hangersEarned == null) {
+      let spent = 0;
+      for (const q of PERKS) for (let k = 0; k < Math.min(sv.perks[q.id] || 0, q.costs.length); k++) spent += q.costs[k];
+      sv.hangersEarned = sv.hangers + spent;
+    }
+    // washers and the robot moved from coin upgrades to hanger perks
+    if (sv.lv.washer2) { sv.perks.washers = Math.max(sv.perks.washers || 0, Math.min(3, sv.lv.washer2)); }
+    if (sv.lv.bot) { sv.perks.robo = Math.max(sv.perks.robo || 0, Math.min(4, sv.lv.bot)); }
+    delete sv.lv.washer2; delete sv.lv.bot;
+    if (sv.lv.cap > 2) sv.lv.cap = 2;
+    delete sv.perks.auto; delete sv.perks.head;
+
     sv.prestiges = sv.prestiges || 0;
     if (sv.runEarned == null) sv.runEarned = sv.prestiges ? 0 : (sv.lifetime || 0);
     if (sv.owned) { for (const k in sv.owned) if (sv.owned[k] && !sv.lv[k]) sv.lv[k] = 1; delete sv.owned; }
