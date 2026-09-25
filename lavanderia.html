@@ -277,6 +277,21 @@
   .shop-close:hover { border-color: var(--ink); }
   .shop-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .shop-sub { margin: 6px 0 10px; color: var(--muted); font-size: 13px; font-family: var(--display); letter-spacing: .06em; text-transform: uppercase; }
+  .shop-grid::-webkit-scrollbar, .auth::-webkit-scrollbar { width: 14px; }
+  .shop-grid::-webkit-scrollbar-track, .auth::-webkit-scrollbar-track {
+    background: var(--edge);
+    box-shadow: inset 2px 0 0 var(--panel-2), inset -2px 0 0 var(--panel-2);
+  }
+  .shop-grid::-webkit-scrollbar-thumb, .auth::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border: 3px solid var(--edge);
+    box-shadow: inset -3px -3px 0 var(--gold-dk), inset 2px 2px 0 #fff3a8;
+  }
+  .shop-grid::-webkit-scrollbar-thumb:hover { background: #ffe066; }
+  .shop-grid::-webkit-scrollbar-button, .auth::-webkit-scrollbar-button { display: none; height: 0; }
+  @supports not selector(::-webkit-scrollbar) {
+    .shop-grid, .auth { scrollbar-color: var(--gold) var(--edge); }
+  }
   .shop-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -517,7 +532,7 @@
       <p class="acc-name">Signed in as <b id="accName"></b></p>
       <p class="eyebrow" style="margin-top: 12px">Transfer code</p>
       <div class="code-row"><code id="accCode">…</code><button class="ghost" id="copyCode" type="button">Copy</button></div>
-      <p class="acc-hint">To play on another device, log in there with your name, your password and this code. The code carries your progress, so it changes as you play: copy the newest one.</p>
+      <p class="acc-hint">To play on another device, log in there with your name, your password and this code. The code carries your progress and changes as you play and every time you log in, so copy the newest one. Each code works once per device.</p>
     </section>
 
     <section class="panel howto">
@@ -569,7 +584,7 @@
     { id: 'washer2', name: 'Extra Washer', icon: 'washer', costs: [45, 110, 220],
       desc: () => 'Another washing machine' },
     { id: 'bot', name: 'Robo Vac', icon: 'bot', costs: [70, 90, 110, 120],
-      desc: (lv) => lv === 0 ? 'Robot that picks up, washes and sends clothes (~30s each)' : `Robo Vac 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
+      desc: (lv) => lv === 0 ? 'Robot that picks up, washes and sends clothes by itself (~30s each)' : `Robo Vac 25% faster · now x${(1.25 ** (lv - 1)).toFixed(2)}` },
   ];
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
   const SOAP_MULT = 1.15;
@@ -580,7 +595,7 @@
     cap: { title: 'Washer Capacity', blurb: 'More clothes in every wash', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
     belt: { title: 'Clothes Flow', blurb: 'More clothes on a faster belt (x1.15 each level)', show: (lv) => 'x' + fmtMult(1.15 ** lv) },
     washer2: { title: 'Washers', blurb: 'Another washing machine, up to 4', show: (lv) => String(1 + lv) },
-    bot: { title: 'Robo Vac', blurb: 'Robot that washes clothes for you', show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed' },
+    bot: { title: 'Robo Vac', blurb: 'Robot that picks up, washes and delivers clothes by itself', show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed' },
   };
 
   // ================= canvas & layout =================
@@ -627,7 +642,7 @@
     if (prev) {
       for (const it of floor) { it.fx = Math.min(it.fx / prev.W * W, W - it.w - 2); it.fy = Math.max(30, Math.min(it.fy / prev.H * H, H - it.h - 2)); }
       for (const pl of piles) { pl.x = Math.min(pl.x / prev.W * W, W - 8); pl.y = Math.max(34, Math.min(pl.y / prev.H * H, H - 2)); }
-      bot.x = BOTHOME.x; bot.y = BOTHOME.y; setBot(bot.item ? (bot.item.clean ? 'toStation' : 'toWasher') : bot.wi >= 0 && washers[bot.wi].bot ? 'waitWash' : 'seek');
+      bot.x = BOTHOME.x; bot.y = BOTHOME.y; const keepWash = bot.s === 'washing'; setBot(bot.item ? (bot.item.clean ? 'toStation' : 'washing') : 'seek'); if (bot.s === 'washing' && !keepWash) { bot.washT0 = now; bot.washMs = BOT_WASH_MS / botBoost(); }
       if (hand && hand.kind !== 'item') hand = null;
       resetTools();
     }
@@ -1205,7 +1220,15 @@
       const f = (t / 60 | 0) % 2;
       R(x - 8 - f, y, 2, 1, '#9aa0b5'); R(x + 7 + f, y, 2, 1, '#9aa0b5');
     }
-    if (bot.item) drawItem(bot.item, x - bot.item.w / 2, y - 6 - bot.item.h, t);
+    if (bot.item) {
+      const shake = bot.s === 'washing' ? ((t / 60 | 0) % 2) : 0;
+      drawItem(bot.item, x - bot.item.w / 2 + shake, y - 6 - bot.item.h, t);
+      if (bot.s === 'washing') {
+        const p = Math.min(1, (now - bot.washT0) / bot.washMs);
+        const by = y - 9 - bot.item.h;
+        R(x - 8, by, 16, 4, OUT); R(x - 7, by + 1, 14, 2, '#3d3357'); R(x - 7, by + 1, Math.round(14 * p), 2, '#6fe08a');
+      }
+    }
   }
 
   let vignette = null;
@@ -1815,13 +1838,14 @@
     }
   }
 
-  // ---- Robo Vac: roams, picks up one item, washes it, sends it (~30 s per item at level 1)
-  const BOT_SPEED = 8.5;
+  // ---- Robo Vac: picks up one item, washes it inside itself while it roams the
+  // lower floor, then sends it up the tube (~30 s per item at level 1)
+  const BOT_SPEED = 8.5, BOT_WASH_MS = 11000;
   const BOT_TEXT = {
     dock: 'Docked', seek: 'Looking for laundry', toFloor: 'Picking up from the floor', toBelt: 'Waiting at the belt',
-    grab: 'Grabbing', toWasher: 'Loading a washer', holdWasher: 'Waiting for a free washer', waitWash: 'Waiting for the wash',
-    toCollect: 'Collecting the clean load', toStation: 'Delivering to the tube', rest: 'Delivering to the tube',
+    grab: 'Grabbing', washing: 'Washing it inside', toStation: 'Delivering to the tube', rest: 'Delivering to the tube',
   };
+  const botBoost = () => 1.25 ** Math.max(0, level('bot') - 1);
   function setBot(st, wait = 0) {
     bot.wait = wait; bot.roam = null;
     if (bot.s === st) return;
@@ -1831,25 +1855,21 @@
   }
   function moveBot(tx, ty, dt, mult = 1) {
     const dx = tx - bot.x, dy = ty - bot.y, d = Math.hypot(dx, dy);
-    const sp = BOT_SPEED * 1.25 ** Math.max(0, level('bot') - 1) * mult * dt;
+    const sp = BOT_SPEED * botBoost() * mult * dt;
     if (d <= sp) { bot.x = tx; bot.y = ty; return true; }
     bot.x += dx / d * sp; bot.y += dy / d * sp;
     if (Math.random() < dt * 3) emit('dust', bot.x - dx / d * 7, bot.y, 1, { vx: 0, vy: -4, life: 0.4 });
     return false;
   }
+  // the open strip of floor below the washers, where the robot roams
+  function lowerLane() {
+    const top = Math.max(BELT.y + 28, ...WASHERS.slice(0, washerCount()).map(w => w.y + w.h + 16));
+    return { y0: Math.min(top, H - 10), y1: H - 5 };
+  }
   function roam(dt) {
     if (bot.wait > 0) { bot.wait -= dt; return; }
-    if (!bot.roam) bot.roam = { x: rand(14, W - 14), y: rand(BELT.y + 28, H - 6) };
-    if (moveBot(bot.roam.x, bot.roam.y, dt, 0.7)) { bot.roam = null; bot.wait = rand(0.6, 1.6); }
-  }
-  function idleWasher() {
-    let best = -1, bd = 1e9;
-    for (let i = 0; i < washerCount(); i++) {
-      if (washers[i].s !== 'idle' || washers[i].load.length || washerSandy(i)) continue;
-      const w = WASHERS[i], d = Math.hypot(w.x + w.w / 2 - bot.x, w.y + w.h + 8 - bot.y);
-      if (d < bd) { bd = d; best = i; }
-    }
-    return best;
+    if (!bot.roam) { const L = lowerLane(); bot.roam = { x: rand(14, STATION.x - 12), y: rand(L.y0, L.y1) }; }
+    if (moveBot(bot.roam.x, bot.roam.y, dt, 0.6)) { bot.roam = null; bot.wait = rand(0.5, 1.4); }
   }
   function botPick(it) {
     bot.item = it;
@@ -1868,7 +1888,7 @@
           for (const it of floor) { const d = Math.hypot(it.fx + it.w / 2 - bot.x, it.fy + it.h - bot.y); if (d < bd) { bd = d; best = it; } }
           bot.target = best;
           setBot('toFloor');
-        } else if (items.some(it => it.drop < 1)) {
+        } else if (items.some(it => it.drop < 1) && !beltJammed()) {
           setBot('toBelt');
         } else {
           if (moveBot(BOTHOME.x, BOTHOME.y, dt)) setBot('dock');
@@ -1892,45 +1912,21 @@
       }
       case 'grab':
         bot.wait -= dt;
-        if (bot.wait <= 0) setBot(bot.item.clean ? 'toStation' : 'toWasher');
-        break;
-      case 'toWasher': {
-        if (bot.wi < 0 || washers[bot.wi].s !== 'idle' || washers[bot.wi].load.length) bot.wi = idleWasher();
-        if (bot.wi < 0) { setBot('holdWasher'); break; }
-        const w = WASHERS[bot.wi];
-        if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
-          if (washers[bot.wi].s === 'idle' && !washers[bot.wi].load.length) {
-            washers[bot.wi].load.push(bot.item);
-            bot.item = null;
-            startWash(bot.wi, true);
-            setBot('waitWash');
-          } else bot.wi = -1;
+        if (bot.wait <= 0) {
+          if (bot.item.clean) setBot('toStation');
+          else { setBot('washing'); bot.washT0 = now; bot.washMs = BOT_WASH_MS / botBoost(); }
         }
         break;
-      }
-      case 'holdWasher':
+      case 'washing':
         roam(dt);
-        if (idleWasher() >= 0) { bot.wi = -1; setBot('toWasher'); }
-        break;
-      case 'waitWash': {
-        const ws = washers[bot.wi];
-        if (!ws || !ws.bot || ws.s === 'idle') { bot.wi = -1; setBot('seek'); break; }
-        if (ws.s === 'done') { setBot('toCollect'); break; }
-        roam(dt);
-        break;
-      }
-      case 'toCollect': {
-        const ws = washers[bot.wi];
-        if (!ws || !ws.bot || ws.s !== 'done') { bot.wi = -1; setBot('seek'); break; }
-        const w = WASHERS[bot.wi];
-        if (moveBot(w.x + w.w / 2, w.y + w.h + 8, dt)) {
-          const it = ws.item;
-          washers[bot.wi] = newWasher();
-          bot.wi = -1;
-          botPick(it);
+        if (Math.random() < dt * 5) emit('bubble', bot.x + rand(-5, 5), bot.y - 8, 1, { vx: 0, vy: rand(-16, -9), life: rand(0.5, 0.9) });
+        if (now - bot.washT0 >= bot.washMs) {
+          freshen(bot.item);
+          emit('spark', bot.x, bot.y - 12, 8, { spread: 6, color: '#fff6b8', vy: -25, life: 0.6 });
+          beep(880, 0.06, 'square', 0.03); beep(1175, 0.08, 'square', 0.03, 0, 0.07);
+          setBot('toStation');
         }
         break;
-      }
       case 'toStation':
         if (moveBot(STATION.x - 4, STATION.y + STATION.h + 6, dt)) {
           sends.push({ item: bot.item, t0: now, x0: bot.x - bot.item.w / 2, y0: bot.y - 6 - bot.item.h, paid: false });
@@ -1943,6 +1939,9 @@
         bot.wait -= dt;
         if (bot.wait <= 0) setBot('seek');
         break;
+      default:
+        setBot(bot.item ? (bot.item.clean ? 'toStation' : 'washing') : 'seek');
+        if (bot.s === 'washing') { bot.washT0 = now; bot.washMs = BOT_WASH_MS / botBoost(); }
     }
   }
 
@@ -2083,9 +2082,11 @@
     drawTopSand('belt', 0, t);
     drawBinFront();
     const ready = !!(hand && hand.kind === 'item' && hand.item.clean);
-    [...Array(washerCount()).keys()].sort((a, b) => WASHERS[a].y - WASHERS[b].y || b - a).forEach(i => { drawWasher(i, t); drawTopSand('washer', i, t); });
-    drawStation(t, ready);
-    if (owned('bot')) drawBot(t);
+    // things standing on the floor, back to front, so the robot passes behind machines it is behind
+    const stand = [...Array(washerCount()).keys()].map(i => ({ y: WASHERS[i].y + WASHERS[i].h, d: () => { drawWasher(i, t); drawTopSand('washer', i, t); } }));
+    stand.push({ y: STATION.y + STATION.h, d: () => drawStation(t, ready) });
+    if (owned('bot')) stand.push({ y: bot.y, d: () => drawBot(t) });
+    stand.sort((a, b) => a.y - b.y).forEach(o => o.d());
     drawSends(t);
     drawParts();
 
@@ -2308,24 +2309,42 @@
     }
     return new Uint8Array(out);
   }
+  // A code = 3 random bytes (new on every login) + the save sealed with a stream
+  // derived from the account key and those bytes + a checksum. So every login
+  // shows a completely different code, and a device remembers codes it used.
+  let codeNonce = null;
   async function makeCode(sv, ck) {
+    if (!codeNonce) codeNonce = crypto.getRandomValues(new Uint8Array(3));
+    const n = hex(codeNonce);
     const p = packSave(sv);
-    const stream = await sha(ck + '|s');
-    const check = (await sha(ck + '|c|' + hex(p))).slice(0, 4);
-    const bytes = new Uint8Array(p.length + 4);
-    p.forEach((x, i) => { bytes[i] = x ^ stream[i]; });
-    bytes.set(check, p.length);
+    const stream = await sha(ck + '|s|' + n);
+    const check = (await sha(ck + '|c|' + n + '|' + hex(p))).slice(0, 4);
+    const bytes = new Uint8Array(3 + p.length + 4);
+    bytes.set(codeNonce, 0);
+    p.forEach((x, i) => { bytes[3 + i] = x ^ stream[i]; });
+    bytes.set(check, 3 + p.length);
     return toB32(bytes).match(/.{1,4}/g).join('-');
   }
   async function readCode(code, ck) {
     const bytes = fromB32(code);
     if (bytes.length < 11) throw new Error('short');
+    // current format (with nonce)
+    if (bytes.length >= 14) {
+      const n = hex(bytes.slice(0, 3));
+      const stream = await sha(ck + '|s|' + n);
+      const p = bytes.slice(3, -4).map((x, i) => x ^ stream[i]);
+      const check = (await sha(ck + '|c|' + n + '|' + hex(p))).slice(0, 4);
+      if (hex(check) === hex(bytes.slice(-4))) return { save: unpackSave(p), nonce: n };
+    }
+    // older codes without a nonce
     const stream = await sha(ck + '|s');
     const p = bytes.slice(0, -4).map((x, i) => x ^ stream[i]);
     const check = (await sha(ck + '|c|' + hex(p))).slice(0, 4);
     if (hex(check) !== hex(bytes.slice(-4))) throw new Error('check');
-    return unpackSave(p);
+    return { save: unpackSave(p), nonce: 'old:' + hex(bytes.slice(-4)) };
   }
+  function codeUsed(acc, nonce) { return !!(acc && acc.usedCodes && acc.usedCodes.includes(nonce)); }
+  function markCodeUsed(acc, nonce) { acc.usedCodes = [nonce, ...(acc.usedCodes || [])].slice(0, 60); }
 
   let codeTimer = 0;
   function scheduleCode() {
@@ -2362,6 +2381,7 @@
   function enterGame(key, note) {
     const acc = loadAccounts()[key];
     session = key;
+    codeNonce = crypto.getRandomValues(new Uint8Array(3));
     try { localStorage.setItem(SES_KEY, key); } catch (e) {}
     save = normalizeSave(Object.assign(freshSave(), acc.save || {}));
     applyUpgrades();
@@ -2447,7 +2467,6 @@
         saveAccounts(accs);
         $('authForm').reset();
         enterGame(key, note);
-        beep(784, 0.08); beep(1047, 0.1, 'square', 0.04, 0, 0.08);
         return;
       }
       // log in
@@ -2458,8 +2477,11 @@
         if (await hashPassword(pass, acc.salt) !== acc.hash) return err('Wrong name or password.');
         let note = null;
         if (codeTxt) {
-          let fromCode;
-          try { fromCode = await readCode(codeTxt, ck); } catch (x) { return err('That transfer code doesn’t belong to this account.'); }
+          let res;
+          try { res = await readCode(codeTxt, ck); } catch (x) { return err('That transfer code doesn’t belong to this account.'); }
+          if (codeUsed(acc, res.nonce)) return err('That code was already used. Copy the newest one from your account.');
+          const fromCode = res.save;
+          markCodeUsed(acc, res.nonce);
           if ((fromCode.lifetime || 0) >= ((acc.save && acc.save.lifetime) || 0)) {
             acc.save = Object.assign(acc.save || {}, fromCode, { seen: (acc.save && acc.save.seen) || {} });
             note = 'Progress loaded from your transfer code.';
@@ -2471,10 +2493,10 @@
         return;
       }
       if (!codeTxt) return err('No account with that name on this device. On a new device, also enter your transfer code.');
-      let fromCode;
-      try { fromCode = await readCode(codeTxt, ck); } catch (x) { return err('Name, password or transfer code is wrong.'); }
+      let res;
+      try { res = await readCode(codeTxt, ck); } catch (x) { return err('Name, password or transfer code is wrong.'); }
       const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
-      accs[key] = { name, salt, hash: await hashPassword(pass, salt), ck, save: normalizeSave(fromCode), created: Date.now() };
+      accs[key] = { name, salt, hash: await hashPassword(pass, salt), ck, save: normalizeSave(res.save), created: Date.now(), usedCodes: [res.nonce] };
       saveAccounts(accs);
       $('authForm').reset();
       enterGame(key, 'Progress loaded from your transfer code.');
