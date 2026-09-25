@@ -370,7 +370,8 @@
   .uc-ico canvas { width: 28px; height: 28px; image-rendering: pixelated; display: block; }
   .uc-lv { grid-area: lv; font-family: var(--display); font-size: 11px; color: var(--mint); letter-spacing: .06em; }
   .uc-title { grid-area: title; margin-top: 6px; font-family: var(--display); font-weight: 700; font-size: 18px; line-height: 1.1; }
-  .uc-blurb { grid-area: blurb; color: var(--muted); font-size: 13px; line-height: 1.3; }
+  .uc-blurb { grid-area: blurb; color: var(--muted); font-size: 14px; line-height: 1.35; }
+  .uc-blurb b { font-family: var(--body); font-weight: 600; font-size: 16px; color: var(--ink); letter-spacing: .03em; }
   .uc-next {
     grid-area: next; margin-top: 6px;
     font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1;
@@ -605,7 +606,7 @@
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
-      <p>Deliver loads back to back for a <b>combo</b> (up to x2), and watch for <b>golden clothes</b>: they pay x10. Earn 500 coins in a run to unlock <b>Golden Hangers</b> (prestige).</p>
+      <p>Deliver loads back to back for a <b>combo</b> (up to x2), and watch for <b>golden clothes</b>: they pay x10. Reach 500 coins to unlock <b>Golden Hangers</b> (prestige).</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -656,7 +657,7 @@
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
   // permanent perks bought with Golden Hangers (kept through prestige)
   const PERKS = [
-    { id: 'power', name: 'Prestige Power', title: 'Prestige Bonus', blurb: 'More coins for every prestige you have (x2 at 30)', costs: [5], show: (lv) => lv ? 'x' + fmtMult(powerMult()) : 'Off', showNext: () => 'x' + fmtMult(powerMult()), icon: 'hanger' },
+    { id: 'power', name: 'Prestige Power', title: 'Prestige Bonus', blurb: 'More coins for every prestige you have', costs: [5], show: (lv) => lv ? 'x' + fmtMult(powerMult()) : 'Off', showNext: () => 'x' + fmtMult(powerMult()), icon: 'hanger' },
     { id: 'softener', name: 'Fabric Softener', title: 'Coin Bonus', blurb: '+25% coins on every load, forever', costs: [3, 6, 10, 16, 25], show: (lv) => 'x' + fmtMult(1.25 ** lv), icon: 'soap' },
     { id: 'lucky', name: 'Lucky Socks', title: 'Golden Clothes', blurb: 'More golden clothes (they pay x10)', costs: [2, 4, 7, 11, 16], show: (lv) => (1 + 3 * lv) + '% chance', icon: 'lucky' },
     { id: 'auto', name: 'Smart Washers', title: 'Auto Start', blurb: 'Washers start 3s after you add clothes', costs: [6], show: (lv) => lv ? 'On' : 'Off', icon: 'washer' },
@@ -666,9 +667,9 @@
   ];
   const PERK_ORDER = PERKS.map(p => p.id);
   const PRESTIGE_AT = 500;
-  // first prestige (500 coins in a run) gives 5 hangers; 4x the coins gives 2x the hangers
-  const hangersFor = (run) => Math.floor(5 * Math.sqrt(Math.max(0, run) / PRESTIGE_AT) + 1e-9);
-  const hangerAt = (n) => Math.ceil(PRESTIGE_AT * (n / 5) ** 2);
+  // based on the coins you hold: 500 coins give 10 hangers; 4x the coins gives 2x the hangers
+  const hangersFor = (c) => Math.floor(10 * Math.sqrt(Math.max(0, c) / PRESTIGE_AT) + 1e-9);
+  const hangerAt = (n) => Math.ceil(PRESTIGE_AT * (n / 10) ** 2);
   const SOAP_MULT = 1.15;
   // how each upgrade reads in the shop: the stat it changes and its value at a level
   const STATS = {
@@ -964,20 +965,22 @@
     btn.innerHTML = `<span class="uc-ico"></span><span class="uc-lv"></span><span class="uc-title"></span><span class="uc-blurb"></span><span class="uc-next"></span><span class="uc-now"></span><span class="uc-buy"><i></i><b></b></span><span class="uc-bar"></span>`;
     btn.querySelector('.uc-ico').appendChild(drawIcon(q.icon));
     btn.querySelector('.uc-title').textContent = q.title;
-    btn.querySelector('.uc-blurb').textContent = q.blurb;
+    setBlurb(btn.querySelector('.uc-blurb'), q.blurb);
     btn.addEventListener('click', () => buyPerk(q));
     $('perks').appendChild(btn);
     perkEls[q.id] = { btn, lv: btn.querySelector('.uc-lv'), next: btn.querySelector('.uc-next'), now: btn.querySelector('.uc-now'), cost: btn.querySelector('.uc-buy b'), bar: btn.querySelector('.uc-bar') };
   });
   function renderPrestige() {
-    const run = save.runEarned || 0;
+    const run = save.coins || 0;
     const unlocked = run >= PRESTIGE_AT || save.prestiges > 0 || save.hangers > 0;
     $('prOpen').hidden = !unlocked;
     $('screen').classList.toggle('has-pr', unlocked);
     const gain = run >= PRESTIGE_AT ? hangersFor(run) : 0;
+    // badge: how many hanger perks you can buy right now (like Upgrades)
+    const affordable = PERKS.filter(q => perk(q.id) < q.costs.length && (save.hangers || 0) >= q.costs[perk(q.id)]).length;
     const badge = $('prBadge');
-    badge.hidden = !gain;
-    badge.textContent = '+' + gain;
+    badge.hidden = !affordable;
+    badge.textContent = affordable;
     $('prRow').hidden = $('prRow2').hidden = !unlocked;
     $('stHangers').textContent = fmt(save.hangers || 0);
     $('stPrestiges').textContent = fmt(save.prestiges || 0);
@@ -987,11 +990,11 @@
     $('prBonus').textContent = 'x' + fmtMult(perk('power') ? powerMult() : 1);
     $('prCount').textContent = fmt(save.prestiges || 0);
     if (run < PRESTIGE_AT) {
-      $('prNext').textContent = `Earn ${fmt(PRESTIGE_AT)} coins this run to prestige (${fmt(run)} so far).`;
+      $('prNext').textContent = `Have ${fmt(PRESTIGE_AT)} coins to prestige (you have ${fmt(run)}).`;
       $('prBar').style.width = Math.min(100, run / PRESTIGE_AT * 100) + '%';
     } else {
       const nextAt = hangerAt(gain + 1), prevAt = hangerAt(gain);
-      $('prNext').textContent = `Next hanger at ${fmt(nextAt)} coins earned this run (${fmt(run)} so far).`;
+      $('prNext').textContent = `Next hanger at ${fmt(nextAt)} coins (you have ${fmt(run)}).`;
       $('prBar').style.width = Math.min(100, (run - prevAt) / (nextAt - prevAt) * 100) + '%';
     }
     const go = $('prGo');
@@ -1040,7 +1043,7 @@
     doPrestige();
   });
   function doPrestige() {
-    const gain = save.runEarned >= PRESTIGE_AT ? hangersFor(save.runEarned) : 0;
+    const gain = save.coins >= PRESTIGE_AT ? hangersFor(save.coins) : 0;
     if (!gain) return;
     save.hangers = (save.hangers || 0) + gain;
     save.prestiges = (save.prestiges || 0) + 1;
@@ -1084,7 +1087,7 @@
     save.coins += n;
     save.lifetime += n;
     save.runEarned = (save.runEarned || 0) + n;
-    if (save.runEarned >= PRESTIGE_AT) once('prestige', 'Golden Hangers unlocked! Open the purple Hangers button.', 'good');
+    if (save.coins >= PRESTIGE_AT) once('prestige', 'Golden Hangers unlocked! Open the purple Hangers button.', 'good');
     persist();
     renderStats();
     $coins.classList.remove('bump'); void $coins.offsetWidth; $coins.classList.add('bump');
@@ -1126,6 +1129,15 @@
     if (kind === 'bot') { P(3, 3, 8, 1, OUT); P(2, 4, 10, 1, OUT); P(1, 5, 12, 5, OUT); P(2, 10, 10, 1, OUT); P(2, 5, 10, 3, '#4a4f66'); P(3, 4, 8, 1, '#4a4f66'); P(2, 8, 10, 2, '#2a2c3a'); P(2, 7, 10, 1, '#7fe0c4'); P(6, 5, 2, 1, '#6fe08a'); P(4, 5, 2, 1, '#6d7390'); }
     return c;
   }
+  // blurbs with their numbers set a bit bigger so 5 and 8 don't blur together
+  function setBlurb(el, str) {
+    el.textContent = '';
+    str.split(/([+\-x]?\d+(?:\.\d+)?%?)/).forEach((part, i) => {
+      if (!part) return;
+      if (i % 2) { const b = document.createElement('b'); b.textContent = part; el.appendChild(b); }
+      else el.appendChild(document.createTextNode(part));
+    });
+  }
   const shopEls = {};
   const $ups = $('ups');
   UPGRADES.forEach((u, i) => {
@@ -1137,7 +1149,7 @@
     btn.innerHTML = `<span class="uc-ico"></span><span class="uc-lv"></span><span class="uc-title"></span><span class="uc-blurb"></span><span class="uc-next"></span><span class="uc-now"></span><span class="uc-buy"><i></i><b></b></span><span class="uc-bar"></span>`;
     btn.querySelector('.uc-ico').appendChild(drawIcon(u.icon));
     btn.querySelector('.uc-title').textContent = st.title;
-    btn.querySelector('.uc-blurb').textContent = st.blurb;
+    setBlurb(btn.querySelector('.uc-blurb'), st.blurb);
     btn.addEventListener('click', () => buy(u));
     $ups.appendChild(btn);
     shopEls[u.id] = {
