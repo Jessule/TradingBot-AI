@@ -203,9 +203,10 @@
   [hidden] { display: none !important; }
 
   /* ===== prestige ===== */
-  .pr-open { left: auto; right: 12px; background: #b58cff; box-shadow: inset 0 -4px 0 #6d45b8, 0 3px 0 var(--edge); }
+  .up-open.pr-open { left: 12px; right: auto; top: 58px; background: #b58cff; box-shadow: inset 0 -4px 0 #6d45b8, 0 3px 0 var(--edge); }
   .pr-open:active { box-shadow: inset 0 -2px 0 #6d45b8, 0 1px 0 var(--edge); }
-  .pr-badge { background: var(--gold); right: auto; left: -10px; }
+  .up-badge.pr-badge { background: var(--gold); }
+  .up-open.pr-open { padding-right: 20px; }
   .hanger { width: 16px; height: 11px; flex: none; position: relative; background: var(--edge); clip-path: polygon(50% 0, 60% 18%, 100% 100%, 0 100%, 40% 18%); }
   .hanger.big { width: 22px; height: 15px; background: var(--gold); }
   .pr-wallet { color: #d7b8ff; text-shadow: 0 2px 0 #5b3a9a; }
@@ -236,7 +237,7 @@
   .uc.perk.maxed .uc-next { color: var(--mint); text-shadow: 0 3px 0 #2f7a64; }
   .flash { position: absolute; inset: 4px; z-index: 8; pointer-events: none; background: #fff6d6; animation: flash .9s steps(6) forwards; }
   @keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
-  body[data-layout="tall"] .pr-open { left: auto; right: 8px; }
+  body[data-layout="tall"] .up-open.pr-open { left: 8px; right: auto; top: 48px; }
   body[data-layout="tall"] .pr-gain { font-size: 30px; }
 
   /* ===== in-game upgrade menu ===== */
@@ -244,6 +245,7 @@
   /* keep action messages clear of the Upgrades button: beside it when wide, below it when narrow */
   @container (max-width: 640px) {
     #toast { top: 54px; max-width: calc(100% - 24px); }
+    .screen.has-pr #toast { top: 92px; }
   }
   .up-open {
     position: absolute; left: 12px; top: 12px; z-index: 3;
@@ -528,19 +530,19 @@
           <span class="up-open-ico" aria-hidden="true"></span>Upgrades<span class="up-badge" id="upBadge" hidden>0</span>
         </button>
         <button class="up-open pr-open" id="prOpen" type="button" aria-haspopup="dialog" aria-controls="prShop" hidden>
-          <span class="hanger" aria-hidden="true"></span>Prestige<span class="up-badge pr-badge" id="prBadge" hidden>+0</span>
+          <span class="hanger" aria-hidden="true"></span>Hangers<span class="up-badge pr-badge" id="prBadge" hidden>+0</span>
         </button>
         <div class="shop prestige" id="prShop" role="dialog" aria-modal="true" aria-labelledby="prTitle" hidden>
           <div class="shop-panel">
             <div class="shop-top">
               <div>
-                <p class="eyebrow">Start over, come back stronger</p>
-                <h2 id="prTitle">Prestige</h2>
+                <p class="eyebrow">Prestige</p>
+                <h2 id="prTitle">Golden Hangers</h2>
               </div>
               <div class="shop-wallet pr-wallet"><span class="hanger big" aria-hidden="true"></span><span id="prHangers">0</span></div>
               <button class="shop-close" id="prClose" type="button" aria-label="Close prestige">&times;</button>
             </div>
-            <p class="shop-sub">Golden Hangers buy permanent perks</p>
+            <p class="shop-sub">Reset your laundromat for hangers, spend them on permanent perks</p>
             <div class="shop-grid" id="perks">
               <section class="pr-hero">
                 <p class="pr-gain">+<span id="prGain">0</span> <small>Golden Hangers</small></p>
@@ -603,7 +605,7 @@
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
-      <p>Deliver loads back to back for a <b>combo</b> (up to x2), and watch for <b>golden clothes</b>: they pay x10. Earn 500 coins in a run to unlock <b>Prestige</b>.</p>
+      <p>Deliver loads back to back for a <b>combo</b> (up to x2), and watch for <b>golden clothes</b>: they pay x10. Earn 500 coins in a run to unlock <b>Golden Hangers</b> (prestige).</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -971,6 +973,7 @@
     const run = save.runEarned || 0;
     const unlocked = run >= PRESTIGE_AT || save.prestiges > 0 || save.hangers > 0;
     $('prOpen').hidden = !unlocked;
+    $('screen').classList.toggle('has-pr', unlocked);
     const gain = run >= PRESTIGE_AT ? hangersFor(run) : 0;
     const badge = $('prBadge');
     badge.hidden = !gain;
@@ -993,7 +996,7 @@
     }
     const go = $('prGo');
     go.disabled = !gain;
-    if (!go.classList.contains('confirm')) go.textContent = gain ? `Prestige for +${gain}` : 'Not yet';
+    if (!go.classList.contains('confirm')) go.textContent = gain ? `Reset for +${gain} hangers` : 'Not yet';
     for (const q of PERKS) {
       const el = perkEls[q.id], lv = perk(q.id), max = q.costs.length, maxed = lv >= max;
       const cost = maxed ? 0 : q.costs[lv], can = !maxed && (save.hangers || 0) >= cost;
@@ -1081,7 +1084,7 @@
     save.coins += n;
     save.lifetime += n;
     save.runEarned = (save.runEarned || 0) + n;
-    if (save.runEarned >= PRESTIGE_AT) once('prestige', 'Prestige unlocked! Open the purple Prestige button.', 'good');
+    if (save.runEarned >= PRESTIGE_AT) once('prestige', 'Golden Hangers unlocked! Open the purple Hangers button.', 'good');
     persist();
     renderStats();
     $coins.classList.remove('bump'); void $coins.offsetWidth; $coins.classList.add('bump');
