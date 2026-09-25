@@ -373,7 +373,7 @@
   .uc:disabled { cursor: default; }
   .uc-ico { grid-area: ico; width: 34px; height: 34px; background: var(--edge); display: grid; place-items: center; }
   .uc-ico canvas { width: 28px; height: 28px; image-rendering: pixelated; display: block; }
-  .uc-lv { grid-area: lv; font-family: var(--display); font-size: 11px; color: var(--mint); letter-spacing: .06em; }
+  .uc-lv { grid-area: lv; font-family: var(--body); font-weight: 600; font-size: 14px; color: var(--mint); letter-spacing: .04em; }
   .uc-title { grid-area: title; margin-top: 6px; font-family: var(--display); font-weight: 700; font-size: 18px; line-height: 1.1; }
   .uc-blurb { grid-area: blurb; color: var(--muted); font-size: 14px; line-height: 1.35; }
   .uc-blurb b { font-family: var(--body); font-weight: 600; font-size: 16px; color: var(--ink); letter-spacing: .03em; }
@@ -383,8 +383,8 @@
     color: var(--gold); text-shadow: 0 3px 0 var(--gold-dk);
     font-variant-numeric: tabular-nums;
   }
-  .uc-now { grid-area: now; font-family: var(--display); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
-  .uc-now b { color: var(--ink); font-weight: 400; }
+  .uc-now { grid-area: now; font-family: var(--body); font-size: 15px; color: var(--muted); letter-spacing: .03em; }
+  .uc-now b { color: var(--ink); font-weight: 600; font-size: 16px; }
   .uc-buy {
     grid-area: buy; margin-top: 8px;
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -679,9 +679,9 @@
   // how each upgrade reads in the shop: the stat it changes and its value at a level
   const STATS = {
     drum: { title: 'Wash Speed', blurb: 'Every wash cycle 10% faster', show: (lv) => (BASE.washMs * 0.9 ** lv / 1000).toFixed(1) + 's' },
-    soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth (x1.15 each level)', show: (lv) => 'x' + fmtMult(SOAP_MULT ** lv) },
+    soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth', show: (lv) => 'x' + fmtMult(SOAP_MULT ** lv) },
     cap: { title: 'Washer Capacity', blurb: 'More clothes in every wash', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
-    belt: { title: 'Clothes Flow', blurb: 'More clothes on a faster belt (x1.15 each level)', show: (lv) => 'x' + fmtMult(1.15 ** lv) },
+    belt: { title: 'Clothes Flow', blurb: 'More clothes on a faster belt', show: (lv) => 'x' + fmtMult(1.15 ** lv) },
     washer2: { title: 'Washers', blurb: 'Another washing machine, up to 4', show: (lv) => String(1 + lv) },
     bot: { title: 'Robo Vac', blurb: 'Robot that picks up, washes and delivers clothes by itself', show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed' },
   };
