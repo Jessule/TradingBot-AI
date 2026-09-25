@@ -206,6 +206,11 @@
   .up-open.pr-open { left: 12px; right: auto; top: 58px; background: #b58cff; box-shadow: inset 0 -4px 0 #6d45b8, 0 3px 0 var(--edge); }
   .pr-open:active { box-shadow: inset 0 -2px 0 #6d45b8, 0 1px 0 var(--edge); }
   .up-badge.pr-badge { background: var(--gold); }
+  .up-open.pr-open.locked { background: #4a4466; color: #c9c4ea; box-shadow: inset 0 -4px 0 #2e2a47, 0 3px 0 var(--edge); cursor: not-allowed; padding-right: 10px; }
+  .up-open.pr-open.locked .hanger { background: #c9c4ea; }
+  .pr-req { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; padding: 1px 5px 2px; background: var(--edge); color: var(--gold); font-size: 11px; }
+  .lock { width: 8px; height: 9px; position: relative; background: var(--gold); margin-top: 3px; }
+  .lock::before { content: ""; position: absolute; left: 1px; top: -5px; width: 6px; height: 5px; border: 2px solid var(--gold); border-bottom: 0; box-sizing: border-box; }
   .up-open.pr-open { padding-right: 20px; }
   .hanger { width: 16px; height: 11px; flex: none; position: relative; background: var(--edge); clip-path: polygon(50% 0, 60% 18%, 100% 100%, 0 100%, 40% 18%); }
   .hanger.big { width: 22px; height: 15px; background: var(--gold); }
@@ -531,7 +536,7 @@
           <span class="up-open-ico" aria-hidden="true"></span>Upgrades<span class="up-badge" id="upBadge" hidden>0</span>
         </button>
         <button class="up-open pr-open" id="prOpen" type="button" aria-haspopup="dialog" aria-controls="prShop" hidden>
-          <span class="hanger" aria-hidden="true"></span>Hangers<span class="up-badge pr-badge" id="prBadge" hidden>+0</span>
+          <span class="hanger" aria-hidden="true"></span><span class="pr-label">Hangers</span><span class="pr-req" id="prReq" hidden><span class="lock" aria-hidden="true"></span>500</span><span class="up-badge pr-badge" id="prBadge" hidden>0</span>
         </button>
         <div class="shop prestige" id="prShop" role="dialog" aria-modal="true" aria-labelledby="prTitle" hidden>
           <div class="shop-panel">
@@ -606,7 +611,7 @@
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
-      <p>Deliver loads back to back for a <b>combo</b> (up to x2), and watch for <b>golden clothes</b>: they pay x10. Reach 500 coins to unlock <b>Golden Hangers</b> (prestige).</p>
+      <p>Watch for <b>golden clothes</b>: they pay x10. Reach 500 coins to unlock <b>Golden Hangers</b> (prestige).</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -799,7 +804,6 @@
   const powerMult = () => 2 ** ((save.prestiges || 0) / 30);
   const prestigeMult = () => (perk('power') ? powerMult() : 1) * 1.25 ** perk('softener');
   const goldChance = () => 0.01 + 0.03 * perk('lucky');
-  let combo = 0, lastPay = -1e9;
   const washerCount = () => 1 + level('washer2');
   const sandAmount = () => piles.reduce((sum, pl) => sum + pl.amount, 0);
   const beltFactor = () => Math.max(MIN_BELT, 1 - PILE_SLOW * sandAmount());
@@ -973,13 +977,18 @@
   function renderPrestige() {
     const run = save.coins || 0;
     const unlocked = run >= PRESTIGE_AT || save.prestiges > 0 || save.hangers > 0;
-    $('prOpen').hidden = !unlocked;
-    $('screen').classList.toggle('has-pr', unlocked);
+    // the button shows up (locked) at 100 coins, and opens at 500
+    const shown = unlocked || run >= 100;
+    $('prOpen').hidden = !shown;
+    $('prOpen').classList.toggle('locked', !unlocked);
+    $('prOpen').setAttribute('aria-label', unlocked ? 'Golden Hangers' : 'Golden Hangers, locked: needs 500 coins');
+    $('prReq').hidden = unlocked;
+    $('screen').classList.toggle('has-pr', shown);
     const gain = run >= PRESTIGE_AT ? hangersFor(run) : 0;
     // badge: how many hanger perks you can buy right now (like Upgrades)
     const affordable = PERKS.filter(q => perk(q.id) < q.costs.length && (save.hangers || 0) >= q.costs[perk(q.id)]).length;
     const badge = $('prBadge');
-    badge.hidden = !affordable;
+    badge.hidden = !affordable || !unlocked;
     badge.textContent = affordable;
     $('prRow').hidden = $('prRow2').hidden = !unlocked;
     $('stHangers').textContent = fmt(save.hangers || 0);
@@ -1050,7 +1059,6 @@
     save.runEarned = 0;
     save.coins = 100 * perk('head');
     save.lv = perk('robo') && level('bot') ? { bot: 1 } : {};
-    combo = 0;
     applyUpgrades();
     resetWorld();
     persist();
@@ -1078,7 +1086,11 @@
     sh.classList.add('closing');
     setTimeout(() => { sh.hidden = true; sh.classList.remove('closing'); }, 200);
   }
-  $('prOpen').addEventListener('click', () => openPanel('prShop', 'prClose'));
+  $('prOpen').addEventListener('click', () => {
+    const unlocked = save.coins >= PRESTIGE_AT || save.prestiges > 0 || save.hangers > 0;
+    if (!unlocked) { toast(`Golden Hangers unlock at ${fmt(PRESTIGE_AT)} coins (you have ${fmt(save.coins)}).`, 'warn'); beep(160, 0.08, 'triangle', 0.04); return; }
+    openPanel('prShop', 'prClose');
+  });
   $('prClose').addEventListener('click', () => closePanel('prShop'));
   $('prShop').addEventListener('click', (e) => { if (e.target === $('prShop')) closePanel('prShop'); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('prShop').hidden) closePanel('prShop'); });
@@ -2290,14 +2302,11 @@
         s.paid = true;
         const cx = STATION.x + 12, cy = STATION.y + 4;
         const n = countOf(s.item), gn = goldOf(s.item);
-        combo = now - lastPay < 8000 ? Math.min(combo + 1, 10) : 0;
-        lastPay = now;
-        const value = CFG.coinValue * (n + 9 * gn) * (1 + 0.1 * combo);
+        const value = CFG.coinValue * (n + 9 * gn);
         if (gn) {
           emit('spark', cx, cy - 4, 14, { spread: 8, color: '#ffd23f', vy: -35, life: 0.9 });
           if (!save.seen.gold) once('gold', 'Golden clothes! They pay x10.', 'good');
         }
-        if (combo >= 3 && combo % 3 === 0) beep(1568, 0.08, 'square', 0.03, 0, 0.12);
         emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + fmtVal(value) });
         emit('coin', cx, cy, 6, { spread: 3, life: 0.7 });
         flyCoin(cx, cy, value);
@@ -2348,15 +2357,6 @@
     stand.sort((a, b) => a.y - b.y).forEach(o => o.d());
     drawSends(t);
     drawParts();
-    if (combo > 0 && now - lastPay < 8000) {
-      const left = 1 - (now - lastPay) / 8000;
-      const label = 'x' + (1 + 0.1 * combo).toFixed(1);
-      const bx = STATION.x - 2, by = STATION.y - 16;
-      R(bx - 1, by - 1, 22, 11, OUT);
-      R(bx, by, 20, 9, '#3a2466');
-      text(label, bx + 2, by + 1, ((t / 150) | 0) % 2 ? '#ffd23f' : '#fff6b8');
-      R(bx, by + 7, Math.round(20 * left), 2, '#b58cff');
-    }
 
     // targets
     if (hand) {
