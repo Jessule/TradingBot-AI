@@ -683,7 +683,7 @@
     { id: 'power', name: 'Prestige Power', title: 'Prestige Bonus', blurb: 'More coins for every prestige you have', costs: [5], show: (lv) => lv ? 'x' + fmtMult(powerMult()) : 'Off', showNext: () => 'x' + fmtMult(powerMult()), icon: 'hanger' },
     { id: 'washers', name: 'Extra Washer', title: 'Washers', blurb: 'One more washing machine, up to 4', costs: [6, 14, 30], show: (lv) => String(1 + lv), icon: 'washer' },
     { id: 'robo', name: 'Robo Vac', title: 'Robo Vac', blurb: 'Robot that picks up, washes and delivers clothes by itself', costs: [8, 12, 18, 26], show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed', icon: 'bot' },
-    { id: 'softener', name: 'Fabric Softener', title: 'Coin Bonus', blurb: '+25% coins on every load, forever', costs: [3, 6, 10, 16, 25], show: (lv) => 'x' + fmtMult(1.25 ** lv), icon: 'soap' },
+    { id: 'softener', name: 'Fabric Softener', title: 'Coin Bonus', blurb: 'x1.25 coins per level, forever', costs: [3, 6, 10, 16, 25], show: (lv) => 'x' + fmtMult(1.25 ** lv), icon: 'soap' },
     { id: 'lucky', name: 'Lucky Socks', title: 'Golden Clothes', blurb: 'More golden clothes (they pay x3)', costs: [2, 4, 7, 11, 16], show: (lv) => (1 + 3 * lv) + '% chance', icon: 'lucky' },
     { id: 'filter', name: 'Window Screen', title: 'Dust Filter', blurb: '-10% dust through the window per level', costs: [3, 6, 10], show: (lv) => lv ? '-' + 10 * lv + '% dust' : 'Normal', icon: 'filter' },
   ];
