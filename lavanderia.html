@@ -549,7 +549,7 @@
           <span class="up-open-ico" aria-hidden="true"></span>Upgrades<span class="up-badge" id="upBadge" hidden>0</span>
         </button>
         <button class="up-open pr-open" id="prOpen" type="button" aria-haspopup="dialog" aria-controls="prShop" hidden>
-          <span class="hanger" aria-hidden="true"></span><span class="pr-label">Hangers</span><span class="pr-req" id="prReq" hidden><span class="lock" aria-hidden="true"></span>250</span><span class="up-badge pr-badge" id="prBadge" hidden>0</span>
+          <span class="hanger" aria-hidden="true"></span><span class="pr-label">Hangers</span><span class="pr-req" id="prReq" hidden><span class="lock" aria-hidden="true"></span>150</span><span class="up-badge pr-badge" id="prBadge" hidden>0</span>
         </button>
         <div class="shop prestige" id="prShop" role="dialog" aria-modal="true" aria-labelledby="prTitle" hidden>
           <div class="shop-panel">
@@ -628,7 +628,7 @@
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
-      <p>Watch for <b>golden clothes</b>: they pay x3. Reach 250 coins to unlock <b>Golden Hangers</b> (prestige).</p>
+      <p>Watch for <b>golden clothes</b>: they pay x3. Reach 150 coins to unlock <b>Golden Hangers</b> (prestige).</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -689,8 +689,9 @@
     { at: 10, kind: 'coins', v: 1.3, label: 'x1.3 coins' },
   ];
   const PERK_ORDER = PERKS.map(p => p.id);
-  const PRESTIGE_AT = 250;
-  // based on the coins you hold: 250 coins give 10 hangers; 4x the coins gives 2x the hangers
+  const PRESTIGE_AT = 150;
+  const PRESTIGE_SHOW_AT = 50;
+  // based on the coins you hold: 150 coins give 10 hangers; 4x the coins gives 2x the hangers
   const hangersFor = (c) => Math.floor(10 * Math.sqrt(Math.max(0, c) / PRESTIGE_AT) + 1e-9);
   const hangerAt = (n) => Math.ceil(PRESTIGE_AT * (n / 10) ** 2);
   const SOAP_MULT = 1.15;
@@ -996,8 +997,8 @@
   function renderPrestige() {
     const run = save.coins || 0;
     const unlocked = run >= PRESTIGE_AT || save.prestiges > 0 || save.hangers > 0;
-    // the button shows up (locked) at 100 coins, and opens at 500
-    const shown = unlocked || run >= 100;
+    // the button shows up (locked) at 50 coins, and opens at 150
+    const shown = unlocked || run >= PRESTIGE_SHOW_AT;
     $('prOpen').hidden = !shown;
     $('prOpen').classList.toggle('locked', !unlocked);
     $('prOpen').setAttribute('aria-label', unlocked ? 'Golden Hangers' : `Golden Hangers, locked: needs ${PRESTIGE_AT} coins`);
