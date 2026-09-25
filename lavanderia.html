@@ -4,8 +4,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap">
 <style>
-  /* pixel digits with a squared-off 5 (never mistaken for 8); digits only, other characters use the page fonts */
-  @font-face { font-family: "PixDigits"; src: url(data:font/ttf;base64,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) format("truetype"); unicode-range: U+0030-0039; font-display: block; }
+  /* pixel digits with a squared-off 5 (never mistaken for 8) and a clear %; only those, other characters use the page fonts */
+  @font-face { font-family: "PixDigits"; src: url(data:font/ttf;base64,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) format("truetype"); unicode-range: U+0025, U+0030-0039; font-display: block; }
   :root {
     --bg: #161527;
     --bg-dot: rgba(190, 180, 255, .06);
@@ -628,7 +628,7 @@
       <p class="eyebrow">How to play</p>
       <p><b>Drag</b> a dirty item from the belt into the washer. When the light turns green, <b>drag</b> the clean load to the orange tube for <b>1 coin</b>. The counter on the washer shows how many items are inside; with a bigger tub, add more and press the <b>green button</b> to start (a full washer starts on its own).</p>
       <p>You can <b>drop clothes on the floor</b>, but they get filthy and crumble into sand, and sand slows the belt. To clean it: <b>put the dustpan</b> next to the sand, <b>push the sand</b> into it with the broom, then <b>empty the dustpan</b> in the trash can.</p>
-      <p>Watch for <b>golden clothes</b>: they pay x10. Reach 250 coins to unlock <b>Golden Hangers</b> (prestige).</p>
+      <p>Watch for <b>golden clothes</b>: they pay x3. Reach 250 coins to unlock <b>Golden Hangers</b> (prestige).</p>
       <p>Tapping works too: tap something, then tap where it goes.</p>
     </section>
   </div>
@@ -679,7 +679,7 @@
     { id: 'washers', name: 'Extra Washer', title: 'Washers', blurb: 'One more washing machine, up to 4', costs: [6, 14, 30], show: (lv) => String(1 + lv), icon: 'washer' },
     { id: 'robo', name: 'Robo Vac', title: 'Robo Vac', blurb: 'Robot that picks up, washes and delivers clothes by itself', costs: [8, 12, 18, 26], show: (lv) => lv === 0 ? 'Off' : lv === 1 ? 'On' : 'x' + (1.25 ** (lv - 1)).toFixed(2) + ' speed', icon: 'bot' },
     { id: 'softener', name: 'Fabric Softener', title: 'Coin Bonus', blurb: '+25% coins on every load, forever', costs: [3, 6, 10, 16, 25], show: (lv) => 'x' + fmtMult(1.25 ** lv), icon: 'soap' },
-    { id: 'lucky', name: 'Lucky Socks', title: 'Golden Clothes', blurb: 'More golden clothes (they pay x10)', costs: [2, 4, 7, 11, 16], show: (lv) => (1 + 3 * lv) + '% chance', icon: 'lucky' },
+    { id: 'lucky', name: 'Lucky Socks', title: 'Golden Clothes', blurb: 'More golden clothes (they pay x3)', costs: [2, 4, 7, 11, 16], show: (lv) => (1 + 3 * lv) + '% chance', icon: 'lucky' },
     { id: 'filter', name: 'Window Screen', title: 'Dust Filter', blurb: '-10% dust through the window per level', costs: [3, 6, 10], show: (lv) => lv ? '-' + 10 * lv + '% dust' : 'Normal', icon: 'filter' },
   ];
   // perk order used by v4 transfer codes, before the perk list changed
@@ -696,7 +696,7 @@
   const SOAP_MULT = 1.15;
   // how each upgrade reads in the shop: the stat it changes and its value at a level
   const STATS = {
-    drum: { title: 'Wash Speed', blurb: 'Every wash cycle 10% faster', show: (lv) => (BASE.washMs * 0.9 ** lv / 1000).toFixed(1) + 's' },
+    drum: { title: 'Wash Speed', blurb: 'Every wash 10% faster (time for a full load)', show: (lv) => (BASE.washMs * 0.9 ** lv * CFG.capacity ** 0.6 / 1000).toFixed(1) + 's' },
     soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth', show: (lv) => 'x' + fmtMult(SOAP_MULT ** lv) },
     cap: { title: 'Washer Capacity', blurb: 'More clothes per wash (up to 3). Bigger loads take a bit longer', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
     belt: { title: 'Clothes Flow', blurb: 'More clothes on a faster belt', show: (lv) => 'x' + fmtMult(1.15 ** lv) },
@@ -746,7 +746,7 @@
     if (prev) {
       for (const it of floor) { it.fx = Math.min(it.fx / prev.W * W, W - it.w - 2); it.fy = Math.max(30, Math.min(it.fy / prev.H * H, H - it.h - 2)); }
       for (const pl of piles) { pl.x = Math.min(pl.x / prev.W * W, W - 8); pl.y = Math.max(34, Math.min(pl.y / prev.H * H, H - 2)); }
-      bot.x = BOTHOME.x; bot.y = BOTHOME.y; const keepWash = bot.s === 'washing'; setBot(bot.item ? (bot.item.clean ? 'toStation' : 'washing') : 'seek'); if (bot.s === 'washing' && !keepWash) { bot.washT0 = now; bot.washMs = BOT_WASH_MS / botBoost(); }
+      bot.x = BOTHOME.x; bot.y = BOTHOME.y; const keepWash = bot.s === 'washing'; setBot(bot.item ? (bot.item.clean ? 'toStation' : 'washing') : 'seek'); if (bot.s === 'washing' && !keepWash) { bot.washT0 = now; bot.pickT = now; }
       if (hand && hand.kind !== 'item') hand = null;
       resetTools();
     }
@@ -760,7 +760,8 @@
   // ================= palette & sprites =================
   const OUT = '#1c1a2e';
   const SAND = ['#e2c28a', '#cfa965', '#b48d4f', '#f0dcae'];
-  const COLORS = ['#e05a5a', '#4a7fe0', '#f0c84a', '#5ac06a', '#e87ab8', '#9a6ae0', '#f08a3c'];
+  // normal clothes avoid yellow/orange so only golden clothes look gold
+  const COLORS = ['#e05a5a', '#4a7fe0', '#3fb8b0', '#5ac06a', '#e87ab8', '#9a6ae0', '#8a8fa3'];
   const SPR = {
     shirt: ['..XX..XX..', '.XXXXXXXX.', 'XXXXXXXXXX', 'XX.XXXX.XX', '...XXXX...', '...XXXX...', '...SSSS...', '...XXXX...'],
     pants: ['SSSSSSSS', 'XXXXXXXX', 'XXX..XXX', 'XXX..XXX', 'XXX..XXX', 'XXX..XXX', 'XXX..XXX', 'XX....XX'],
@@ -951,7 +952,7 @@
     $('stDelivered').textContent = fmt(save.delivered);
     $('stLifetime').textContent = fmt(save.lifetime);
     $('stDropped').textContent = fmt(save.dropped);
-    $('stWash').textContent = (CFG.washMs / 1000).toFixed(1) + 's';
+    $('stWash').textContent = (washTime(CFG.capacity) / 1000).toFixed(1) + 's' + (CFG.capacity > 1 ? ` (${CFG.capacity} clothes)` : '');
     $('perLoad').textContent = '+' + fmtVal(CFG.coinValue);
     renderFloor();
     renderShop();
@@ -1523,7 +1524,7 @@
       const shake = bot.s === 'washing' ? ((t / 60 | 0) % 2) : 0;
       drawItem(bot.item, x - bot.item.w / 2 + shake, y - 6 - bot.item.h, t);
       if (bot.s === 'washing') {
-        const p = Math.min(1, (now - bot.washT0) / bot.washMs);
+        const p = Math.min(1, (now - bot.washT0) / (bot.washMs || 1));
         const by = y - 9 - bot.item.h;
         R(x - 8, by, 16, 4, OUT); R(x - 7, by + 1, 14, 2, '#3d3357'); R(x - 7, by + 1, Math.round(14 * p), 2, '#6fe08a');
       }
@@ -2145,7 +2146,8 @@
 
   // ---- Robo Vac: picks up one item, washes it inside itself while it roams the
   // lower floor, then sends it up the tube (~30 s per item at level 1)
-  const BOT_SPEED = 8.5, BOT_WASH_MS = 11000;
+  // each cloth takes about 30 s from pick-up to delivery (faster with Robo Vac levels)
+  const BOT_SPEED = 8.5, BOT_CLOTH_MS = 30000;
   const BOT_TEXT = {
     dock: 'Docked', seek: 'Looking for laundry', toFloor: 'Picking up from the floor', toBelt: 'Waiting at the belt',
     grab: 'Grabbing', washing: 'Washing it inside', toStation: 'Delivering to the tube', rest: 'Delivering to the tube',
@@ -2178,6 +2180,7 @@
   }
   function botPick(it) {
     bot.item = it;
+    bot.pickT = now;
     it.fly = null;
     emit('spark', bot.x, bot.y - 8, 5, { spread: 4, color: '#7fe0c4', vy: -18, life: 0.5 });
     beep(620, 0.05, 'square', 0.025); beep(820, 0.05, 'square', 0.025, 0, 0.05);
@@ -2219,12 +2222,17 @@
         bot.wait -= dt;
         if (bot.wait <= 0) {
           if (bot.item.clean) setBot('toStation');
-          else { setBot('washing'); bot.washT0 = now; bot.washMs = BOT_WASH_MS / botBoost(); }
+          else { setBot('washing'); bot.washT0 = now; }
         }
         break;
       case 'washing':
         roam(dt);
         if (Math.random() < dt * 5) emit('bubble', bot.x + rand(-5, 5), bot.y - 8, 1, { vx: 0, vy: rand(-16, -9), life: rand(0.5, 0.9) });
+        {
+          const tx = STATION.x - 4, ty = STATION.y + STATION.h + 6;
+          const driveMs = Math.hypot(tx - bot.x, ty - bot.y) / (BOT_SPEED * botBoost()) * 1000;
+          bot.washMs = Math.max(1500, (bot.pickT || bot.washT0) + BOT_CLOTH_MS / botBoost() - driveMs - bot.washT0);
+        }
         if (now - bot.washT0 >= bot.washMs) {
           freshen(bot.item);
           emit('spark', bot.x, bot.y - 12, 8, { spread: 6, color: '#fff6b8', vy: -25, life: 0.6 });
@@ -2246,7 +2254,7 @@
         break;
       default:
         setBot(bot.item ? (bot.item.clean ? 'toStation' : 'washing') : 'seek');
-        if (bot.s === 'washing') { bot.washT0 = now; bot.washMs = BOT_WASH_MS / botBoost(); }
+        if (bot.s === 'washing') { bot.washT0 = now; bot.pickT = now; }
     }
   }
 
@@ -2347,10 +2355,10 @@
         s.paid = true;
         const cx = STATION.x + 12, cy = STATION.y + 4;
         const n = countOf(s.item), gn = goldOf(s.item);
-        const value = CFG.coinValue * (n + 9 * gn);
+        const value = CFG.coinValue * (n + 2 * gn);
         if (gn) {
           emit('spark', cx, cy - 4, 14, { spread: 8, color: '#ffd23f', vy: -35, life: 0.9 });
-          if (!save.seen.gold) once('gold', 'Golden clothes! They pay x10.', 'good');
+          if (!save.seen.gold) once('gold', 'Golden clothes! They pay x3.', 'good');
         }
         emit('text', cx - 3, cy - 6, 1, { vx: 0, vy: -16, life: 0.9, color: '#ffd84a', text: '+' + fmtVal(value) });
         emit('coin', cx, cy, 6, { spread: 3, life: 0.7 });
