@@ -165,13 +165,12 @@
   #coins.bump { animation: bump .3s steps(3); }
   @keyframes bump { 50% { transform: translateY(-5px) scale(1.12); } }
   .coin-mult {
-    align-self: flex-end; margin-bottom: 4px;
-    font-family: var(--display); font-weight: 700; font-size: 18px;
-    color: var(--mint); background: var(--edge); padding: 3px 7px 4px;
+    align-self: flex-end; margin: 0 0 5px -4px;
+    font-family: var(--display); font-weight: 700; font-size: 22px;
+    color: var(--mint); text-shadow: 0 2px 0 var(--edge);
   }
-  .wallet-mini { display: flex; flex-wrap: wrap; gap: 8px; }
-  .wm-item { display: inline-flex; align-items: center; gap: 8px; background: var(--panel-2); border: 2px solid var(--edge); padding: 4px 10px 5px; font-size: 13px; color: var(--muted); }
-  .wm-item b { color: #d7b8ff; font-family: var(--display); font-size: 16px; }
+  .stat dt .hanger { display: inline-block; vertical-align: -1px; margin-right: 6px; background: var(--gold); }
+  #stHangers { color: #d7b8ff; }
 
   /* stats */
   dl { margin: 10px 0 0; display: grid; gap: 6px; }
@@ -214,6 +213,7 @@
   body[data-layout="tall"] .labels { inset: 3px; }
   .lbl { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; letter-spacing: .02em;
     text-shadow: 0 2px 0 var(--edge), 2px 0 0 var(--edge), -2px 0 0 var(--edge), 0 -2px 0 var(--edge), 2px 2px 0 var(--edge); }
+  .lbl.thin { text-shadow: 0 1px 0 var(--edge), 1px 0 0 var(--edge), -1px 0 0 var(--edge), 0 -1px 0 var(--edge); }
   .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; opacity: 1 !important; }
 
   /* ===== prestige ===== */
@@ -527,8 +527,7 @@
     .account { order: 5; }
     .bank { grid-template-columns: auto 1fr; align-items: center; padding: 10px 14px; }
     .bank .eyebrow { display: none; }
-    .bank .wallet-mini { justify-content: flex-end; }
-    .bank .coin-mult { font-size: 15px; }
+    .bank .coin-mult { font-size: 18px; }
     #coins { font-size: 34px; }
   }
   body[data-layout="tall"] { padding-block: 12px 28px; }
@@ -610,15 +609,13 @@
   <div class="col">
     <section class="panel bank" aria-label="Coins">
       <p class="eyebrow">Coins</p>
-      <div class="bank-row"><span class="coin" id="bankCoin" aria-hidden="true"></span><span id="coins">0</span><span class="coin-mult" id="coinMult" title="Coins per cloth">x1</span></div>
-      <div class="wallet-mini" id="walletMini" hidden>
-        <span class="wm-item"><span class="hanger big" aria-hidden="true"></span><span class="wm-name">Hangers</span><b id="wmHangers">0</b></span>
-      </div>
+      <div class="bank-row"><span class="coin" id="bankCoin" aria-hidden="true"></span><span id="coins">0</span><span class="coin-mult" id="coinMult" title="Coins per cloth">(x1)</span></div>
     </section>
 
     <section class="panel stats">
       <p class="eyebrow">Shift report</p>
       <dl>
+        <div class="stat" id="hangerRow" hidden><dt><span class="hanger" aria-hidden="true"></span>Golden hangers</dt><dd id="stHangers">0</dd></div>
         <div class="stat"><dt>Loads delivered</dt><dd id="stDelivered">0</dd></div>
         <div class="stat"><dt>Lifetime coins</dt><dd id="stLifetime">0</dd></div>
         <div class="stat"><dt>Dropped in basket</dt><dd id="stDropped">0</dd></div>
@@ -975,10 +972,9 @@
     $('stLifetime').textContent = fmt(save.lifetime);
     $('stDropped').textContent = fmt(save.dropped);
     $('stWash').textContent = (washTime(CFG.capacity) / 1000).toFixed(1) + 's' + (CFG.capacity > 1 ? ` (${CFG.capacity} clothes)` : '');
-    $('coinMult').textContent = 'x' + fmtVal(CFG.coinValue);
-    const showWallet = (save.hangers || 0) > 0 || (save.prestiges || 0) > 0 || (save.hangersEarned || 0) > 0;
-    $('walletMini').hidden = !showWallet;
-    $('wmHangers').textContent = fmt(save.hangers || 0);
+    $('coinMult').textContent = '(x' + fmtVal(CFG.coinValue) + ')';
+    $('hangerRow').hidden = !((save.hangers || 0) > 0 || (save.prestiges || 0) > 0 || (save.hangersEarned || 0) > 0);
+    $('stHangers').textContent = fmt(save.hangers || 0);
     renderFloor();
     renderShop();
     renderPrestige();
@@ -1556,10 +1552,27 @@
   const $labels = document.getElementById('labels');
   const lblPool = new Map();
   let lblUsed = new Set();
-  function putLabel(key, str, lx, ly, color) {
+  // size is in map pixels; maxW (map pixels) shrinks the text until it fits its box
+  const lblMeasure = document.createElement('canvas').getContext('2d');
+  const lblWidths = new Map();
+  function lblWidth(str) {
+    let w = lblWidths.get(str);
+    if (w === undefined) {
+      lblMeasure.font = '700 100px ' + getComputedStyle($labels).fontFamily;
+      w = lblMeasure.measureText(str).width / 100 + str.length * 0.02;
+      if (lblWidths.size > 400) lblWidths.clear();
+      lblWidths.set(str, w);
+    }
+    return w;
+  }
+  document.fonts?.ready?.then(() => lblWidths.clear());
+  function putLabel(key, str, lx, ly, color, size = 6, maxW = 0, cls = '') {
     let el = lblPool.get(key);
-    if (!el) { el = document.createElement('span'); el.className = 'lbl'; $labels.appendChild(el); lblPool.set(key, el); }
+    if (!el) { el = document.createElement('span'); el.className = 'lbl' + (cls ? ' ' + cls : ''); $labels.appendChild(el); lblPool.set(key, el); }
     if (el.textContent !== str) el.textContent = str;
+    if (maxW) size = Math.min(size, maxW / lblWidth(str));
+    const fs = (size / 6).toFixed(3) + 'em';
+    if (el.style.fontSize !== fs) el.style.fontSize = fs;
     const l = (lx / W * 100).toFixed(2) + '%', tp = (ly / H * 100).toFixed(2) + '%';
     if (el.style.left !== l) el.style.left = l;
     if (el.style.top !== tp) el.style.top = tp;
@@ -1751,30 +1764,30 @@
     if (wsh.s === 'idle') {
       const n = loadCount(wsh);
       const label = `${n}/${CFG.capacity}`;
-      const lw = 17;
-      R(bx - 1, y - 12, lw + 2, 10, OUT);
-      R(bx, y - 11, lw, 8, '#2d2a4f');
-      putLabel('cnt' + i, label, bx + lw / 2, y - 6.5, n ? '#7fe0c4' : '#c9c4ea');
+      const lw = n ? w - 12 : w; // same length as the washer (minus the go button)
+      R(bx - 1, y - 9, lw + 2, 7, OUT);
+      R(bx, y - 8, lw, 5, '#2d2a4f');
+      putLabel('cnt' + i, label, bx + lw / 2, y - 5.3, n ? '#7fe0c4' : '#c9c4ea', 4.5, lw - 2);
       if (n) {
         const b = goBox(i), pulse = (t / 300 | 0) % 2;
         R(b.x - 1, b.y - 1, b.w + 2, b.h + 2, OUT);
         R(b.x, b.y, b.w, b.h, pulse ? '#6fe08a' : '#4fc070');
         R(b.x, b.y, b.w, 1, '#b4f5c4');
         R(b.x, b.y + b.h - 2, b.w, 2, '#2f8a4a');
-        for (let k = 0; k < 3; k++) R(b.x + 4 + k, b.y + 2 + k, 1, 5 - k * 2, OUT);
+        for (let k = 0; k < 3; k++) R(b.x + 4 + k, b.y + 1 + k, 1, 5 - k * 2, OUT);
       }
     }
     if (washing) {
       const dur = wsh.dur || CFG.washMs;
       const p = Math.min(1, (t - wsh.t0) / dur);
-      R(bx - 1, y - 12, w + 2, 10, OUT);
-      R(bx, y - 11, w, 8, '#3d3357');
-      R(bx, y - 11, Math.round(w * p), 8, '#4fc070');
-      R(bx, y - 11, Math.round(w * p), 1, '#b4f5c4');
+      R(bx - 1, y - 9, w + 2, 7, OUT);
+      R(bx, y - 8, w, 5, '#3d3357');
+      R(bx, y - 8, Math.round(w * p), 5, '#4fc070');
+      R(bx, y - 8, Math.round(w * p), 1, '#b4f5c4');
       // seconds left, centred on the bar
       const left = Math.max(0, (dur - (t - wsh.t0)) / 1000);
       const label = (left >= 10 ? String(Math.ceil(left)) : left.toFixed(1)) + 's';
-      putLabel('tmr' + i, label, bx + w / 2, y - 6.5, '#ffffff');
+      putLabel('tmr' + i, label, bx + w / 2, y - 5.3, '#ffffff', 4.5, w - 2);
     } else if (wsh.s === 'done') {
       const bob = Math.round(Math.sin(t / 180 + i) * 1.5);
       const it = wsh.item;
@@ -1814,10 +1827,12 @@
     }
     R(x + 5, y + 18, 18, 8, OUT);
     R(x + 6, y + 19, 16, 6, '#2d4f3f');
-    // payout plate: coin + value when it fits, otherwise just the value, centred
+    // payout plate: a coin in the background with the value on top, shrunk to fit
     const val = fmtVal(CFG.coinValue);
-    disc(x + 9, y + 22, 2, '#ffd84a');
-    putLabel('plate', val, x + 17.5, y + 22.3, ready ? '#6fe08a' : '#8fd6a8');
+    disc(x + 14, y + 22, 3, '#c79a2a');
+    disc(x + 14, y + 22, 2, '#e8b83a');
+    R(x + 14, y + 21, 1, 3, '#a8801e');
+    putLabel('plate', val, x + 14, y + 22.3, ready ? '#6fe08a' : '#b4f5c4', 5, 15, 'thin');
     R(x + 2, y + h + 1, 4, 2, OUT); R(x + w - 6, y + h + 1, 4, 2, OUT);
   }
 
@@ -1907,7 +1922,7 @@
   }
   const washTime = (n) => CFG.washMs * Math.max(1, n) ** 0.6;
   const canLoad = (i, it) => !it.clean && washers[i].s === 'idle' && !washerSandy(i) && loadCount(washers[i]) + countOf(it) <= CFG.capacity;
-  const goBox = (i) => { const w = WASHERS[i]; return { x: w.x + w.w - 12, y: w.y - 12, w: 12, h: 10 }; };
+  const goBox = (i) => { const w = WASHERS[i]; return { x: w.x + w.w - 11, y: w.y - 10, w: 11, h: 8 }; };
   function startWash(i, byBot) {
     const wsh = washers[i];
     if (wsh.s !== 'idle' || !wsh.load.length) return;
