@@ -685,7 +685,7 @@
   let washers = [newWasher(), newWasher(), newWasher(), newWasher()];
   const countOf = (it) => it.count || 1;
   const loadCount = (w) => (w.load || []).reduce((n, it) => n + countOf(it), 0);
-  let dustEv = null, dustAt = 0;
+  let dustEv = null, dustAt = 0, dustDone = false;
   // sand resting on top of the belt or a washer: { where: 'belt'|'washer', i, rel, amount, seed }
   let topSand = [];
   const beltJammed = () => topSand.some(t => t.where === 'belt');
@@ -1950,11 +1950,14 @@
     if (!session || save.delivered < 5) return;
     if (!dustEv) {
       if (now < dustAt) return;
-      dustAt = now + rand(45000, 75000);
+      dustAt = now + rand(35000, 55000);
       if (piles.length + topSand.length >= 6) return;
       const r = Math.random();
-      if (r < 0.35 && !beltJammed()) dustEv = { t0: now, where: 'belt', rel: rand(0.1, 0.9) };
-      else if (r < 0.65) { const i = Math.random() * washerCount() | 0; dustEv = { t0: now, where: 'washer', i, rel: rand(0.2, 0.8) }; }
+      const firstDust = !dustDone;
+      dustDone = true;
+      // the first dust of a session always lands on the belt, then half the time
+      if ((firstDust || r < 0.5) && !beltJammed()) dustEv = { t0: now, where: 'belt', rel: rand(0.15, 0.85) };
+      else if (r < 0.75) { const i = Math.random() * washerCount() | 0; dustEv = { t0: now, where: 'washer', i, rel: rand(0.2, 0.8) }; }
       else dustEv = { t0: now, where: 'floor', x: rand(DUST.x0, DUST.x1), y: rand(DUST.y0, DUST.y1) };
       if (dustEv.where !== 'floor') { const pos = topSandPos(dustEv); dustEv.x = pos.x; dustEv.y = pos.y; }
       beep(90, 0.5, 'sawtooth', 0.02, 60);
@@ -2370,7 +2373,7 @@
     items = []; floor = []; piles = []; sends = []; parts = []; recent = [];
     hand = null;
     washers = [newWasher(), newWasher(), newWasher(), newWasher()];
-    dustEv = null; dustAt = now + rand(30000, 50000); topSand = [];
+    dustEv = null; dustAt = now + rand(20000, 35000); topSand = []; dustDone = false;
     bot = { x: BOTHOME.x, y: BOTHOME.y, s: 'dock', wi: -1, item: null, target: null, wait: 0, roam: null };
     const el = $('stBot'); if (el) el.textContent = 'Docked';
     pan.load = 0;
