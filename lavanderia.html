@@ -835,8 +835,9 @@
   const level = (id) => save.lv[id] || 0;
   const owned = (id) => level(id) > 0;
   const perk = (id) => (save.perks && save.perks[id]) || 0;
-  // based on the hangers you hold right now: +x0.0333 each, so 30 hangers = x2
-  const powerMult = () => 1 + (save.hangers || 0) / 30;
+  // based on the hangers you hold right now
+  // diminishing returns: x2 at 30 hangers, x3 at 120, x4 at 270, x5 at 480
+  const powerMult = () => 1 + Math.sqrt((save.hangers || 0) / 30);
   const milestoneBonus = (kind) => MILESTONES.filter(m => m.kind === kind && (save.hangersEarned || 0) >= m.at)
     .reduce((a, m) => kind === 'cap' ? a + m.v : a * m.v, kind === 'cap' ? 0 : 1);
   const prestigeMult = () => (perk('power') ? powerMult() : 1) * 1.25 ** perk('softener') * milestoneBonus('coins');
