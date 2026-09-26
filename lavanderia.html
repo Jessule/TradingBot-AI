@@ -2953,6 +2953,7 @@
       const remote = await cloudRead();
       if (remote && (remote.save.lifetime || 0) > (save.lifetime || 0)) adoptRemote(remote, 'Progress loaded from your other device.');
       else if (!remote) cloudDirty = true;
+      if (remote) cloudSyncedAt = Date.now();
       cloudErr = null;
     } catch (e) { cloudErr = e; }
     renderCloud();
