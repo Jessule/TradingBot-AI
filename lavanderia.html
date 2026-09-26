@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap">
 <style>
   /* pixel digits with a squared-off 5 (never mistaken for 8) and a clear %; only those, other characters use the page fonts */
-  @font-face { font-family: "PixDigits"; src: url(data:font/ttf;base64,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) format("truetype"); unicode-range: U+0025, U+0030-0039; font-display: block; }
+  @font-face { font-family: "PixFont"; src: url(data:font/ttf;base64,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AAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvADMAABM1MxUhNTMVBTUzFSE1MxUFNTMVITUzFQU1IRUFNTMVITUzFQU1MxUhNTMVBTUzFSE1MxUyZAEsZP4MZAEsZP4MZAEsZP4MAfT+DGQBLGT+DGQBLGT+DGQBLGQCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAAHADIAAAFeArwAAwAHAAsADwATABcAGwAAEzUhFQc1MxUHNTMVBzUzFQc1MxUHNTMVBzUhFTIBLMhkZGRkZGRkZGTIASwCWGRkZGRkZGRkZGRkZGRkZGRkZGRkAAgAMgAAAiYCvAADAAcACwAPABMAFwAbAB8AABM1IRUHNTMVBzUzFQc1MxUHNTMVBTUzFTM1MxUFNTMV+gEsyGRkZGRkZGT+cGTIZP7UyAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAADQAyAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvADMAABM1MxUhNTMVBTUzFTM1MxUFNTMVMzUzFQU1MxUHNTMVMzUzFQU1MxUzNTMVBTUzFSE1MxUyZAEsZP4MZMhk/nBkZGT+1MjIZGRk/tRkyGT+cGQBLGQCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAAHADIAAAImArwAAwAHAAsADwATABcAGwAAEzUzFQc1MxUHNTMVBzUzFQc1MxUHNTMVBzUhFTJkZGRkZGRkZGRkZGQB9AJYZGRkZGRkZGRkZGRkZGRkZGRkZGQAABAAMgAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAzADcAOwA/AAATNTMVITUzFQU1MxUzNTMVBTUzFTM1MxUzNTMVBTUzFTM1MxUzNTMVBTUzFSE1MxUFNTMVITUzFQU1MxUhNTMVMmQBLGT+DMhkyP4MZGRkZGT+DGRkZGRk/gxkASxk/gxkASxk/gxkASxkAlhkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAPADIAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3ADsAABM1MxUhNTMVBTUzFTM1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFQU1MxUhNTMVBTUzFSE1MxUFNTMVITUzFTJkASxk/gzIyGT+DGRkZGRk/gxkyMj+DGQBLGT+DGQBLGT+DGQBLGQCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAMADIAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AABM1IRUFNTMVITUzFQU1MxUhNTMVBTUzFSE1MxUFNTMVITUzFQU1MxUhNTMVBTUhFZYBLP5wZAEsZP4MZAEsZP4MZAEsZP4MZAEsZP4MZAEsZP5wASwCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAACQAyAAACJgK8AAMABwALAA8AEwAXABsAHwAjAAATNSEVBTUzFSE1MxUFNTMVITUzFQU1IRUFNTMVBzUzFQc1MxUyAZD+cGQBLGT+DGQBLGT+DAGQ/nBkZGRkZAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAA4AMgAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAzADcAABM1IRUFNTMVITUzFQU1MxUhNTMVBTUzFSE1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFQU1MxUzNTMVlgEs/nBkASxk/gxkASxk/gxkASxk/gxkZGRkZP4MZMhk/tTIZGQCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGQADAAyAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAKwAvAAATNSEVBTUzFSE1MxUFNTMVITUzFQU1IRUFNTMVMzUzFQU1MxUzNTMVBTUzFSE1MxUyAZD+cGQBLGT+DGQBLGT+DAGQ/nBkZGT+1GTIZP5wZAEsZAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAAHADIAAAImArwAAwAHAAsADwATABcAGwAAEzUhFQU1MxUHNTMVFTUhFRU1MxUHNTMVBTUhFZYBkP4MZGRkASxkZGT+DAGQAlhkZGRkZGRkZGRkZGRkZGRkZGRkZAAABwAyAAACJgK8AAMABwALAA8AEwAXABsAABM1IRUFNTMVBzUzFQc1MxUHNTMVBzUzFQc1MxUyAfT+1GRkZGRkZGRkZGRkAlhkZGRkZGRkZGRkZGRkZGRkZGRkZAANADIAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwAAEzUzFSE1MxUFNTMVITUzFQU1MxUhNTMVBTUzFSE1MxUFNTMVITUzFQU1MxUhNTMVBTUhFTJkASxk/gxkASxk/gxkASxk/gxkASxk/gxkASxk/gxkASxk/nABLAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGQAAA0AMgAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAzAAATNTMVITUzFQU1MxUhNTMVBTUzFSE1MxUFNTMVITUzFQU1MxUhNTMVBTUzFTM1MxUHNTMVMmQBLGT+DGQBLGT+DGQBLGT+DGQBLGT+DGQBLGT+cGRkZMhkAlhkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAARADIAAAImArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3ADsAPwBDAAATNTMVITUzFQU1MxUhNTMVBTUzFSE1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFTJkASxk/gxkASxk/gxkASxk/gxkZGRkZP4MZGRkZGT+DGRkZGRk/nBkZGQCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGQAAA0AMgAAAiYCvAADAAcACwAPABMAFwAbAB8AIwAnACsALwAzAAATNTMVITUzFQU1MxUhNTMVBTUzFTM1MxUHNTMVBzUzFTM1MxUFNTMVITUzFQU1MxUhNTMVMmQBLGT+DGQBLGT+cGRkZMhkyGRkZP5wZAEsZP4MZAEsZAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGQACgAyAAACJgK8AAMABwALAA8AEwAXABsAHwAjACcAABM1MxUhNTMVBTUzFSE1MxUFNTMVMzUzFQc1MxUHNTMVBzUzFQc1MxUyZAEsZP4MZAEsZP5wZGRkyGRkZGRkZGQCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAcAMgAAAiYCvAADAAcACwAPABMAFwAbAAATNSEVBzUzFQc1MxUHNTMVBzUzFQc1MxUHNSEVMgH0ZGTIZMhkyGTIZGQB9AJYZGRkZGRkZGRkZGRkZGRkZGRkZGQABgAyAAABwgH0AAMABwALAA8AEwAXAAATNTMVFTUzFQU1IRUFNTMVMzUzFQU1IRWWyGT+1AEs/nBkyGT+1AEsAZBkZGRkZGRkZGRkZGRkZGRkAAoAMgAAAcICvAADAAcACwAPABMAFwAbAB8AIwAnAAATNTMVBzUzFQc1IRUFNTMVMzUzFQU1MxUzNTMVBTUzFTM1MxUFNSEVMmRkZGQBLP7UZMhk/nBkyGT+cGTIZP5wASwCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAUAMgAAAcIB9AADAAcACwAPABMAABM1IRUFNTMVBzUzFQc1MxUVNSEVlgEs/nBkZGRkZAEsAZBkZGRkZGRkZGRkZGRkZAAKADIAAAHCArwAAwAHAAsADwATABcAGwAfACMAJwAAATUzFQc1MxUFNSEVBTUzFTM1MxUFNTMVMzUzFQU1MxUzNTMVBTUhFQFeZGRk/tQBLP5wZMhk/nBkyGT+cGTIZP7UASwCWGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAYAMgAAAcIB9AADAAcACwAPABMAFwAAEzUzFQU1MxUzNTMVBTUhFQU1MxUVNSEVlsj+1GTIZP5wAZD+cGQBLAGQZGRkZGRkZGRkZGRkZGRkZAAHADIAAAHCArwAAwAHAAsADwATABcAGwAAEzUzFQU1MxUHNSEVBzUzFQc1MxUHNTMVBzUzFfrI/tRkyAEsyGRkZGRkZGQCWGRkZGRkZGRkZGRkZGRkZGRkZGRkAAgAMv+cAcIB9AADAAcACwAPABMAFwAbAB8AABM1IRUFNTMVMzUzFQU1MxUzNTMVBTUhFQc1MxUFNSEVlgEs/nBkyGT+cGTIZP7UASxkZP5wASwBkGRkZGRkZGRkZGRkZGRkZGRkZGRkZAALADIAAAHCArwAAwAHAAsADwATABcAGwAfACMAJwArAAATNTMVBzUzFQc1IRUFNTMVMzUzFQU1MxUzNTMVBTUzFTM1MxUFNTMVMzUzFTJkZGRkASz+1GTIZP5wZMhk/nBkyGT+cGTIZAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAABgAyAAAAlgK8AAMABwALAA8AEwAXAAATNTMVBzUzFQc1MxUHNTMVBzUzFQc1MxUyZGRkZGRkZGRkZGQCWGRkyGRkZGRkZGRkZGRkZGRkAAAHADL/nAFeArwAAwAHAAsADwATABcAGwAAEzUzFQc1MxUHNTMVBzUzFQc1MxUHNTMVBTUzFfpkZGRkZGRkZGRkZP7UyAJYZGTIZGRkZGRkZGRkZGRkZGRkZGQAAAsAMgAAAcICvAADAAcACwAPABMAFwAbAB8AIwAnACsAABM1MxUHNTMVBzUzFTM1MxUFNTMVMzUzFQU1MxUHNTMVMzUzFQU1MxUzNTMVMmRkZGRkyGT+cGRkZP7UyMhkZGT+1GTIZAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAABwAyAAAA+gK8AAMABwALAA8AEwAXABsAABM1MxUHNTMVBzUzFQc1MxUHNTMVBzUzFRU1MxUyZGRkZGRkZGRkZGRkAlhkZGRkZGRkZGRkZGRkZGRkZGRkZAAADgAyAAACJgH0AAMABwALAA8AEwAXABsAHwAjACcAKwAvADMANwAAEzUzFTM1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFTM1MxUFNTMVMzUzFTM1MxUyyGRk/nBkZGRkZP4MZGRkZGT+DGRkZGRk/gxkZGRkZAGQZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGQACQAyAAABwgH0AAMABwALAA8AEwAXABsAHwAjAAATNSEVBTUzFTM1MxUFNTMVMzUzFQU1MxUzNTMVBTUzFTM1MxUyASz+1GTIZP5wZMhk/nBkyGT+cGTIZAGQZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAACAAyAAABwgH0AAMABwALAA8AEwAXABsAHwAAEzUzFQU1MxUzNTMVBTUzFTM1MxUFNTMVMzUzFQU1MxWWyP7UZMhk/nBkyGT+cGTIZP7UyAGQZGRkZGRkZGRkZGRkZGRkZGRkZGQACAAy/5wBwgH0AAMABwALAA8AEwAXABsAHwAAEzUhFQU1MxUzNTMVBTUzFTM1MxUFNSEVBTUzFQc1MxUyASz+1GTIZP5wZMhk/nABLP7UZGRkAZBkZGRkZGRkZGRkZGRkZGRkZGRkZGQAAAgAMv+cAcIB9AADAAcACwAPABMAFwAbAB8AABM1IRUFNTMVMzUzFQU1MxUzNTMVBTUhFQc1MxUHNTMVlgEs/nBkyGT+cGTIZP7UASxkZGRkAZBkZGRkZGRkZGRkZGRkZGRkZGRkZGQABgAyAAABXgH0AAMABwALAA8AEwAXAAATNTMVMzUzFQU1MxUHNTMVBzUzFQc1MxUyZGRk/tTIyGRkZGRkAZBkZGRkZGRkZGRkZGRkZGRkAAAFADIAAAHCAfQAAwAHAAsADwATAAATNSEVBTUzFRU1MxUVNTMVBTUhFZYBLP5wZMhk/nABLAGQZGRkZGRkZGRkZGRkZGQABwAyAAABwgK8AAMABwALAA8AEwAXABsAABM1MxUHNTMVBzUhFQc1MxUHNTMVBzUzFRU1MxWWZGRkyAEsyGRkZGRkyAJYZGRkZGRkZGRkZGRkZGRkZGRkZGQACQAyAAABwgH0AAMABwALAA8AEwAXABsAHwAjAAATNTMVMzUzFQU1MxUzNTMVBTUzFTM1MxUFNTMVMzUzFQU1IRUyZMhk/nBkyGT+cGTIZP5wZMhk/tQBLAGQZGRkZGRkZGRkZGRkZGRkZGRkZGRkZAAACQAyAAABXgH0AAMABwALAA8AEwAXABsAHwAjAAATNTMVMzUzFQU1MxUzNTMVBTUzFTM1MxUFNTMVMzUzFQc1MxUyZGRk/tRkZGT+1GRkZP7UZGRkyGQBkGRkZGRkZGRkZGRkZGRkZGRkZGRkZGQAAA0AMgAAAiYB9AADAAcACwAPABMAFwAbAB8AIwAnACsALwAzAAATNTMVITUzFQU1MxUzNTMVMzUzFQU1MxUzNTMVMzUzFQU1MxUzNTMVMzUzFQU1MxUzNTMVMmQBLGT+DGRkZGRk/gxkZGRkZP4MZGRkZGT+cGRkZAGQZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAAJADIAAAHCAfQAAwAHAAsADwATABcAGwAfACMAABM1MxUzNTMVBTUzFTM1MxUFNTMVBTUzFTM1MxUFNTMVMzUzFTJkyGT+cGTIZP7UyP7UZMhk/nBkyGQBkGRkZGRkZGRkZGRkZGRkZGRkZGRkZGQACQAy/5wBwgH0AAMABwALAA8AEwAXABsAHwAjAAATNTMVMzUzFQU1MxUzNTMVBTUzFTM1MxUFNSEVBzUzFQU1IRUyZMhk/nBkyGT+cGTIZP7UASxkZP5wASwBkGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAAFADIAAAHCAfQAAwAHAAsADwATAAATNSEVBzUzFQU1MxUFNTMVBzUhFTIBkGRk/tTI/tRkZAGQAZBkZGRkZGRkZGRkZGRkZAABADIAAACWAGQAAwAAMzUzFTJk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OAd1bmkwMDY5B3VuaTAwNkEHdW5pMDA2Qgd1bmkwMDZDB3VuaTAwNkQHdW5pMDA2RQd1bmkwMDZGB3VuaTAwNzAHdW5pMDA3MQd1bmkwMDcyB3VuaTAwNzMHdW5pMDA3NAd1bmkwMDc1B3VuaTAwNzYHdW5pMDA3Nwd1bmkwMDc4B3VuaTAwNzkHdW5pMDA3QQd1bmkwMDJFB3VuaTAwMkMHdW5pMDAzQQd1bmkwMDNCB3VuaTAwMjEHdW5pMDAzRgd1bmkwMDI3B3VuaTAwMjIHdW5pMDAyRAd1bmkwMDJCB3VuaTAwM0QHdW5pMDAyRgd1bmkwMDVDB3VuaTAwMjgHdW5pMDAyOQd1bmkwMDVCB3VuaTAwNUQHdW5pMDAzQwd1bmkwMDNFB3VuaTAwNUYHdW5pMDAyMwd1bmkwMDI2B3VuaTAwMkEHdW5pMDBENwd1bmkwMEI3B3VuaTIwMjIHdW5pMDA0MAd1bmkwMDI0B3VuaTAwN0UHdW5pMDA3Qwd1bmkyMDI2B3VuaTIwMTMHdW5pMjAxNAd1bmkyMDE5B3VuaTIwMTgHdW5pMjAxQwd1bmkyMDFEB3VuaTIxOTIHdW5pMjE5MAd1bmkyMTkxB3VuaTIxOTMHdW5pMjcxMwd1bmkyMEFDB3VuaTAwQTEHdW5pMDBCRgd1bmkwMEYxB3VuaTAwRTEHdW5pMDBFOQd1bmkwMEVEB3VuaTAwRjMHdW5pMDBGQQAAAA==) format("truetype"); font-display: block; }
   :root {
     --bg: #161527;
     --bg-dot: rgba(190, 180, 255, .06);
@@ -20,8 +20,8 @@
     --mint: #7fe0c4;
     --pink: #ff8fc7;
     --warn: #ffab85;
-    --display: "PixDigits", "Silkscreen", ui-monospace, "Courier New", monospace;
-    --body: "PixDigits", "Silkscreen", ui-monospace, "Courier New", monospace;
+    --display: "PixFont", "Silkscreen", ui-monospace, "Courier New", monospace;
+    --body: "PixFont", "Silkscreen", ui-monospace, "Courier New", monospace;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -657,7 +657,7 @@
       <dl>
         <div class="stat"><dt>Loads delivered</dt><dd id="stDelivered">0</dd></div>
         <div class="stat"><dt>Lifetime coins</dt><dd id="stLifetime">0</dd></div>
-        <div class="stat"><dt>Dropped in basket</dt><dd id="stDropped">0</dd></div>
+        <div class="stat"><dt>Thrown in the bin</dt><dd id="stDropped">0</dd></div>
         <div class="stat"><dt>Wash cycle</dt><dd id="stWash">5.0s</dd></div>
         <div class="stat" id="prRow" hidden><dt><span class="hanger" aria-hidden="true"></span>Golden Hangers</dt><dd id="stHangers">0</dd></div>
         <div class="stat" id="prRow2" hidden><dt>Prestiges</dt><dd id="stPrestiges">0</dd></div>
@@ -736,6 +736,8 @@
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
     { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: Array.from({ length: 10 }, (_, i) => Math.round(10 * 1.6 ** i)),
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
+    { id: 'basket', name: 'Clean Basket', icon: 'basket', costs: [400],
+      desc: () => 'Keep clean clothes without them getting dirty' },
   ];
   const BASE_SPAWN = BASE.spawnMin + BASE.spawnVar / 2;
   // permanent perks bought with Golden Hangers (kept through prestige)
@@ -765,6 +767,7 @@
     drum: { title: 'Wash Speed', blurb: 'Every wash 10% faster (time for a full load)', show: (lv) => (BASE.washMs * 0.9 ** lv * CFG.capacity ** 0.6 / 1000).toFixed(1) + 's' },
     soap: { title: 'Coin Value', blurb: 'Multiplies coins per cloth', show: (lv) => 'x' + fmtMult(SOAP_MULT ** lv) },
     cap: { title: 'Washer Capacity', blurb: 'More clothes per wash (up to 3). Bigger loads take a bit longer', show: (lv) => (BASE.capacity + lv) + (BASE.capacity + lv > 1 ? ' clothes' : ' cloth') },
+    basket: { title: 'Clean Basket', blurb: 'Stack clean clothes in it. They stay clean, then carry them all to the tube at once', show: (lv) => lv ? 'Owned' : 'None' },
     belt: { title: 'Clothes Flow', blurb: 'More clothes on a faster belt', show: (lv) => 'x' + fmtMult(1.15 ** lv) },
   };
 
@@ -782,7 +785,7 @@
       STATION: { x: 180, y: 74, w: 30, h: 28 },
       PIPE: { x: 189, w: 12 },
       WIN: { x: 136 }, PLANT: { x: 222, y: 34 }, POSTER: { x: 84 }, DUST: { x0: 128, x1: 172, y0: 32, y1: 46 },
-      PAN: { x: 220, y: 110 }, BROOM: { x: 192, y: 123 }, TRASH: { x: 222, y: 84, w: 13, h: 16 }, BOT: { x: 160, y: 123 },
+      PAN: { x: 220, y: 110 }, BROOM: { x: 192, y: 123 }, TRASH: { x: 222, y: 84, w: 13, h: 16 }, BOT: { x: 160, y: 123 }, BASKET: { x: 146, y: 106 },
     },
     tall: {
       W: 128, H: 192,
@@ -792,17 +795,17 @@
       STATION: { x: 92, y: 134, w: 30, h: 28 },
       PIPE: { x: 101, w: 12 },
       WIN: { x: 66 }, PLANT: { x: 10, y: 170 }, POSTER: null, DUST: { x0: 60, x1: 92, y0: 64, y1: 72 },
-      PAN: { x: 91, y: 173 }, BROOM: { x: 72, y: 187 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 30, y: 187 },
+      PAN: { x: 91, y: 173 }, BROOM: { x: 72, y: 187 }, TRASH: { x: 108, y: 168, w: 13, h: 16 }, BOT: { x: 30, y: 187 }, BASKET: { x: 46, y: 174 },
     },
   };
-  let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, PANHOME, BROOMHOME, TRASH, BOTHOME;
+  let layoutName = '', BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, PANHOME, BROOMHOME, TRASH, BOTHOME, BASKET;
   function applyLayout() {
     const name = window.innerWidth < 700 && window.innerHeight > window.innerWidth ? 'tall' : 'wide';
     if (name === layoutName) return;
     const prev = layoutName ? { W, H } : null;
     layoutName = name;
     const L = LAYOUTS[name];
-    ({ W, H, BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, TRASH } = L);
+    ({ W, H, BELT, BIN, WASHERS, STATION, PIPE, WIN, PLANT, POSTER, DUST, TRASH, BASKET } = L);
     BOTHOME = L.BOT; PANHOME = L.PAN; BROOMHOME = L.BROOM;
     cv.width = W; cv.height = H;
     g.imageSmoothingEnabled = false;
@@ -850,6 +853,7 @@
   let save = { coins: 0, lifetime: 0, delivered: 0, dropped: 0, sound: true, lv: {}, seen: {} };
   let items = [];            // on the belt
   let floor = [];            // lying on the floor
+  let basket = null;         // clean clothes kept in the basket, as one stacked item
   let piles = [];            // sand piles
   let hand = null;           // what the player is holding
   const newWasher = () => ({ s: 'idle', item: null, t0: 0, load: [] });
@@ -1247,6 +1251,7 @@
     if (kind === 'lucky') { P(4, 1, 5, 8, OUT); P(5, 2, 3, 7, '#ffd23f'); P(2, 8, 8, 5, OUT); P(3, 9, 6, 3, '#ffd23f'); P(5, 3, 1, 2, '#fff6b8'); P(11, 1, 1, 3, '#fff'); P(10, 2, 3, 1, '#fff'); }
     if (kind === 'filter') { P(1, 2, 12, 10, OUT); P(2, 3, 10, 8, '#26346a'); for (let k = 3; k < 12; k += 2) P(k, 3, 1, 8, '#9aa0b5'); for (let k = 4; k < 11; k += 2) P(2, k, 10, 1, '#9aa0b5'); }
     if (kind === 'hanger') { P(6, 1, 2, 3, OUT); P(6, 1, 2, 1, '#ffd23f'); P(5, 4, 4, 2, OUT); P(2, 6, 10, 2, OUT); P(0, 8, 14, 3, OUT); P(1, 9, 12, 1, '#ffd23f'); P(3, 7, 8, 1, '#ffd23f'); P(6, 5, 2, 1, '#ffd23f'); }
+    if (kind === 'basket') { P(1, 5, 12, 8, OUT); P(2, 6, 10, 6, '#c98a4a'); for (let k = 3; k < 12; k += 3) P(k, 6, 1, 6, '#9a5e2a'); P(2, 8, 10, 1, '#e0ad6a'); P(3, 2, 3, 4, '#4a7fe0'); P(7, 1, 4, 5, '#e05a5a'); P(3, 2, 3, 1, '#8fb4ff'); }
     if (kind === 'coin') { P(3, 3, 8, 8, OUT); P(4, 4, 6, 6, '#ffd23f'); P(6, 5, 2, 4, '#c98f0a'); P(4, 4, 2, 2, '#fff3a8'); }
     if (kind === 'cap') { P(2, 2, 10, 11, OUT); P(3, 3, 8, 9, '#eef0f5'); P(4, 6, 6, 5, '#1f3b52'); P(5, 8, 4, 2, '#e05a5a'); P(8, 7, 2, 2, '#4a7fe0'); P(9, 0, 5, 5, OUT); P(11, 1, 1, 3, '#6fe08a'); P(10, 2, 3, 1, '#6fe08a'); }
     if (kind === 'soap') { P(4, 1, 6, 3, OUT); P(5, 2, 4, 1, '#e87ab8'); P(3, 4, 8, 9, OUT); P(4, 5, 6, 7, '#7fe0c4'); P(5, 7, 4, 3, '#ffffff'); P(10, 2, 2, 2, '#e8f7ff'); P(12, 5, 1, 1, '#e8f7ff'); }
@@ -1880,12 +1885,11 @@
     }
     R(x + 5, y + 18, 18, 8, OUT);
     R(x + 6, y + 19, 16, 6, '#2d4f3f');
-    // payout plate: a coin in the background with the value on top, shrunk to fit
-    const val = fmtVal(CFG.coinValue);
-    disc(x + 14, y + 22, 3, '#c79a2a');
-    disc(x + 14, y + 22, 2, '#e8b83a');
-    R(x + 14, y + 21, 1, 3, '#a8801e');
-    putLabel('plate', val, x + 14, y + 22.3, ready ? '#6fe08a' : '#b4f5c4', 5, 15, 'thin');
+    // payout plate: what the load in your hand is worth here (dirty pays nothing)
+    const held = hand && hand.kind === 'item' ? hand.item : null;
+    const val = !held ? fmtVal(CFG.coinValue)
+      : held.clean ? fmtVal(CFG.coinValue * (countOf(held) + 2 * goldOf(held))) : '0';
+    putLabel('plate', val, x + 14, y + 22.3, val === '0' ? '#ff8f6b' : ready || held ? '#6fe08a' : '#b4f5c4', 5, 15, 'thin');
     R(x + 2, y + h + 1, 4, 2, OUT); R(x + w - 6, y + h + 1, 4, 2, OUT);
   }
 
@@ -1932,6 +1936,30 @@
   const itemY = (it) => BELT.y - 1 - it.h + it.drop;
   const itemBox = (it) => ({ x: it.x, y: itemY(it), w: it.w, h: it.h });
   const floorBox = (it) => ({ x: it.fx, y: it.fy, w: it.w, h: it.h });
+  const hasBasket = () => level('basket') > 0;
+  const basketBox = () => ({ x: BASKET.x - 1, y: BASKET.y - 6, w: 18, h: 18 });
+  function addToBasket(it) {
+    if (!basket) { basket = it; basket.goldN = goldOf(it); basket.count = countOf(it); return; }
+    basket.goldN = goldOf(basket) + goldOf(it);
+    basket.count = countOf(basket) + countOf(it);
+    basket.gold = basket.goldN > 0;
+  }
+  function drawBasket(t) {
+    const { x, y } = BASKET;
+    oval(x + 8, y + 11, 9, 1, 'rgba(20,50,60,.22)');
+    if (basket) {
+      // the top of the pile peeks out of the basket
+      drawItem(basket, x + 8 - basket.w / 2, y - 5, t);
+    }
+    R(x - 1, y + 1, 18, 10, OUT);
+    R(x, y + 2, 16, 8, '#c98a4a');
+    R(x, y + 2, 16, 1, '#e0ad6a');
+    for (let k = 2; k < 16; k += 3) R(x + k, y + 3, 1, 7, '#9a5e2a');
+    R(x, y + 5, 16, 1, '#e0ad6a');
+    R(x + 1, y + 9, 14, 1, '#8a4e1e');
+    R(x - 2, y + 1, 3, 3, OUT); R(x + 15, y + 1, 3, 3, OUT);
+    if (basket && countOf(basket) > 1) text('x' + countOf(basket), x + 17, y + 5, '#ffd84a');
+  }
   const pileBox = (pl) => { const s = pileSize(pl), w = Math.round(14 * s), hh = Math.round(3 + 2 * s); return { x: pl.x - w / 2, y: pl.y - hh - 2, w, h: hh + 3 }; };
   const stationBox = () => ({ x: STATION.x - 2, y: STATION.y - 26, w: STATION.w + 4, h: STATION.h + 26 });
   const washerBox = (i) => WASHERS[i];
@@ -1945,6 +1973,7 @@
       if (it.drop < 3 && inRect(px, py, itemBox(it), pad + 1)) return { src: 'belt', i };
     }
     if (inRect(px, py, panBox(), pad)) return { src: 'pan' };
+    if (hasBasket() && basket && inRect(px, py, basketBox(), pad)) return { src: 'basket' };
     if (inRect(px, py, broomBox(), pad)) return { src: 'broom' };
     let best = null;
     floor.forEach((it, i) => { if (inRect(px, py, floorBox(it), pad) && (!best || it.fy > floor[best.i].fy)) best = { src: 'floor', i }; });
@@ -1959,6 +1988,7 @@
     const pad = touchMode ? 7 : 4;
     for (let i = 0; i < washerCount(); i++) if (inRect(px, py, washerBox(i), pad)) return { k: 'washer', i };
     if (inRect(px, py, stationBox(), pad)) return { k: 'station' };
+    if (hasBasket() && inRect(px, py, basketBox(), pad)) return { k: 'basket' };
     if (inRect(px, py, binBox(), 1)) return { k: 'bin' };
     if (inRect(px, py, beltZone(), 0)) return { k: 'belt' };
     return null;
@@ -2009,6 +2039,10 @@
       const it = floor.splice(pk.i, 1)[0];
       hand = { kind: 'item', item: it, src: 'floor', srcPos: { x: it.fx, y: it.fy } };
       beep(440, 0.05); beep(660, 0.06, 'square', 0.04, 0, 0.04);
+    } else if (pk.src === 'basket') {
+      hand = { kind: 'item', item: basket, src: 'basket' };
+      basket = null;
+      beep(440, 0.05); beep(660, 0.06, 'square', 0.04, 0, 0.04);
     } else if (pk.src === 'washer') {
       const it = washers[pk.i].item;
       washers[pk.i] = newWasher();
@@ -2046,6 +2080,8 @@
       const it = hand.item;
       if (hand.src === 'washer' && washers[hand.srcI].s === 'idle') {
         washers[hand.srcI] = { s: 'done', item: it, t0: now, load: [] };
+      } else if (hand.src === 'basket') {
+        addToBasket(it);
       } else if (hand.src === 'belt') {
         it.x = hand.srcX; it.drop = 0; it.vy = 0;
         it.fly = { x0: from.x - it.w / 2, y0: from.y - it.h / 2, t0: now };
@@ -2100,7 +2136,9 @@
     const z = mouthZone();
     for (let i = piles.length - 1; i >= 0; i--) {
       const pl = piles[i];
-      if (!inRect(pl.x, pl.y - 2, z, 0)) continue;
+      // a wide pile counts as soon as its edge reaches the dustpan's mouth
+      const hw = Math.round(14 * pileSize(pl)) / 2;
+      if (Math.abs(pl.x - (z.x + z.w / 2)) > z.w / 2 + hw - 2 || !inRect(z.x + z.w / 2, pl.y - 2, z, 0)) continue;
       const room = PAN_CAP - pan.load;
       if (room <= 0) {
         if (now - fullWarnAt > 2500) { fullWarnAt = now; toast('The dustpan is full. Empty it in the trash can.', 'warn'); }
@@ -2142,7 +2180,7 @@
       for (const pl of piles) {
         // a sweep only moves sand toward the dustpan's open side
         if ((mx - pl.x) * dx + (my - (pl.y - 2)) * dy <= 0) continue;
-        if (Math.abs(pl.x - hx) < 7 && Math.abs(pl.y - 2 - hy) < 5) {
+        if (Math.abs(pl.x - hx) < Math.max(7, Math.round(14 * pileSize(pl)) / 2 + 3) && Math.abs(pl.y - 2 - hy) < 5) {
           pl.x = clamp(pl.x + dx / steps, 6, W - 6);
           pl.y = clamp(pl.y + dy / steps, 33, H - 2);
           pushed = true;
@@ -2200,6 +2238,19 @@
         : wsh.s !== 'idle' ? 'That washer is busy.'
         : washerSandy(tg.i) ? 'Sand on this washer! Brush it off with the broom.'
         : `It doesn't fit: ${loadCount(wsh)}/${CFG.capacity} already inside.`, 'warn');
+      returnHand(p);
+      return;
+    }
+    if (tg && tg.k === 'basket') {
+      if (it.clean) {
+        addToBasket(it);
+        hand = null;
+        emit('spark', BASKET.x + 8, BASKET.y, 5, { spread: 6, color: '#ffffff', vy: -20, life: 0.5 });
+        beep(300, 0.06, 'triangle', 0.05); beep(450, 0.06, 'triangle', 0.04, 0, 0.05);
+        if (!save.seen.basket) once('basket', 'Clean clothes stay clean in the basket. Grab it all and drop it in the tube!', 'good');
+        return;
+      }
+      toast('Only clean clothes go in the basket.', 'warn');
       returnHand(p);
       return;
     }
@@ -2505,6 +2556,7 @@
     const layer = [
       ...piles.map(pl => ({ y: pl.y, d: () => drawPile(pl) })),
       { y: TRASH.y + TRASH.h, d: drawTrash },
+      ...(hasBasket() ? [{ y: BASKET.y + 10, d: () => drawBasket(t) }] : []),
       ...(hand && hand.kind === 'pan' ? [] : [{ y: pan.y + 10, d: () => drawPan(pan.x, pan.y, false, pan.face, pan.load) }]),
       ...(hand && hand.kind === 'broom' ? [] : [{ y: broom.y + 4, d: () => drawBroomFloor(broom.x, broom.y) }]),
       ...floor.map(it => ({ y: it.fy + it.h, d: () => {
@@ -2542,11 +2594,12 @@
         const tg = dropTargetAt(hp.x, hp.y);
         for (let i = 0; i < washerCount(); i++) if (canLoad(i, hand.item)) bracketBox(WASHERS[i], t, tg && tg.k === 'washer' && tg.i === i);
         if (hand.item.clean) bracketBox(STATION, t, tg && tg.k === 'station');
+        if (hand.item.clean && hasBasket()) bracketBox(basketBox(), t, tg && tg.k === 'basket');
       }
     } else if (!touchMode && ptr.inside) {
       const pk = pickAt(ptr.x, ptr.y);
       if (pk) {
-        const b = pk.src === 'belt' ? itemBox(items[pk.i]) : pk.src === 'floor' ? floorBox(floor[pk.i]) : pk.src === 'washer' ? WASHERS[pk.i] : pk.src === 'pan' ? panBox() : broomBox();
+        const b = pk.src === 'belt' ? itemBox(items[pk.i]) : pk.src === 'floor' ? floorBox(floor[pk.i]) : pk.src === 'washer' ? WASHERS[pk.i] : pk.src === 'pan' ? panBox() : pk.src === 'basket' ? basketBox() : broomBox();
         bracketBox(b, t, true);
       }
     }
@@ -2700,14 +2753,15 @@
 
   // compact binary form of a save
   const LV_ORDER = ['drum', 'soap', 'belt', 'washer2', 'bot', 'cap'];
+  const LV_ORDER6 = [...LV_ORDER, 'basket'];
   function packSave(sv) {
-    const out = [5];
+    const out = [6];
     const vint = (n) => { n = Math.max(0, Math.floor(n || 0)); while (n >= 128) { out.push((n % 128) | 128); n = Math.floor(n / 128); } out.push(n); };
     vint(sv.coins); vint(sv.lifetime); vint(sv.delivered); vint(sv.dropped);
     vint(sv.runEarned); vint(sv.hangers); vint(sv.prestiges); vint(sv.hangersEarned);
     out.push(sv.sound ? 1 : 0);
     const L = sv.lv || {};
-    for (const id of LV_ORDER) out.push(L[id] || 0);
+    for (const id of LV_ORDER6) out.push(L[id] || 0);
     const P = sv.perks || {};
     for (const id of PERK_ORDER) out.push(P[id] || 0);
     return new Uint8Array(out);
@@ -2715,19 +2769,20 @@
   function unpackSave(b) {
     let i = 0;
     const ver = b[i++];
-    if (ver < 1 || ver > 5) throw new Error('version');
+    if (ver < 1 || ver > 6) throw new Error('version');
     const upMax = (id, v) => { const u = UPGRADES.find(x => x.id === id); return u ? Math.min(v, u.costs.length) : v; };
     const perkMax = (id, v) => { const q = PERKS.find(x => x.id === id); return q ? Math.min(v, q.costs.length) : v; };
     const vint = () => { let n = 0, m = 1, x; do { if (i >= b.length) throw new Error('short'); x = b[i++]; n += (x & 127) * m; m *= 128; } while (x & 128); return n; };
     const coins = vint(), lifetime = vint(), delivered = vint(), dropped = vint();
-    if (ver === 4 || ver === 5) {
+    if (ver >= 4) {
       const runEarned = vint(), hangers = vint(), prestiges = vint();
-      const hangersEarned = ver === 5 ? vint() : undefined;
-      const order = ver === 5 ? PERK_ORDER : PERK_ORDER_V4;
-      if (i + 1 + LV_ORDER.length + order.length !== b.length) throw new Error('length');
+      const hangersEarned = ver >= 5 ? vint() : undefined;
+      const order = ver >= 5 ? PERK_ORDER : PERK_ORDER_V4;
+      const lvOrder = ver >= 6 ? LV_ORDER6 : LV_ORDER;
+      if (i + 1 + lvOrder.length + order.length !== b.length) throw new Error('length');
       const sound = !!b[i++];
       const lv = {}, perks = {};
-      for (const id of LV_ORDER) lv[id] = upMax(id, b[i++]);
+      for (const id of lvOrder) lv[id] = upMax(id, b[i++]);
       for (const id of order) perks[id] = perkMax(id, b[i++]);
       const out = { coins, lifetime, delivered, dropped, runEarned, hangers, prestiges, sound, seen: {}, lv, perks };
       if (hangersEarned != null) out.hangersEarned = hangersEarned;
@@ -2843,7 +2898,7 @@
     return sv;
   }
   function resetWorld() {
-    items = []; floor = []; piles = []; sends = []; parts = []; recent = [];
+    items = []; floor = []; piles = []; sends = []; parts = []; recent = []; basket = null;
     hand = null;
     washers = [newWasher(), newWasher(), newWasher(), newWasher()];
     dustEv = null; dustAt = now + rand(20000, 35000); topSand = []; dustDone = false;
