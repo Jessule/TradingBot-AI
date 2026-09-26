@@ -459,6 +459,14 @@
     overflow-wrap: anywhere;
     user-select: all;
   }
+  .code-row input {
+    flex: 1; min-width: 0;
+    font-family: var(--display); font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--edge); border: 2px solid var(--panel-2); padding: 7px 9px;
+  }
+  .code-row input:focus { outline: none; border-color: var(--mint); }
+  .acc-msg { margin: 6px 0 0; font-size: 13px; min-height: 1.2em; color: var(--mint); }
+  .acc-msg.bad { color: var(--warn); }
   .acc-hint { margin: 8px 0 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
   .who { color: var(--mint); border-color: var(--mint); max-width: 11em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .brand-actions { display: flex; gap: 8px; align-items: center; flex: none; }
@@ -631,7 +639,10 @@
       <p class="acc-name">Signed in as <b id="accName"></b></p>
       <p class="eyebrow" style="margin-top: 12px">Transfer code</p>
       <div class="code-row"><code id="accCode">…</code><button class="ghost" id="copyCode" type="button">Copy</button></div>
-      <p class="acc-hint">To play on another device, log in there with your name, your password and this code. The code carries your progress and changes as you play and every time you log in, so copy the newest one. Each code works once per device.</p>
+      <p class="acc-hint">This code carries your progress and changes as you play. Copy the newest one and paste it on your other device.</p>
+      <p class="eyebrow" style="margin-top: 12px">Load progress from another device</p>
+      <form class="code-row" id="loadCodeForm"><input id="loadCode" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="Paste code" aria-label="Transfer code from another device"><button class="ghost" id="loadCodeBtn" type="submit">Load</button></form>
+      <p class="acc-msg" id="loadMsg" role="status"></p>
     </section>
 
     <section class="panel howto">
@@ -2854,6 +2865,30 @@
     try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
   });
 
+  // paste a code from another device while signed in
+  $('loadCodeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = (t, bad) => { $('loadMsg').textContent = t; $('loadMsg').classList.toggle('bad', !!bad); };
+    const txt = $('loadCode').value.trim();
+    if (!session || !txt) return msg('Paste the code from your other device first.', true);
+    persist();
+    const accs = loadAccounts();
+    const acc = accs[session];
+    if (!acc) return;
+    let res;
+    try { res = await readCode(txt, acc.ck); } catch (x) { return msg('That code doesn’t belong to this account.', true); }
+    // a code keeps its id for a whole session, so accept it again whenever it carries newer progress
+    const fromCode = normalizeSave(res.save);
+    const have = (acc.save && acc.save.lifetime) || 0, got = fromCode.lifetime || 0;
+    if (got < have || (got === have && codeUsed(acc, res.nonce))) return msg('This device already has this progress or newer. Copy the newest code.', true);
+    markCodeUsed(acc, res.nonce);
+    acc.save = Object.assign(acc.save || {}, fromCode, { seen: (acc.save && acc.save.seen) || {}, sound: save.sound });
+    saveAccounts(accs);
+    $('loadCode').value = '';
+    enterGame(session, 'Progress loaded from your other device.');
+    msg('Progress loaded from your other device.');
+  });
+
   $('authForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const err = (m) => { $('authErr').textContent = m; };
@@ -2895,10 +2930,11 @@
         if (codeTxt) {
           let res;
           try { res = await readCode(codeTxt, ck); } catch (x) { return err('That transfer code doesn’t belong to this account.'); }
-          if (codeUsed(acc, res.nonce)) return err('That code was already used. Copy the newest one from your account.');
           const fromCode = res.save;
+          const have = (acc.save && acc.save.lifetime) || 0, got = fromCode.lifetime || 0;
+          const fresh = got > have || (got === have && !codeUsed(acc, res.nonce));
           markCodeUsed(acc, res.nonce);
-          if ((fromCode.lifetime || 0) >= ((acc.save && acc.save.lifetime) || 0)) {
+          if (fresh) {
             acc.save = Object.assign(acc.save || {}, fromCode, { seen: (acc.save && acc.save.seen) || {} });
             note = 'Progress loaded from your transfer code.';
           } else note = 'This device already had newer progress, so it was kept.';
