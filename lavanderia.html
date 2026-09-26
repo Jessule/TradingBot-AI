@@ -38,15 +38,23 @@
     padding-inline: 16px;
     padding-block: 18px 32px;
   }
+  /* wide screens: title, coins, the game across the whole width, info panels underneath */
   .app {
-    max-width: 1100px;
+    max-width: 1400px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: "brand brand brand" "bank bank bank" "stage stage stage" "stats account howto";
+    gap: 14px 18px;
     align-items: start;
   }
-  .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .col { display: contents; }
+  .brand { grid-area: brand; }
+  .bank { grid-area: bank; }
+  .stage { grid-area: stage; }
+  .stats { grid-area: stats; }
+  .account { grid-area: account; }
+  .howto { grid-area: howto; }
 
   .panel {
     background: var(--panel);
@@ -96,7 +104,7 @@
     width: 100%;
     max-width: 100%;
     height: auto;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 15 / 8;
     margin-inline: auto;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
@@ -133,7 +141,7 @@
   #toast.good { color: var(--gold); }
 
   /* bank */
-  .bank { display: grid; gap: 6px; }
+  .bank { display: flex; align-items: center; gap: 16px; padding: 10px 16px; }
   .bank-row { display: flex; align-items: center; gap: 12px; }
   .coin {
     flex: none;
@@ -270,7 +278,7 @@
   body[data-layout="tall"] .pr-gain { font-size: 30px; }
 
   /* ===== in-game upgrade menu ===== */
-  .screen { position: relative; width: 100%; margin-inline: auto; container-type: inline-size; }
+  .screen { position: relative; width: min(100%, calc((100dvh - 150px) * 15 / 8)); min-width: min(100%, 640px); margin-inline: auto; container-type: inline-size; }
   /* keep action messages clear of the Upgrades button: beside it when wide, below it when narrow */
   @container (max-width: 640px) {
     #toast { top: 54px; max-width: calc(100% - 24px); }
@@ -372,6 +380,31 @@
     min-height: 0;
     overscroll-behavior: contain;
   }
+  /* wide screens: upgrades as tall cards in one row, scrolled sideways */
+  body[data-layout="wide"] #ups {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 1fr);
+    grid-template-rows: minmax(100%, max-content);
+    align-content: stretch;
+    overflow-x: auto; overflow-y: auto;
+    scroll-snap-type: x proximity;
+  }
+  body[data-layout="wide"] #ups .uc {
+    grid-template-rows: auto auto 1fr auto auto auto;
+    align-items: start;
+    align-content: stretch;
+    scroll-snap-align: start;
+    padding: 14px 14px 16px;
+  }
+  body[data-layout="wide"] #ups .uc-blurb { align-self: start; font-size: 15px; margin-top: 4px; }
+  body[data-layout="wide"] #ups .uc-title { font-size: 20px; }
+  body[data-layout="wide"] #ups .uc-ico { width: 46px; height: 46px; margin-bottom: 6px; }
+  body[data-layout="wide"] #ups .uc-ico canvas { width: 38px; height: 38px; }
+  body[data-layout="wide"] #ups .uc-next { font-size: clamp(30px, 4.2cqw, 48px); margin-top: 6px; }
+  body[data-layout="wide"] #ups .uc-now { font-size: 17px; margin-bottom: 8px; }
+  .shop-grid::-webkit-scrollbar { height: 14px; }
+  .shop-grid::-webkit-scrollbar-track:horizontal { box-shadow: inset 0 2px 0 var(--panel-2), inset 0 -2px 0 var(--panel-2); }
   .uc {
     --i: 0;
     position: relative;
@@ -526,14 +559,13 @@
   /* one column */
   @media (max-width: 860px) {
     .app { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
-    .col { display: contents; }
     .brand { order: 0; }
     .bank { order: 1; }
     .stage { order: 2; }
     .stats { order: 3; }
     .howto { order: 6; }
     .account { order: 5; }
-    .bank { grid-template-columns: auto 1fr; align-items: center; padding: 10px 14px; }
+    .bank { padding: 10px 14px; }
     .bank .eyebrow { display: none; }
     .bank .coin-mult { font-size: 18px; }
     #coins { font-size: 34px; }
@@ -639,9 +671,11 @@
       <p class="acc-name">Signed in as <b id="accName"></b></p>
       <p class="acc-msg" id="cloudMsg" hidden></p>
       <div id="localSync">
+      <div id="exportCode">
       <p class="eyebrow" style="margin-top: 12px">Transfer code</p>
       <div class="code-row"><code id="accCode">…</code><button class="ghost" id="copyCode" type="button">Copy</button></div>
       <p class="acc-hint">This code carries your progress and changes as you play. Copy the newest one and paste it on your other device.</p>
+      </div>
       <p class="eyebrow" style="margin-top: 12px">Load progress from another device</p>
       <form class="code-row" id="loadCodeForm"><input id="loadCode" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="Paste code" aria-label="Transfer code from another device"><button class="ghost" id="loadCodeBtn" type="submit">Load</button></form>
       <p class="acc-msg" id="loadMsg" role="status"></p>
@@ -735,20 +769,20 @@
   };
 
   // ================= canvas & layout =================
-  let W = 192, H = 128;
+  let W = 240, H = 128;
   const cv = document.getElementById('game');
   let g = cv.getContext('2d');
 
   const LAYOUTS = {
     wide: {
-      W: 192, H: 128,
-      BELT: { x0: 0, x1: 84, y: 38 },
-      BIN: { x: 88, y: 42, w: 17 },
-      WASHERS: [{ x: 74, y: 64, w: 30, h: 36 }, { x: 34, y: 64, w: 30, h: 36 }, { x: 108, y: 64, w: 30, h: 36 }, { x: 1, y: 64, w: 30, h: 36 }],
-      STATION: { x: 140, y: 74, w: 30, h: 28 },
-      PIPE: { x: 149, w: 12 },
-      WIN: { x: 102 }, PLANT: { x: 8, y: 108 }, POSTER: { x: 72 }, DUST: { x0: 110, x1: 134, y0: 32, y1: 46 },
-      PAN: { x: 175, y: 110 }, BROOM: { x: 152, y: 123 }, TRASH: { x: 176, y: 84, w: 13, h: 16 }, BOT: { x: 120, y: 123 },
+      W: 240, H: 128,
+      BELT: { x0: 0, x1: 100, y: 38 },
+      BIN: { x: 104, y: 42, w: 17 },
+      WASHERS: [{ x: 90, y: 64, w: 30, h: 36 }, { x: 50, y: 64, w: 30, h: 36 }, { x: 130, y: 64, w: 30, h: 36 }, { x: 10, y: 64, w: 30, h: 36 }],
+      STATION: { x: 180, y: 74, w: 30, h: 28 },
+      PIPE: { x: 189, w: 12 },
+      WIN: { x: 136 }, PLANT: { x: 222, y: 34 }, POSTER: { x: 84 }, DUST: { x0: 128, x1: 172, y0: 32, y1: 46 },
+      PAN: { x: 220, y: 110 }, BROOM: { x: 192, y: 123 }, TRASH: { x: 222, y: 84, w: 13, h: 16 }, BOT: { x: 160, y: 123 },
     },
     tall: {
       W: 128, H: 192,
@@ -1230,6 +1264,13 @@
   }
   const shopEls = {};
   const $ups = $('ups');
+  // the mouse wheel scrolls the upgrade row sideways on wide screens
+  $ups.addEventListener('wheel', (e) => {
+    if (document.body.dataset.layout !== 'wide' || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if ($ups.scrollWidth <= $ups.clientWidth) return;
+    $ups.scrollLeft += e.deltaY;
+    e.preventDefault();
+  }, { passive: false });
   UPGRADES.forEach((u, i) => {
     const st = STATS[u.id];
     const btn = document.createElement('button');
@@ -2824,7 +2865,7 @@
     $('accName').textContent = acc.name;
     $('accountPanel').hidden = false;
     $('auth').hidden = true;
-    $('localSync').hidden = !!acc.cloud;
+    $('exportCode').hidden = !!acc.cloud;
     renderStats(); renderRate(); renderCode(); renderCloud();
     toast(note || (save.delivered ? `Welcome back, ${acc.name}!` : 'Drag a dirty item from the belt into the washer.'), note ? 'good' : '');
   }
@@ -2958,11 +2999,12 @@
     } catch (e) { cloudErr = e; }
     renderCloud();
   }
-  function enterCloud(c, sv, note) {
+  function enterCloud(c, sv, note, ck) {
     cloud = c; storeCloud();
     const accs = loadAccounts();
     const k = 'cloud:' + c.uid;
-    accs[k] = { name: c.name, cloud: true, save: sv };
+    // ck lets a transfer code from the old device-only version be pasted in
+    accs[k] = { name: c.name, cloud: true, save: sv, ck, usedCodes: (accs[k] && accs[k].usedCodes) || [] };
     saveAccounts(accs);
     enterGame(k, note);
     cloudDirty = true; cloudLast = 0;
@@ -3038,8 +3080,9 @@
     const accs = loadAccounts();
     const acc = accs[session];
     if (!acc) return;
+    if (!acc.ck) return msg('Log out and log in again, then paste the code.', true);
     let res;
-    try { res = await readCode(txt, acc.ck); } catch (x) { return msg('That code doesn’t belong to this account.', true); }
+    try { res = await readCode(txt, acc.ck); } catch (x) { return msg('That code doesn’t belong to this account. Use the same name and password as on the other device.', true); }
     // a code keeps its id for a whole session, so accept it again whenever it carries newer progress
     const fromCode = normalizeSave(res.save);
     const have = (acc.save && acc.save.lifetime) || 0, got = fromCode.lifetime || 0;
@@ -3049,6 +3092,7 @@
     saveAccounts(accs);
     $('loadCode').value = '';
     enterGame(session, 'Progress loaded from your other device.');
+    if (acc.cloud) { cloudDirty = true; cloudLast = 0; cloudWrite(); }
     msg('Progress loaded from your other device.');
   });
 
@@ -3078,7 +3122,7 @@
               try { const raw = localStorage.getItem(LEGACY_KEY); if (raw) { sv = JSON.parse(raw); localStorage.removeItem(LEGACY_KEY); } } catch (x) {}
             }
             $('authForm').reset();
-            enterCloud(c, normalizeSave(Object.assign(freshSave(), sv || {})), note);
+            enterCloud(c, normalizeSave(Object.assign(freshSave(), sv || {})), note, await codeKey(key, pass));
             return;
           } catch (e) {
             if (e.code === 'EMAIL_EXISTS') return err('That name is already taken. Pick another one, or log in.');
@@ -3116,7 +3160,7 @@
           let sv = remote ? remote.save : null, note = null;
           if (localOk && (!sv || (la.save.lifetime || 0) > (sv.lifetime || 0))) { sv = la.save; note = 'Progress from this device is now saved online.'; }
           $('authForm').reset();
-          enterCloud(c, normalizeSave(Object.assign(freshSave(), sv || {})), note);
+          enterCloud(c, normalizeSave(Object.assign(freshSave(), sv || {})), note, await codeKey(key, pass));
           return;
         } catch (e) {
           cloud = null;
@@ -3126,7 +3170,7 @@
               const c = await idAuth('signUp', key, pass);
               c.name = la.name;
               $('authForm').reset();
-              enterCloud(c, normalizeSave(Object.assign(freshSave(), la.save || {})), 'Your account is online now, so your progress follows you to any device.');
+              enterCloud(c, normalizeSave(Object.assign(freshSave(), la.save || {})), 'Your account is online now, so your progress follows you to any device.', await codeKey(key, pass));
               return;
             } catch (e2) {
               if (e2.code === 'EMAIL_EXISTS') return err('Wrong password for this name.');
