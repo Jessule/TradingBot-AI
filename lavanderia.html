@@ -2849,7 +2849,7 @@
   // ================= cloud saves (Firebase Auth + Firestore over REST) =================
   // The name + password log into Firebase (the name becomes an internal e-mail),
   // and the save lives in Firestore at saves/<uid>, readable only by its owner.
-  const FB = { apiKey: 'AIzaSyBy2b5dJPI3ThrLZ_le-m6PbDhhp2v3aQU', project: 'laundry-incremental' };
+  const FB = { apiKey: 'AIzaSyBy2b5dJPI3ThrLZ_le-m6PbDhhp2v3aQU', project: 'laundry-incremental', db: 'default' };
   const CLOUD_KEY = 'pixel-laundromat-cloud', CLOUD_EVERY = 60000;
   let cloud = null;          // { uid, name, refreshToken, idToken, exp }
   let cloudOk = null;        // null: unknown, false: Firebase can't be reached from this page
@@ -2866,7 +2866,8 @@
     const j = await r.json().catch(() => ({}));
     if (!r.ok) {
       const er = j.error || {};
-      throw new CloudErr(String(er.message || er.status || 'HTTP_' + r.status).split(/[\s:]/)[0], er.status || '');
+      const first = String(er.message || '').split(/[\s:]/)[0];
+      throw new CloudErr(/^[A-Z_]{3,}$/.test(first) ? first : (er.status || 'HTTP_' + r.status), er.status || '');
     }
     return j;
   }
@@ -2895,7 +2896,7 @@
       else localStorage.removeItem(CLOUD_KEY);
     } catch (e) {}
   }
-  const docUrl = (uid) => `https://firestore.googleapis.com/v1/projects/${FB.project}/databases/(default)/documents/saves/${uid}`;
+  const docUrl = (uid) => `https://firestore.googleapis.com/v1/projects/${FB.project}/databases/${FB.db}/documents/saves/${uid}`;
   async function cloudRead() {
     const tok = await cloudToken();
     try {
