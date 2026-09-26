@@ -2101,12 +2101,16 @@
     for (let i = piles.length - 1; i >= 0; i--) {
       const pl = piles[i];
       if (!inRect(pl.x, pl.y - 2, z, 0)) continue;
-      if (pan.load + pl.amount > PAN_CAP) {
+      const room = PAN_CAP - pan.load;
+      if (room <= 0) {
         if (now - fullWarnAt > 2500) { fullWarnAt = now; toast('The dustpan is full. Empty it in the trash can.', 'warn'); }
         continue;
       }
-      pan.load += pl.amount;
-      piles.splice(i, 1);
+      // a big pile goes in bit by bit: fill the dustpan, the rest stays on the floor
+      const take = Math.min(room, pl.amount);
+      pan.load += take;
+      pl.amount -= take;
+      if (pl.amount <= 0) piles.splice(i, 1);
       for (let k = 0; k < 10; k++) emit('sand', pan.x + 5, pan.y + 6, 1, { spread: 4, vy: rand(-30, -10), vx: rand(-10, 10), life: 0.4, color: SAND[k % 4], floorY: pan.y + 8 });
       beep(700, 0.06, 'square', 0.035, 300);
       renderFloor();
