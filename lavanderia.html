@@ -637,12 +637,15 @@
     <section class="panel account" id="accountPanel" hidden>
       <div class="shop-head"><p class="eyebrow">Account</p><button class="ghost" id="logoutBtn" type="button">Log out</button></div>
       <p class="acc-name">Signed in as <b id="accName"></b></p>
+      <p class="acc-msg" id="cloudMsg" hidden></p>
+      <div id="localSync">
       <p class="eyebrow" style="margin-top: 12px">Transfer code</p>
       <div class="code-row"><code id="accCode">…</code><button class="ghost" id="copyCode" type="button">Copy</button></div>
       <p class="acc-hint">This code carries your progress and changes as you play. Copy the newest one and paste it on your other device.</p>
       <p class="eyebrow" style="margin-top: 12px">Load progress from another device</p>
       <form class="code-row" id="loadCodeForm"><input id="loadCode" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="Paste code" aria-label="Transfer code from another device"><button class="ghost" id="loadCodeBtn" type="submit">Load</button></form>
       <p class="acc-msg" id="loadMsg" role="status"></p>
+      </div>
     </section>
 
     <section class="panel howto">
@@ -667,11 +670,11 @@
       <div class="field"><label for="fName">Name</label><input id="fName" name="name" autocomplete="username" maxlength="16" spellcheck="false" autocapitalize="off"></div>
       <div class="field"><label for="fPass">Password</label><input id="fPass" name="password" type="password" autocomplete="current-password"></div>
       <div class="field" id="rowPass2" hidden><label for="fPass2">Repeat password</label><input id="fPass2" name="password2" type="password" autocomplete="new-password"></div>
-      <div class="field" id="rowCode"><label for="fCode">Transfer code <small>(only on a new device)</small></label><input id="fCode" name="code" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX"></div>
+      <div class="field" id="rowCode" hidden><label for="fCode">Transfer code <small>(only on a new device)</small></label><input id="fCode" name="code" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX"></div>
       <p class="auth-err" id="authErr" role="alert"></p>
       <button class="primary" type="submit" id="authSubmit">Log in</button>
     </form>
-    <p class="auth-foot">Accounts live on this device. On another device, your transfer code brings your progress with you.</p>
+    <p class="auth-foot" id="authFoot">Your progress is saved online, so you can keep playing on any device.</p>
   </div>
 </div>
 
@@ -975,6 +978,7 @@
     if (!acc) return;
     acc.save = save;
     saveAccounts(accs);
+    if (acc.cloud) { cloudDirty = true; return; }
     scheduleCode();
   }
   function renderStats() {
@@ -2763,7 +2767,7 @@
   async function renderCode() {
     if (!session) return;
     const acc = loadAccounts()[session];
-    if (!acc) return;
+    if (!acc || acc.cloud) return;
     try { $('accCode').textContent = await makeCode(save, acc.ck); } catch (e) { $('accCode').textContent = 'Unavailable in this browser'; }
   }
 
@@ -2820,11 +2824,17 @@
     $('accName').textContent = acc.name;
     $('accountPanel').hidden = false;
     $('auth').hidden = true;
-    renderStats(); renderRate(); renderCode();
+    $('localSync').hidden = !!acc.cloud;
+    renderStats(); renderRate(); renderCode(); renderCloud();
     toast(note || (save.delivered ? `Welcome back, ${acc.name}!` : 'Drag a dirty item from the belt into the washer.'), note ? 'good' : '');
   }
   function logout() {
     persist();
+    if (cloud) {
+      const k = session;
+      cloudWrite(true).then(() => { if (!cloudDirty) { const accs = loadAccounts(); delete accs[k]; saveAccounts(accs); } cloudDirty = false; });
+      cloud = null; storeCloud(); cloudSyncedAt = 0; cloudErr = null;
+    }
     session = null;
     try { localStorage.removeItem(SES_KEY); } catch (e) {}
     save = normalizeSave(freshSave());
@@ -2836,6 +2846,154 @@
     showAuth('login');
   }
 
+  // ================= cloud saves (Firebase Auth + Firestore over REST) =================
+  // The name + password log into Firebase (the name becomes an internal e-mail),
+  // and the save lives in Firestore at saves/<uid>, readable only by its owner.
+  const FB = { apiKey: 'AIzaSyBy2b5dJPI3ThrLZ_le-m6PbDhhp2v3aQU', project: 'laundry-incremental' };
+  const CLOUD_KEY = 'pixel-laundromat-cloud', CLOUD_EVERY = 60000;
+  let cloud = null;          // { uid, name, refreshToken, idToken, exp }
+  let cloudOk = null;        // null: unknown, false: Firebase can't be reached from this page
+  let cloudDirty = false, cloudLast = 0, cloudBusy = false, cloudSyncedAt = 0, cloudErr = null;
+  const cloudEmail = (key) => 'n' + hex(utf8.encode(key)) + '@players.pixel-laundromat.game';
+  const cloudPass = (pass) => 'pl1:' + pass;
+  class CloudErr extends Error { constructor(code, status) { super(code); this.code = code; this.status = status; } }
+  const OFFLINE = ['NETWORK', 'OPERATION_NOT_ALLOWED', 'CONFIGURATION_NOT_FOUND', 'API_KEY_INVALID', 'PROJECT_NOT_FOUND'];
+  const cloudDown = (e) => OFFLINE.includes(e.code) || /^HTTP_5/.test(e.code);
+  async function fbFetch(url, opts) {
+    let r;
+    try { r = await fetch(url, opts); } catch (e) { throw new CloudErr('NETWORK'); }
+    cloudOk = true;
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const er = j.error || {};
+      throw new CloudErr(String(er.message || er.status || 'HTTP_' + r.status).split(/[\s:]/)[0], er.status || '');
+    }
+    return j;
+  }
+  async function idAuth(kind, key, pass) {
+    const j = await fbFetch(`https://identitytoolkit.googleapis.com/v1/accounts:${kind}?key=${FB.apiKey}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cloudEmail(key), password: cloudPass(pass), returnSecureToken: true }),
+    });
+    return { uid: j.localId, idToken: j.idToken, refreshToken: j.refreshToken, exp: Date.now() + (+j.expiresIn || 3600) * 1000 - 60000 };
+  }
+  async function cloudToken(c = cloud) {
+    if (!c) throw new CloudErr('NO_SESSION');
+    if (c.idToken && Date.now() < c.exp) return c.idToken;
+    const j = await fbFetch(`https://securetoken.googleapis.com/v1/token?key=${FB.apiKey}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(c.refreshToken),
+    });
+    c.idToken = j.id_token; c.refreshToken = j.refresh_token;
+    c.exp = Date.now() + (+j.expires_in || 3600) * 1000 - 60000;
+    if (c === cloud) storeCloud();
+    return c.idToken;
+  }
+  function storeCloud() {
+    try {
+      if (cloud) localStorage.setItem(CLOUD_KEY, JSON.stringify({ uid: cloud.uid, name: cloud.name, refreshToken: cloud.refreshToken }));
+      else localStorage.removeItem(CLOUD_KEY);
+    } catch (e) {}
+  }
+  const docUrl = (uid) => `https://firestore.googleapis.com/v1/projects/${FB.project}/databases/(default)/documents/saves/${uid}`;
+  async function cloudRead() {
+    const tok = await cloudToken();
+    try {
+      const j = await fbFetch(docUrl(cloud.uid), { headers: { Authorization: 'Bearer ' + tok } });
+      const f = j.fields || {};
+      if (!f.data) return null;
+      return { name: f.name && f.name.stringValue, save: normalizeSave(JSON.parse(f.data.stringValue)) };
+    } catch (e) { if (e.status === 'NOT_FOUND') return null; throw e; }
+  }
+  // take the other device's progress when it is ahead of this one
+  function adoptRemote(remote, note) {
+    const accs = loadAccounts();
+    if (!accs[session]) return;
+    accs[session].save = Object.assign(remote.save, { seen: Object.assign({}, remote.save.seen, save.seen), sound: save.sound });
+    saveAccounts(accs);
+    enterGame(session, note);
+  }
+  async function cloudWrite(final) {
+    const c = cloud;
+    if (!c || (cloudBusy && !final)) return;
+    // snapshot now: on log out the game resets right after this call
+    const data = JSON.stringify(save), life = save.lifetime || 0;
+    cloudBusy = true;
+    try {
+      if (!final) {
+        // another device may have played meanwhile: never overwrite a save that is further along
+        const remote = await cloudRead();
+        if (remote && (remote.save.lifetime || 0) > life) {
+          cloudDirty = false; cloudLast = Date.now(); cloudSyncedAt = Date.now(); cloudErr = null;
+          adoptRemote(remote, 'Progress loaded from your other device.');
+          return;
+        }
+      }
+      const tok = await cloudToken(c);
+      const body = { fields: {
+        name: { stringValue: c.name },
+        data: { stringValue: data },
+        lifetime: { doubleValue: life },
+        updated: { timestampValue: new Date().toISOString() },
+      } };
+      cloudDirty = false; cloudLast = Date.now();
+      await fbFetch(docUrl(c.uid), { method: 'PATCH', keepalive: !!final, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      cloudSyncedAt = Date.now(); cloudErr = null;
+    } catch (e) {
+      cloudDirty = true; cloudErr = e;
+    } finally {
+      cloudBusy = false;
+      renderCloud();
+    }
+  }
+  async function cloudPull() {
+    if (!cloud || cloudBusy) return;
+    try {
+      const remote = await cloudRead();
+      if (remote && (remote.save.lifetime || 0) > (save.lifetime || 0)) adoptRemote(remote, 'Progress loaded from your other device.');
+      else if (!remote) cloudDirty = true;
+      cloudErr = null;
+    } catch (e) { cloudErr = e; }
+    renderCloud();
+  }
+  function enterCloud(c, sv, note) {
+    cloud = c; storeCloud();
+    const accs = loadAccounts();
+    const k = 'cloud:' + c.uid;
+    accs[k] = { name: c.name, cloud: true, save: sv };
+    saveAccounts(accs);
+    enterGame(k, note);
+    cloudDirty = true; cloudLast = 0;
+    cloudWrite();
+  }
+  function renderCloud() {
+    const el = $('cloudMsg');
+    if (!cloud) { el.hidden = true; return; }
+    el.hidden = false;
+    let t;
+    if (cloudErr) t = cloudErr.code === 'NETWORK' ? 'Offline. Your progress will be saved online when you reconnect.' : 'Couldn’t save online (' + cloudErr.code + '). Retrying…';
+    else if (!cloudSyncedAt) t = 'Connecting…';
+    else { const s = Math.round((Date.now() - cloudSyncedAt) / 1000); t = 'Saved online ' + (s < 10 ? 'just now' : s < 60 ? s + 's ago' : Math.round(s / 60) + ' min ago') + '. Log in with the same name on any device.'; }
+    el.textContent = t;
+    el.classList.toggle('bad', !!cloudErr);
+  }
+  setInterval(() => {
+    if (cloud && cloudDirty && Date.now() - cloudLast > (cloudErr ? 20000 : CLOUD_EVERY)) cloudWrite();
+    if (cloud) renderCloud();
+  }, 5000);
+  document.addEventListener('visibilitychange', () => {
+    if (!cloud) return;
+    if (document.visibilityState === 'hidden') { persist(); if (cloudDirty) cloudWrite(true); }
+    else cloudPull();
+  });
+  window.addEventListener('pagehide', () => { if (cloud) { persist(); if (cloudDirty) cloudWrite(true); } });
+  // can this page reach Firebase at all? (an embedded preview may block it)
+  function probeCloud() {
+    fetch('https://firestore.googleapis.com/', { mode: 'no-cors', cache: 'no-store' })
+      .then(() => { if (cloudOk === null) cloudOk = true; }, () => { cloudOk = false; })
+      .then(() => { if (!$('auth').hidden) showAuth(authMode); });
+  }
+
   // ---- sign in / sign up form
   let authMode = 'login';
   function showAuth(mode) {
@@ -2843,7 +3001,10 @@
     $('tabLogin').setAttribute('aria-selected', String(mode === 'login'));
     $('tabSignup').setAttribute('aria-selected', String(mode === 'signup'));
     $('rowPass2').hidden = mode !== 'signup';
-    $('rowCode').hidden = mode !== 'login';
+    $('rowCode').hidden = mode !== 'login' || cloudOk !== false;
+    $('authFoot').textContent = cloudOk === false
+      ? 'Accounts live on this device. On another device, your transfer code brings your progress with you.'
+      : 'Your progress is saved online, so you can keep playing on any device.';
     $('fPass').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
     $('authSubmit').textContent = mode === 'signup' ? 'Create account' : 'Log in';
     $('authErr').textContent = '';
@@ -2904,6 +3065,26 @@
       const accs = loadAccounts();
       if (authMode === 'signup') {
         if ($('fPass2').value !== pass) return err('The passwords don’t match.');
+        if (cloudOk !== false) {
+          try {
+            const c = await idAuth('signUp', key, pass);
+            c.name = name;
+            let sv = null, note = `Account created. Welcome, ${name}!`;
+            const la = accs[key];
+            if (la && la.hash && await hashPassword(pass, la.salt) === la.hash) { sv = la.save; note = 'Account created online with the progress from this device.'; }
+            else if (!Object.keys(accs).length) {
+              try { const raw = localStorage.getItem(LEGACY_KEY); if (raw) { sv = JSON.parse(raw); localStorage.removeItem(LEGACY_KEY); } } catch (x) {}
+            }
+            $('authForm').reset();
+            enterCloud(c, normalizeSave(Object.assign(freshSave(), sv || {})), note);
+            return;
+          } catch (e) {
+            if (e.code === 'EMAIL_EXISTS') return err('That name is already taken. Pick another one, or log in.');
+            if (e.code === 'TOO_MANY_ATTEMPTS_TRY_LATER') return err('Too many tries. Wait a minute and try again.');
+            if (!cloudDown(e)) return err('Couldn’t create the account (' + e.code + ').');
+            cloudOk = false;
+          }
+        }
         if (accs[key]) return err('That name already has an account on this device. Log in instead.');
         const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
         // the first account on a device takes over progress from before accounts existed
@@ -2920,7 +3101,42 @@
         enterGame(key, note);
         return;
       }
-      // log in
+      // log in online; a device-only account moves online the first time
+      if (cloudOk !== false) {
+        const la = accs[key];
+        const localOk = !!(la && la.hash && await hashPassword(pass, la.salt) === la.hash);
+        try {
+          const c = await idAuth('signInWithPassword', key, pass);
+          cloud = c;
+          const remote = await cloudRead().catch(() => null);
+          cloud = null;
+          c.name = (remote && remote.name) || (la && la.name) || name;
+          let sv = remote ? remote.save : null, note = null;
+          if (localOk && (!sv || (la.save.lifetime || 0) > (sv.lifetime || 0))) { sv = la.save; note = 'Progress from this device is now saved online.'; }
+          $('authForm').reset();
+          enterCloud(c, normalizeSave(Object.assign(freshSave(), sv || {})), note);
+          return;
+        } catch (e) {
+          cloud = null;
+          if (['INVALID_LOGIN_CREDENTIALS', 'EMAIL_NOT_FOUND', 'INVALID_PASSWORD', 'INVALID_EMAIL'].includes(e.code)) {
+            if (!localOk) return err('Wrong name or password.');
+            try {
+              const c = await idAuth('signUp', key, pass);
+              c.name = la.name;
+              $('authForm').reset();
+              enterCloud(c, normalizeSave(Object.assign(freshSave(), la.save || {})), 'Your account is online now, so your progress follows you to any device.');
+              return;
+            } catch (e2) {
+              if (e2.code === 'EMAIL_EXISTS') return err('Wrong password for this name.');
+              if (!cloudDown(e2)) return err('Couldn’t log in (' + e2.code + ').');
+              cloudOk = false;
+            }
+          } else if (e.code === 'TOO_MANY_ATTEMPTS_TRY_LATER') return err('Too many tries. Wait a minute and try again.');
+          else if (e.code === 'USER_DISABLED') return err('This account is disabled.');
+          else if (!cloudDown(e)) return err('Couldn’t log in (' + e.code + ').');
+          else cloudOk = false;
+        }
+      }
       const codeTxt = $('fCode').value.trim();
       const ck = await codeKey(key, pass);
       let acc = accs[key];
@@ -2967,9 +3183,17 @@
     const first = makeItem(); first.x = 28; items.push(first);
     renderStats(); renderRate();
     requestAnimationFrame(loop);
+    probeCloud();
     let key = null;
     try { key = localStorage.getItem(SES_KEY); } catch (e) {}
-    if (key && loadAccounts()[key]) {
+    let stored = null;
+    try { stored = JSON.parse(localStorage.getItem(CLOUD_KEY) || 'null'); } catch (e) {}
+    if (key && key.startsWith('cloud:') && !(stored && 'cloud:' + stored.uid === key)) key = null;
+    if (key && key.startsWith('cloud:') && loadAccounts()[key]) {
+      cloud = { uid: stored.uid, name: stored.name, refreshToken: stored.refreshToken, idToken: null, exp: 0 };
+      enterGame(key);
+      cloudPull();
+    } else if (key && loadAccounts()[key]) {
       enterGame(key);
       if (data && data.save) { save = normalizeSave(data.save); applyUpgrades(); renderStats(); }
     } else {
