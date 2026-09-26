@@ -684,7 +684,7 @@
       desc: () => `Wash 10% faster · now ${(CFG.washMs / 1000).toFixed(1)}s` },
     { id: 'soap', name: 'Premium Soap', icon: 'soap', costs: accelCosts(3, 1.12, 0.035, 20),
       desc: () => `x${SOAP_MULT} coins per cloth` },
-    { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 55],
+    { id: 'cap', name: 'Bigger Tub', icon: 'cap', costs: [30, 150],
       desc: () => `+1 item per wash · now ${CFG.capacity}` },
     { id: 'belt', name: 'Wider Belt', icon: 'belt', costs: Array.from({ length: 10 }, (_, i) => Math.round(10 * 1.6 ** i)),
       desc: () => `15% more clothes · now x${(BASE_SPAWN / (CFG.spawnMin + CFG.spawnVar / 2)).toFixed(2)}` },
