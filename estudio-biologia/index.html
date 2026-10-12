@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estudio Biología Cuerpo Humano</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#141a35;--mut:#5b6280;--line:#e1e5f0;--acc:#00a9c0;--acc2:#007d93;--ok:#1b9a55;--okbg:#e4f6ec;--ko:#d6403a;--kobg:#fdeceb;--warn:#fff4dc;--shadow:0 2px 10px rgba(20,26,53,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1226;--card:#1a1f3d;--ink:#eef0fa;--mut:#a2a8c8;--line:#2c3260;--acc:#27c8dd;--acc2:#27c8dd;--ok:#4cd68a;--okbg:#12362a;--ko:#ff7a73;--kobg:#3b1c24;--warn:#3a3118;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:20px 16px 8px;max-width:900px;margin:auto}
+h1{margin:0;font-size:1.5rem}
+header p{margin:2px 0 0;color:var(--mut);font-size:.95rem}
+nav{display:flex;gap:6px;max-width:900px;margin:12px auto 0;padding:0 16px;flex-wrap:wrap}
+nav button{flex:1;min-width:120px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:900px;margin:16px auto 60px;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.btn{padding:10px 16px;border-radius:10px;border:1px solid var(--acc);background:var(--acc);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--acc2)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+.mut{color:var(--mut);font-size:.9rem}
+.tag{display:inline-block;font-size:.75rem;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.04em}
+/* tests */
+.model{cursor:pointer;text-align:center}
+.model:hover{border-color:var(--acc)}
+.model b{font-size:1.1rem}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt.sel{border-color:var(--acc);background:var(--bg)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ko{border-color:var(--ko);background:var(--kobg)}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;padding:12px 14px;border-radius:10px;border-left:5px solid}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.ko{background:var(--kobg);border-color:var(--ko)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0 14px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.score{font-size:2.4rem;font-weight:800}
+/* flashcards */
+.flash{perspective:1000px;margin:12px 0}
+.flip{position:relative;height:260px;transform-style:preserve-3d;transition:transform .5s;cursor:pointer}
+.flip.on{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow);overflow:auto}
+.front{background:var(--card);font-size:1.4rem;font-weight:700}
+.back{background:#141a35;color:#fff;transform:rotateY(180deg);font-size:1.1rem}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{padding:5px 11px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;font:inherit;font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+/* desarrollo */
+textarea{width:100%;min-height:140px;padding:12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
+.kw{display:inline-block;margin:3px 4px 3px 0;padding:3px 10px;border-radius:14px;font-size:.85rem;border:1px solid var(--line)}
+.kw.has{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.kw.no{background:var(--kobg);border-color:var(--ko);color:var(--ko)}
+.model-ans{background:var(--warn);padding:12px 14px;border-radius:10px;margin-top:10px;white-space:pre-line}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧬 Unidad 1 · La organización del cuerpo humano</h1>
+  <p>Biología y Geología · ESO — tarjetas, tests tipo test y preguntas de desarrollo</p>
+</header>
+<nav id="nav">
+  <button data-v="tests" class="on">📝 Tests</button>
+  <button data-v="cards">🃏 Tarjetas</button>
+  <button data-v="dev">✍️ Desarrollo</button>
+  <button data-v="stats">📊 Progreso</button>
+</nav>
+<main id="app"></main>
+
+<script>
+/* ============ DATOS ============ */
+// Q(pregunta, respuesta correcta, [3 incorrectas], explicación)
+const Q=(q,ok,bad,why)=>({q,ok,bad,why});
+
+const MODELS=[
+{name:"Modelo 1",qs:[
+Q("¿Cuál es el orden correcto de los niveles de organización, de menor a mayor complejidad?","Átomos → biomoléculas → células → tejidos → órganos → sistemas/aparatos",["Células → átomos → tejidos → biomoléculas → órganos → sistemas","Biomoléculas → átomos → órganos → tejidos → células → sistemas","Átomos → células → biomoléculas → órganos → tejidos → sistemas"],"Los átomos se unen formando biomoléculas, que se agrupan en células; las células forman tejidos, los tejidos órganos y los órganos sistemas o aparatos."),
+Q("Ordena de más simple a más complejo: oxígeno, proteína, glóbulo rojo, tejido sanguíneo, corazón, aparato circulatorio. ¿Cuál es el PRIMERO?","Oxígeno (átomo)",["Proteína","Glóbulo rojo","Aparato circulatorio"],"El oxígeno es un átomo (bioelemento), el nivel más simple. Orden completo: oxígeno → proteína → glóbulo rojo → tejido sanguíneo → corazón → aparato circulatorio."),
+Q("En el orden anterior, ¿qué va justo DESPUÉS del tejido sanguíneo?","Corazón",["Glóbulo rojo","Proteína","Aparato circulatorio"],"Tejido sanguíneo (tejido) → corazón (órgano) → aparato circulatorio (aparato)."),
+Q("La hemoglobina es una…","Proteína",["Hidrato de carbono","Ácido nucleico","Lípido"],"La hemoglobina de los glóbulos rojos es una proteína. Las proteínas forman estructuras celulares y regulan la mayoría de los procesos celulares."),
+Q("El colesterol es un ejemplo de…","Lípido",["Proteína","Hidrato de carbono","Ácido nucleico"],"Los lípidos almacenan energía y forman parte de las membranas celulares; el colesterol es uno de ellos."),
+Q("La glucosa es un ejemplo de…","Hidrato de carbono",["Lípido","Proteína","Ácido nucleico"],"Los hidratos de carbono (glúcidos) son la principal fuente de energía de la célula."),
+Q("El ADN es un ejemplo de…","Ácido nucleico",["Lípido","Proteína","Hidrato de carbono"],"Los ácidos nucleicos contienen la información genética que controla las funciones celulares."),
+Q("¿Qué biomoléculas contienen la información genética que controla las funciones celulares?","Los ácidos nucleicos",["Los lípidos","Los hidratos de carbono","Las proteínas"],"El ADN es un ácido nucleico y guarda la información genética."),
+Q("¿Qué biomoléculas son la principal fuente de energía de la célula?","Los hidratos de carbono",["Los ácidos nucleicos","Las proteínas","Las sales minerales"],"Ejemplo: la glucosa."),
+Q("¿Por qué componentes está formada la membrana plasmática?","Fosfolípidos, proteínas, glúcidos y colesterol",["Carbonato cálcico y cromatina","Solo ADN y proteínas","Solo agua y sales minerales"],"Es una capa de lípidos y proteínas (con glúcidos y colesterol). La cromatina es del núcleo y el carbonato cálcico no forma parte de ella."),
+Q("¿Cuál es el recorrido correcto del oxígeno hasta las células de los tejidos?","Medio externo → Sangre → Medio interno → Células",["Medio externo → Medio interno → Sangre → Células","Medio interno → Sangre → Células → Medio interno","Células → Medio interno → Sangre → Medio externo"],"El medio interno entra en contacto con el medio externo a través de la sangre, y las células toman de él el oxígeno y los nutrientes."),
+Q("La homeostasis es…","El conjunto de procesos fisiológicos que mantienen estables las características del medio interno",["El líquido que baña todas las células","El conjunto de órganos que realizan una función","El proceso por el que las células se especializan"],"El medio interno es el líquido que baña las células; la homeostasis es lo que lo mantiene estable."),
+]},
+{name:"Modelo 2",qs:[
+Q("¿Qué tipo de célula es la célula humana?","Eucariota animal",["Procariota","Eucariota vegetal","Una célula sin núcleo"],"Las células humanas son eucariotas animales: tienen núcleo y orgánulos."),
+Q("¿Cuáles son los componentes básicos comunes a todas las células?","Membrana plasmática, núcleo, citoplasma y orgánulos celulares",["Pared celular, cloroplastos y vacuola","Solo núcleo y citoplasma","Membrana, ADN y tejidos"],"Tienen formas y funciones muy diversas, pero comparten estos cuatro componentes."),
+Q("¿Cuál es la función de la membrana plasmática?","Rodear, proteger y aislar la célula y regular el paso de sustancias hacia dentro y fuera",["Contener el material genético","Sintetizar proteínas","Obtener energía mediante respiración celular"],"Es una delgada capa de lípidos y proteínas que regula qué entra y qué sale."),
+Q("Las sustancias pequeñas atraviesan la membrana por…","Difusión",["Endocitosis","Proteínas transportadoras","Respiración celular"],"Pequeñas → difusión; medianas → proteínas transportadoras; grandes → endocitosis."),
+Q("Las sustancias de tamaño mediano atraviesan la membrana mediante…","Proteínas transportadoras",["Difusión","Endocitosis","Fotosíntesis"],"Las proteínas transportadoras de la membrana las dejan pasar."),
+Q("Las sustancias grandes entran en la célula por…","Endocitosis",["Difusión","Proteínas transportadoras","Ósmosis únicamente"],"En la endocitosis la membrana engloba la sustancia grande."),
+Q("¿Qué contiene el núcleo?","El material genético",["Los lisosomas","Las enzimas digestivas","Los ribosomas ya formados"],"El núcleo es una estructura grande y esférica que contiene el ADN."),
+Q("¿Para qué sirven los poros de la envoltura nuclear?","Permiten el intercambio de sustancias entre el núcleo y el citoplasma",["Fabrican proteínas","Digieren partículas","Producen energía"],"La envoltura nuclear es una membrana con poros."),
+Q("La cromatina (o cromosomas) es…","ADN en diferentes estados de condensación",["El medio líquido interno del núcleo","La estructura donde se forman los ribosomas","La membrana del núcleo"],"Cromatina y cromosomas son el mismo material (ADN) más o menos condensado."),
+Q("¿Dónde se forman los ribosomas?","En el nucléolo",["En el aparato de Golgi","En las mitocondrias","En los lisosomas"],"El nucléolo es una estructura esférica del núcleo donde se forman los ribosomas."),
+Q("El nucleoplasma es…","El medio líquido interno del núcleo",["El medio líquido de la célula","La membrana del núcleo","Un orgánulo que fabrica lípidos"],"El medio líquido de la célula es el citosol (en el citoplasma)."),
+Q("El citosol está formado aproximadamente por…","70-80 % de agua y 20-30 % de proteínas, lípidos, glúcidos, ácidos nucleicos, sales minerales e iones",["Solo agua","50 % de lípidos y 50 % de proteínas","Solo ADN y sales"],"Es el medio líquido interno de la célula donde están los orgánulos."),
+]},
+{name:"Modelo 3",qs:[
+Q("¿Qué orgánulo obtiene energía para la célula mediante la respiración celular?","La mitocondria",["El aparato de Golgi","El lisosoma","El centriolo"],"Las mitocondrias son estructuras ovaladas de doble membrana con repliegues en la interna."),
+Q("¿Qué orgánulo tiene ribosomas adheridos y participa en la síntesis de proteínas?","El retículo endoplasmático rugoso",["El retículo endoplasmático liso","El aparato de Golgi","El lisosoma"],"El RE rugoso lleva ribosomas en su pared; el liso no."),
+Q("El retículo endoplasmático liso interviene en la síntesis de…","Lípidos",["Proteínas","ADN","Ribosomas"],"El RE liso no tiene ribosomas y sintetiza lípidos."),
+Q("¿Qué orgánulo modifica las sustancias sintetizadas en el RE y las transporta en vesículas al exterior?","El aparato de Golgi",["La mitocondria","El centriolo","El ribosoma"],"Es un conjunto de sáculos aplanados."),
+Q("Los lisosomas…","Son vesículas en las que se digieren partículas gracias a sus enzimas digestivas",["Producen energía","Sintetizan proteínas","Dirigen la división celular"],"Digieren las partículas capturadas por la célula."),
+Q("Las vesículas son…","Pequeños compartimentos que transportan o almacenan sustancias",["Estructuras que contienen el ADN","Orgánulos que generan energía","Fibras del citoesqueleto"],"En el ejercicio: «Orgánulo encargado de transportar o almacenar sustancias» = vesícula."),
+Q("Los centriolos…","Dirigen el movimiento del citoesqueleto y de los cromosomas durante la división celular",["Sintetizan lípidos","Fabrican proteínas","Digieren partículas"],"Son dos cilindros compuestos de fibras."),
+Q("Los ribosomas se encargan de…","Sintetizar proteínas",["Sintetizar lípidos","Generar energía","Transportar sustancias"],"Pueden estar adheridos al RE o dispersos por el citoplasma."),
+Q("El citoesqueleto es…","Una red de fibras que sostiene los orgánulos, da forma a la célula e interviene en sus movimientos (cilios y flagelos)",["Un conjunto de sáculos aplanados","El medio líquido de la célula","La capa externa de la célula"],"Es un orgánulo no membranoso."),
+Q("¿Cuál de estos orgánulos tiene doble membrana y repliegues internos?","La mitocondria",["El ribosoma","El centriolo","La vesícula"],"Esos repliegues están en su membrana interna."),
+Q("¿Cuál de estos orgánulos NO es membranoso?","El ribosoma",["La mitocondria","El lisosoma","El aparato de Golgi"],"No membranosos: centriolos, ribosomas y citoesqueleto."),
+Q("Todas las células del cuerpo proceden de una única célula inicial llamada…","Cigoto",["Célula madre adulta","Neurona","Glóbulo rojo"],"Todas contienen la misma información genética pero varían en forma y función por la diferenciación celular."),
+]},
+{name:"Modelo 4",qs:[
+Q("Un tejido es…","Un conjunto de células con forma y estructura similar que se especializan para realizar la misma función",["Un conjunto de órganos que realizan la misma función","Un grupo de átomos unidos","Una célula especializada"],"Los tejidos forman los órganos."),
+Q("¿Qué es la diferenciación celular?","Un conjunto de cambios en la forma y estructura de las células que les permite especializarse en funciones concretas",["La unión de varios tejidos","La división del núcleo","La entrada de sustancias por la membrana"],"Gracias a ella aparecen neuronas, fibras musculares, glóbulos rojos…"),
+Q("El tejido epitelial está formado por…","Una o más capas de células muy unidas entre sí",["Células rodeadas de abundante matriz y fibras","Células alargadas con capacidad contráctil","Neuronas y células gliales"],"Recubre los órganos y actúa como barrera protectora."),
+Q("¿Cuál es la función del epitelio de revestimiento?","Protectora",["Producir y secretar sustancias","Contraerse","Transmitir el impulso nervioso"],"El epitelio glandular es el que produce y secreta sustancias."),
+Q("El epitelio glandular…","Produce y secreta sustancias",["Recubre las articulaciones","Forma los huesos","Contrae el corazón"],"Sus células pueden aparecer repartidas o formando glándulas."),
+Q("¿Cuál de estos es un tejido conectivo?","Tejido óseo",["Tejido nervioso","Tejido muscular liso","Epitelio glandular"],"Son conectivos: conjuntivo, adiposo, cartilaginoso, óseo y sanguíneo."),
+Q("El tejido conectivo se caracteriza por…","Células rodeadas de matriz intercelular y fibras; conecta órganos y otros tejidos",["Células muy unidas sin matriz","Células alargadas con actina y miosina","Células que transmiten impulsos"],"Su matriz intercelular es lo que lo distingue del epitelial."),
+Q("El tejido conjuntivo…","Tiene fibras muy abundantes, rellena el espacio entre órganos y forma tendones",["Almacena grasas","Forma los huesos","Tiene matriz líquida llamada plasma"],"En la tabla del ejercicio, la «matriz gelatinosa con abundantes fibras» es el conjuntivo."),
+Q("El tejido adiposo…","Tiene pocas fibras, células llamadas adipocitos y almacena grasa (reserva energética y termorreguladora)",["Recubre las articulaciones","Forma los huesos","Transmite el impulso nervioso"],"«Matriz con poca sustancia intercelular y células que almacenan grasa» = adiposo."),
+Q("¿Qué tejido recubre las articulaciones para evitar su desgaste?","El tejido cartilaginoso",["El tejido óseo","El tejido adiposo","El tejido muscular liso"],"Tiene matriz sólida y elástica y condrocitos; también está en oreja, nariz y tráquea."),
+Q("El tejido óseo se caracteriza por…","Una matriz sólida y dura (sales de calcio) y células como osteocitos, osteoblastos y osteoclastos",["Una matriz líquida llamada plasma","Adipocitos","Condrocitos"],"Forma los huesos; puede ser esponjoso o compacto."),
+Q("La sangre es un tejido conectivo con…","Matriz líquida (plasma) y glóbulos rojos, blancos y plaquetas",["Matriz sólida y dura","Adipocitos","Fibras musculares"],"Por eso el tejido sanguíneo también se señala como conectivo."),
+]},
+{name:"Modelo 5",qs:[
+Q("El tejido muscular está formado por…","Células alargadas con capacidad contráctil (miocitos o fibras musculares)",["Neuronas y células gliales","Células muy unidas que recubren órganos","Células rodeadas de matriz y fibras"],"Las proteínas actina y miosina se organizan en miofibrillas y producen la contracción."),
+Q("¿Qué proteínas se encargan de la contracción muscular?","Actina y miosina",["Hemoglobina y colesterol","Ribosomas y lisosomas","ADN y ARN"],"Se organizan formando miofibrillas."),
+Q("El tejido muscular estriado esquelético tiene contracción…","Fuerte, rápida y voluntaria; forma parte del aparato locomotor",["Lenta e involuntaria","Fuerte, rápida e involuntaria","Nula"],"Sus fibras son multinucleadas."),
+Q("El tejido muscular cardíaco…","Tiene fibras ramificadas y contracción fuerte, rápida e involuntaria",["Tiene contracción lenta e involuntaria","Es voluntario","Está en las paredes de órganos huecos"],"Es responsable de las contracciones del corazón."),
+Q("El tejido muscular liso…","Se contrae de forma lenta e involuntaria y está en las paredes de órganos huecos",["Se contrae rápido y voluntariamente","Forma el corazón","Forma los huesos"],"Sus células tienen un solo núcleo."),
+Q("¿Qué función tienen las neuronas?","Producir, recibir y transmitir el impulso nervioso",["Nutrir y defender a las células gliales","Almacenar grasa","Contraer el corazón"],"Son las células principales del tejido nervioso."),
+Q("Las células gliales se encargan de…","La nutrición, la defensa y el soporte de las neuronas",["Transmitir el impulso nervioso","Producir hormonas","Contraer los músculos"],"Acompañan a las neuronas en el sistema nervioso."),
+Q("Un órgano es…","Un conjunto de diferentes tejidos que trabajan coordinadamente para realizar una función específica",["Un grupo de células iguales","Un grupo de órganos con una misma función","Un líquido que baña las células"],"Ejemplo: el corazón. Un grupo de órganos forma un sistema o aparato."),
+Q("Un sistema o aparato es…","Un grupo de órganos que trabajan conjuntamente para realizar una misma actividad o función",["Un conjunto de tejidos","Un grupo de células","Una molécula grande"],"Ejemplo: el aparato circulatorio."),
+Q("¿Cuál de estos sistemas pertenece a la función de relación (interacción)?","El sistema nervioso",["El aparato excretor","El sistema circulatorio","El aparato reproductor femenino"],"Relación: nervioso, endocrino, esquelético y muscular."),
+Q("El sistema circulatorio y el aparato excretor pertenecen a la función de…","Nutrición",["Relación","Reproducción","Ninguna función vital"],"Nutrición: digestivo, respiratorio, circulatorio, excretor y linfático."),
+Q("El aparato reproductor femenino pertenece a la función de…","Reproducción",["Nutrición","Relación","Homeostasis"],"Reproducción: aparato reproductor femenino y masculino."),
+]},
+];
+
+const CARDS=[
+["Niveles de organización","Átomos → biomoléculas → células → tejidos → órganos → sistemas/aparatos.","1. Niveles"],
+["Biomoléculas del tema","Carbohidratos (hidratos de carbono), lípidos, proteínas, ácidos nucleicos, agua y sales minerales.","1. Niveles"],
+["Hidratos de carbono","Principal fuente de energía de la célula. Ej.: glucosa.","1. Niveles"],
+["Lípidos","Algunos son fuente de almacenamiento energético; otros forman parte de las membranas celulares. Ej.: colesterol.","1. Niveles"],
+["Proteínas","Forman parte de las estructuras de la célula y regulan la mayoría de procesos celulares. Ej.: hemoglobina.","1. Niveles"],
+["Ácidos nucleicos","Contienen la información genética que controla las funciones celulares. Ej.: ADN.","1. Niveles"],
+["Orden: oxígeno → … → aparato circulatorio","Oxígeno → proteína → glóbulo rojo → tejido sanguíneo → corazón → aparato circulatorio.","1. Niveles"],
+["Célula","Unidad básica de los seres vivos. La humana es eucariota animal, con formas y funciones diversas pero con componentes comunes.","2. Célula"],
+["Componentes básicos de la célula","Membrana plasmática · núcleo · citoplasma · orgánulos celulares.","2. Célula"],
+["Membrana plasmática","Delgada capa de lípidos y proteínas (también glúcidos y colesterol). Rodea, protege y aísla el contenido celular y regula el paso de sustancias.","2. Célula"],
+["Paso de sustancias por la membrana","Pequeñas: difusión · Medianas: proteínas transportadoras · Grandes: endocitosis.","2. Célula"],
+["Núcleo","Estructura grande y esférica que contiene el material genético (ADN).","2. Célula"],
+["Partes del núcleo","Envoltura nuclear (membrana con poros) · nucleoplasma (medio líquido interno) · cromatina/cromosomas (ADN condensado) · nucléolo (donde se forman los ribosomas).","2. Célula"],
+["Citoplasma","Medio interno líquido de la célula (citosol) con los orgánulos. Citosol: 70-80 % agua, 20-30 % proteínas, lípidos, glúcidos, ácidos nucleicos, sales minerales e iones.","2. Célula"],
+["Mitocondria","Orgánulo de doble membrana con repliegues internos. Genera energía para la célula mediante la respiración celular.","3. Orgánulos"],
+["Retículo endoplasmático rugoso","Canales y sáculos con ribosomas adheridos. Participa en la síntesis de proteínas.","3. Orgánulos"],
+["Retículo endoplasmático liso","Sin ribosomas. Interviene en la síntesis de lípidos.","3. Orgánulos"],
+["Aparato de Golgi","Sáculos aplanados que modifican las sustancias sintetizadas en el RE y las transportan en vesículas al exterior celular.","3. Orgánulos"],
+["Lisosomas","Vesículas donde se digieren partículas capturadas por la célula, gracias a sus enzimas digestivas.","3. Orgánulos"],
+["Vesículas","Pequeños compartimentos que transportan o almacenan sustancias.","3. Orgánulos"],
+["Orgánulos membranosos","Mitocondrias, retículo endoplasmático, aparato de Golgi, lisosomas y vesículas.","3. Orgánulos"],
+["Centriolos","Dos cilindros de fibras. Dirigen el movimiento del citoesqueleto y de los cromosomas durante la división celular.","3. Orgánulos"],
+["Ribosomas","Pequeñas partículas que sintetizan proteínas. Adheridos al RE o dispersos por el citoplasma.","3. Orgánulos"],
+["Citoesqueleto","Red de fibras que sostiene los orgánulos y da forma a la célula. Interviene en los movimientos celulares (cilios y flagelos).","3. Orgánulos"],
+["Orgánulos no membranosos","Centriolos, ribosomas y citoesqueleto.","3. Orgánulos"],
+["Diferenciación celular","Cambios en la forma y estructura de las células que les permiten especializarse en funciones concretas.","4. Diferenciación y tejidos"],
+["Cigoto","Célula inicial de la que proceden todas las células del cuerpo. Todas tienen la misma información genética pero varían en forma y función.","4. Diferenciación y tejidos"],
+["Tejido","Conjunto de células con forma y estructura similar que se especializan para realizar la misma función.","4. Diferenciación y tejidos"],
+["Los 4 tipos de tejido","Epitelial · conectivo · muscular · nervioso.","4. Diferenciación y tejidos"],
+["Tejido epitelial","Una o más capas de células muy unidas. Recubre los órganos y es barrera protectora. Epitelio de revestimiento: función protectora. Epitelio glandular: produce y secreta sustancias.","4. Diferenciación y tejidos"],
+["Tejido conectivo","Células rodeadas de matriz intercelular y fibras. Conecta órganos y otros tejidos. Tipos: conjuntivo, adiposo, cartilaginoso, óseo y sangre.","4. Diferenciación y tejidos"],
+["Tejido conjuntivo","Fibras muy abundantes (matriz gelatinosa). Rellena el espacio entre órganos y los mantiene en su sitio. Forma tendones.","4. Diferenciación y tejidos"],
+["Tejido adiposo","Matriz con pocas fibras. Células: adipocitos. Almacena grasas: reserva energética y función termorreguladora.","4. Diferenciación y tejidos"],
+["Tejido cartilaginoso","Matriz sólida y elástica. Células: condrocitos. Oreja, nariz, tráquea y articulaciones (protector, evita el desgaste).","4. Diferenciación y tejidos"],
+["Tejido óseo","Esponjoso o compacto. Matriz sólida y dura (sales de calcio). Células: osteocitos, osteoblastos y osteoclastos. Forma los huesos.","4. Diferenciación y tejidos"],
+["Sangre","Tejido conectivo con matriz líquida (plasma) y células sanguíneas: glóbulos rojos, blancos y plaquetas.","4. Diferenciación y tejidos"],
+["Tejido muscular","Células alargadas contráctiles (miocitos o fibras musculares). Actina y miosina forman las miofibrillas y producen la contracción.","5. Tejidos muscular y nervioso"],
+["Músculo estriado esquelético","Contracción fuerte, rápida y voluntaria. Aparato locomotor. Fibras multinucleadas.","5. Tejidos muscular y nervioso"],
+["Músculo estriado cardíaco","Fibras ramificadas. Contracción fuerte, rápida e involuntaria. Corazón.","5. Tejidos muscular y nervioso"],
+["Músculo liso","Contracción lenta e involuntaria. Paredes de órganos huecos. Células con un solo núcleo.","5. Tejidos muscular y nervioso"],
+["Tejido nervioso","Principal componente del sistema nervioso. Neuronas: producen, reciben y transmiten el impulso nervioso. Células gliales: nutrición, defensa y soporte de las neuronas.","5. Tejidos muscular y nervioso"],
+["Órgano","Formado por diferentes tejidos que trabajan coordinadamente para realizar una función específica.","6. Órganos, sistemas y homeostasis"],
+["Sistema / aparato","Grupo de órganos que trabajan conjuntamente para realizar una misma actividad o función.","6. Órganos, sistemas y homeostasis"],
+["Funciones vitales y sistemas","Nutrición: digestivo, respiratorio, circulatorio, excretor y linfático. Relación: nervioso, esquelético, muscular y endocrino. Reproducción: aparato reproductor femenino y masculino.","6. Órganos, sistemas y homeostasis"],
+["Medio interno","Líquido que baña todas las células y entra en contacto con el medio externo a través de la sangre. Las células toman de él nutrientes y oxígeno y vierten a él sus desechos.","6. Órganos, sistemas y homeostasis"],
+["Homeostasis","Conjunto de procesos fisiológicos que mantienen estables las características del medio interno.","6. Órganos, sistemas y homeostasis"],
+["Recorrido del oxígeno","Medio externo → sangre → medio interno → células de los tejidos.","6. Órganos, sistemas y homeostasis"],
+];
+
+// Preguntas de desarrollo: modelo de respuesta + palabras clave (sin tildes, minúsculas)
+const DEV=[
+{q:"Ordena de más simple a más complejo: glóbulo rojo, oxígeno, aparato circulatorio, proteína, corazón y tejido sanguíneo. Explica brevemente cada nivel.",
+ ans:"Oxígeno (átomo) → proteína (biomolécula) → glóbulo rojo (célula) → tejido sanguíneo (tejido) → corazón (órgano) → aparato circulatorio (aparato o sistema).\nLos átomos se unen formando biomoléculas, que se agrupan en células; las células forman tejidos, los tejidos órganos y los órganos sistemas.",
+ kw:[["oxigeno"],["proteina"],["globulo rojo"],["tejido sanguineo"],["corazon"],["aparato circulatorio"],["atomo","biomolecula"]]},
+{q:"Define célula, tejido, órgano, aparato/sistema, medio interno y homeostasis.",
+ ans:"• Célula: unidad básica de los seres vivos; la humana es eucariota animal.\n• Tejido: conjunto de células con forma y estructura similar que se especializan para realizar la misma función.\n• Órgano: formado por diferentes tejidos que trabajan coordinadamente para realizar una función específica.\n• Aparato/sistema: grupo de órganos que trabajan conjuntamente para una misma función.\n• Medio interno: líquido que baña todas las células y entra en contacto con el medio externo a través de la sangre.\n• Homeostasis: conjunto de procesos fisiológicos que mantienen estables las características del medio interno.",
+ kw:[["celula"],["tejido"],["especializan","misma funcion"],["organo"],["coordinadamente","diferentes tejidos"],["aparato","sistema"],["medio interno"],["homeostasis"],["estables","estable"]]},
+{q:"Explica las características de la célula: tipo de célula y componentes básicos.",
+ ans:"La célula humana es una célula eucariota animal. Tiene formas y funciones muy diversas, pero con componentes básicos comunes a todas: membrana plasmática, núcleo, citoplasma y orgánulos celulares.",
+ kw:[["eucariota"],["animal"],["membrana plasmatica"],["nucleo"],["citoplasma"],["organulos"],["formas","funciones"]]},
+{q:"Describe la estructura y la función de la membrana plasmática.",
+ ans:"Es una delgada capa de lípidos y proteínas (con glúcidos y colesterol). Rodea, protege y aísla el contenido celular y regula el paso de sustancias a su través: las pequeñas pasan por difusión, las medianas mediante proteínas transportadoras y las grandes por endocitosis.",
+ kw:[["lipidos","fosfolipidos"],["proteinas"],["rodea","protege","aisla"],["regula","paso de sustancias"],["difusion"],["proteinas transportadoras"],["endocitosis"]]},
+{q:"Describe la estructura y la función del núcleo.",
+ ans:"Estructura grande y esférica que contiene el material genético (ADN). Partes: envoltura nuclear (membrana con poros que permiten el intercambio de sustancias), nucleoplasma (medio líquido interno), cromatina/cromosomas (ADN en distintos estados de condensación) y nucléolo (estructura esférica donde se forman los ribosomas).",
+ kw:[["material genetico","adn"],["esferica","grande"],["envoltura nuclear","membrana nuclear"],["poros"],["nucleoplasma"],["cromatina","cromosomas"],["nucleolo"],["ribosomas"]]},
+{q:"Explica la función de estos orgánulos: mitocondria, retículo endoplasmático rugoso y liso, aparato de Golgi y lisosomas.",
+ ans:"• Mitocondria: obtiene energía para la célula mediante la respiración celular (doble membrana con repliegues).\n• RE rugoso: tiene ribosomas y participa en la síntesis de proteínas.\n• RE liso: sin ribosomas, interviene en la síntesis de lípidos.\n• Aparato de Golgi: modifica las sustancias sintetizadas en el RE y las transporta en vesículas al exterior celular.\n• Lisosomas: vesículas donde se digieren partículas capturadas gracias a sus enzimas digestivas.",
+ kw:[["mitocondria"],["energia","respiracion celular"],["rugoso"],["proteinas"],["liso"],["lipidos"],["golgi"],["vesiculas","transporta"],["lisosomas"],["digieren","enzimas"]]},
+{q:"Explica la función de las vesículas, los centriolos, los ribosomas y el citoesqueleto. ¿Cuáles son orgánulos no membranosos?",
+ ans:"• Vesículas: pequeños compartimentos que transportan o almacenan sustancias.\n• Centriolos: dos cilindros de fibras que dirigen el movimiento del citoesqueleto y de los cromosomas en la división celular.\n• Ribosomas: sintetizan proteínas; adheridos al RE o dispersos en el citoplasma.\n• Citoesqueleto: red de fibras que sostiene los orgánulos, da forma a la célula e interviene en el movimiento (cilios y flagelos).\nNo membranosos: centriolos, ribosomas y citoesqueleto.",
+ kw:[["vesiculas"],["transportan","almacenan"],["centriolos"],["division"],["ribosomas"],["proteinas"],["citoesqueleto"],["cilios","flagelos","forma"]]},
+{q:"¿Qué es la diferenciación celular? ¿De qué célula proceden todas las del cuerpo y qué tienen en común?",
+ ans:"Es un conjunto de cambios en la forma y estructura de las células que les permite especializarse en funciones concretas. Todas las células del cuerpo proceden de una única célula inicial, el cigoto, y todas contienen la misma información genética, pero varían en su forma y función (neuronas, fibras musculares, glóbulos rojos…).",
+ kw:[["cambios","forma","estructura"],["especializar"],["funciones"],["cigoto"],["misma informacion genetica","informacion genetica"],["neuronas","musculares","globulos"]]},
+{q:"Explica el tejido epitelial: características, tipos (revestimiento y glandular) y función.",
+ ans:"Está formado por una o más capas de células muy unidas entre sí. Recubre los órganos y actúa como barrera protectora. El epitelio de revestimiento tiene función protectora; el epitelio glandular produce y secreta sustancias y sus células pueden estar repartidas o formando glándulas.",
+ kw:[["capas"],["muy unidas","unidas"],["recubre"],["barrera","protectora"],["revestimiento"],["glandular"],["secretan","secreta","producen"]]},
+{q:"Explica el tejido conectivo y describe sus tipos (conjuntivo, adiposo, cartilaginoso, óseo y sangre).",
+ ans:"Células rodeadas de matriz intercelular y fibras; conecta órganos y otros tejidos.\n• Conjuntivo: muchas fibras, rellena el espacio entre órganos y forma tendones.\n• Adiposo: pocas fibras, adipocitos, almacena grasas (reserva energética y termorreguladora).\n• Cartilaginoso: matriz sólida y elástica, condrocitos; oreja, nariz, tráquea y articulaciones.\n• Óseo: matriz sólida y dura (sales de calcio), osteocitos, osteoblastos y osteoclastos; forma los huesos.\n• Sangre: matriz líquida (plasma) y glóbulos rojos, blancos y plaquetas.",
+ kw:[["matriz"],["fibras"],["conjuntivo","tendones"],["adiposo","adipocitos"],["cartilaginoso","condrocitos"],["oseo","huesos"],["sangre","plasma"],["globulos"]]},
+{q:"Compara los tres tipos de tejido muscular (esquelético, cardíaco y liso).",
+ ans:"El tejido muscular está formado por miocitos o fibras musculares, con actina y miosina que forman miofibrillas.\n• Estriado esquelético: contracción fuerte, rápida y voluntaria; aparato locomotor.\n• Estriado cardíaco: fibras ramificadas, contracción fuerte, rápida e involuntaria; corazón.\n• Liso: contracción lenta e involuntaria; paredes de órganos huecos.",
+ kw:[["esqueletico"],["voluntaria"],["locomotor"],["cardiaco"],["ramificadas","corazon"],["involuntaria"],["liso"],["lenta","organos huecos"],["actina","miosina"]]},
+{q:"Explica el tejido nervioso: sus células y sus funciones. Después, dibuja mentalmente el recorrido del oxígeno desde el medio externo hasta las células.",
+ ans:"Es el principal componente del sistema nervioso. Las neuronas producen, reciben y transmiten el impulso nervioso. Las células gliales se encargan de la nutrición, la defensa y el soporte de las neuronas.\nRecorrido del oxígeno: medio externo → sangre → medio interno → células de los tejidos (el medio interno baña las células, que toman de él el oxígeno y los nutrientes y vierten sus desechos).",
+ kw:[["sistema nervioso"],["neuronas"],["impulso nervioso"],["gliales","glia"],["nutricion","defensa","soporte"],["medio externo"],["sangre"],["medio interno"],["celulas"]]},
+];
+
+/* ============ UTILIDADES ============ */
+const $=s=>document.querySelector(s);
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let store={};
+try{store=JSON.parse(localStorage.getItem("estudioBio")||"{}")}catch(e){}
+store.tests=store.tests||{};store.known=store.known||{};
+const save=()=>{try{localStorage.setItem("estudioBio",JSON.stringify(store))}catch(e){}};
+
+const app=$("#app");
+function view(v){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  ({tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  window.scrollTo(0,0);
+}
+$("#nav").onclick=e=>{if(e.target.dataset.v)view(e.target.dataset.v)};
+
+/* ============ TESTS ============ */
+let T=null;
+function viewTests(){
+  const best=i=>{const r=store.tests["m"+i];return r?`Mejor: ${r.best}/${MODELS[i].qs.length}`:"Sin hacer"};
+  app.innerHTML=`<div class="card"><b>Elige un modelo de examen</b>
+    <p class="mut">Cada modelo tiene 12 preguntas distintas. Si fallas, te mostramos la respuesta correcta y por qué.</p>
+    <label class="row"><input type="checkbox" id="exam"> <span><b>Modo examen</b>: sin feedback hasta el final (la corrección con explicaciones sale al terminar)</span></label>
+  </div>
+  <div class="grid">${MODELS.map((m,i)=>`<div class="card model" data-m="${i}"><b>📝 ${m.name}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best(i)}</div></div>`).join("")}
+  <div class="card model" data-m="mix"><b>🎲 Mixto</b><div class="mut">20 preguntas al azar de los 5 modelos</div></div>
+  <div class="card model" data-m="fails"><b>🔁 Repasar fallos</b><div class="mut">${(store.fails||[]).length} preguntas falladas guardadas</div></div></div>`;
+  app.onclick=e=>{const c=e.target.closest(".model");if(!c)return;startTest(c.dataset.m,$("#exam").checked)};
+}
+function startTest(m,exam){
+  let qs,name;
+  const all=MODELS.flatMap(x=>x.qs);
+  if(m==="mix"){qs=shuffle(all).slice(0,20);name="Mixto"}
+  else if(m==="fails"){qs=all.filter(q=>(store.fails||[]).includes(q.q));name="Repaso de fallos";if(!qs.length){alert("¡No tienes fallos guardados! 🎉");return}}
+  else{qs=MODELS[+m].qs.slice();name=MODELS[+m].name}
+  qs=shuffle(qs).map(q=>({...q,opts:shuffle([q.ok,...q.bad])}));
+  T={m,name,exam,qs,i:0,ans:[],locked:false};
+  renderQ();
+}
+function renderQ(){
+  const q=T.qs[T.i],n=T.qs.length;
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">${T.name}${T.exam?" · modo examen":""}</span><span class="sp"></span><span class="mut">${T.i+1}/${n}</span></div>
+  <div class="bar"><i style="width:${T.i/n*100}%"></i></div>
+  <h3 style="margin:0 0 10px">${esc(q.q)}</h3>
+  <div id="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+  <div id="fb"></div>
+  <div class="row" style="margin-top:14px"><button class="btn ghost" id="quit">Salir</button><span class="sp"></span><button class="btn" id="next" hidden></button></div></div>`;
+  T.locked=false;
+  $("#quit").onclick=()=>{if(confirm("¿Salir del test? Se perderá el progreso."))viewTests()};
+  $("#opts").onclick=e=>{const b=e.target.closest(".opt");if(!b||T.locked&&!T.exam)return;pick(+b.dataset.k)};
+  $("#next").onclick=()=>{if(T.i+1<n){T.i++;renderQ()}else finish()};
+}
+function pick(k){
+  const q=T.qs[T.i];T.ans[T.i]=k;
+  const next=$("#next");next.hidden=false;next.textContent=T.i+1<T.qs.length?"Siguiente →":"Ver resultado";
+  const btns=[...document.querySelectorAll(".opt")];
+  if(T.exam){btns.forEach((b,j)=>b.classList.toggle("sel",j===k));return}
+  T.locked=true;
+  const good=q.opts[k]===q.ok;
+  btns.forEach((b,j)=>{b.disabled=true;if(q.opts[j]===q.ok)b.classList.add("ok");else if(j===k)b.classList.add("ko")});
+  $("#fb").innerHTML=good
+   ?`<div class="fb ok"><b>✅ ¡Correcto!</b><br>${esc(q.why)}</div>`
+   :`<div class="fb ko"><b>❌ Has fallado.</b> La respuesta correcta es:<br><b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
+}
+function finish(){
+  const n=T.qs.length;
+  const wrong=T.qs.filter((q,i)=>q.opts[T.ans[i]]!==q.ok);
+  const sc=n-wrong.length;
+  store.fails=(store.fails||[]).filter(f=>!T.qs.some(q=>q.q===f));
+  wrong.forEach(q=>store.fails.push(q.q));
+  const key="m"+T.m;const r=store.tests[key]||{best:0,tries:0};
+  r.tries++;r.best=Math.max(r.best,sc);r.last=sc;r.n=n;store.tests[key]=r;
+  store.hist=(store.hist||[]).concat({name:T.name,sc,n,d:new Date().toLocaleDateString("es-ES")}).slice(-30);
+  save();
+  const nota=(sc/n*10).toFixed(1);
+  app.innerHTML=`<div class="card" style="text-align:center"><span class="tag">${T.name}</span>
+   <div class="score">${sc}/${n} · ${nota}</div>
+   <p>${sc===n?"🏆 ¡Perfecto!":sc/n>=.5?"👍 ¡Aprobado! Repasa los fallos:":"💪 A repasar un poco más:"}</p>
+   <div class="row" style="justify-content:center"><button class="btn" id="again">Repetir</button><button class="btn ghost" id="back">Menú</button></div></div>
+   ${wrong.length?`<h3>Tus fallos (${wrong.length})</h3>`+wrong.map(q=>`<div class="card"><b>${esc(q.q)}</b>
+     <div class="fb ko" style="margin-top:8px">Tu respuesta: ${esc(q.opts[T.ans[T.qs.indexOf(q)]]??"(en blanco)")}</div>
+     <div class="fb ok" style="margin-top:8px"><b>Correcta:</b> ${esc(q.ok)}<br><b>Porque:</b> ${esc(q.why)}</div></div>`).join(""):""}`;
+  $("#again").onclick=()=>startTest(T.m,T.exam);
+  $("#back").onclick=viewTests;
+}
+
+/* ============ TARJETAS ============ */
+let C={sec:"Todas",pool:[],i:0,onlyReview:false};
+function viewCards(){
+  const secs=["Todas",...new Set(CARDS.map(c=>c[2]))];
+  const pool=()=>CARDS.map((c,id)=>({c,id})).filter(x=>(C.sec==="Todas"||x.c[2]===C.sec)&&(!C.onlyReview||!store.known[x.id]));
+  C.pool=pool();if(C.i>=C.pool.length)C.i=0;
+  const cur=C.pool[C.i];
+  const knownN=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="chips">${secs.map(s=>`<button class="chip ${s===C.sec?"on":""}" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+  <div class="row"><label class="mut"><input type="checkbox" id="rev" ${C.onlyReview?"checked":""}> Solo las que aún no sé</label><span class="sp"></span><span class="mut">Dominadas: ${knownN}/${CARDS.length}</span></div>
+  ${cur?`<div class="flash"><div class="flip" id="flip"><div class="face front">${esc(cur.c[0])}<div class="mut" style="font-weight:400;font-size:.8rem;margin-top:10px">toca para girar</div></div><div class="face back">${esc(cur.c[1])}</div></div></div>
+  <div class="row"><button class="btn ghost" id="prev">←</button><span class="mut">${C.i+1}/${C.pool.length}</span><button class="btn ghost" id="nx">→</button><span class="sp"></span>
+   <button class="btn ghost" id="rv">🔁 Repasar</button><button class="btn" id="kn">✅ Me la sé</button></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="sh">🔀 Barajar</button></div>`
+  :`<div class="card">🎉 No quedan tarjetas pendientes en esta selección.</div>`}`;
+  app.onclick=e=>{const ch=e.target.closest(".chip");if(ch){C.sec=ch.dataset.s;C.i=0;viewCards()}};
+  $("#rev").onchange=e=>{C.onlyReview=e.target.checked;C.i=0;viewCards()};
+  if(!cur)return;
+  $("#flip").onclick=()=>$("#flip").classList.toggle("on");
+  const go=d=>{C.i=(C.i+d+C.pool.length)%C.pool.length;viewCards()};
+  $("#prev").onclick=()=>go(-1);$("#nx").onclick=()=>go(1);
+  $("#kn").onclick=()=>{store.known[cur.id]=true;save();C.pool=pool();if(!C.onlyReview)C.i=(C.i+1)%C.pool.length;viewCards()};
+  $("#rv").onclick=()=>{store.known[cur.id]=false;save();go(1)};
+  $("#sh").onclick=()=>{C.i=Math.floor(Math.random()*C.pool.length);viewCards()};
+}
+
+/* ============ DESARROLLO ============ */
+let D={i:0,checked:false};
+function viewDev(){
+  const d=DEV[D.i];
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">Pregunta de desarrollo</span><span class="sp"></span><span class="mut">${D.i+1}/${DEV.length}</span></div>
+  <h3 style="margin:8px 0">${esc(d.q)}</h3>
+  <textarea id="txt" placeholder="Escribe aquí tu respuesta…">${esc(store["dev"+D.i]||"")}</textarea>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="p">←</button><button class="btn ghost" id="n">→</button><span class="sp"></span><button class="btn" id="chk">Comprobar</button></div>
+  <div id="res"></div></div>`;
+  $("#txt").oninput=e=>{store["dev"+D.i]=e.target.value;save()};
+  $("#p").onclick=()=>{D.i=(D.i+DEV.length-1)%DEV.length;viewDev()};
+  $("#n").onclick=()=>{D.i=(D.i+1)%DEV.length;viewDev()};
+  $("#chk").onclick=()=>{
+    const t=norm($("#txt").value);
+    const hits=d.kw.map(g=>g.some(w=>t.includes(norm(w))));
+    const ok=hits.filter(Boolean).length;
+    $("#res").innerHTML=`<p><b>Conceptos clave detectados: ${ok}/${d.kw.length}</b></p>
+    <div>${d.kw.map((g,i)=>`<span class="kw ${hits[i]?"has":"no"}">${hits[i]?"✓":"✗"} ${esc(g[0])}</span>`).join("")}</div>
+    <p class="mut">Es una detección automática por palabras: si lo explicaste con otras palabras, compara con la respuesta modelo.</p>
+    <div class="model-ans"><b>Respuesta modelo</b>\n${esc(d.ans)}</div>`;
+  };
+}
+
+/* ============ PROGRESO ============ */
+function viewStats(){
+  const k=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="grid">
+   <div class="card"><span class="tag">Tarjetas dominadas</span><div class="score">${k}/${CARDS.length}</div></div>
+   <div class="card"><span class="tag">Preguntas por repasar</span><div class="score">${(store.fails||[]).length}</div></div></div>
+  <div class="card"><b>Modelos de test</b>${MODELS.map((m,i)=>{const r=store.tests["m"+i];return `<p>${m.name}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
+  <div class="card"><b>Últimos intentos</b>${(store.hist||[]).slice().reverse().slice(0,10).map(h=>`<p class="mut">${h.d} · ${esc(h.name)} · ${h.sc}/${h.n}</p>`).join("")||'<p class="mut">Todavía no hay intentos.</p>'}</div>
+  <button class="btn ghost" id="rst">Borrar progreso</button>`;
+  $("#rst").onclick=()=>{if(confirm("¿Borrar todo el progreso?")){store={tests:{},known:{}};save();viewStats()}};
+}
+view("tests");
+</script>
+</body>
+</html>
