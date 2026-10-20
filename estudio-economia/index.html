@@ -151,6 +151,238 @@ Q("Si un país tiene 40 millones de personas de 16 años o más y 24 millones de
 ]},
 ];
 
+// Tests largos por apartado (1-7) y de vocabulario (8)
+const TOPICS=[
+{name:"1 · ¿Qué es la actividad económica?",qs:[
+Q("¿Qué permite el proceso llamado actividad económica?","Obtener los bienes y servicios que cubren las necesidades humanas",["Fabricar únicamente productos industriales","Recaudar impuestos","Fijar los salarios de los trabajadores"],"Actividad económica = todo proceso que permite obtener bienes y servicios para cubrir necesidades humanas."),
+Q("Las necesidades y deseos de las personas son…","Infinitos",["Limitados","Iguales para todos","Inexistentes"],"Por eso nunca se agotan las necesidades que hay que cubrir."),
+Q("Los medios que empleamos para satisfacer las necesidades (dinero, trabajo…) son…","Limitados",["Infinitos","Gratuitos","Siempre suficientes"],"Necesidades infinitas con medios limitados es el problema básico de la economía."),
+Q("¿Por qué surge la Economía como ciencia?","Porque las necesidades son infinitas y los medios para satisfacerlas son limitados",["Porque los bienes son gratuitos","Porque solo el Estado produce","Porque no hay consumidores"],"Hay que decidir qué producir y en qué cantidad con recursos escasos."),
+Q("¿De qué aspectos se encarga la Economía?","Qué bienes y servicios producir, en qué cantidad y el comportamiento de los consumidores",["Solo de la política y las leyes","Solo del clima","Solo de las exportaciones"],"Analiza producción, cantidades y comportamiento de los consumidores."),
+Q("¿Cuántas fases abarcan las actividades económicas?","Tres",["Dos","Cuatro","Cinco"],"Producción, distribución y consumo."),
+Q("¿Cuál es el orden de las fases de la actividad económica?","Producción → distribución → consumo",["Consumo → producción → distribución","Distribución → consumo → producción","Producción → consumo → distribución"],"Primero se obtiene el bien, luego se lleva al mercado y finalmente se consume."),
+Q("Las actividades de producción son…","Todas las actividades humanas cuya finalidad es la obtención de bienes y servicios",["Las que ponen los productos a la venta","Las que usan los consumidores","Las que recauda el Estado"],"Para producir se utilizan los recursos naturales y el trabajo de las personas."),
+Q("¿Qué se utiliza para producir bienes y servicios?","Recursos naturales y el trabajo de las personas",["Solo dinero","Solo impuestos","Solo publicidad"],"Son los recursos que se emplean en la fase de producción."),
+Q("La distribución es el conjunto de actividades que…","Ponen los bienes y servicios a disposición de los consumidores",["Obtienen los bienes de la naturaleza","Hacen uso de los bienes","Fijan los impuestos"],"Es la fase intermedia entre producción y consumo."),
+Q("¿Cómo llega la mayoría de productos al consumidor?","A través de establecimientos donde se ponen a la venta en el mercado y el consumidor los compra",["Directamente desde la fábrica a casa sin intermediarios","Por el Estado de forma gratuita","Solo por Internet"],"La venta en el mercado es parte de la distribución."),
+Q("Las actividades de consumo son aquellas en las que…","Los consumidores hacen uso de los bienes y servicios",["Se obtienen materias primas","Se transportan productos","Se crean empresas"],"Consumir es usar los bienes y servicios para cubrir necesidades."),
+Q("¿Qué tiende a hacer la sociedad actual con el consumo?","Incentivarlo y crear nuevas necesidades, lo que puede llevar al consumismo",["Reducirlo a lo imprescindible","Prohibirlo","Ignorarlo"],"Se crean necesidades nuevas de manera que se llega al consumismo."),
+Q("Un agricultor cultiva tomates. ¿En qué fase de la actividad económica está?","Producción",["Distribución","Consumo","Ninguna"],"Está obteniendo un bien."),
+Q("Un camión lleva los tomates a una tienda. ¿En qué fase estamos?","Distribución",["Producción","Consumo","Ahorro"],"Se pone el producto a disposición del consumidor."),
+Q("Una familia compra los tomates y se los come. ¿Qué fase es la del uso final?","Consumo",["Producción","Distribución","Transformación"],"Usa el bien para satisfacer una necesidad."),
+Q("Una clase en un instituto es un ejemplo de…","Servicio",["Bien material","Materia prima","Producto elaborado"],"Los servicios son inmateriales; la fruta de un puesto sería un bien material."),
+Q("Las frutas expuestas en un puesto del mercado son un ejemplo de…","Bien material",["Servicio","Impuesto","Sistema económico"],"Es un objeto material que se compra y se consume."),
+Q("¿Qué ciencia estudia la producción, distribución y consumo de bienes y servicios?","La Economía",["La Geografía física","La Sociología","La Estadística"],"Economía: ciencia que estudia esas tres fases."),
+]},
+{name:"2 · Los sectores económicos",qs:[
+Q("¿En cuántos grandes sectores se agrupan las actividades económicas?","Tres",["Dos","Cuatro","Seis"],"Primario, secundario y terciario."),
+Q("El sector primario comprende actividades destinadas a…","Obtener alimentos y materias primas vegetales y animales del medio natural",["Transformar materias primas","Prestar servicios","Vender productos elaborados"],"Son las que se obtienen directamente de la naturaleza."),
+Q("¿Qué actividades incluye el sector primario?","Agricultura, ganadería, pesca y explotación forestal",["Industria y construcción","Comercio, turismo y sanidad","Banca y seguros"],"Las cuatro actividades clásicas del sector primario."),
+Q("El sector secundario engloba las actividades que…","Transforman las materias primas en productos elaborados",["Obtienen alimentos de la naturaleza","Prestan un servicio a la sociedad","Fijan los precios"],"Ejemplo: de la leche (materia prima) se obtiene el queso (producto elaborado)."),
+Q("Según el texto principal, el sector secundario incluye…","Minería y explotación de fuentes de energía, industria y construcción",["Agricultura y ganadería","Educación y sanidad","Comercio y transporte"],"Industria y construcción son siempre del secundario."),
+Q("El sector terciario incluye las actividades que…","Prestan un servicio a la sociedad",["Obtienen materias primas","Transforman productos","Producen alimentos"],"Se les llama también sector servicios."),
+Q("¿Cuál de estas actividades pertenece al sector terciario?","El transporte",["La pesca","La construcción","La ganadería"],"Educación, sanidad y transporte son servicios."),
+Q("La sanidad pertenece al sector…","Terciario",["Primario","Secundario","A ninguno"],"Es un servicio a la sociedad."),
+Q("La educación pertenece al sector…","Terciario",["Primario","Secundario","A ninguno"],"Es un servicio."),
+Q("El comercio y el turismo pertenecen al sector…","Terciario",["Primario","Secundario","Ninguno"],"Aparecen en el esquema como actividades del sector terciario o de servicios."),
+Q("La construcción pertenece al sector…","Secundario",["Primario","Terciario","A ninguno"],"Transforma materiales en edificios."),
+Q("La industria pertenece al sector…","Secundario",["Primario","Terciario","A ninguno"],"Transforma materias primas en productos elaborados."),
+Q("La agricultura pertenece al sector…","Primario",["Secundario","Terciario","A ninguno"],"Se obtiene directamente de la naturaleza."),
+Q("¿Cuál de estas actividades NO es del sector primario?","La construcción",["La pesca","La ganadería","La explotación forestal"],"La construcción es secundaria."),
+Q("¿Cuál de estas actividades NO es del sector terciario?","La industria",["El comercio","La sanidad","La educación"],"La industria es secundaria."),
+Q("En el ejemplo de la leche y el queso, la leche es…","La materia prima",["El producto elaborado","Un servicio","Un impuesto"],"El queso es el producto elaborado."),
+Q("¿En qué sector se transforma la leche en queso?","Secundario",["Primario","Terciario","En ninguno"],"Es una transformación de materia prima en producto elaborado."),
+Q("¿En qué sector se obtiene la leche de las vacas?","Primario (ganadería)",["Secundario","Terciario","En ninguno"],"Se obtiene directamente de la naturaleza."),
+Q("En general, ¿qué ocurre con los sectores cuanto más avanzada es una economía?","Tiene más peso el terciario y menos el primario",["Tiene más peso el primario y menos el terciario","Solo existe el secundario","Los tres pesan igual"],"Las economías desarrolladas son sobre todo de servicios."),
+Q("Según el vocabulario, el sector primario se realiza en…","Zonas rurales, marítimas y forestales, alejadas de las ciudades",["Grandes fábricas","Centros comerciales","Oficinas"],"Son las zonas donde están los recursos naturales."),
+Q("Los productos del sector secundario pueden ser…","Elaborados (de consumo o finales) o semielaborados (de producción o intermedios)",["Solo servicios","Solo materias primas","Solo bienes inmateriales"],"Los semielaborados se usan para producir otros bienes."),
+Q("Las transformaciones del sector secundario antes eran artesanales y hoy son…","Industriales, con máquinas que necesitan fuentes de energía",["Manuales","Agrícolas","Inexistentes"],"Hoy se hacen con máquinas."),
+Q("Según el vocabulario, el sector terciario incluye…","Todas las actividades que no entran en los otros dos sectores",["Solo el comercio","Solo la banca","Solo el transporte"],"Es la distribución y comercialización (puesta en venta) de bienes y servicios."),
+]},
+{name:"3 · Los agentes económicos",qs:[
+Q("¿Cuántos grandes agentes intervienen en la actividad económica?","Tres",["Dos","Cuatro","Cinco"],"Las personas, las empresas y el Estado."),
+Q("¿Cuáles son los tres agentes económicos?","Personas, empresas y Estado",["Bancos, tiendas y fábricas","Sindicatos, patronal y Estado","Trabajadores, jefes y clientes"],"Los tres intervienen en la actividad económica."),
+Q("Las personas contribuyen a la producción con…","Su trabajo y capital",["Impuestos","Leyes","Subvenciones"],"Al mismo tiempo consumen bienes y servicios."),
+Q("¿Qué incentiva la actividad económica?","El consumo de las personas",["La publicidad únicamente","El ahorro del Estado","Las leyes"],"El consumo de bienes y servicios es el que la incentiva."),
+Q("Las empresas se dedican a…","Producir bienes y servicios con el fin de obtener un beneficio",["Elaborar leyes","Consumir bienes","Recaudar impuestos"],"Su fin es un beneficio económico."),
+Q("El beneficio de una empresa es…","Ingresos − gastos",["Ingresos + gastos","Gastos − ingresos","Salarios × precio"],"Si ingresan más de lo que gastan, obtienen beneficio."),
+Q("Para desarrollar su actividad, las empresas…","Contratan trabajo a cambio de un salario y compran bienes y servicios a otras empresas",["Solo venden","Solo reciben subvenciones","Solo pagan impuestos"],"Son demandantes de trabajo y de bienes."),
+Q("Una empresa pública es…","Propiedad del Estado o de otras Administraciones públicas",["Propiedad de personas particulares","Una empresa grande","Una empresa con muchos socios"],"Según la propiedad hay públicas y privadas."),
+Q("Una empresa privada es…","Propiedad de personas o entidades particulares",["Propiedad del Estado","Una empresa con pérdidas","Una cooperativa pública"],"Se clasifican según la propiedad."),
+Q("Una microempresa tiene…","Menos de 10 trabajadores y facturación de hasta 2 millones de euros al año",["10-50 empleados","Hasta 250 empleados","Más de 250 empleados"],"Es el tamaño más pequeño."),
+Q("Una empresa pequeña tiene…","10-50 empleados y facturación de entre 2 y 10 millones de euros al año",["Menos de 10 empleados","Hasta 250 empleados y 50 millones","Más de 250 empleados"],"Entre la micro y la mediana."),
+Q("Una empresa mediana tiene…","Hasta 250 trabajadores y facturación de hasta 50 millones de euros al año",["Menos de 10 trabajadores","10-50 trabajadores","Más de 250 trabajadores"],"Por encima de ese tamaño es grande."),
+Q("Una gran empresa tiene…","Más de 250 empleados y facturación superior a 50 millones de euros al año",["Hasta 250 empleados","Menos de 10 empleados","Facturación de hasta 2 millones"],"Es el mayor tamaño."),
+Q("Una empresa con 8 trabajadores y 1,5 millones de facturación es…","Una microempresa",["Una pequeña empresa","Una mediana empresa","Una gran empresa"],"Menos de 10 trabajadores y hasta 2 millones."),
+Q("Una empresa con 120 empleados y 20 millones de facturación es…","Una empresa mediana",["Una microempresa","Una pequeña empresa","Una gran empresa"],"Menos de 250 empleados y menos de 50 millones, pero más que una pequeña."),
+Q("Según el número de propietarios las empresas son…","Individuales o sociedades",["Públicas o privadas","Micro o grandes","Primarias o secundarias"],"Individual: una persona. Sociedad: varios propietarios."),
+Q("Una empresa individual…","Pertenece a una única persona",["Pertenece a varias personas","Pertenece al Estado","Solo existe en el sector primario"],"Las sociedades tienen varios propietarios."),
+Q("Las sociedades más frecuentes son…","Las sociedades limitadas (S.L.) y las anónimas (S.A.)",["Las cooperativas públicas","Las empresas individuales","Los sindicatos"],"Son las formas con varios propietarios."),
+Q("En una sociedad anónima, los beneficios se reparten…","En proporción a las acciones de cada accionista (dividendos)",["A partes iguales entre los trabajadores","Íntegramente al Estado","Al azar"],"Un accionista con el 30 % de las acciones recibe el 30 % de los beneficios."),
+Q("¿Qué función cumple el Estado elaborando leyes?","Regular la actividad económica del país",["Producir bienes","Consumir bienes","Vender servicios"],"Es la función normativa del Estado."),
+Q("El Estado concede ayudas y subvenciones a las empresas privadas para…","Incentivar la producción",["Reducir el empleo","Subir los impuestos","Eliminar la competencia"],"Es una función económica del Estado."),
+Q("¿Cuál es otra función económica del Estado?","Prestar servicios públicos y crear empresas",["Fabricar todos los productos","Fijar el salario de cada trabajador","Competir con las familias"],"Además genera mucho empleo."),
+Q("Para financiar sus actuaciones, el Estado…","Recauda impuestos",["Vende acciones a particulares","Imprime billetes sin límite","Cobra beneficios de las empresas privadas"],"Los impuestos son su principal fuente de ingresos."),
+Q("Un impuesto es…","Un pago que individuos y empresas deben hacer a un organismo público (Estado, Comunidad Autónoma o municipio)",["Un salario","Una subvención","Un beneficio"],"Se paga a organismos públicos."),
+Q("Los impuestos directos…","Gravan directamente las rentas y el patrimonio de personas y empresas",["Se pagan al comprar bienes y servicios","Solo los pagan las empresas públicas","Son los salarios"],"Ejemplos: IRPF e impuesto de Patrimonio."),
+Q("El IRPF y el impuesto de Patrimonio son impuestos…","Directos",["Indirectos","Locales exclusivamente","Voluntarios"],"Gravan rentas y patrimonio."),
+Q("Los impuestos indirectos…","Se pagan al adquirir bienes y servicios (ej.: IVA)",["Gravan las rentas","Gravan el patrimonio","Los pagan solo las empresas"],"El IVA se paga al comprar."),
+Q("En el esquema «¿Quién interviene en el proceso productivo?», el Estado o sector público…","Controla el proceso (gobierno)",["Compra bienes y servicios","Produce y vende","Presta dinero"],"Las familias compran, las empresas producen y venden, y el Estado controla."),
+Q("En ese esquema, las familias (economías domésticas)…","Compran bienes y servicios",["Producen y venden","Controlan el proceso","Elaboran las leyes"],"Son consumidoras."),
+]},
+{name:"4 · Los factores productivos",qs:[
+Q("¿Qué son los factores productivos?","Los que son indispensables para la producción de bienes y servicios",["Los impuestos de una empresa","Los beneficios de una empresa","Los sectores económicos"],"Sin ellos no se pueden producir bienes y servicios."),
+Q("¿Cuáles son los factores productivos del apartado 4?","Recursos naturales, capital, tecnología, conocimiento y saber hacer, y trabajo",["Dinero, bancos y Estado","Sectores primario, secundario y terciario","Oferta, demanda y precio"],"Son los cinco (a-e) que se estudian."),
+Q("Los recursos naturales son…","Los que se utilizan en el proceso de producción, como agua y tierra",["Las máquinas","El dinero","La formación"],"Pueden ser renovables o no renovables."),
+Q("Los recursos naturales renovables…","No se agotan o se pueden regenerar",["Se agotan","Los fabrica el ser humano","Son siempre gratuitos"],"Ejemplo: el agua bien gestionada."),
+Q("Los recursos naturales no renovables…","Se agotan, por lo que las empresas deben gestionar su uso adecuadamente",["Se regeneran solos","No se usan en producción","Son ilimitados"],"Hay que usarlos con cuidado."),
+Q("El capital como factor productivo es…","Todos los recursos no naturales que se emplean para producir bienes y servicios",["El agua y la tierra","El trabajo humano","Un impuesto"],"Hay tres tipos: físico, humano y financiero."),
+Q("El capital físico son…","Elementos materiales: edificios, maquinaria, medios informáticos…",["La formación de los trabajadores","El dinero","Las técnicas"],"Es el capital que se puede tocar."),
+Q("El capital humano es…","La formación o cualificación de los trabajadores y su experiencia",["Las máquinas","El dinero de la empresa","Las materias primas"],"Mejora con la educación y la experiencia."),
+Q("El capital financiero es…","El dinero necesario para crear una empresa y mantener su actividad",["Los edificios","La experiencia de los empleados","La tecnología"],"Es el dinero."),
+Q("Un ordenador de una oficina es capital…","Físico",["Humano","Financiero","Natural"],"Es un medio informático, un elemento material."),
+Q("Un curso de formación de un trabajador aumenta el capital…","Humano",["Físico","Financiero","Natural"],"Mejora su cualificación."),
+Q("Un préstamo para abrir una tienda es capital…","Financiero",["Físico","Humano","Natural"],"Es el dinero para crear la empresa."),
+Q("La tecnología es…","El conjunto de técnicas utilizadas para la producción de bienes y servicios",["El conjunto de máquinas únicamente","El dinero de una empresa","El agua y la tierra"],"Se clasifica según cómo se produce."),
+Q("En la producción manual…","El ser humano proporciona la fuerza y el manejo de las herramientas",["La maquinaria proporciona la fuerza","Los robots controlan las herramientas","No interviene nadie"],"Ejemplo: un artesano con un martillo."),
+Q("En la producción mecanizada…","La maquinaria proporciona la fuerza y el trabajador maneja las herramientas",["El ser humano pone toda la fuerza","Las máquinas hacen todo sin trabajadores","No hay herramientas"],"Es intermedia entre manual y robotizada."),
+Q("En la producción robotizada…","Las máquinas proporcionan la fuerza y controlan las herramientas; los trabajadores programan y controlan las máquinas",["El trabajador pone la fuerza","El trabajador maneja las herramientas","No se usan máquinas"],"El trabajador se encarga de programar y vigilar."),
+Q("Un operario que maneja una máquina de coser eléctrica realiza producción…","Mecanizada",["Manual","Robotizada","Artesanal pura"],"La máquina pone la fuerza y el trabajador maneja la herramienta."),
+Q("Un brazo robótico programado que suelda coches en una fábrica es producción…","Robotizada",["Manual","Mecanizada","Artesanal"],"La máquina controla la herramienta y los trabajadores solo programan y vigilan."),
+Q("Actualmente, el uso de la tecnología es fundamental para…","Que se produzca el crecimiento económico",["Reducir el consumo","Eliminar el capital","Disminuir la producción"],"Permite aumentar la producción con el mismo trabajo y capital."),
+Q("Una ventaja de la tecnología es que…","Permite aumentar la producción empleando el mismo trabajo y capital, ahorrando dinero",["Crea más puestos de trabajo siempre","Elimina la necesidad de capital","Reduce la producción"],"El crecimiento económico es su ventaja."),
+Q("Una desventaja del uso de la tecnología es…","La reducción de puestos de trabajo",["El aumento de la producción","El ahorro de dinero","El crecimiento económico"],"Las máquinas sustituyen a trabajadores."),
+Q("¿Por qué una economía moderna y competitiva necesita un sistema educativo y centros de investigación de calidad?","Porque los conocimientos son un factor clave para el crecimiento económico",["Porque la educación es gratis","Porque se necesitan más funcionarios","Porque reduce la producción"],"El conocimiento es un factor productivo."),
+Q("El «saber hacer» (know-how) se refiere a…","Los conocimientos prácticos (técnicas, tácticas empresariales…) necesarios para realizar una actividad",["Los conocimientos teóricos de la escuela","El dinero de una empresa","Las máquinas de una fábrica"],"Los conocimientos prácticos."),
+Q("El saber hacer se adquiere…","Por la educación, el trabajo diario o el entorno social",["Solo en la universidad","Solo con dinero","Solo por herencia"],"Hay varias vías."),
+Q("El trabajo es…","La actividad humana física o intelectual necesaria para producir bienes y servicios",["El esfuerzo de las máquinas","Un impuesto","Un sistema económico"],"Es un factor productivo."),
+Q("La productividad de un trabajo se mide por…","La cantidad de bienes y servicios que puede producir en un día",["El salario cobrado","Las horas de descanso","El número de jefes"],"A mayor producción en el mismo tiempo, mayor productividad."),
+Q("¿Qué factores influyen en la productividad de un trabajador?","La formación del trabajador y la tecnología de la que dispone",["Solo su edad","Solo su sueldo","Solo el clima"],"Ejemplos citados en el texto."),
+]},
+{name:"5 · La población y el trabajo",qs:[
+Q("La población activa está formada por…","Personas de 16 o más años que suministran mano de obra para producir bienes y servicios o están dispuestas a hacerlo",["Solo las personas con empleo","Menores de 16 años","Personas jubiladas"],"Incluye ocupados y parados."),
+Q("¿Qué edad mínima define la población activa?","16 años",["14 años","18 años","65 años"],"Personas de 16 o más años."),
+Q("La población ocupada es la que…","Tiene empleo",["Busca trabajo","No quiere trabajar","Es menor de edad"],"Es una parte de la población activa."),
+Q("La población parada es la que…","No tiene trabajo pero lo busca y está disponible para incorporarse de inmediato",["Tiene trabajo","Está jubilada","Estudia y no busca trabajo"],"También forma parte de la población activa."),
+Q("La población inactiva está formada por…","Personas de 16 o más años no clasificadas como ocupadas ni paradas",["Las personas con empleo","Los parados que buscan trabajo","Los autónomos"],"Ejemplos: estudiantes, jubilados…"),
+Q("¿Cuál de estas personas forma parte de la población inactiva?","Un estudiante de 17 años que no busca trabajo",["Un trabajador con contrato","Un parado que busca empleo activamente","Un autónomo"],"Los estudiantes son población inactiva."),
+Q("¿Cuál de estas personas está en la población activa?","Una persona sin empleo que lo busca y está disponible",["Un jubilado","Un ama de casa","Un estudiante a tiempo completo"],"Es población parada, dentro de la activa."),
+Q("La EPA es…","La Encuesta de Población Activa",["Una Empresa Pública Autónoma","El Estatuto del Personal Autónomo","Una Escala de Precios Anual"],"Se realiza para analizar el mercado de trabajo español."),
+Q("¿Quién realiza la EPA y con qué frecuencia?","El INE, trimestralmente",["El Estado, anualmente","Los sindicatos, mensualmente","Las empresas, semestralmente"],"INE = Instituto Nacional de Estadística."),
+Q("Un ejemplo de trabajo no remunerado es…","El de las amas de casa",["El de un asalariado","El de un autónomo","El de un cooperativista"],"Los trabajadores remunerados se distinguen en tres grupos."),
+Q("Los trabajadores por cuenta ajena son…","Asalariados empleados por una empresa o por el Estado a cambio de un salario",["Los que se asocian en cooperativas","Los autónomos","Los empresarios"],"Reciben un salario."),
+Q("Los trabajadores que se asocian en cooperativas…","Se reparten los beneficios en función del dinero aportado a la empresa",["Cobran un salario fijo de una empresa","Trabajan fuera del ámbito de la empresa","Son empleados del Estado"],"Según lo aportado."),
+Q("Los trabajadores por cuenta propia (autónomos) son…","Personas que ofrecen sus servicios retribuidos fuera del ámbito físico de la empresa",["Asalariados de una empresa","Socios de una cooperativa","Funcionarios"],"Trabajan por su cuenta."),
+Q("En los contratos se formalizan…","Las condiciones laborales negociadas entre el empleador y el empleado",["Los impuestos","Los precios de venta","Las vacaciones del Estado"],"Período de prueba, duración, puesto y categoría…"),
+Q("¿Qué edad mínima exige la ley en España para contratar a un trabajador, según el tema?","16 años",["14 años","12 años","18 años"],"No se puede contratar a menores de 16 años."),
+Q("¿Cuál es el máximo de horas semanales de trabajo que cita el tema?","40 horas",["30 horas","48 horas","60 horas"],"No se puede trabajar más de 40 horas semanales."),
+Q("¿Cuál de estos es un tipo de contrato citado en el tema?","De interinidad",["De herencia","De alquiler","De préstamo"],"Indefinido, formativo, en prácticas, de obra y servicio, de interinidad, a tiempo parcial…"),
+Q("La patronal es…","La representante de las federaciones empresariales",["La representante de los trabajadores","Un organismo del Estado","Un tipo de contrato"],"Negocia con los sindicatos."),
+Q("Los sindicatos son…","Los representantes de los trabajadores",["Los representantes de las empresas","Una empresa pública","Un tipo de impuesto"],"Negocian con la patronal y las Administraciones."),
+Q("Los acuerdos de la negociación entre Administraciones, patronal y sindicatos se recogen en…","Los convenios",["Los impuestos","Los contratos de prácticas","La EPA"],"Los convenios recogen las condiciones de trabajo acordadas."),
+Q("En las pequeñas empresas, los trabajadores son representados por…","Delegados de personal",["Un comité de empresa","La patronal","El Estado"],"En las medianas y grandes hay comité de empresa."),
+Q("En las empresas medianas y grandes, los trabajadores son representados por…","Un comité de empresa",["Delegados de personal únicamente","La patronal","Los autónomos"],"Uno o varios delegados en las pequeñas."),
+Q("El desempleo cíclico o coyuntural…","Evoluciona al ritmo del crecimiento económico (aumenta en períodos de crisis)",["Se debe a variaciones durante el año","Se produce por despidos por mejoras técnicas","No existe"],"Depende del ciclo económico."),
+Q("El desempleo estacional…","Está motivado por las variaciones de la actividad económica a lo largo del año (hostelería, agricultura…)",["Evoluciona con la crisis","Se produce por la introducción de máquinas","Es voluntario"],"Por ejemplo, el turismo en verano."),
+Q("El desempleo tecnológico…","Se produce cuando hay despidos por introducir mejoras técnicas",["Se produce por la estación del año","Evoluciona con las crisis","Se debe a la falta de leyes"],"Las máquinas sustituyen a trabajadores."),
+Q("¿Cuál de estas es una consecuencia de una tasa de paro importante?","Descenso del consumo y, en consecuencia, de la producción y del empleo",["Aumento del consumo","Aumento de los ingresos del Estado","Disminución del gasto social"],"Menos ingresos: menos consumo."),
+Q("Una tasa de paro alta provoca en el Estado…","Disminución de ingresos y aumento del gasto social público",["Aumento de ingresos y menos gasto","Ningún efecto","Aumento de impuestos directos"],"Se recaudan menos impuestos y se gasta más en protección social."),
+Q("La economía sumergida son…","Actividades no declaradas por las que no se cotiza ni se pagan impuestos",["Empresas públicas","Actividades del sector primario","Trabajadores autónomos"],"Aumenta cuando hay mucho paro."),
+]},
+{name:"6 · Los sistemas económicos",qs:[
+Q("Un sistema económico es…","El modo en que se producen los bienes y servicios de una sociedad y la forma en que se distribuyen los beneficios entre sus habitantes",["Un conjunto de leyes laborales","Un tipo de impuesto","Un grupo de empresas"],"Es la forma de organizar la actividad económica."),
+Q("¿Cuántos sistemas económicos se tratan en el tema?","Tres: subsistencia, comunista y capitalista",["Dos","Cuatro","Cinco"],"Subsistencia, comunista y capitalista (economía de mercado)."),
+Q("En el sistema de subsistencia…","Las familias producen todo lo que necesitan para cubrir sus necesidades básicas",["El Estado lo controla todo","Hay libre competencia","Se aplica la ley de oferta y demanda"],"Es el sistema más sencillo."),
+Q("En el sistema de subsistencia, lo que sobra (excedente)…","Se vende o se intercambia en el mercado local",["Se entrega al Estado","Se destruye","Se exporta siempre"],"Es un sistema propio de sociedades muy poco desarrolladas."),
+Q("El sistema de subsistencia es propio de…","Sociedades muy poco desarrolladas",["Países ricos","Países comunistas","Economías de mercado avanzadas"],"Se localiza en sociedades poco desarrolladas."),
+Q("En el sistema comunista…","El Estado controla todos los aspectos de la economía",["Los particulares controlan la economía","Las familias producen lo que necesitan","Existe la libre competencia"],"Es propietario de las empresas."),
+Q("En el sistema comunista, el Estado decide…","Qué producir y en qué cantidad, fija los precios y decide quién se lleva los beneficios",["Solo los precios","Solo el salario mínimo","Nada"],"Control total."),
+Q("¿En qué países se localiza actualmente el sistema comunista, según el tema?","Corea del Norte, Cuba y China",["Estados Unidos, Canadá y México","España, Francia e Italia","Alemania y Japón"],"China ha tenido apertura económica en los últimos años."),
+Q("¿Qué otro nombre recibe el sistema capitalista?","Economía de mercado",["Economía de subsistencia","Economía planificada","Economía comunista"],"Sistema capitalista o economía de mercado."),
+Q("En el sistema capitalista, los medios de producción (empresas, tierra…) son de…","Propiedad privada",["Propiedad del Estado","Propiedad colectiva de las familias","Nadie"],"La propiedad privada es la primera característica."),
+Q("El principal objetivo de la actividad económica en el sistema capitalista es…","La obtención del mayor beneficio económico",["Cubrir las necesidades básicas de la familia","Controlar los precios por el Estado","Eliminar la competencia"],"Es la búsqueda del beneficio."),
+Q("En el sistema capitalista la actividad económica se regula mediante…","La ley de la oferta y la demanda",["Las órdenes del Estado","El trueque","El azar"],"La producción y el precio dependen de ella."),
+Q("Según la ley de la oferta y la demanda, la producción y el precio de un artículo se incrementan cuando…","El producto es escaso",["Hay productos de sobra","No hay demanda","El Estado lo prohíbe"],"Cuando hay productos de sobra para cubrir la demanda, bajan."),
+Q("Si la oferta es superior a la demanda (competencia de productos)…","Bajan los precios",["Suben los precios","Los precios no cambian","Desaparece el mercado"],"Hay más productos de los que se demandan."),
+Q("Si aumenta la demanda y escasean los productos…","Suben los precios",["Bajan los precios","No cambian","Desaparece la oferta"],"Más demanda que oferta."),
+Q("Al bajar los precios…","Aumenta la demanda",["Disminuye la demanda","Desaparece la oferta","No ocurre nada"],"Es el efecto que muestra el esquema."),
+Q("La libre competencia significa que…","Cualquier persona puede realizar la actividad económica siempre y cuando cumpla la legislación vigente",["Solo el Estado puede producir","Solo las grandes empresas pueden vender","No hay leyes"],"Es una característica del capitalismo."),
+Q("¿En qué sistema el Estado fija los precios de los productos?","En el comunista",["En el capitalista","En el de subsistencia","En todos"],"En el capitalista se fijan por oferta y demanda."),
+Q("¿En qué sistema el Estado es el propietario de las empresas?","En el comunista",["En el capitalista","En el de subsistencia","En ninguno"],"Es la característica principal del sistema comunista."),
+Q("¿En qué sistema económico las familias producen casi todo lo que consumen?","En el de subsistencia",["En el comunista","En el capitalista","En todos"],"Cubren sus necesidades básicas."),
+Q("¿Cuál es el contrario de la economía de mercado?","La economía centralizada o planificada",["La economía de subsistencia","La economía sumergida","La economía de exportación"],"Según el vocabulario."),
+]},
+{name:"7 · El mundo del trabajo",qs:[
+Q("El trabajo es…","El esfuerzo realizado por las personas con el fin de producir riqueza",["Un impuesto","Un tipo de empresa","Una ley"],"Definición del apartado 7."),
+Q("La población activa es la que…","Se encuentra en edad legal de trabajar y se divide en ocupada y desocupada o parada",["No puede o no quiere trabajar","Es solo la que tiene empleo","Es menor de 16 años"],"Ocupada = tiene un empleo; parada = busca empleo."),
+Q("La población inactiva es aquella que…","No puede o no quiere trabajar, no busca empleo o no tiene un empleo remunerado",["Tiene un empleo","Busca empleo","Está en edad de trabajar y trabaja"],"Ej.: menores, jubilados, amas de casa, estudiantes, discapacitados, rentistas."),
+Q("¿Cuál de estos grupos es población inactiva?","Jubilados",["Trabajadores por cuenta ajena","Autónomos","Parados que buscan empleo"],"Menores, jubilados, amas de casa, estudiantes, discapacitados y rentistas."),
+Q("El mercado de trabajo está formado por…","La oferta de trabajo y la demanda de trabajo",["Solo la oferta","Solo la demanda","El Estado y los impuestos"],"Oferta realizada por las empresas, demanda solicitada por las personas."),
+Q("La oferta de trabajo es la que realizan…","Las empresas",["Las personas","El Estado únicamente","Los sindicatos"],"Ofrecen puestos de trabajo."),
+Q("La demanda de trabajo es la solicitada por…","Las personas",["Las empresas","El Estado únicamente","La patronal"],"Las personas buscan trabajo."),
+Q("Los trabajadores cualificados tienen…","Formación apropiada, salarios altos y empleos estables",["Sin formación y salarios bajos","Empleo inestable","Ningún contrato"],"Según su formación."),
+Q("Los trabajadores no cualificados tienen…","Sin formación, salarios bajos y empleo más inestable",["Formación apropiada","Salarios altos","Empleos estables"],"Son lo contrario de los cualificados."),
+Q("¿Cómo se calcula la tasa de actividad?","(Población activa × 100) / Población de 16 años y más",["(Población activa desocupada × 100) / Población activa","(Población ocupada × 100) / Población inactiva","Población activa + Población inactiva"],"Porcentaje de población activa."),
+Q("¿Cómo se calcula la tasa de paro?","(Población activa desocupada × 100) / Población activa",["(Población activa × 100) / Población de 16 años y más","Población ocupada × 100","Población inactiva / Población activa"],"Porcentaje de población activa desocupada."),
+Q("Un país tiene 50 millones de personas de 16 años o más y 30 millones de población activa. La tasa de actividad es…","60 %",["30 %","50 %","80 %"],"30 × 100 / 50 = 60 %."),
+Q("Un país tiene 25 millones de población activa y 5 millones de población activa desocupada. La tasa de paro es…","20 %",["5 %","25 %","80 %"],"5 × 100 / 25 = 20 %."),
+Q("Un país tiene 15 millones de población activa, de los cuales 1,5 millones están parados. La tasa de paro es…","10 %",["1,5 %","15 %","90 %"],"1,5 × 100 / 15 = 10 %."),
+Q("Un país tiene 8 millones de personas de 16 años o más y 6 millones de población activa. La tasa de actividad es…","75 %",["6 %","8 %","60 %"],"6 × 100 / 8 = 75 %."),
+Q("La legislación laboral establece…","Los derechos y deberes de los trabajadores y condiciones mínimas (jornada, salario mínimo, descansos)",["Los precios de los productos","Los impuestos de las empresas","El sistema económico"],"Las condiciones mínimas se reflejan en un contrato laboral."),
+Q("Los convenios colectivos…","Regulan las condiciones laborales en una empresa o sector productivo, fruto de negociaciones entre empresarios y trabajadores",["Son leyes del Estado únicamente","Regulan los precios","Son un tipo de impuesto"],"Negocian patronal y sindicatos."),
+Q("La globalización del mercado laboral provoca…","Desplazamientos de fábricas (deslocalización) y de mano de obra, y un aumento de las migraciones",["Menos migraciones","Más producción local siempre","Ninguna consecuencia"],"Es uno de los cambios en el mundo del trabajo."),
+Q("La flexibilización laboral supone…","Más contratación temporal y a tiempo parcial, sobre todo de jóvenes, con salarios más bajos y más precariedad",["Más contratos indefinidos","Salarios más altos","Menos horas para todos"],"Crea más inseguridad y precariedad laboral."),
+Q("El teletrabajo es…","El trabajo a domicilio gracias a las TIC",["Trabajar solo en la fábrica","Un tipo de contrato indefinido","Un tipo de paro"],"Se extiende en servicios y entre autónomos (arquitectos, dibujantes…)."),
+Q("¿Qué tipo de trabajadores se necesitan cada vez más?","Más cualificados, expertos en nuevas tecnologías y que sepan trabajar en equipo",["Sin formación","Solo manuales","Solo de agricultura"],"Las nuevas tecnologías exigen más cualificación."),
+Q("El desempleo reduce los ingresos de las personas y de la sociedad, lo que provoca…","Menos consumo y menos producción",["Más consumo","Más producción","Más ingresos del Estado"],"Es un círculo vicioso."),
+Q("En los países desarrollados el desempleo se debe a…","La automatización de las tareas y la deslocalización",["El atraso económico","La escasa formación","El trabajo infantil"],"Distinto de los países menos desarrollados."),
+Q("En los países menos desarrollados el desempleo se debe a…","El atraso económico y la escasa formación",["La automatización","La deslocalización","El exceso de formación"],"Contraste con los países desarrollados."),
+Q("La discriminación laboral de las mujeres se manifiesta en…","Menor salario y menos puestos directivos, más empleo en economía sumergida y dificultad para conciliar familia y trabajo",["Mayor salario","Más puestos directivos","Menos trabajo doméstico"],"Son sus tres aspectos."),
+Q("El trabajo infantil afecta a unos…","200 millones de niños",["2 millones","20 millones","2.000 millones"],"Sobre todo en los países subdesarrollados."),
+Q("¿Por qué se utiliza el trabajo infantil sobre todo en países subdesarrollados?","Es mano de obra barata y sin derechos",["Porque tiene alta cualificación","Porque cobra altos salarios","Porque lo exige la ley"],"Se aprovecha su situación."),
+]},
+{name:"8 · Vocabulario",qs:[
+Q("Economía: ciencia que estudia…","La producción, distribución y consumo de bienes (objetos materiales) y servicios (inmateriales)",["Solo la política","Solo los precios","Solo las empresas públicas"],"Definición del vocabulario."),
+Q("Actividad económica: permite la generación de riqueza dentro de una comunidad mediante…","La extracción, transformación y distribución de los recursos naturales o de algún servicio",["La caza y la pesca únicamente","El ahorro del dinero","El cobro de impuestos"],"Cubre las necesidades de las poblaciones."),
+Q("Sector primario: abarca agricultura, ganadería, pesca y…","Silvicultura (explotación forestal)",["Industria","Comercio","Construcción"],"Silvicultura = explotación forestal."),
+Q("La silvicultura es…","La explotación forestal",["La pesca en altamar","La industria del mueble","El comercio de madera"],"Es una actividad del sector primario."),
+Q("Los recursos naturales que se convierten en materia prima se obtienen en el sector…","Primario",["Secundario","Terciario","Ninguno"],"A partir de ellos se obtienen bienes."),
+Q("Sector secundario: se refiere a…","La transformación de las materias primas para convertirlas en productos",["La extracción de recursos","La puesta en venta de servicios","La recaudación de impuestos"],"Es el sector industrial."),
+Q("Los productos elaborados son…","Bienes de consumo o finales",["Bienes de producción o intermedios","Materias primas","Servicios"],"Ya pueden usarse directamente."),
+Q("Los productos semielaborados son…","Bienes de producción o intermedios que se usarán para producir bienes elaborados",["Bienes de consumo","Servicios","Materias primas sin tratar"],"Se transformarán más."),
+Q("Sector terciario: se refiere a…","La distribución y comercialización (puesta en venta) de bienes y servicios",["La transformación de materias primas","La extracción de recursos","La agricultura"],"Aquí se incluyen todas las actividades que no entran en los otros dos sectores."),
+Q("Factores de producción: son tres…","Bienes físicos (capital físico), trabajo o mano de obra (capital humano) y capital o dinero (capital financiero)",["Tierra, agua y aire","Oferta, demanda y precio","Estado, empresas y familias"],"Según el vocabulario."),
+Q("El capital físico también se llama…","Bienes físicos (maquinaria e infraestructuras)",["Mano de obra","Dinero","Tecnología"],"Maquinaria e infraestructuras."),
+Q("El trabajo o mano de obra también se llama…","Capital humano",["Capital físico","Capital financiero","Capital natural"],"Según el vocabulario."),
+Q("El capital o dinero también se llama…","Capital financiero",["Capital físico","Capital humano","Capital natural"],"Es el dinero."),
+Q("Agentes económicos: son los que…","Demandan (compran) los bienes y servicios producidos",["Solo producen","Solo cobran impuestos","Solo trabajan"],"Son familias, empresas y el Estado."),
+Q("Las familias consumen para…","Cubrir sus necesidades",["Producir otros bienes","Obtener beneficio","Recaudar impuestos"],"Las empresas y el Estado consumen para producir otros bienes o servicios."),
+Q("Las empresas y el Estado consumen bienes y servicios para…","Producir otros bienes o servicios",["Cubrir las necesidades de una familia","Ahorrar","Pagar impuestos"],"Es la diferencia con las familias."),
+Q("Oferta es…","El conjunto de bienes y servicios que están a la venta",["El conjunto de bienes comprados","El dinero de las empresas","Los impuestos"],"Según el vocabulario."),
+Q("Demanda es…","El conjunto de bienes y servicios que son comprados por los agentes económicos",["El conjunto de bienes a la venta","El salario de los trabajadores","Los beneficios"],"La demanda la hacen los compradores."),
+Q("Si hay más oferta que demanda…","Los precios tienden a bajar",["Los precios tienden a subir","Los precios no cambian","No hay precios"],"Pasa lo contrario si hay más demanda."),
+Q("Si hay más demanda que oferta…","Los precios tienden a subir",["Los precios tienden a bajar","Los precios no cambian","Desaparece la demanda"],"Los productos escasean."),
+Q("Al aumento de precios se le llama…","Inflación",["Deflación","Beneficio","Subvención"],"Y a la bajada de precios, deflación."),
+Q("A la bajada de precios se le llama…","Deflación",["Inflación","Beneficio","Impuesto"],"Contrario de inflación."),
+Q("Empresas: entidades económicas que venden bienes o servicios para lograr…","Beneficios (ganancias que quedan al restar gastos)",["Impuestos","Subvenciones","Salarios"],"Los beneficios son ingresos − gastos."),
+Q("Los beneficios de una empresa pueden…","Ahorrarse, invertirse o fiscalizarse (pagar impuestos)",["Solo gastarse","Solo ahorrarse","Solo repartirse al Estado"],"El capital acumulado puede ahorrarse (se guarda), invertirse (se gasta) o fiscalizarse."),
+Q("Invertir el capital de una empresa significa…","Gastarlo (por ejemplo en maquinaria para producir más)",["Guardarlo","Pagarlo como impuestos","Repartirlo a los trabajadores"],"Según el vocabulario: invertir = se gasta."),
+Q("Fiscalizar el capital significa…","Que parte del dinero va al Estado en forma de impuestos",["Guardarlo","Invertirlo","Gastarlo en publicidad"],"Son los ingresos del Estado."),
+Q("Sindicatos: asociaciones de trabajadores asalariados cuyo fin es…","Mejorar las condiciones laborales y el nivel de vida de los trabajadores",["Aumentar los beneficios de las empresas","Recaudar impuestos","Elaborar leyes"],"Realizan reclamaciones mediante sus representantes."),
+Q("Los representantes de los sindicatos en la empresa, elegidos periódicamente, se llaman…","Delegados",["Accionistas","Patronos","Subvencionados"],"Se eligen en elecciones periódicas."),
+Q("Si las reivindicaciones de los sindicatos no se satisfacen, realizan…","Manifestaciones y huelgas",["Subvenciones","Despidos","Contratos"],"Durante las huelgas los trabajadores no cobran."),
+Q("Mercado laboral: relación entre…","La demanda de empleo (personas que buscan trabajo) y la oferta de empleo (empresas y Estado)",["Oferta de dinero y demanda de bienes","Compradores y vendedores de productos","Banco y cliente"],"Según el vocabulario."),
+Q("El paro o desempleo es…","La cantidad de personas que no trabajan pero quieren trabajar",["La cantidad de jubilados","Las personas que no quieren trabajar","El número de ocupados"],"Definición del vocabulario."),
+Q("Razones por las que aumenta el paro según el vocabulario…","Avances tecnológicos (las máquinas sustituyen a personas) y deslocalizaciones",["Más demanda de trabajo","Menos impuestos","Más salarios"],"Empresas que se trasladan a países con salarios más bajos."),
+Q("La economía de mercado se basa en…","Los principios de la oferta y la demanda a través del mercado",["La planificación del Estado","El trueque","La autosuficiencia familiar"],"Hay libertad plena para que los agentes económicos compren y vendan."),
+Q("En una economía de mercado, los recursos productivos son…","De propiedad privada",["Del Estado","Comunes","De nadie"],"Se asume empresa privada y competencia."),
+Q("Políticas económicas: son…","Los tipos de intervenciones que los Estados pueden hacer en la economía",["Los tipos de impuestos","Los tipos de empresas","Los tipos de contratos"],"Hay tres."),
+Q("El intervencionismo insuficiente corresponde a las políticas…","Neoliberales",["Socialdemócratas","De socialismo soviético","De subsistencia"],"Poca intervención del Estado."),
+Q("El intervencionismo excesivo corresponde a las políticas…","De socialismo soviético (antiguos países comunistas)",["Neoliberales","Socialdemócratas","De economía mixta"],"Mucha intervención del Estado."),
+Q("El intervencionismo equilibrado corresponde a las políticas…","Socialdemócratas (sistema de economía mixta)",["Neoliberales","De socialismo soviético","De subsistencia"],"Intervención equilibrada."),
+]},
+];
+
 const CARDS=[
 ["Actividad económica","Todo proceso que permite obtener los bienes y servicios que cubren las necesidades humanas.","1. Actividad y sectores"],
 ["Economía","Ciencia que estudia qué bienes y servicios producir, en qué cantidad y el comportamiento de los consumidores. Las necesidades son infinitas pero los medios son limitados.","1. Actividad y sectores"],
@@ -260,21 +492,25 @@ $("#nav").onclick=e=>{if(e.target.dataset.v)view(e.target.dataset.v)};
 /* ============ TESTS ============ */
 let T=null;
 function viewTests(){
-  const best=i=>{const r=store.tests["m"+i];return r?`Mejor: ${r.best}/${MODELS[i].qs.length}`:"Sin hacer"};
-  app.innerHTML=`<div class="card"><b>Elige un modelo de examen</b>
-    <p class="mut">Cada modelo tiene 12 preguntas distintas. Si fallas, te mostramos la respuesta correcta y por qué.</p>
+  const best=(k,n)=>{const r=store.tests[k];return r?`Mejor: ${r.best}/${r.n||n}`:"Sin hacer"};
+  app.innerHTML=`<div class="card"><b>Elige un test</b>
+    <p class="mut">Si fallas, te mostramos la respuesta correcta y por qué.</p>
     <label class="row"><input type="checkbox" id="exam"> <span><b>Modo examen</b>: sin feedback hasta el final (la corrección con explicaciones sale al terminar)</span></label>
   </div>
-  <div class="grid">${MODELS.map((m,i)=>`<div class="card model" data-m="${i}"><b>📝 ${m.name}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best(i)}</div></div>`).join("")}
-  <div class="card model" data-m="mix"><b>🎲 Mixto</b><div class="mut">20 preguntas al azar de los 5 modelos</div></div>
+  <h3>Por apartados (largos)</h3>
+  <div class="grid">${TOPICS.map((m,i)=>`<div class="card model" data-m="t${i}"><b>📚 ${esc(m.name)}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("mt"+i,m.qs.length)}</div></div>`).join("")}</div>
+  <h3>Modelos de examen</h3>
+  <div class="grid">${MODELS.map((m,i)=>`<div class="card model" data-m="${i}"><b>📝 ${m.name}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("m"+i,m.qs.length)}</div></div>`).join("")}
+  <div class="card model" data-m="mix"><b>🎲 Mixto</b><div class="mut">20 preguntas al azar de todos los tests</div></div>
   <div class="card model" data-m="fails"><b>🔁 Repasar fallos</b><div class="mut">${(store.fails||[]).length} preguntas falladas guardadas</div></div></div>`;
   app.onclick=e=>{const c=e.target.closest(".model");if(!c)return;startTest(c.dataset.m,$("#exam").checked)};
 }
 function startTest(m,exam){
   let qs,name;
-  const all=MODELS.flatMap(x=>x.qs);
+  const all=[...MODELS,...TOPICS].flatMap(x=>x.qs);
   if(m==="mix"){qs=shuffle(all).slice(0,20);name="Mixto"}
   else if(m==="fails"){qs=all.filter(q=>(store.fails||[]).includes(q.q));name="Repaso de fallos";if(!qs.length){alert("¡No tienes fallos guardados! 🎉");return}}
+  else if(m[0]==="t"){const t=TOPICS[+m.slice(1)];qs=t.qs.slice();name=t.name}
   else{qs=MODELS[+m].qs.slice();name=MODELS[+m].name}
   qs=shuffle(qs).map(q=>({...q,opts:shuffle([q.ok,...q.bad])}));
   T={m,name,exam,qs,i:0,ans:[],locked:false};
@@ -382,6 +618,7 @@ function viewStats(){
   app.innerHTML=`<div class="grid">
    <div class="card"><span class="tag">Tarjetas dominadas</span><div class="score">${k}/${CARDS.length}</div></div>
    <div class="card"><span class="tag">Preguntas por repasar</span><div class="score">${(store.fails||[]).length}</div></div></div>
+  <div class="card"><b>Tests por apartado</b>${TOPICS.map((m,i)=>{const r=store.tests["mt"+i];return `<p>${esc(m.name)}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
   <div class="card"><b>Modelos de test</b>${MODELS.map((m,i)=>{const r=store.tests["m"+i];return `<p>${m.name}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
   <div class="card"><b>Últimos intentos</b>${(store.hist||[]).slice().reverse().slice(0,10).map(h=>`<p class="mut">${h.d} · ${esc(h.name)} · ${h.sc}/${h.n}</p>`).join("")||'<p class="mut">Todavía no hay intentos.</p>'}</div>
   <button class="btn ghost" id="rst">Borrar progreso</button>`;
