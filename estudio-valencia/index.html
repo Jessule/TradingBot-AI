@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estudio Ortografía Valenciano</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#141a35;--mut:#5b6280;--line:#e1e5f0;--acc:#00a9c0;--acc2:#007d93;--ok:#1b9a55;--okbg:#e4f6ec;--ko:#d6403a;--kobg:#fdeceb;--warn:#fff4dc;--shadow:0 2px 10px rgba(20,26,53,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1226;--card:#1a1f3d;--ink:#eef0fa;--mut:#a2a8c8;--line:#2c3260;--acc:#27c8dd;--acc2:#27c8dd;--ok:#4cd68a;--okbg:#12362a;--ko:#ff7a73;--kobg:#3b1c24;--warn:#3a3118;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:20px 16px 8px;max-width:900px;margin:auto}
+h1{margin:0;font-size:1.5rem}
+header p{margin:2px 0 0;color:var(--mut);font-size:.95rem}
+nav{display:flex;gap:6px;max-width:900px;margin:12px auto 0;padding:0 16px;flex-wrap:wrap}
+nav button{flex:1;min-width:120px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:900px;margin:16px auto 60px;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.btn{padding:10px 16px;border-radius:10px;border:1px solid var(--acc);background:var(--acc);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--acc2)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+.mut{color:var(--mut);font-size:.9rem}
+.tag{display:inline-block;font-size:.75rem;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.04em}
+/* tests */
+.model{cursor:pointer;text-align:center}
+.model:hover{border-color:var(--acc)}
+.model b{font-size:1.1rem}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt.sel{border-color:var(--acc);background:var(--bg)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ko{border-color:var(--ko);background:var(--kobg)}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;padding:12px 14px;border-radius:10px;border-left:5px solid}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.ko{background:var(--kobg);border-color:var(--ko)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0 14px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.score{font-size:2.4rem;font-weight:800}
+/* flashcards */
+.flash{perspective:1000px;margin:12px 0}
+.flip{position:relative;height:260px;transform-style:preserve-3d;transition:transform .5s;cursor:pointer}
+.flip.on{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow);overflow:auto}
+.front{background:var(--card);font-size:1.4rem;font-weight:700}
+.back{background:#141a35;color:#fff;transform:rotateY(180deg);font-size:1.1rem}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{padding:5px 11px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;font:inherit;font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+/* desarrollo */
+textarea{width:100%;min-height:140px;padding:12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
+.kw{display:inline-block;margin:3px 4px 3px 0;padding:3px 10px;border-radius:14px;font-size:.85rem;border:1px solid var(--line)}
+.kw.has{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.kw.no{background:var(--kobg);border-color:var(--ko);color:var(--ko)}
+.model-ans{background:var(--warn);padding:12px 14px;border-radius:10px;margin-top:10px;white-space:pre-line}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>✍️ Unitat 1 · Repàs d'ortografia</h1>
+  <p>Valencià · 3r ESO — tarjetas, tests tipo test y preguntas de desarrollo</p>
+</header>
+<nav id="nav">
+  <button data-v="tests" class="on">📝 Tests</button>
+  <button data-v="cards">🃏 Tarjetas</button>
+  <button data-v="dev">✍️ Desarrollo</button>
+  <button data-v="stats">📊 Progreso</button>
+</nav>
+<main id="app"></main>
+
+<script>
+/* ============ DATOS ============ */
+// Q(pregunta, respuesta correcta, [3 incorrectas], explicación)
+const Q=(q,ok,bad,why)=>({q,ok,bad,why});
+
+const MODELS=[
+{name:"Modelo 1",qs:[
+Q("Un dígraf és…","Un conjunt de dues lletres que equivalen a un únic so",["Una lletra que té dos sons","Una síl·laba amb dues vocals","Una paraula amb dues síl·labes"],"Dígrafs: ll, ny, gu, qu, ig, ss, rr, tg, tj, tx, tz."),
+Q("Quin d'aquests dígrafs NO es pot separar a final de ratlla?","ll (pa-lla)",["rr (ser-ra)","ss (tas-sa)","tg (met-ge)"],"No es poden separar ll, ny, gu, qu i ig. Sí que es poden separar ss, rr, tg, tj, tx i tz."),
+Q("Com se separa correctament «metge»?","met-ge",["me-tge","metg-e","m-etge"],"El dígraf tg sí que es pot separar: met-ge."),
+Q("La síl·laba tònica d'una paraula polisíl·laba és…","La que es pronuncia amb més força",["La primera","L'última sempre","La que porta una vocal"],"Segons la seua posició, les paraules són agudes, planes o esdrúixoles."),
+Q("«Mariner» (ma-ri-ner) és una paraula…","Aguda",["Plana","Esdrúixola","Sobreesdrúixola"],"En les agudes la síl·laba tònica és l'última: ma-ri-NER."),
+Q("«Pràctica» s'accentua perquè és una paraula…","Esdrúixola",["Aguda acabada en vocal","Plana acabada en vocal","Monosíl·laba"],"Totes les esdrúixoles porten accent gràfic."),
+Q("Les paraules agudes s'accentuen quan acaben en…","Vocal, vocal + s, -en o -in",["Qualsevol consonant","Només -s","Diftong"],"Exemples: meló, cabàs, aprén."),
+Q("Quina és la forma correcta per a la part del cos?","mà",["ma","má","mâ"],"Mà (part del cos) i ma (possessiu «la meua») són un parell diacrític."),
+Q("«El gos _____ Baskerville». Quina forma és la correcta?","dels",["d'els","de els","d'ells"],"La preposició de no s'apostrofa davant l'article masculí: del, dels."),
+Q("La dièresi es col·loca exclusivament sobre…","La i i la u",["Totes les vocals","Les vocals a, e, o","Les consonants"],"Indica que la u de gue, gui, que, qui no és muda, o que i/u no formen diftong."),
+Q("Quina és la forma correcta?","la història",["l'història","la històrïa","el història"],"La femenina la no s'apostrofa davant i/u/hi/hu àtones: la història."),
+Q("Un hiat són…","Dues vocals en contacte que pertanyen a síl·labes diferents",["Dues vocals en la mateixa síl·laba","Tres vocals en una síl·laba","Dues consonants seguides"],"Exemples: idea, coet, ciència."),
+]},
+{name:"Modelo 2",qs:[
+Q("Quins dígrafs NO es poden separar?","ll, ny, gu, qu, ig",["ss, rr, tg, tj, tx, tz","mm, nn, l·l","tl, tm, tn"],"Els altres dígrafs sí que es poden separar."),
+Q("Com se separa «cassola»?","cas-so-la",["ca-sso-la","cass-o-la","c-as-so-la"],"ss es separa: cas-sa, tas-sa."),
+Q("Com se separa «platja»?","plat-ja",["pla-tja","platj-a","p-lat-ja"],"tj es separa: plat-ja."),
+Q("«Figuera» se separa…","fi-gue-ra",["fig-ue-ra","fi-g-uera","figu-e-ra"],"El dígraf gu no es pot separar."),
+Q("La síl·laba tònica de «núvol» és…","nú (és plana)",["vol (és aguda)","nú (és esdrúixola)","vol (és plana)"],"Núvol és plana: la tònica ocupa la penúltima posició."),
+Q("«Història» (his-tò-ri-a) és una paraula…","Esdrúixola",["Aguda","Plana","Monosíl·laba"],"La tònica és l'antepenúltima: his-TÒ-ri-a."),
+Q("Les paraules planes s'accentuen quan acaben en…","Diftong o consonant (excepte vocal + s, -en, -in)",["Vocal","Vocal + s","Sempre"],"Exemples: berenàveu, plàtan, rèptils."),
+Q("Quina forma indica quantitat («més de cent»)?","més",["mes","mès","mess"],"més (quantitat) / mes (part de l'any)."),
+Q("«Si» amb accent (sí) és…","L'afirmació",["La conjunció condicional","El pronom reflexiu","El verb ser"],"Sí (afirmació) / si (conjunció condicional)."),
+Q("«Els pronoms febles s'apostrofen davant d'un verb que comença per vocal o h». Quin és correcte?","m'enganyen",["me enganyen","m enganyen","me'enganyen"],"Em, et, es, el, la i en s'apostrofen: m'enganyen, t'agrada, s'espanta."),
+Q("En «l'IVA», l'article s'apostrofa perquè…","La sigla comença per so vocàlic",["És una paraula femenina","Porta accent","És un diftong"],"Davant de sigles que comencen amb so vocàlic: l'ESO, l'IEC, l'IVA."),
+Q("Quina d'aquestes paraules porta dièresi?","veïna",["veina","veína","vèina"],"La dièresi indica que la i no forma diftong amb la vocal anterior."),
+]},
+{name:"Modelo 3",qs:[
+Q("Les lletres compostes són…","Combinacions de consonants que representen sons geminats (repetits)",["Dues vocals en una síl·laba","Dues paraules unides","Consonants sense so"],"Són: mm, nn, l·l, tl, tll, tm i tn."),
+Q("Com se separa «immòbil»?","im-mò-bil",["i-mmò-bil","imm-ò-bil","immò-bil"],"mm es separa: im-mò-bil."),
+Q("Com se separa «setmana»?","set-ma-na",["se-tma-na","setm-a-na","s-et-ma-na"],"tm es separa i la t no es pronuncia: set-ma-na."),
+Q("La t dels grups tl, tll, tm i tn…","No es pronuncia, però indica que els sons de l, ll, m i n s'allarguen",["Es pronuncia sempre","És muda i sobra","S'ha d'eliminar en escriure"],"S'escriu per indicar el so geminat."),
+Q("Com se separa «novel·lista»?","no-vel-lis-ta",["no-ve-l·lis-ta","nove-l·lis-ta","novel·-lis-ta"],"El grup l·l es parteix en dues l: vel-lis."),
+Q("«Esdrúixola» vol dir que la síl·laba tònica ocupa la…","Antepenúltima posició",["Penúltima posició","Última posició","Primera posició sempre"],"Ex.: fà-bri-ca."),
+Q("Quina d'aquestes paraules és monosíl·laba àtona?","la (article)",["riu","mai","dit"],"Pal, dit, mai i riu són monosíl·labs tònics."),
+Q("Quina és la forma del verb ser?","és",["es","ès","éz"],"És (verb ser) / es (pronom reflexiu)."),
+Q("«Què» amb accent és…","El pronom interrogatiu o relatiu tònic",["La conjunció","La preposició","El pronom reflexiu"],"Què (interrogació) / que (preposició o conjunció)."),
+Q("«Els pronoms febles s'apostrofen darrere d'un verb acabat en vocal». Quin és correcte?","ajuda'm",["ajuda-m","ajudam","ajuda m"],"Exemples: lleva't, creure's, desperta'l, llença'ls, agafa'n."),
+Q("Davant del nom de les lletres, l'article…","No s'apostrofa (la a, la e, la hac)",["S'apostrofa sempre (l'a)","S'apostrofa només amb la e","Es canvia per el"],"La a, la e, la i, la o, la u, la ema, la ela, la hac."),
+Q("Quin és un triftong?","caieu",["aire","cuina","teula"],"Un triftong són tres vocals en la mateixa síl·laba: caieu, Paraguai, iaio."),
+]},
+{name:"Modelo 4",qs:[
+Q("Quin d'aquests grups de lletres sí que es pot separar a final de ratlla?","tx (cot-xe)",["gu (fi-gue-ra)","qu (es-que-na)","ny (ca-nya)"],"gu, qu, ll i ny no es poden separar."),
+Q("Com se separa «innocent»?","in-no-cent",["i-nno-cent","inn-o-cent","inno-cent"],"El grup nn es parteix: in-no-cent."),
+Q("«Atles» se separa…","at-les",["a-tles","atl-es","a-t-les"],"El grup tl es separa: at-les."),
+Q("Les paraules agudes tenen la síl·laba tònica…","A l'última posició",["A la penúltima","A l'antepenúltima","Sempre a la primera"],"Ex.: hu-ra-CÀ."),
+Q("Quina d'aquestes és aguda i s'accentua?","meló",["pràctica","plàtan","rèptils"],"Aguda acabada en vocal."),
+Q("Quina és plana i s'accentua?","plàtan",["meló","cabàs","pràctica"],"Plana acabada en consonant (-n sola)."),
+Q("Quina és esdrúixola?","pràctica",["meló","plàtan","cabàs"],"La tònica és l'antepenúltima."),
+Q("«Sol» (sense accent) pot ser…","L'astre o el verb soler",["La terra","El verb ser","L'acció d'usar"],"Sòl (terra) / sol (astre, verb soler)."),
+Q("«Son» sense accent significa…","L'acte de dormir o el possessiu «seu»",["El verb ser","El verb tenir","La part del cos"],"Són (verb ser) / son (dormir, possessiu seu)."),
+Q("«Té» amb accent és…","El verb tenir",["La infusió","El pronom feble","El verb veure"],"Té (verb tenir) / te (infusió)."),
+Q("«L'1 de maig»: l'article s'apostrofa…","Davant de xifres que comencen per so vocàlic",["Perquè és una consonant","Perquè és plural","Mai s'apostrofa"],"Ex.: l'11 d'abril, l'11è aniversari."),
+Q("Quina d'aquestes paraules porta dièresi perquè la u de gue/gui/que/qui no és muda?","següent",["segent","seguent","seguënt"],"Següent, ambigüitat, aqüeducte, terraqüi."),
+]},
+{name:"Modelo 5",qs:[
+Q("La norma 1 de la separació de síl·labes diu que…","No s'ha de deixar cap lletra sola ni al començament ni al final de ratlla",["Cal separar sempre les vocals","No es poden separar les consonants","Cal partir al mig de la paraula"],"Una lletra sola no pot quedar a final ni començament de ratlla."),
+Q("No es poden separar les vocals que formen part d'un…","Diftong",["Hiat","Dígraf","Prefix"],"Norma 2 de la separació de síl·labes."),
+Q("Els mots compostos i els prefixos es separen…","D'acord amb els elements que els integren",["Per la meitat","Al final","No es separen mai"],"Norma 5."),
+Q("Quina és la paraula sobreesdrúixola de la taula?","únicament",["pràctica","berenàveu","meló"],"Les sobreesdrúixoles porten sempre accent gràfic."),
+Q("«Aprén» s'accentua perquè és una paraula…","Aguda acabada en -en",["Plana acabada en vocal","Esdrúixola","Plana acabada en -s"],"Les agudes acabades en -en o -in s'accentuen."),
+Q("«Déu» (divinitat) i «deu» (numeral) són…","Un parell diacrític",["Sinònims","Paraules planes","Paraules esdrúixoles"],"El deu numeral o verb deure no porta accent."),
+Q("«Pèl» (cabell) i «pel» (per + el): la forma sense accent és…","Una contracció de la preposició per i l'article el",["El cabell","Un verb","Un adverbi"],"Pèl (cabell) / pel (per+el)."),
+Q("Quina és la forma correcta?","m'enganyen i t'agrada",["me enganyen i te agrada","m' enganyen i t' agrada","me'enganyen i te'agrada"],"Els pronoms em, et… s'apostrofen davant de verb que comença per vocal."),
+Q("«Del dia d'avui»: la preposició de…","No s'apostrofa davant l'article masculí (del)",["S'apostrofa sempre","No s'apostrofa mai","S'apostrofa davant consonant"],"Davant l'article masculí es contrau: del, dels."),
+Q("Quina d'aquestes preposicions + paraula és correcta?","exercici de ioga",["exercici d'ioga","exercici d'oga","exercici de'ioga"],"No s'apostrofa davant diftong creixent (i o hi + vocal)."),
+Q("«Raül» porta dièresi perquè…","La u no forma diftong decreixent amb la vocal anterior",["La u és muda","És un cultisme en -itat","És un verb en -ir"],"Ex.: raïm, veïna, diürn, Raül, Seül, taüt."),
+Q("«Hiena» comença per…","Un diftong creixent (hi + vocal)",["Un hiat","Una h aspirada","Un triftong"],"Per això: la hiena i de hiena (no s'apostrofa)."),
+]},
+];
+
+// Tests largos por apartado
+const TOPICS=[
+{name:"1.1 · Dígrafs i separació de síl·labes",qs:[
+Q("Un dígraf és…","Un conjunt de dues lletres que equivalen a un únic so",["Una lletra amb dos sons","Dues vocals en una síl·laba","Una paraula de dues síl·labes"],"Els dígrafs del valencià són ll, ny, gu, qu, ig, ss, rr, tg, tj, tx i tz."),
+Q("Quins dígrafs NO es poden separar a final de ratlla?","ll, ny, gu, qu, ig",["ss, rr, tg, tj, tx, tz","mm, nn, l·l","tl, tll, tm, tn"],"Els que no es poden separar: ll, ny, gu, qu, ig."),
+Q("Quins dígrafs sí que es poden separar?","ss, rr, tg, tj, tx, tz",["ll, ny, gu, qu","ll, ny, ig","gu, qu, ny"],"Exemples: cas-so-la, ar-ròs, met-ge, plat-ja, dut-xa, tret-ze."),
+Q("«Colla» conté el dígraf ll. Quina separació és correcta?","co-lla",["col-la","c-olla","coll-a"],"ll no es pot separar."),
+Q("«Any» conté el dígraf ny. Com se separa «canya»?","ca-nya",["can-ya","c-anya","cany-a"],"ny no es pot separar."),
+Q("Com se separa «figuera»?","fi-gue-ra",["fig-ue-ra","f-iguera","fi-g-ue-ra"],"gu no es pot separar."),
+Q("Com se separa «esquena»?","es-que-na",["esq-ue-na","e-sque-na","esqu-e-na"],"qu no es pot separar."),
+Q("Com se separa «arròs»?","ar-ròs",["a-rròs","arr-òs","a-r-ròs"],"rr es separa: ser-ra, ar-ròs."),
+Q("Com se separa «cassola»?","cas-so-la",["ca-sso-la","c-as-so-la","cass-o-la"],"ss es separa."),
+Q("Com se separa «metge»?","met-ge",["me-tge","m-etge","metg-e"],"tg es separa."),
+Q("Com se separa «platja»?","plat-ja",["pla-tja","p-latja","platj-a"],"tj es separa."),
+Q("Com se separa «dutxa»?","dut-xa",["du-txa","d-utxa","dutx-a"],"tx es separa: cot-xe, dut-xa."),
+Q("Com se separa «tretze»?","tret-ze",["tre-tze","t-retze","tretz-e"],"tz es separa: at-zar, tret-ze."),
+Q("Com se separa «escena» (grup sc)?","es-ce-na",["e-sce-na","esc-e-na","e-s-ce-na"],"sc es separa."),
+Q("Com se separa «caixa» (grup ix)?","cai-xa",["ca-ix-a","caix-a","c-aixa"],"ix es separa, però ai és un diftong que no es parteix."),
+Q("Com se separa «accés» (grup cc)?","ac-cés",["a-ccés","acc-és","a-c-cés"],"cc es separa."),
+Q("Norma 1: a final de ratlla…","No s'ha de deixar cap lletra sola ni al començament ni al final de ratlla",["Es pot deixar una lletra sola","Sempre es parteix la paraula en dues meitats","Es poden partir els diftongs"],"Una lletra sola no pot quedar aïllada."),
+Q("Norma 2: no es poden separar…","Les vocals que formen part d'un diftong",["Les consonants","Els prefixos","Els dígrafs mm i nn"],"Un diftong és una única síl·laba."),
+Q("Norma 5: els mots compostos i els prefixos…","S'han de separar d'acord amb els elements que els integren",["No es poden separar mai","Es separen per la meitat","Es separen sempre per l'última vocal"],"Així es respecta la composició de la paraula."),
+Q("Les lletres compostes són…","Combinacions de consonants que representen sons geminats (repetits)",["Dues vocals amb un sol so","Consonants que no es pronuncien","Dígrafs de vocals"],"Les nostres lletres compostes són mm, nn, l·l, tl, tll, tm i tn."),
+Q("Quines són les lletres compostes del valencià?","mm, nn, l·l, tl, tll, tm i tn",["ll, ny, gu, qu, ig","ss, rr, tg, tj, tx, tz","ai, ei, oi, ui, au"],"Ex.: immersió, connectar, novel·lista, atles, rotllo, setmana, cotna."),
+Q("Per què s'escriu la t dels grups tl, tll, tm i tn?","Per indicar que els sons de l, ll, m i n s'allarguen",["Perquè es pronuncia sempre","Perquè és un dígraf","Per fer més llarga la paraula"],"La t no es pronuncia."),
+Q("Com se separa «immersió»?","im-mer-sió",["i-mmer-sió","imm-er-sió","immer-sió"],"mm es separa."),
+Q("Com se separa «connectar»?","con-nec-tar",["co-nnec-tar","conn-ec-tar","connec-tar"],"nn es separa."),
+Q("Com se separa «pàl·lid»?","pàl-lid",["pà-l·lid","pàl·-lid","pàll-id"],"l·l es parteix en l i l."),
+Q("Com se separa «atles»?","at-les",["a-tles","atl-es","a-t-les"],"tl es separa."),
+Q("Com se separa «rotllo»?","rot-llo",["ro-tllo","rotl-lo","r-otllo"],"tll es separa: rat-lla, rot-llo."),
+Q("Com se separa «setmana»?","set-ma-na",["se-tma-na","setm-a-na","s-et-ma-na"],"tm es separa."),
+]},
+{name:"1.2a · Síl·laba tònica i classificació",qs:[
+Q("La síl·laba tònica d'una paraula polisíl·laba és…","La que es pronuncia amb més força",["La primera","L'última sempre","La que porta vocal"],"Segons la posició de la tònica, les paraules són agudes, planes o esdrúixoles."),
+Q("Una paraula aguda té la síl·laba tònica…","A l'última posició",["A la penúltima posició","A l'antepenúltima posició","A la primera sempre"],"Ex.: ma-ri-NER, hu-ra-CÀ."),
+Q("Una paraula plana té la síl·laba tònica…","A la penúltima posició",["A l'última posició","A l'antepenúltima posició","Només en la primera"],"Ex.: fi-GUE-ra, NÚ-vol."),
+Q("Una paraula esdrúixola té la síl·laba tònica…","A l'antepenúltima posició",["A l'última posició","A la penúltima posició","A la primera sempre"],"Ex.: FÀ-bri-ca, his-TÒ-ri-a."),
+Q("«Mariner» és…","Aguda",["Plana","Esdrúixola","Monosíl·laba"],"ma-ri-NER."),
+Q("«Huracà» és…","Aguda",["Plana","Esdrúixola","Sobreesdrúixola"],"hu-ra-CÀ."),
+Q("«Figuera» és…","Plana",["Aguda","Esdrúixola","Monosíl·laba"],"fi-GUE-ra."),
+Q("«Núvol» és…","Plana",["Aguda","Esdrúixola","Sobreesdrúixola"],"NÚ-vol."),
+Q("«Fàbrica» és…","Esdrúixola",["Aguda","Plana","Monosíl·laba"],"FÀ-bri-ca."),
+Q("«Història» és…","Esdrúixola",["Aguda","Plana","Monosíl·laba"],"his-TÒ-ri-a."),
+Q("«Meló» és…","Aguda",["Plana","Esdrúixola","Sobreesdrúixola"],"me-LÓ."),
+Q("«Cabàs» és…","Aguda",["Plana","Esdrúixola","Sobreesdrúixola"],"ca-BÀS."),
+Q("«Plàtan» és…","Plana",["Aguda","Esdrúixola","Sobreesdrúixola"],"PLÀ-tan."),
+Q("«Pràctica» és…","Esdrúixola",["Aguda","Plana","Monosíl·laba"],"PRÀC-ti-ca."),
+Q("«Únicament» és una paraula…","Sobreesdrúixola",["Aguda","Plana","Monosíl·laba"],"Les sobreesdrúixoles porten sempre accent."),
+Q("«Berenàveu» és…","Plana acabada en diftong",["Aguda","Esdrúixola","Monosíl·laba"],"Plana acabada en diftong (-eu)."),
+Q("Quins són monosíl·labs tònics?","La gran majoria: pal, dit, mai, riu",["Els articles el, la","Els pronoms em, et, es","La paraula que"],"Els monosíl·labs tònics tenen síl·laba tònica."),
+Q("Els monosíl·labs àtons són…","Articles, pronoms febles, algunes preposicions i la paraula que",["Pal, dit, mai i riu","Les paraules planes","Les paraules agudes"],"Segons la força amb què es pronuncien."),
+Q("Quins d'aquests monosíl·labs són àtons?","el, la (articles)",["pal","dit","riu"],"Pal, dit, mai i riu són tònics."),
+Q("Quins pronoms febles són monosíl·labs àtons?","em, et, es, ens",["pal, dit","mai, riu","dau, riu"],"Els pronoms febles són àtons."),
+Q("Quines preposicions són monosíl·labs àtons?","a, de, en, amb, per",["pal, dit","mai, riu","mà, sé"],"Algunes preposicions són àtones."),
+Q("Quina paraula és monosíl·laba àtona?","que",["riu","mai","dit"],"La paraula que és àtona."),
+Q("«Pal» és…","Un monosíl·lab tònic",["Un monosíl·lab àton","Una paraula plana","Una paraula esdrúixola"],"La gran majoria de monosíl·labs són tònics."),
+]},
+{name:"1.2b · Normes d'accentuació i diacrítics",qs:[
+Q("Les paraules sobreesdrúixoles porten accent…","Sempre",["Mai","Només si acaben en vocal","Només si acaben en -s"],"Totes les sobreesdrúixoles i esdrúixoles s'accentuen."),
+Q("Les paraules esdrúixoles porten accent…","Sempre",["Mai","Només si acaben en consonant","Només si acaben en vocal"],"Ex.: pràctica."),
+Q("Una paraula plana s'accentua si acaba en…","Diftong o consonant (excepte vocal + s, -en, -in)",["Vocal","Vocal + s","-en o -in"],"Ex.: berenàveu, plàtan, rèptils."),
+Q("Una paraula aguda s'accentua si acaba en…","Vocal, vocal + s, -en o -in",["Qualsevol consonant","Diftong","Cap lletra"],"Ex.: meló, cabàs, aprén."),
+Q("Quina d'aquestes paraules porta accent per ser aguda acabada en vocal?","meló",["plàtan","pràctica","rèptils"],"Aguda acabada en vocal."),
+Q("Quina porta accent per ser aguda acabada en vocal + s?","cabàs",["meló","plàtan","pràctica"],"Aguda acabada en vocal + s."),
+Q("Quina porta accent per ser aguda acabada en -en?","aprén",["plàtan","pràctica","cabàs"],"Aguda acabada en -en."),
+Q("Quina porta accent per ser plana acabada en consonant?","plàtan",["meló","cabàs","aprén"],"Plana acabada en consonant (-n)."),
+Q("Quina porta accent per ser plana acabada en diftong?","berenàveu",["meló","cabàs","aprén"],"Plana acabada en diftong."),
+Q("Quants accents diacrítics es mostren a l'infografia?","15",["5","8","24"],"Tots són monosíl·labs."),
+Q("«Bé» amb accent és…","L'adverbi",["Els corders","El verb ser","El pronom reflexiu"],"Bé (adverbi) / be (corders)."),
+Q("«Déu» amb accent és…","La divinitat",["El numeral","El verb deure","El pronom"],"Déu (divinitat) / deu (numeral)."),
+Q("«És» amb accent és…","El verb ser",["El pronom reflexiu","El pronom feble","L'adverbi"],"És (ser) / es (pronom reflexiu)."),
+Q("«Mà» amb accent és…","La part del cos",["El possessiu «la meua»","El verb mar","L'adverbi"],"Mà (part del cos) / ma (possessiu)."),
+Q("«Més» amb accent és…","La quantitat",["La part de l'any","El pronom reflexiu","La preposició"],"Més (quantitat) / mes (part de l'any)."),
+Q("«Món» amb accent és…","El planeta",["El possessiu «el meu»","El verb moldre","L'animal"],"Món (planeta) / mon (possessiu meu)."),
+Q("«Pèl» amb accent és…","El cabell",["La contracció per + el","El verb pelar","La preposició"],"Pèl (cabell) / pel (per + el)."),
+Q("«Què» amb accent és…","El pronom interrogatiu o relatiu tònic",["La preposició","La conjunció","El pronom reflexiu"],"Què (interrogació) / que (preposició)."),
+Q("«Sé» amb accent és…","El verb saber",["El pronom reflexiu","El verb ser","L'afirmació"],"Sé (verb saber) / se (pronom reflexiu)."),
+Q("«Sí» amb accent és…","L'afirmació",["La conjunció condicional","El pronom reflexiu","El verb ser"],"Sí (afirmació) / si (conjunció condicional)."),
+Q("«Sòl» amb accent és…","La terra",["L'astre","El verb soler","El verb ser"],"Sòl (terra) / sol (astre, verb soler)."),
+Q("«Són» amb accent és…","El verb ser",["L'acte de dormir","El possessiu seu","El verb tenir"],"Són (verb ser) / son (dormir, possessiu seu)."),
+Q("«Té» amb accent és…","El verb tenir",["La infusió","El pronom feble","El verb veure"],"Té (verb tenir) / te (infusió)."),
+Q("«Ús» amb accent és…","L'acció d'usar",["El pronom feble","El verb ser","El verb usar"],"Ús (acció d'usar) / us (pronom feble)."),
+Q("«Vós» amb accent és…","La forma de tractament",["El pronom feble","El verb veure","El verb anar"],"Vós (forma de tractament) / vos (pronom feble)."),
+Q("«Véns» amb accent és del verb…","Venir",["Vendre","Veure","Anar"],"Véns (venir) / vens (vendre)."),
+Q("«Vés» amb accent és del verb…","Anar",["Veure","Venir","Vendre"],"Vés (anar) / ves (veure)."),
+Q("«Sóc» amb accent és…","El verb ser",["El calçat","El verb saber","El pronom reflexiu"],"Sóc (ser) / soc (calçat)."),
+]},
+{name:"1.2c · Vocalisme: e, o obertes i tancades",qs:[
+Q("Les vocals e i o obertes només apareixen en posició…","Tònica",["Àtona","Final de paraula","Inicial de paraula"],"Les tancades poden ser tòniques o àtones."),
+Q("Per a pronunciar la o i la e obertes has d'…","Obrir la boca com si anares a dir la a",["Tancar la boca","Pronunciar-les molt ràpid","Alçar la veu"],"Però articules la o o la e."),
+Q("Si una e oberta deixa de ser tònica en una paraula derivada…","Passa a ser tancada",["Continua sent oberta","Es perd","Porta dièresi"],"Tela [ɛ] → teler [e]."),
+Q("La e és oberta davant de síl·laba amb i. Exemple:","conveni",["menjaré","camió","després"],"Davant síl·laba en i: conveni, col·legi."),
+Q("La e és oberta davant síl·laba amb u o diftong eu. Exemple:","cèl·lula",["creu","meu","seu"],"Cèl·lula, ingenu, peu, fideu."),
+Q("Quines paraules en eu són excepcions (e tancada)?","creu, greu, meu, seu",["peu, fideu","cèl·lula, ingenu","conveni, col·legi"],"Excepcions de la regla de la e oberta davant u."),
+Q("La e és oberta davant l o r + consonant. Exemple:","arrel",["menjaré","camió","després"],"Mel, arrel, novel·la, terra, ferro, comerç, cert."),
+Q("La e és oberta en…","Quasi totes les esdrúixoles (ex.: anècdota, València)",["Quasi totes les agudes","Totes les paraules","Cap paraula"],"Excepcions: Dénia, església, sénia, sépia…"),
+Q("La e és oberta en les terminacions…","-ecte, -ecta, -epte, -epta",["-ent","-er","-eix"],"Concepte, objecte, correcta, recepta."),
+Q("La e és oberta en…","Termes tècnics i científics (espectre, telègraf, telèfon, pètal, vèrtex)",["Paraules agudes","Paraules monosíl·labes","Verbs"],"Excepcions: -eca (biblioteca), -edre, -ema (teorema), -ense."),
+Q("També són paraules amb e oberta…","gendre, tendre, Vicent, Josep, bes",["menjaré, camió","pretén, després","torró, camió"],"Són «algunes paraules» de la llista."),
+Q("La o és oberta davant de i o u. Exemple:","boia",["camió","torró","menjaré"],"Boia, boina, ou, bou, dijous, mòdul."),
+Q("Excepcions de la o oberta davant i: les acabades en…","-oix (coix, moix, toix)",["-ot","-ol","-ort"],"També jou, pou, tou."),
+Q("La o és oberta en…","Quasi totes les esdrúixoles (còlera, dòmino, memòria)",["Quasi totes les agudes","Totes les paraules","Cap paraula"],"Excepcions: fórmula, pólvora, tómbola, tórtora…"),
+Q("La o és oberta en termes tècnics i científics. Exemple:","tòrax",["camió","torró","menjaré"],"Esòfag, quiròfan, pròleg, anòmal, quilòmetre, tòrax, ciclop, amorf."),
+Q("Terminacions amb o oberta: -oc, -oca","groc, lloca, roca",["boc, boca, joca","camió, torró","cola, bola"],"Excepcions: boc, boca, joca."),
+Q("Terminacions amb o oberta: -ol, -ola","cresol, escola",["cola, bola, gola","camió","torró"],"Excepcions: braol, udol, cola, bola, gola."),
+Q("Terminacions amb o oberta: -ort, -orta","fort, horta",["camió","torró","cola"],"En castellà porten diftong ue: fuerte, huerto."),
+Q("Terminacions amb o oberta: -ot, -ota","xicot, pilota",["bot, brot, mot, nebot, tot","camió","torró"],"Excepcions: bot, brot, mot, nebot, tot, sanglot, singlot, xanglot, jota, sota."),
+Q("Terminacions amb o oberta: -ost, -osta","cost, impost, costa",["agost, angost, congost","camió","torró"],"Excepcions: agost, angost, congost, most, brosta."),
+Q("El verb «moldre» té la o…","Oberta (-oldre)",["Tancada","Muda","Àtona"],"Terminació -oldre: absoldre, moldre, resoldre."),
+Q("En les paraules agudes, la e i la o solen ser…","Tancades (menjaré, pretén, després, camió, torró)",["Obertes","Mudes","Diftongs"],"Excepcions: arròs, açò, això, allò, redòs, ressò, rebò, debò, però, què, perquè, espòs…"),
+Q("Quin és el participi de cloure amb o oberta (excepció de les agudes)?","exclòs / inclòs",["menjaré","camió","després"],"Participi de cloure: exclòs, conclòs, inclòs."),
+Q("En les paraules planes, la e i la o solen ser…","Obertes (dipòsit, sòlid, tèxtil, exèrcit, dèbil, mòdul)",["Tancades","Diftongs","Mudes"],"Excepcions: verbs de la 2a conjugació (córrer, témer, conéixer), estómac, cérvol, jóvens, llépol, préstec, feréstec, préssec."),
+Q("En les paraules esdrúixoles, la e i la o solen ser…","Obertes (gènere, pèrdua, memòria, València)",["Tancades","Mudes","Diftongs"],"Excepcions: fórmula, pólvora, tómbola, góndola, Dénia, tórtora, església, llémena, feréstega, sénia, séquia."),
+Q("Quines paraules admeten els dos accents (obert i tancat)?","alé/alè, café/cafè, sépia/sèpia, anglés/anglès, cinqué/cinquè",["molt/mòlt","déu/deu","menjaré/menjarè"],"I els verbs de la 2a conjugació acabats en -éixer/-èixer. Cal ser coherent."),
+Q("Algunes paraules canvien de significat si porten la vocal oberta o tancada. Exemple:","molt (quantitatiu) / mòlt (verb moldre)",["café / cafè","anglés / anglès","sépia / sèpia"],"També déu / deu."),
+]},
+{name:"1.3a · Diftongs, hiats i triftongs",qs:[
+Q("Un diftong són…","Dues vocals (una és i/u àtona) que es pronuncien en una mateixa síl·laba",["Dues vocals en síl·labes diferents","Tres vocals en una síl·laba","Dues consonants unides"],"Ex.: aire, cuina."),
+Q("Un hiat són…","Dues vocals en contacte que pertanyen a síl·labes diferents",["Dues vocals en la mateixa síl·laba","Tres vocals en una síl·laba","Dues consonants unides"],"Ex.: idea, coet, ciència."),
+Q("Un triftong són…","Tres vocals en la mateixa síl·laba",["Dues vocals en la mateixa síl·laba","Tres consonants seguides","Dues síl·labes"],"Ex.: caieu, Paraguai, iaio."),
+Q("Quin és un triftong?","caieu",["aire","cuina","viure"],"Tres vocals en una síl·laba."),
+Q("Quin és un triftong?","Paraguai",["aire","teula","estàtua"],"Tres vocals en una síl·laba."),
+Q("Quin és un triftong?","iaio",["noia","ciència","estàtua"],"Tres vocals en una síl·laba."),
+Q("Els diftongs decreixents són vocal +…","i o u",["a o e","consonant","h"],"Ex.: aire, feina, boina, cuina, caure, teula, viure, moure, duu."),
+Q("«Aire» té un diftong…","Decreixent (ai)",["Creixent","Hiat","Triftong"],"ai-re: 2 síl·labes."),
+Q("«Cuina» té un diftong…","Decreixent (ui)",["Creixent","Hiat","Triftong"],"cui-na."),
+Q("«Caure» té un diftong…","Decreixent (au)",["Creixent","Hiat","Triftong"],"cau-re."),
+Q("«Viure» té un diftong…","Decreixent (iu)",["Creixent","Hiat","Triftong"],"viu-re."),
+Q("«Moure» té un diftong…","Decreixent (ou)",["Creixent","Hiat","Triftong"],"mou-re."),
+Q("«Teula» té un diftong…","Decreixent (eu)",["Creixent","Hiat","Triftong"],"teu-la."),
+Q("«Duu» té un diftong…","Decreixent (uu)",["Creixent","Hiat","Triftong"],"duu."),
+Q("Els diftongs creixents són…","g + u + vocal, q + u + vocal, i/hi inicial + vocal, vocal + i + vocal, vocal + u + vocal",["Vocal + i","Vocal + u","Consonant + i + vocal"],"Ex.: guanyar, quatre, iogurt, hiena, noia, clauer."),
+Q("«Quatre» té un diftong…","Creixent (qua)",["Decreixent","Hiat","Triftong"],"qua-tre."),
+Q("«Guanyar» té un diftong…","Creixent (gua)",["Decreixent","Hiat","Triftong"],"gua-nyar."),
+Q("«Iogurt» (inici de paraula amb i + vocal) té un diftong…","Creixent",["Decreixent","Hiat","Triftong"],"io-gurt."),
+Q("«Hiena» (hi + vocal) té un diftong…","Creixent",["Decreixent","Hiat","Triftong"],"hie-na."),
+Q("«Noia» (vocal + i + vocal) té un diftong…","Creixent (ia)",["Decreixent","Hiat","Triftong"],"no-ia: segons la taula, vocal + i + vocal és creixent."),
+Q("Hiat: consonant + i + vocal. Exemple:","ciència",["noia","aire","iogurt"],"ci-èn-ci-a."),
+Q("Hiat: consonant + u + vocal. Exemple:","estàtua",["aigua","quatre","cuina"],"es-tà-tu-a."),
+Q("Hiat: vocals en contacte diferents de i o u. Exemple:","idea",["aire","noia","iogurt"],"i-de-a."),
+Q("«Coet» és…","Un hiat (co-et)",["Un diftong","Un triftong","Un dígraf"],"Dues vocals en contacte diferents de i o u."),
+Q("«Teatre» és…","Un hiat (te-a-tre)",["Un diftong","Un triftong","Un dígraf"],"No hi ha una i o una u necessàries per a formar diftong."),
+Q("«Poeta», «canoa» i «suor» tenen…","Hiat",["Diftong","Triftong","Dígraf"],"No hi ha i o u per a formar diftong."),
+Q("«València», «Barbàrie» i «camioner» tenen un hiat amb…","ia, ie, io",["ai, ei, oi","ua, ue, uo","qua, gua"],"Hiats amb i."),
+Q("«Estàtua», «nuesa» i «duo» tenen un hiat amb…","ua, ue, uo",["ia, ie, io","ai, ei, oi","qua, gua"],"Hiats amb u."),
+]},
+{name:"1.3b · La dièresi",qs:[
+Q("La dièresi és…","Un signe gràfic que es col·loca exclusivament sobre la i i la u",["Un accent que va sobre qualsevol vocal","Una lletra composta","Un dígraf"],"Té diverses funcions."),
+Q("Funció a) de la dièresi:","Indicar que la u dels grups gue, gui, que, qui no és muda",["Indicar que la u de gua és muda","Indicar un accent agut","Indicar un hiat sempre"],"Ex.: següent, ambigüitat, aqüeducte, terraqüi."),
+Q("Quin d'aquests grups no du mai dièresi?","gua, guo, qua, quo",["gue, gui","que, qui","gui, qui"],"La u d'aquests grups es pronuncia sempre."),
+Q("Quina escriptura és correcta?","següent",["seguent","seqüent","seguënt"],"Gue amb u pronunciada porta dièresi."),
+Q("Quina escriptura és correcta?","ambigüitat",["ambiguitat","ambigüítat","ambigitat"],"La u de gui es pronuncia."),
+Q("Quina escriptura és correcta?","terraqüi",["terraqui","terraqúi","terràqui"],"La u de qui es pronuncia."),
+Q("Funció b) de la dièresi:","Indicar que la i i la u no formen diftong decreixent amb la vocal anterior",["Indicar que la u és muda","Indicar l'accent de la paraula","Separar prefixos"],"Ex.: fluïdesa, oïm, raïm, veïna, xiïta, diürn, Raül, Seül, taüt."),
+Q("Quina escriptura és correcta?","veïna",["veina","veína","veinä"],"La i no forma diftong amb la e anterior."),
+Q("Quina escriptura és correcta?","Raül",["Raul","Raúl","Raüll"],"La u no forma diftong amb la a anterior."),
+Q("Funció c) de la dièresi:","Indicar que la i en posició intervocàlica és vocal sil·làbica",["Indicar que la i és muda","Indicar una consonant","Separar dues paraules"],"Ex.: agraïa, beneïen, reduïes, traduïen."),
+Q("Quina escriptura és correcta?","traduïen",["traduien","traduíen","tradüen"],"La i intervocàlica forma síl·laba per si sola."),
+Q("Funció d) de la dièresi:","Indicar la i en cultismes derivats acabats en -itat, -itzar",["Marcar l'accent en l'última síl·laba","Indicar la u muda","Marcar un diftong"],"Ex.: arcaïtzant, deïtat, europeïtzant, fluïdesa, heroïcitat, laïcitat."),
+Q("Quina escriptura és correcta?","laïcitat",["laicitat","laícitat","lacitat"],"Laic » laïcitat."),
+Q("Quina escriptura és correcta?","heroïcitat",["heroicitat","heroícitat","hroïcitat"],"Heroi » heroïcitat."),
+Q("Estalvi de dièresi: els derivats amb -al…","No la porten (helicoidal, laical, romboidal), llevat de proïsmal i veïnal",["La porten sempre","No la porten mai, sense excepcions","Només porten dièresi els verbs"],"Excepcions: proïsmal, veïnal."),
+Q("Els mots que per les normes d'accentuació han de dur accent…","No porten dièresi (agraíem, Lluís, país, roí)",["Porten dièresi sempre","Porten accent i dièresi","Porten dos accents"],"Ex.: agraïen però agraíem."),
+Q("Quina és correcta per al singular?","país",["païs","paìs","pais"],"El singular porta accent (país); el plural porta dièresi (països)."),
+Q("Les paraules amb els sufixos -isme i -ista…","No porten dièresi (arcaisme, ateisme, altruista, ateneista)",["Porten dièresi sempre","Porten dues dièresis","No porten accent"],"Excepció: lluïsme i proïsme sí que en porten, perquè -isme no és sufix."),
+Q("«Lluïsme» i «proïsme» porten dièresi perquè…","La terminació -isme no és en aquests casos un sufix",["Són verbs","Són paraules agudes","Tenen una h"],"Remarca de la norma."),
+Q("Els infinitius, gerundis, futurs i condicionals dels verbs acabats en vocal + -ir…","No porten dièresi (agrair, agraint, agrairé, agrairia)",["Porten dièresi","Porten accent","Porten dièresi només al gerundi"],"Ex.: beneir, benint; oir, oint; lluir, lluint."),
+Q("Excepcions a la norma anterior:","Reüll i les formes del verb reeixir (reïsc, reïx, reïsca…)",["Agrair i beneir","Oir i lluir","Cap excepció"],"Reüll i reeixir sí porten dièresi."),
+Q("Les paraules amb prefixos com anti-, auto-, bio-, micro-, poli-, re-…","No porten dièresi (antiinflamatori, autoinducció, bioindicador, reunió)",["Porten sempre dièresi","Porten accent","Porten una h"],"També: bi-, co-, contra-, gastro-, intra-, macro-, neo-, primo-, quasi-, radio-, semi-, tele-, termo-."),
+Q("Quina escriptura és correcta?","reunió",["reünió","reuníó","reünio"],"Prefix re-: no porta dièresi."),
+Q("Quina escriptura és correcta?","coincidència",["coïncidència","coincidencia","coïncidencia"],"Prefix co-: no porta dièresi."),
+Q("Quina escriptura és correcta?","antiinflamatori",["antiïnflamatori","antiinflamatórí","antinflamatori"],"Prefix anti-: no porta dièresi."),
+Q("Quina escriptura és correcta?","microinformàtica",["microïnformàtica","microinformatica","micro-informàtica"],"Prefix micro-: no porta dièresi."),
+Q("Quina escriptura és correcta?","termoiònic",["termoïònic","termoionic","termoiónic"],"Prefix termo-: no porta dièresi (i ió/ònic porta accent)."),
+Q("Quina escriptura és correcta?","Lluïsa",["Lluisa","Lluísa","Lluïssa"],"Lluïsa porta dièresi; Lluís porta accent (sense dièresi)."),
+Q("Quina escriptura és correcta?","altruista",["altruïsta","altrúista","altruísta"],"Sufix -ista: sense dièresi."),
+]},
+{name:"1.2d · Apostrofació",qs:[
+Q("L'article el/la i els pronoms personals en, na s'apostrofen davant…","Paraules que comencen per vocal o h",["Paraules que comencen per consonant","Només davant a","Només davant h aspirada"],"Ex.: l'aire, l'hora, l'hivern, l'home, l'Ignasi, Castellar de n'Hug."),
+Q("Quina és correcta?","l'hora",["la hora","el hora","l' hora"],"Davant h muda s'apostrofa."),
+Q("Quina és correcta?","l'home",["el home","la home","l'hom e"],"Davant h muda s'apostrofa."),
+Q("Quina és correcta?","l'illa",["la illa","l'ila","el illa"],"La femenina la s'apostrofa davant i, u, hi, hu TÒNIQUES."),
+Q("Quina és correcta?","l'ungla",["la ungla","el ungla","l'unglas"],"u tònica."),
+Q("Quina és correcta?","l'hípica",["la hípica","el hípica","l' hipica"],"hi tònica."),
+Q("Quina és correcta?","l'Índia",["la Índia","el Índia","la índia"],"i tònica."),
+Q("Quina és correcta?","la indústria",["l'indústria","el indústria","l'industria"],"La femenina la no s'apostrofa davant i, u, hi, hu ÀTONES."),
+Q("Quina és correcta?","la universitat",["l'universitat","el universitat","l'universita"],"u àtona."),
+Q("Quina és correcta?","la unió",["l'unió","el unió","l'uniò"],"u àtona."),
+Q("Quina és correcta?","la humitat",["l'humitat","el humitat","l'humita"],"hu àtona."),
+Q("Quina és correcta?","la història",["l'història","el història","l'historia"],"hi àtona."),
+Q("Quina és correcta?","la idea",["l'idea","el idea","l'ideà"],"i àtona."),
+Q("Quina és correcta?","la unitat",["l'unitat","el unitat","l'unita"],"u àtona."),
+Q("Quina és correcta?","l'1 de maig",["el 1 de maig","la 1 de maig","l' un de maig"],"Davant de xifres començades per so vocàlic."),
+Q("Quina és correcta?","l'11 d'abril",["el 11 d'abril","la 11 d'abril","l'11 de abril"],"Xifra amb so vocàlic (onze)."),
+Q("Quina és correcta?","l'ESO",["el ESO","la ESO","l' E.S.O."],"Davant de sigles que comencen per so vocàlic."),
+Q("Quina és correcta?","l'IVA",["el IVA","la IVA","l' iva"],"Sigla amb so vocàlic."),
+Q("Quina és correcta?","l'IEC",["el IEC","la IEC","l' I.E.C."],"Sigla amb so vocàlic."),
+Q("Quina és correcta?","l'H2O",["el H2O","la H2O","l'hidro"],"Sigla amb so vocàlic (hac/ac)."),
+Q("Quina és correcta?","el iogurt",["l'iogurt","la iogurt","l' iogurt"],"Davant diftong creixent (i o hi + vocal) no s'apostrofa."),
+Q("Quina és correcta?","la hiena",["l'hiena","el hiena","la hièna"],"Diftong creixent hi + vocal."),
+Q("Quina és correcta?","la iaia",["l'iaia","el iaia","l'iaiá"],"Diftong creixent."),
+Q("Quina és correcta?","el iode",["l'iode","la iode","el yode"],"Diftong creixent."),
+Q("Davant el nom de les lletres l'article…","No s'apostrofa (la a, la e, la i, la ema, la ela, la hac)",["S'apostrofa sempre","S'apostrofa només la a","S'apostrofa només la e"],"La a, la e, la i, la o, la u, la ema, la ela, la hac."),
+Q("«La una» (hora) s'escriu…","Sense apostrofar: és la una del migdia",["L'una: és l'una del migdia","El una","Una sense article"],"No s'apostrofa la paraula una quan indica l'hora."),
+Q("Davant del prefix a- de negació l'article…","No s'apostrofa (la asimetria, la anormalitat)",["S'apostrofa sempre","Canvia per el","S'apostrofa només davant h"],"Es fa per evitar confusions: la ira (la lira)."),
+Q("Davant de sigles femenines que comencen per i o u…","No s'apostrofa (la UGT, la UNESCO, la ITV)",["S'apostrofa sempre","Es canvia per el","Se suprimeix l'article"],"Com amb les paraules femenines amb i/u àtones."),
+Q("La preposició de s'apostrofa…","Davant paraules que comencen per vocal o h (d'aigua, d'humor, d'hoquei)",["Davant consonant","Davant article masculí","Davant h aspirada"],"Ex.: Viu d'il·lusions. Un got d'aigua. Partit d'handbol."),
+Q("Davant de l'article masculí (el, els) la preposició de…","Es contrau (del dia, dels Baskerville)",["S'apostrofa (d'el dia)","Se suprimeix","Es duplica"],"Ex.: El diari del dia d'avui. El gos dels Baskerville."),
+Q("Quina és correcta?","pastís de iogurt",["pastís d'iogurt","pastís d' iogurt","pastís de'iogurt"],"De no s'apostrofa davant diftong (i o hi + vocal)."),
+Q("Quina és correcta?","petjades de hiena",["petjades d'hiena","petjades d' hiena","petjades de'hiena"],"Davant diftong no s'apostrofa."),
+Q("Quina és correcta?","de Hollywood",["d'Hollywood","d' Hollywood","de'Hollywood"],"Davant h aspirada no s'apostrofa."),
+Q("Quina és correcta?","de hard rock",["d'hard rock","d' hard rock","de'hard rock"],"h aspirada."),
+Q("Els pronoms em, et, es, el, la i en s'apostrofen davant verbs que comencen per vocal o h. Quina és correcta?","t'agrada",["te agrada","t agrada","te'agrada"],"Ex.: m'enganyen, s'espanta, l'han encertat, n'han tingut un."),
+Q("Quina és correcta?","l'han encertat",["la han encertat","el han encertat","l' han encertat"],"El pronom l' s'apostrofa."),
+Q("Els pronoms s'apostrofen darrere d'un verb acabat en vocal. Quina és correcta?","ajuda'm",["ajuda-m","ajudam","ajuda m"],"Ex.: lleva't, creure's, desperta'l, llença'ls, agafa'n."),
+Q("Quina és correcta?","desperta'l",["desperta-l","despertal","desperta l"],"Darrere de verb acabat en vocal."),
+Q("Quan coincideixen dos o més pronoms febles, sovint…","Un d'ells s'apostrofa (me'n vaig, me n'haig d'anar, no s'hi veu, creure-t'ho)",["Cap s'apostrofa","S'apostrofen tots","No s'apostrofa res"],"Es combina l'apòstrof amb altres formes."),
+]},
+{name:"1.2e · Divergències accentuals",qs:[
+Q("Les divergències accentuals afecten…","Cultismes o manlleus amb la síl·laba tònica en una posició diferent a la del castellà",["Només els verbs","Només les paraules monosíl·labes","Només els noms propis"],"Ex.: aeròlit, demoníac, dioptria, futbol."),
+Q("El valencià, en aquests casos…","Respecta la pronunciació del manlleu en la llengua original",["Sempre segueix el castellà","Canvia la pronunciació sense regla","Elimina l'accent"],"Per això són paraules que cal memoritzar."),
+Q("Quina paraula és aguda en valencià?","alfil",["acne","aureòla","èczema"],"Alfil és aguda (no porta accent)."),
+Q("Quina paraula és aguda en valencià?","cautxú",["acne","ènema","isòbara"],"Cautxú és aguda."),
+Q("Quina paraula és aguda en valencià?","criquet",["acne","aureòla","ènema"],"Criquet és aguda."),
+Q("Quina paraula és aguda en valencià?","oceà",["míssil","rèptil","tulipa"],"Oceà és aguda."),
+Q("Quina paraula és aguda en valencià?","hoquei",["acne","bantu","guru"],"Hoquei és aguda."),
+Q("Quina paraula és aguda en valencià?","handicap",["acne","conclave","karate"],"Handicap és aguda."),
+Q("Quina paraula és aguda en valencià?","flascó",["acne","cardíac","bantu"],"Flascó és aguda."),
+Q("Quina paraula és aguda en valencià?","interval",["acne","bantu","karate"],"Interval és aguda."),
+Q("Quina paraula és plana en valencià?","acne",["alfil","aureòla","èczema"],"Acne és plana."),
+Q("Quina paraula és plana en valencià?","austríac",["alfil","ènema","isòbara"],"Austríac és plana."),
+Q("Quina paraula és plana en valencià?","bantu",["alfil","aureòla","pàtxuli"],"Bantu és plana."),
+Q("Quina paraula és plana en valencià?","cardíac",["alfil","cautxú","olimpíada"],"Cardíac és plana."),
+Q("Quina paraula és plana en valencià?","conclave",["alfil","dioptria","rubèola"],"Conclave és plana."),
+Q("Quina paraula és plana en valencià?","míssil",["alfil","èczema","pneumònia"],"Míssil és plana."),
+Q("Quina paraula és plana en valencià?","rèptil",["alfil","aureòla","isòbara"],"Rèptil és plana."),
+Q("Quina paraula és plana en valencià?","tèxtil",["alfil","ènema","pàtxuli"],"Tèxtil és plana."),
+Q("Quina paraula és plana en valencià?","tulipa",["alfil","aureòla","rubèola"],"Tulipa és plana."),
+Q("Quina paraula és plana en valencià?","vertigen",["alfil","isòbara","quàdriceps"],"Vertigen és plana."),
+Q("Quina paraula és esdrúixola en valencià?","aureòla",["acne","alfil","bantu"],"Aureòla és esdrúixola."),
+Q("Quina paraula és esdrúixola en valencià?","dioptria",["acne","alfil","guru"],"Dioptria és esdrúixola."),
+Q("Quina paraula és esdrúixola en valencià?","èczema",["acne","alfil","bantu"],"Èczema és esdrúixola."),
+Q("Quina paraula és esdrúixola en valencià?","olimpíada",["acne","alfil","cardíac"],"Olimpíada és esdrúixola."),
+Q("Quina paraula és esdrúixola en valencià?","període",["acne","alfil","míssil"],"Període és esdrúixola."),
+Q("Quina paraula és esdrúixola en valencià?","pneumònia",["acne","alfil","conclave"],"Pneumònia és esdrúixola."),
+Q("Quina paraula és esdrúixola en valencià?","rubèola",["acne","alfil","tulipa"],"Rubèola és esdrúixola."),
+Q("Les paraules acabades en -trop són…","Agudes (filantrop, misantrop)",["Planes","Esdrúixoles","Sobreesdrúixoles"],"Sufix -trop: agudes."),
+Q("Les paraules acabades en els sufixos -cit, -lit, -sfera, -osi, -esi, -fon, -íac, -stat són…","Planes (leucòcit, aeròlit, atmosfera, osmosi, mimesi, magnetòfon, afrodisíac, termòstat)",["Agudes","Esdrúixoles","Sobreesdrúixoles"],"Sufixos que donen paraules planes."),
+Q("Les paraules acabades en els sufixos -lisi i -ode són…","Esdrúixoles (electròlisi, elèctrode)",["Agudes","Planes","Sobreesdrúixoles"],"Sufixos que donen paraules esdrúixoles."),
+]},
+];
+
+const CARDS=[
+["Dígraf","Conjunt de dues lletres que equivalen a un únic so. Dígrafs: ll, ny, gu, qu, ig, ss, rr, tg, tj, tx, tz.","1. Dígrafs i síl·labes"],
+["Dígrafs que NO es poden separar","ll (co-lla), ny (ca-nya), gu (fi-gue-ra), qu (es-que-na), ig (rai-g).","1. Dígrafs i síl·labes"],
+["Dígrafs que SÍ es poden separar","ss (cas-so-la), rr (ar-ròs), tg (met-ge), tj (plat-ja), tx (dut-xa), tz (tret-ze).","1. Dígrafs i síl·labes"],
+["Lletres compostes","Combinacions de consonants que representen sons geminats (repetits): mm (immersió), nn (connectar), l·l (novel·lista), tl (atles), tll (rotllo), tm (setmana), tn (cotna).","1. Dígrafs i síl·labes"],
+["La t de tl, tll, tm, tn","No es pronuncia: s'escriu per indicar que els sons de l, ll, m i n s'allarguen.","1. Dígrafs i síl·labes"],
+["Normes de separació de síl·labes","1) No deixar cap lletra sola a final ni a començament de ratlla. 2) No separar les vocals d'un diftong. 3) Separar rr, ss, sc, ix, cc, tj, tg, tx, tl, tll, tm, tz, mm, nn, l·l. 4) No separar gu, qu, ll, ny. 5) Mots compostos i prefixos: segons els elements.","1. Dígrafs i síl·labes"],
+["Síl·laba tònica","En una paraula polisíl·laba, la que es pronuncia amb més força.","2. Accentuació"],
+["Agudes, planes i esdrúixoles","Aguda: tònica a l'última (ma-ri-NER) · Plana: a la penúltima (fi-GUE-ra) · Esdrúixola: a l'antepenúltima (FÀ-bri-ca).","2. Accentuació"],
+["Monosíl·labs tònics i àtons","Tònics: la gran majoria (pal, dit, mai, riu). Àtons: articles (el, la), pronoms febles (em, et, es, ens), algunes preposicions (a, de, en, amb, per) i la paraula que.","2. Accentuació"],
+["Normes d'accentuació","Sobreesdrúixoles i esdrúixoles: sempre. Planes: acabades en diftong o consonant (excepte vocal + s, -en, -in). Agudes: acabades en vocal, vocal + s, -en, -in.","2. Accentuació"],
+["Exemples d'accentuació","Sobreesdrúixola: únicament · Esdrúixola: pràctica · Plana: berenàveu, rèptils, plàtan · Aguda: meló, cabàs, aprén.","2. Accentuació"],
+["Accent diacrític (1)","bé (adverbi) / be (corders) · déu (divinitat) / deu (numeral) · és (ser) / es (reflexiu) · mà (part del cos) / ma (possessiu) · més (quantitat) / mes (part de l'any).","2. Accentuació"],
+["Accent diacrític (2)","món (planeta) / mon (possessiu meu) · pèl (cabell) / pel (per + el) · què (interrogació) / que (preposició) · sé (saber) / se (reflexiu) · sí (afirmació) / si (conjunció condicional).","2. Accentuació"],
+["Accent diacrític (3)","sòl (terra) / sol (astre, verb soler) · són (ser) / son (dormir, possessiu seu) · té (tenir) / te (infusió) · ús (acció d'usar) / us (pronom feble) · vós (tractament) / vos (pronom feble).","2. Accentuació"],
+["Accent diacrític (4)","mòlt (moldre) / molt (quantitatiu) · sóc (ser) / soc (calçat) · véns (venir) / vens (vendre) · vés (anar) / ves (veure) · féu (fer passat) / feu (fer present) · fóra (ser) / fora (adverbi).","2. Accentuació"],
+["Vocals e, o: obertes i tancades","La e i la o obertes només apareixen en posició tònica; les tancades poden ser tòniques o àtones. Per pronunciar-les obertes, cal obrir la boca com si anares a dir la a.","3. Vocalisme e, o"],
+["Truquets: agudes","La e i la o solen ser tancades (menjaré, pretén, després, camió, torró). Excepcions: arròs, açò, això, allò, redòs, ressò, rebò, debò, però, què, perquè, espòs, exclòs, inclòs.","3. Vocalisme e, o"],
+["Truquets: planes","La e i la o solen ser obertes (dipòsit, sòlid, tèxtil, exèrcit, dèbil, mòdul). Excepcions: verbs de la 2a conjugació (córrer, témer), estómac, cérvol, jóvens, llépol, préstec, feréstec, préssec.","3. Vocalisme e, o"],
+["Truquets: esdrúixoles","La e i la o solen ser obertes (gènere, pèrdua, memòria, València). Excepcions: fórmula, pólvora, tómbola, góndola, Dénia, tórtora, església, llémena, feréstega, sénia, séquia.","3. Vocalisme e, o"],
+["E oberta: contextos","Davant síl·laba en i (conveni) o u/eu (cèl·lula, peu) · davant l/r + consonant (mel, terra, cert) · quasi totes les esdrúixoles · -ecte, -ecta, -epte, -epta · termes tècnics (telèfon, pètal) · gendre, tendre, Vicent, Josep, bes.","3. Vocalisme e, o"],
+["O oberta: contextos","Davant i/u (boia, ou, dijous, mòdul) · esdrúixoles (còlera) · termes científics (tòrax) · -oc/-oca, -oç, -of/-ofa, -oig/-oja, -ol/-ola, -oldre, -olt/-olta, -ort/-orta, -os/-ossa, -osa, -ost/-osta, -ot/-ota.","3. Vocalisme e, o"],
+["Paraules amb dos accents","alé/alè, café/cafè, sépia/sèpia, anglés/anglès, cinqué/cinquè i verbs de la 2a conjugació acabats en -éixer/-èixer. Cal ser coherent.","3. Vocalisme e, o"],
+["Diftong","Dues vocals (una i o u àtona) en una mateixa síl·laba. Decreixent: vocal + i/u (aire, cuina, caure, viure). Creixent: gua, qua, io-, hie-, vocal + i + vocal, vocal + u + vocal.","4. Diftongs i hiats"],
+["Diftongs decreixents","ai (mai), au (pau), ei (rei), eu (veure), iu (viu), oi (boira), ou (coure), ui (cuina), uu (duu).","4. Diftongs i hiats"],
+["Diftongs creixents","qua (quatre), gua (aigua), qüe (qüestió), güe (ungüent), qüi (terraqüi), güi (pingüí), quo (quota), guo (paraiguot).","4. Diftongs i hiats"],
+["Hiat","Dues vocals en contacte que pertanyen a síl·labes diferents. Consonant + i + vocal (ciència), consonant + u + vocal (estàtua), vocals diferents de i/u (idea, coet, teatre, poeta).","4. Diftongs i hiats"],
+["Triftong","Tres vocals en la mateixa síl·laba: caieu, Paraguai, iaio.","4. Diftongs i hiats"],
+["Dièresi","Signe gràfic que es posa exclusivament sobre la i i la u. a) La u de gue, gui, que, qui no és muda (següent). b) i/u no formen diftong decreixent amb la vocal anterior (veïna, Raül). c) i intervocàlica sil·làbica (agraïa, traduïen). d) cultismes en -itat, -itzar (laïcitat).","5. Dièresi"],
+["Gua, guo, qua, quo","La u d'aquests grups es pronuncia sempre i no du mai dièresi.","5. Dièresi"],
+["Estalvi de dièresi (1)","Derivats amb -al (helicoidal, laical; llevat de proïsmal i veïnal). Paraules amb accent per les normes (agraíem, país, Lluís, roí). Sufixos -isme, -ista (arcaisme, altruista). Excepció: lluïsme, proïsme.","5. Dièresi"],
+["Estalvi de dièresi (2)","Infinitius, gerundis, futurs i condicionals dels verbs acabats en vocal + -ir (agrair, beneir, oir, lluir). Excepcions: reüll i reeixir (reïsc, reïx). Prefixos: anti-, auto-, bi-, bio-, co-, contra-, micro-, neo-, poli-, re-, semi-, tele-, termo-…","5. Dièresi"],
+["Apostrofar l'article","El, la, en, na davant vocal o h (l'aire, l'hora, l'home, l'Ignasi, n'Hug). La davant i, u, hi, hu tòniques (l'illa, l'ungla, l'hípica, l'Índia). Davant xifres amb so vocàlic (l'1 de maig) i sigles amb so vocàlic (l'ESO, l'IVA).","6. Apostrofació"],
+["No apostrofar l'article","La davant i, u, hi, hu àtones (la indústria, la història) · davant diftong creixent (el iogurt, la hiena) · davant el nom de les lletres (la a, la hac) · la una (hora) · prefix a- de negació (la asimetria) · sigles femenines amb i/u (la UGT, la ITV).","6. Apostrofació"],
+["Apostrofar la preposició de","Davant vocal o h: d'aigua, d'humor, d'hoquei. NO davant l'article masculí (del, dels), NO davant diftong (de iogurt, de hiena) i NO davant h aspirada (de Hollywood, de hard rock).","6. Apostrofació"],
+["Apostrofar els pronoms febles","Em, et, es, el, la, en davant verb amb vocal o h (m'enganyen, t'agrada). Darrere verb acabat en vocal (ajuda'm, lleva't, creure's, desperta'l, llença'ls, agafa'n). Amb dos pronoms, un s'apostrofa (me'n vaig, no s'hi veu).","6. Apostrofació"],
+["Divergències accentuals","Cultismes i manlleus que tenen la síl·laba tònica en una posició diferent a la del castellà. El valencià respecta la pronunciació del manlleu original.","7. Divergències accentuals"],
+["Divergències: agudes","alfil, avar, cautxú, criquet, elit, flascó, fluor, handicap, hoquei, interval, oboé, oceà, poliglot, quilogram, radar, sandvitx, soviet, timpà, xandall, xassís, xiclet, zenit, tiquet…","7. Divergències accentuals"],
+["Divergències: planes","acne, austríac, bantu, cardíac, conclave, guru, karate, míssil, omòplat, paraplegia, rèptil, tèrmit, tèxtil, tulipa, vertigen, víking, zulu…","7. Divergències accentuals"],
+["Divergències: esdrúixoles","aureòla, dioptria, èczema, ènema, isòbara, olimpíada, pàtxuli, període, pneumònia, quàdriceps, rubèola.","7. Divergències accentuals"],
+["Divergències: sufixos","Agudes: -trop (filantrop). Planes: -cit, -lit, -sfera, -osi, -esi, -fon, -íac, -stat. Esdrúixoles: -lisi, -ode.","7. Divergències accentuals"],
+];
+
+const DEV=[
+{q:"Explica què són els dígrafs, quins n'hi ha en valencià i quins es poden separar a final de ratlla.",
+ ans:"Un dígraf és un conjunt de dues lletres que equivalen a un únic so. En valencià: ll, ny, gu, qu, ig, ss, rr, tg, tj, tx i tz. No es poden separar ll, ny, gu, qu i ig (co-lla, ca-nya, fi-gue-ra, es-que-na). Sí que es poden separar ss, rr, tg, tj, tx i tz (cas-so-la, ar-ròs, met-ge, plat-ja, dut-xa, tret-ze).",
+ kw:[["dos lletres","dues lletres"],["unic so","un so"],["ll"],["ny"],["gu","qu"],["ss","rr"],["tg","tj","tx","tz"],["separar"]]},
+{q:"Quines són les normes de separació de síl·labes a final de ratlla?",
+ ans:"1) No s'ha de deixar cap lletra sola ni al començament ni al final de ratlla. 2) No es poden separar les vocals d'un diftong. 3) Els dígrafs i grups de lletres que s'han de separar: rr, ss, sc, ix, cc, tj, tg, tx, tl, tll, tm, tz, mm, nn, l·l. 4) Els dígrafs que no es poden separar: gu, qu, ll, ny. 5) Els mots compostos i els prefixos es separen segons els elements que els integren.",
+ kw:[["lletra sola"],["diftong"],["rr","ss"],["tj","tg","tx"],["gu","qu","ll","ny"],["compostos","prefixos"]]},
+{q:"Què són les lletres compostes? Cita-les amb exemples i explica la t.",
+ ans:"Són combinacions de consonants que representen sons geminats (repetits): mm (immersió), nn (connectar), l·l (novel·lista), tl (atles), tll (rotllo), tm (setmana) i tn (cotna). La t dels grups tl, tll, tm i tn no es pronuncia: es posa per indicar que els sons de l, ll, m i n s'allarguen.",
+ kw:[["consonants"],["geminats","repetits"],["mm"],["nn"],["l·l","l.l"],["tl","tll","tm","tn"],["no es pronuncia"],["allarguen"]]},
+{q:"Defineix la síl·laba tònica i classifica les paraules segons la seua posició. Posa un exemple de cada tipus.",
+ ans:"La síl·laba tònica és la que es pronuncia amb més força. Segons la seua posició: agudes (a l'última: mariner, huracà), planes (a la penúltima: figuera, núvol) i esdrúixoles (a l'antepenúltima: fàbrica, història). També hi ha sobreesdrúixoles (únicament).",
+ kw:[["mes forca","forca"],["agudes"],["planes"],["esdruixoles"],["ultima"],["penultima"],["antepenultima"],["mariner","huraca","figuera","nuvol","fabrica","historia"]]},
+{q:"Explica les normes d'accentuació de les paraules agudes, planes i esdrúixoles amb exemples.",
+ ans:"Esdrúixoles i sobreesdrúixoles: s'accentuen sempre (pràctica, únicament). Planes: s'accentuen quan acaben en diftong (berenàveu) o consonant (plàtan, rèptils), excepte vocal + s, -en i -in. Agudes: s'accentuen quan acaben en vocal (meló), vocal + s (cabàs), -en o -in (aprén).",
+ kw:[["esdruixoles"],["sempre"],["planes"],["diftong"],["consonant"],["agudes"],["vocal"],["en","in"],["pràctica","practica","melo","cabas","apren"]]},
+{q:"Què és l'accent diacrític? Posa deu exemples de parells de paraules.",
+ ans:"És l'accent que distingeix dues paraules monosíl·labes iguals amb significat diferent: bé/be, déu/deu, és/es, mà/ma, més/mes, món/mon, pèl/pel, què/que, sé/se, sí/si, sòl/sol, són/son, té/te, ús/us, vós/vos.",
+ kw:[["distingeix","diferencia"],["monosil"],["be"],["deu"],["mes"],["pel"],["que"],["si"],["sol","son"],["te","us"]]},
+{q:"Explica en quins casos la e és oberta i en quins la o és oberta (contextos i terminacions).",
+ ans:"La e és oberta davant síl·laba amb i o u/eu (conveni, cèl·lula, peu), davant l/r + consonant (mel, terra), en quasi totes les esdrúixoles (València), en -ecte/-ecta/-epte/-epta (concepte), en termes tècnics (telèfon) i en algunes paraules (gendre, tendre, Vicent, Josep, bes). La o és oberta davant i/u (boia, ou, dijous), en esdrúixoles (còlera), termes científics (tòrax) i en terminacions com -oc/-oca, -ol/-ola, -ort/-orta, -ot/-ota, -ost/-osta. Només apareixen en posició tònica.",
+ kw:[["oberta"],["tonica"],["conveni","celula"],["mel","terra"],["esdruixoles"],["ecte","epte"],["boia","ou","dijous"],["terminacions","oc","ol","ort","ot"]]},
+{q:"Explica els truquets per a accentuar les vocals e i o en paraules agudes, planes i esdrúixoles amb excepcions.",
+ ans:"Agudes: e i o solen ser tancades (menjaré, camió, torró); excepcions: arròs, açò, això, però, què, perquè, exclòs. Planes: solen ser obertes (sòlid, tèxtil, dèbil); excepcions: verbs de la 2a conjugació, estómac, cérvol, jóvens, llépol, préstec. Esdrúixoles: solen ser obertes (gènere, memòria, València); excepcions: fórmula, pólvora, tómbola, Dénia, església, sénia, séquia.",
+ kw:[["agudes"],["tancades"],["menjare","camio"],["planes"],["obertes"],["solid","textil"],["esdruixoles"],["genere","memoria"],["excepcions"]]},
+{q:"Diferencia entre diftong, hiat i triftong amb exemples. Explica els tipus de diftong.",
+ ans:"Diftong: dues vocals (una i o u àtona) en una mateixa síl·laba. Decreixents: vocal + i/u (aire, cuina, caure, viure). Creixents: gua, qua, i/hi + vocal a principi de paraula (iogurt, hiena), vocal + i + vocal (noia), vocal + u + vocal. Hiat: dues vocals en síl·labes diferents (ciència, estàtua, idea, coet). Triftong: tres vocals en la mateixa síl·laba (caieu, Paraguai, iaio).",
+ kw:[["diftong"],["mateixa sil"],["decreixents"],["creixents"],["aire","cuina","caure"],["hiat"],["sil·labes diferents","silabes diferents"],["triftong"],["caieu","paraguai","iaio"]]},
+{q:"Explica per a què serveix la dièresi i els casos en què no s'escriu (estalvi de dièresi).",
+ ans:"La dièresi es posa exclusivament sobre la i i la u: a) per indicar que la u de gue, gui, que, qui no és muda (següent); b) perquè la i/u no formen diftong decreixent amb la vocal anterior (veïna, Raül); c) per indicar la i intervocàlica sil·làbica (agraïa); d) en cultismes derivats en -itat, -itzar (laïcitat). No en porten: derivats en -al (helicoidal; llevat de proïsmal i veïnal), paraules amb accent per les normes (país), sufixos -isme, -ista (altruista), infinitius/gerundis/futurs/condicionals en vocal + -ir (agrair), i paraules amb certs prefixos (reunió, coincidència).",
+ kw:[["i","u"],["muda"],["segu","seguent"],["diftong"],["veina","raul"],["itat","itzar"],["al"],["isme","ista"],["agrair","ir"],["prefixos"]]},
+{q:"Explica les normes d'apostrofació de l'article, la preposició de i els pronoms febles amb exemples.",
+ ans:"L'article el/la s'apostrofa davant vocal o h (l'aire, l'hora) i la davant i/u/hi/hu tòniques (l'illa); també davant xifres i sigles amb so vocàlic (l'1 de maig, l'ESO). No s'apostrofa la davant i/u/hi/hu àtones (la història), davant diftong creixent (el iogurt), davant el nom de les lletres (la a), la una (hora), prefix a- de negació i sigles femenines amb i/u (la UGT). La preposició de s'apostrofa davant vocal o h (d'aigua), però no davant l'article masculí (del, dels), diftong (de iogurt) ni h aspirada (de Hollywood). Els pronoms em, et, es, el, la, en s'apostrofen davant verb amb vocal o h (m'enganyen) i darrere verb acabat en vocal (ajuda'm).",
+ kw:[["vocal","h"],["l'aire","l'hora","laire","lhora"],["l'illa","lillla","l'ungla"],["xifres","sigles"],["no s'apostrofa","no sapostrofa"],["diftong"],["del","dels"],["h aspirada"],["pronoms"],["ajuda'm","ajudam","ajuda"]]},
+{q:"Què són les divergències accentuals? Cita'n exemples de cada tipus (agudes, planes i esdrúixoles) i els sufixos.",
+ ans:"Són cultismes o manlleus amb la síl·laba tònica en una posició diferent a la del castellà; el valencià respecta la pronunciació del manlleu original. Agudes: alfil, avar, cautxú, criquet, handicap, hoquei, interval, oceà. Planes: acne, austríac, bantu, cardíac, míssil, rèptil, tèxtil, tulipa. Esdrúixoles: aureòla, dioptria, èczema, ènema, olimpíada, període, pneumònia, rubèola. Sufixos: -trop (agudes); -cit, -lit, -sfera, -osi, -esi, -fon, -íac, -stat (planes); -lisi, -ode (esdrúixoles).",
+ kw:[["cultismes","manlleus"],["castella"],["agudes"],["alfil","criquet","hoquei","oceà","ocea"],["planes"],["acne","tulipa","rèptil","reptil"],["esdruixoles"],["aureola","dioptria","periode","rubeola"],["sufixos","trop","lit","lisi"]]},
+];
+
+/* ============ UTILIDADES ============ */
+const $=s=>document.querySelector(s);
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let store={};
+try{store=JSON.parse(localStorage.getItem("estudioVal")||"{}")}catch(e){}
+store.tests=store.tests||{};store.known=store.known||{};
+const save=()=>{try{localStorage.setItem("estudioVal",JSON.stringify(store))}catch(e){}};
+
+const app=$("#app");
+function view(v){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  ({tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  window.scrollTo(0,0);
+}
+$("#nav").onclick=e=>{if(e.target.dataset.v)view(e.target.dataset.v)};
+
+/* ============ TESTS ============ */
+let T=null;
+function viewTests(){
+  const best=(k,n)=>{const r=store.tests[k];return r?`Mejor: ${r.best}/${r.n||n}`:"Sin hacer"};
+  app.innerHTML=`<div class="card"><b>Elige un test</b>
+    <p class="mut">Si fallas, te mostramos la respuesta correcta y por qué.</p>
+    <label class="row"><input type="checkbox" id="exam"> <span><b>Modo examen</b>: sin feedback hasta el final (la corrección con explicaciones sale al terminar)</span></label>
+  </div>
+  <h3>Por apartados (largos)</h3>
+  <div class="grid">${TOPICS.map((m,i)=>`<div class="card model" data-m="t${i}"><b>📚 ${esc(m.name)}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("mt"+i,m.qs.length)}</div></div>`).join("")}</div>
+  <h3>Modelos de examen</h3>
+  <div class="grid">${MODELS.map((m,i)=>`<div class="card model" data-m="${i}"><b>📝 ${m.name}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("m"+i,m.qs.length)}</div></div>`).join("")}
+  <div class="card model" data-m="mix"><b>🎲 Mixto</b><div class="mut">20 preguntas al azar de todos los tests</div></div>
+  <div class="card model" data-m="fails"><b>🔁 Repasar fallos</b><div class="mut">${(store.fails||[]).length} preguntas falladas guardadas</div></div></div>`;
+  app.onclick=e=>{const c=e.target.closest(".model");if(!c)return;startTest(c.dataset.m,$("#exam").checked)};
+}
+function startTest(m,exam){
+  let qs,name;
+  const all=[...MODELS,...TOPICS].flatMap(x=>x.qs);
+  if(m==="mix"){qs=shuffle(all).slice(0,20);name="Mixto"}
+  else if(m==="fails"){qs=all.filter(q=>(store.fails||[]).includes(q.q));name="Repaso de fallos";if(!qs.length){alert("¡No tienes fallos guardados! 🎉");return}}
+  else if(m[0]==="t"){const t=TOPICS[+m.slice(1)];qs=t.qs.slice();name=t.name}
+  else{qs=MODELS[+m].qs.slice();name=MODELS[+m].name}
+  qs=shuffle(qs).map(q=>({...q,opts:shuffle([q.ok,...q.bad])}));
+  T={m,name,exam,qs,i:0,ans:[],locked:false};
+  renderQ();
+}
+function renderQ(){
+  const q=T.qs[T.i],n=T.qs.length;
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">${T.name}${T.exam?" · modo examen":""}</span><span class="sp"></span><span class="mut">${T.i+1}/${n}</span></div>
+  <div class="bar"><i style="width:${T.i/n*100}%"></i></div>
+  <h3 style="margin:0 0 10px">${esc(q.q)}</h3>
+  <div id="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+  <div id="fb"></div>
+  <div class="row" style="margin-top:14px"><button class="btn ghost" id="quit">Salir</button><span class="sp"></span><button class="btn" id="next" hidden></button></div></div>`;
+  T.locked=false;
+  $("#quit").onclick=()=>{if(confirm("¿Salir del test? Se perderá el progreso."))viewTests()};
+  $("#opts").onclick=e=>{const b=e.target.closest(".opt");if(!b||T.locked&&!T.exam)return;pick(+b.dataset.k)};
+  $("#next").onclick=()=>{if(T.i+1<n){T.i++;renderQ()}else finish()};
+}
+function pick(k){
+  const q=T.qs[T.i];T.ans[T.i]=k;
+  const next=$("#next");next.hidden=false;next.textContent=T.i+1<T.qs.length?"Siguiente →":"Ver resultado";
+  const btns=[...document.querySelectorAll(".opt")];
+  if(T.exam){btns.forEach((b,j)=>b.classList.toggle("sel",j===k));return}
+  T.locked=true;
+  const good=q.opts[k]===q.ok;
+  btns.forEach((b,j)=>{b.disabled=true;if(q.opts[j]===q.ok)b.classList.add("ok");else if(j===k)b.classList.add("ko")});
+  $("#fb").innerHTML=good
+   ?`<div class="fb ok"><b>✅ ¡Correcto!</b><br>${esc(q.why)}</div>`
+   :`<div class="fb ko"><b>❌ Has fallado.</b> La respuesta correcta es:<br><b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
+}
+function finish(){
+  const n=T.qs.length;
+  const wrong=T.qs.filter((q,i)=>q.opts[T.ans[i]]!==q.ok);
+  const sc=n-wrong.length;
+  store.fails=(store.fails||[]).filter(f=>!T.qs.some(q=>q.q===f));
+  wrong.forEach(q=>store.fails.push(q.q));
+  const key="m"+T.m;const r=store.tests[key]||{best:0,tries:0};
+  r.tries++;r.best=Math.max(r.best,sc);r.last=sc;r.n=n;store.tests[key]=r;
+  store.hist=(store.hist||[]).concat({name:T.name,sc,n,d:new Date().toLocaleDateString("es-ES")}).slice(-30);
+  save();
+  const nota=(sc/n*10).toFixed(1);
+  app.innerHTML=`<div class="card" style="text-align:center"><span class="tag">${T.name}</span>
+   <div class="score">${sc}/${n} · ${nota}</div>
+   <p>${sc===n?"🏆 ¡Perfecto!":sc/n>=.5?"👍 ¡Aprobado! Repasa los fallos:":"💪 A repasar un poco más:"}</p>
+   <div class="row" style="justify-content:center"><button class="btn" id="again">Repetir</button><button class="btn ghost" id="back">Menú</button></div></div>
+   ${wrong.length?`<h3>Tus fallos (${wrong.length})</h3>`+wrong.map(q=>`<div class="card"><b>${esc(q.q)}</b>
+     <div class="fb ko" style="margin-top:8px">Tu respuesta: ${esc(q.opts[T.ans[T.qs.indexOf(q)]]??"(en blanco)")}</div>
+     <div class="fb ok" style="margin-top:8px"><b>Correcta:</b> ${esc(q.ok)}<br><b>Porque:</b> ${esc(q.why)}</div></div>`).join(""):""}`;
+  $("#again").onclick=()=>startTest(T.m,T.exam);
+  $("#back").onclick=viewTests;
+}
+
+/* ============ TARJETAS ============ */
+let C={sec:"Todas",pool:[],i:0,onlyReview:false};
+function viewCards(){
+  const secs=["Todas",...new Set(CARDS.map(c=>c[2]))];
+  const pool=()=>CARDS.map((c,id)=>({c,id})).filter(x=>(C.sec==="Todas"||x.c[2]===C.sec)&&(!C.onlyReview||!store.known[x.id]));
+  C.pool=pool();if(C.i>=C.pool.length)C.i=0;
+  const cur=C.pool[C.i];
+  const knownN=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="chips">${secs.map(s=>`<button class="chip ${s===C.sec?"on":""}" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+  <div class="row"><label class="mut"><input type="checkbox" id="rev" ${C.onlyReview?"checked":""}> Solo las que aún no sé</label><span class="sp"></span><span class="mut">Dominadas: ${knownN}/${CARDS.length}</span></div>
+  ${cur?`<div class="flash"><div class="flip" id="flip"><div class="face front">${esc(cur.c[0])}<div class="mut" style="font-weight:400;font-size:.8rem;margin-top:10px">toca para girar</div></div><div class="face back">${esc(cur.c[1])}</div></div></div>
+  <div class="row"><button class="btn ghost" id="prev">←</button><span class="mut">${C.i+1}/${C.pool.length}</span><button class="btn ghost" id="nx">→</button><span class="sp"></span>
+   <button class="btn ghost" id="rv">🔁 Repasar</button><button class="btn" id="kn">✅ Me la sé</button></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="sh">🔀 Barajar</button></div>`
+  :`<div class="card">🎉 No quedan tarjetas pendientes en esta selección.</div>`}`;
+  app.onclick=e=>{const ch=e.target.closest(".chip");if(ch){C.sec=ch.dataset.s;C.i=0;viewCards()}};
+  $("#rev").onchange=e=>{C.onlyReview=e.target.checked;C.i=0;viewCards()};
+  if(!cur)return;
+  $("#flip").onclick=()=>$("#flip").classList.toggle("on");
+  const go=d=>{C.i=(C.i+d+C.pool.length)%C.pool.length;viewCards()};
+  $("#prev").onclick=()=>go(-1);$("#nx").onclick=()=>go(1);
+  $("#kn").onclick=()=>{store.known[cur.id]=true;save();C.pool=pool();if(!C.onlyReview)C.i=(C.i+1)%C.pool.length;viewCards()};
+  $("#rv").onclick=()=>{store.known[cur.id]=false;save();go(1)};
+  $("#sh").onclick=()=>{C.i=Math.floor(Math.random()*C.pool.length);viewCards()};
+}
+
+/* ============ DESARROLLO ============ */
+let D={i:0,checked:false};
+function viewDev(){
+  const d=DEV[D.i];
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">Pregunta de desarrollo</span><span class="sp"></span><span class="mut">${D.i+1}/${DEV.length}</span></div>
+  <h3 style="margin:8px 0">${esc(d.q)}</h3>
+  <textarea id="txt" placeholder="Escribe aquí tu respuesta…">${esc(store["dev"+D.i]||"")}</textarea>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="p">←</button><button class="btn ghost" id="n">→</button><span class="sp"></span><button class="btn" id="chk">Comprobar</button></div>
+  <div id="res"></div></div>`;
+  $("#txt").oninput=e=>{store["dev"+D.i]=e.target.value;save()};
+  $("#p").onclick=()=>{D.i=(D.i+DEV.length-1)%DEV.length;viewDev()};
+  $("#n").onclick=()=>{D.i=(D.i+1)%DEV.length;viewDev()};
+  $("#chk").onclick=()=>{
+    const t=norm($("#txt").value);
+    const hits=d.kw.map(g=>g.some(w=>t.includes(norm(w))));
+    const ok=hits.filter(Boolean).length;
+    $("#res").innerHTML=`<p><b>Conceptos clave detectados: ${ok}/${d.kw.length}</b></p>
+    <div>${d.kw.map((g,i)=>`<span class="kw ${hits[i]?"has":"no"}">${hits[i]?"✓":"✗"} ${esc(g[0])}</span>`).join("")}</div>
+    <p class="mut">Es una detección automática por palabras: si lo explicaste con otras palabras, compara con la respuesta modelo.</p>
+    <div class="model-ans"><b>Respuesta modelo</b>\n${esc(d.ans)}</div>`;
+  };
+}
+
+/* ============ PROGRESO ============ */
+function viewStats(){
+  const k=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="grid">
+   <div class="card"><span class="tag">Tarjetas dominadas</span><div class="score">${k}/${CARDS.length}</div></div>
+   <div class="card"><span class="tag">Preguntas por repasar</span><div class="score">${(store.fails||[]).length}</div></div></div>
+  <div class="card"><b>Tests por apartado</b>${TOPICS.map((m,i)=>{const r=store.tests["mt"+i];return `<p>${esc(m.name)}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
+  <div class="card"><b>Modelos de test</b>${MODELS.map((m,i)=>{const r=store.tests["m"+i];return `<p>${m.name}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
+  <div class="card"><b>Últimos intentos</b>${(store.hist||[]).slice().reverse().slice(0,10).map(h=>`<p class="mut">${h.d} · ${esc(h.name)} · ${h.sc}/${h.n}</p>`).join("")||'<p class="mut">Todavía no hay intentos.</p>'}</div>
+  <button class="btn ghost" id="rst">Borrar progreso</button>`;
+  $("#rst").onclick=()=>{if(confirm("¿Borrar todo el progreso?")){store={tests:{},known:{}};save();viewStats()}};
+}
+view("tests");
+</script>
+</body>
+</html>
