@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estudio Música Medieval</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#141a35;--mut:#5b6280;--line:#e1e5f0;--acc:#00a9c0;--acc2:#007d93;--ok:#1b9a55;--okbg:#e4f6ec;--ko:#d6403a;--kobg:#fdeceb;--warn:#fff4dc;--shadow:0 2px 10px rgba(20,26,53,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1226;--card:#1a1f3d;--ink:#eef0fa;--mut:#a2a8c8;--line:#2c3260;--acc:#27c8dd;--acc2:#27c8dd;--ok:#4cd68a;--okbg:#12362a;--ko:#ff7a73;--kobg:#3b1c24;--warn:#3a3118;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:20px 16px 8px;max-width:900px;margin:auto}
+h1{margin:0;font-size:1.5rem}
+header p{margin:2px 0 0;color:var(--mut);font-size:.95rem}
+nav{display:flex;gap:6px;max-width:900px;margin:12px auto 0;padding:0 16px;flex-wrap:wrap}
+nav button{flex:1;min-width:120px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:900px;margin:16px auto 60px;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.btn{padding:10px 16px;border-radius:10px;border:1px solid var(--acc);background:var(--acc);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--acc2)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+.mut{color:var(--mut);font-size:.9rem}
+.tag{display:inline-block;font-size:.75rem;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.04em}
+/* tests */
+.model{cursor:pointer;text-align:center}
+.model:hover{border-color:var(--acc)}
+.model b{font-size:1.1rem}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt.sel{border-color:var(--acc);background:var(--bg)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ko{border-color:var(--ko);background:var(--kobg)}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;padding:12px 14px;border-radius:10px;border-left:5px solid}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.ko{background:var(--kobg);border-color:var(--ko)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0 14px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.score{font-size:2.4rem;font-weight:800}
+/* flashcards */
+.flash{perspective:1000px;margin:12px 0}
+.flip{position:relative;height:260px;transform-style:preserve-3d;transition:transform .5s;cursor:pointer}
+.flip.on{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow);overflow:auto}
+.front{background:var(--card);font-size:1.4rem;font-weight:700}
+.back{background:#141a35;color:#fff;transform:rotateY(180deg);font-size:1.1rem}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{padding:5px 11px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;font:inherit;font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+/* desarrollo */
+textarea{width:100%;min-height:140px;padding:12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
+.kw{display:inline-block;margin:3px 4px 3px 0;padding:3px 10px;border-radius:14px;font-size:.85rem;border:1px solid var(--line)}
+.kw.has{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.kw.no{background:var(--kobg);border-color:var(--ko);color:var(--ko)}
+.model-ans{background:var(--warn);padding:12px 14px;border-radius:10px;margin-top:10px;white-space:pre-line}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎼 Tema 1 · Entre monjes y juglares</h1>
+  <p>Música · 3º ESO · págs. 10, 11, 12, 16 y 17 — tarjetas, tests tipo test y preguntas de desarrollo</p>
+</header>
+<nav id="nav">
+  <button data-v="tests" class="on">📝 Tests</button>
+  <button data-v="cards">🃏 Tarjetas</button>
+  <button data-v="dev">✍️ Desarrollo</button>
+  <button data-v="stats">📊 Progreso</button>
+</nav>
+<main id="app"></main>
+
+<script>
+/* ============ DATOS ============ */
+// Q(pregunta, respuesta correcta, [3 incorrectas], explicación)
+const Q=(q,ok,bad,why)=>({q,ok,bad,why});
+
+const MODELS=[
+{name:"Modelo 1",qs:[
+Q("¿Qué siglos abarca la Edad Media?","Del siglo V al XV",["Del siglo I al V","Del siglo X al XX","Del siglo XV al XVIII"],"La Edad Media es un largo periodo en el que surge el canto gregoriano."),
+Q("¿Por qué se llama «gregoriano» al canto gregoriano?","En honor al papa Gregorio el Magno",["Por el rey Gregorio de Francia","Por el lugar donde nació","Por el instrumento con que se tocaba"],"Gregorio el Magno (540-604) se dedicó a recopilar cantos religiosos y compilarlos en un libro."),
+Q("El canto gregoriano se canta…","En latín y a capela",["En lengua propia y con instrumentos","En galaicoportugués con laúd","En griego con órgano"],"A capela significa sin acompañamiento instrumental."),
+Q("¿Qué textura tiene el canto gregoriano?","Monódica o monofónica (una sola línea melódica)",["Polifónica (varias voces)","Acompañada de acordes","Con tres melodías a la vez"],"Su ritmo es libre y sus autores son desconocidos."),
+Q("Se considera música profana a la que…","Se hacía fuera de la Iglesia",["Se hacía solo en las catedrales","Era siempre en latín","Cantaban solo los monjes"],"Se tocaba y bailaba en fiestas, ceremonias, para cortejar…"),
+Q("La música profana se desarrolló principalmente en…","Francia, gracias a los trovadores y troveros (siglos XII y XIII)",["Alemania en el siglo V","Italia en el siglo XV","Inglaterra en el siglo X"],"Trovadores y troveros eran gente culta, incluso reyes."),
+Q("¿Quiénes solían interpretar la música de los trovadores y troveros?","Los juglares y los ministriles",["Los monjes","Los papas","Los reyes siempre"],"Los trovadores componían; los juglares y ministriles interpretaban."),
+Q("Una cantiga es…","Una composición poético-musical en lengua galaicoportuguesa",["Un canto en latín a capela","Una forma de polifonía","Un instrumento de cuerda"],"Alfonso X el Sabio reunió más de 420."),
+Q("¿Sobre qué trataban las Cantigas de Santa María?","Los milagros de la Virgen María",["Las guerras de los reyes","El amor cortés","Las batallas de la Reconquista"],"Aunque el texto es religioso, se considera música profana."),
+Q("La polifonía es…","Una textura que consiste en componer música a varias voces que suenan simultáneamente",["Una sola melodía sin acompañamiento","Un instrumento medieval","Un tipo de letra"],"Surgió en torno a la catedral de Notre Dame."),
+Q("¿Quién inventó el nombre de las notas musicales?","Guido d'Arezzo",["Leonín","Perotín","Alfonso X"],"Guido d'Arezzo (992-1050) también fue el primero en escribir la música sobre 4 líneas (tetragrama)."),
+Q("Un acorde es…","Un conjunto de tres o más sonidos diferentes que suenan simultáneamente",["Una sola nota larga","Dos notas seguidas una tras otra","Una línea melódica"],"El acorde es el fundamento de la armonía."),
+]},
+{name:"Modelo 2",qs:[
+Q("El canto gregoriano tiene un ritmo…","Libre",["Marcado","Muy rápido siempre","De danza"],"Los trovadores, en cambio, cantaban con ritmos marcados."),
+Q("Los autores del canto gregoriano son…","Desconocidos",["Los trovadores","Leonín y Perotín","Alfonso X"],"Los trovadores sí solían poner su autoría."),
+Q("¿De qué temática es el canto gregoriano?","Religiosa",["De amor","De guerra","De humor"],"Se cantaba en monasterios e iglesias."),
+Q("La música profana se interpretaba en…","Fiestas, ceremonias y para cortejar a una dama",["Solo en los monasterios","Solo en las catedrales","Solo en misas"],"Se tocaba y bailaba fuera de la Iglesia."),
+Q("¿Quién fue un rey trovador citado en el libro?","Ricardo Corazón de León",["Alfonso X el Sabio","Carlomagno","Gregorio el Magno"],"Entre los trovadores había gente culta e incluso reyes."),
+Q("Los trovadores y troveros cantaban sobre…","El amor y la guerra",["Solo temas religiosos","Solo ciencia","Solo oraciones"],"Y lo hacían en su propia lengua, no en latín."),
+Q("Las canciones de trovadores y troveros se cantaban…","«A solo» y acompañadas de instrumentos",["A capela y en latín","A varias voces sin instrumentos","Solo por monjes"],"Eso es casi lo contrario del canto gregoriano."),
+Q("Alfonso X el Sabio vivió entre…","1221 y 1284",["540 y 604","992 y 1050","1100 y 1150"],"Preparó una colección de más de 420 cantigas."),
+Q("La estructura de las cantigas se basa en…","La alternancia de estribillo y estrofa",["Una sola melodía sin repetición","La polifonía a tres voces","Un ritmo libre"],"Es la característica estructural de las cantigas."),
+Q("¿Quiénes fueron los primeros en componer música polifónica?","Leonín y Perotín",["Guido d'Arezzo y Alfonso X","Gregorio el Magno y Ricardo Corazón de León","Los juglares"],"Trabajaron en la catedral de Notre Dame durante los siglos XII y XIII."),
+Q("A la primera forma polifónica se la llamó…","Organum",["Cantiga","Gregoriano","Tetragrama"],"Se tomaron melodías del gregoriano y se pusieron otras encima."),
+Q("En el organum, al principio, las voces…","Se movían todas al mismo ritmo",["Cada una tenía su ritmo propio","Cantaban en lenguas distintas","No tenían melodía"],"Pronto cada melodía tomó vida propia."),
+]},
+{name:"Modelo 3",qs:[
+Q("¿Cuántas aportaciones importantes al lenguaje musical hizo Guido d'Arezzo?","Dos",["Una","Tres","Cuatro"],"Escribir la música sobre 4 líneas e inventar el nombre de las notas."),
+Q("El tetragrama es…","Un sistema de 4 líneas para escribir música",["Un sistema de 5 líneas","Un instrumento","Un tipo de acorde"],"Guido d'Arezzo fue el primero en escribir sobre 4 líneas."),
+Q("¿Qué nombres de notas inventó Guido d'Arezzo?","Ut-re-mi-fa-sol-la-si",["Do-re-mi-fa-sol-la-si","A-B-C-D-E-F-G","Uno-dos-tres-cuatro"],"Aparece en la imagen de la página 12."),
+Q("¿Cómo eran las estructuras del Románico, según el libro?","Habitualmente de una planta",["Cada vez más altas","De varias torres de gran altura","Siempre circulares"],"En el Gótico los edificios religiosos se levantan cada vez más altos."),
+Q("¿Qué ocurre con los edificios religiosos en el Gótico?","Se levantan cada vez más altos (Notre Dame, Burgos, León)",["Son de una sola planta","Se hacen más pequeños","Se construyen sin torres"],"Reflejan la idea de verticalidad."),
+Q("¿Cómo se refleja la verticalidad en la música?","Con la polifonía: melodías colocadas unas encima de otras",["Con el canto a una sola voz","Con instrumentos más graves","Con ritmos más lentos"],"Los músicos componen en estilo polifónico, a varias voces."),
+Q("La idea de «acercarse» a Dios, en la Edad Media, es…","Una metáfora de mirar hacia lo más alto",["Una norma musical","Un instrumento","Un tipo de canción"],"Llevó a los artistas a crear obras de verticalidad o altura."),
+Q("¿Qué instrumentos de cuerda pulsada usaban los trovadores?","Laúd, arpa, salterio o lira",["Viola y violín","Trompeta y chirimía","Triángulo y panderos"],"Improvisaban melodías para adornar la línea vocal."),
+Q("Las violas son instrumentos de…","Cuerda frotada",["Cuerda pulsada","Viento","Percusión"],"Se usaban para hacer notas sostenidas en las que se apoyaba la voz."),
+Q("Las chirimías eran…","Antecesoras del moderno oboe, con lengüeta doble",["Antecesoras de la gaita","Tipos de tambor","Instrumentos de cuerda"],"Son instrumentos de viento."),
+Q("Las cornamusas son similares a…","Las gaitas",["Los oboes","Las liras","Los triángulos"],"Son instrumentos de viento."),
+Q("¿Cuál era el instrumento más utilizado en la iglesia?","El órgano",["El laúd","La lira","La cornamusa"],"Los demás se usaban principalmente en la música profana."),
+]},
+{name:"Modelo 4",qs:[
+Q("Un acorde perfecto se construye con…","Un intervalo de 3.ª y otro de 5.ª sobre una nota dada",["Un intervalo de 2.ª y otro de 4.ª","Un intervalo de 8.ª","Solo notas iguales"],"Tiene tres sonidos diferentes."),
+Q("El acorde perfecto de do está formado por…","do, mi y sol",["do, re y mi","do, fa y sol","do, mi y la"],"3.ª (do-mi) + 5.ª (do-sol)."),
+Q("Un intervalo es…","La distancia en altura entre dos notas",["Una nota muy larga","Un instrumento","Una forma de cantiga"],"Puede ser armónico o melódico."),
+Q("Para nombrar un intervalo, se cuenta…","Desde la primera nota hasta la última, ambas inclusive, según el orden de la escala",["Sin contar la primera nota","Solo las notas negras","Las líneas del pentagrama"],"Ejemplo: fa, sol, la, si, do' es un intervalo de 5.ª."),
+Q("¿Qué intervalo hay entre fa y do'?","Quinta (5.ª)",["Tercera (3.ª)","Cuarta (4.ª)","Octava (8.ª)"],"fa(1), sol(2), la(3), si(4), do'(5)."),
+Q("¿Qué intervalo hay entre do y mi?","Tercera (3.ª)",["Quinta (5.ª)","Segunda (2.ª)","Cuarta (4.ª)"],"do(1), re(2), mi(3)."),
+Q("¿Qué intervalo hay entre do y sol?","Quinta (5.ª)",["Tercera (3.ª)","Segunda (2.ª)","Séptima (7.ª)"],"do(1), re(2), mi(3), fa(4), sol(5)."),
+Q("Un acorde puede tener más de tres sonidos si…","Se repiten notas a diferente altura",["Se cambia de instrumento","Se baja de tono","Se canta en latín"],"Básicamente seguirá siendo el mismo acorde, pues se emplean tres notas diferentes."),
+Q("La armonía es…","Todo lo relacionado con la organización de sonidos simultáneos",["La organización de sonidos uno tras otro","El estudio de los instrumentos","El texto de una canción"],"Sirve de acompañamiento a la melodía."),
+Q("El fundamento de la armonía es…","El acorde",["El intervalo de segunda","La percusión","El estribillo"],"La armonía enriquece la melodía y contribuye a configurar su carácter."),
+Q("¿Qué es un intervalo melódico?","El formado por dos notas sonando una tras otra",["El formado por dos notas a la vez","El de tres sonidos","El que no se puede contar"],"El armónico suena simultáneamente."),
+Q("¿Qué es un intervalo armónico?","El formado por dos notas sonando a la vez",["El de dos notas una tras otra","El de una sola nota","El que no tiene distancia"],"El melódico suena de forma sucesiva."),
+]},
+{name:"Modelo 5",qs:[
+Q("¿Cuál NO es una característica del canto gregoriano?","Acompañamiento de instrumentos",["En latín","A capela","Ritmo libre"],"Se canta a capela, sin instrumentos."),
+Q("¿Cuál es una característica de los trovadores y troveros?","Cantan en su lengua, con ritmos marcados e instrumentos",["Cantan en latín a capela","Sus autores son desconocidos","Su temática es solo religiosa"],"Es casi lo contrario del canto gregoriano."),
+Q("¿En qué lengua están escritas las cantigas?","Galaicoportugués",["Latín","Francés","Catalán"],"Es una lengua de la península ibérica medieval."),
+Q("Las cantigas se consideran música…","Profana, aunque su texto sea religioso",["Religiosa","Gregoriana","Polifónica únicamente"],"Alfonso X el Sabio las reunió."),
+Q("Alfonso X el Sabio…","Reunió más de 420 cantigas y compuso algunas",["Inventó el tetragrama","Inventó el organum","Compuso el canto gregoriano"],"Fue rey y músico."),
+Q("¿Dónde trabajaron Leonín y Perotín?","En la catedral de Notre Dame",["En Burgos","En León","En el monasterio de Silos"],"Durante los siglos XII y XIII."),
+Q("El organum consistía en…","Coger melodías del gregoriano y poner otras encima",["Cantar una sola melodía","Acompañar con arpa","Narrar milagros"],"Fue la primera forma polifónica."),
+Q("¿Qué contrastan el Románico y el Gótico en el libro?","La altura de las construcciones",["El color de las vidrieras","El idioma","Los instrumentos"],"El Gótico es más alto, como la polifonía es más «vertical»."),
+Q("Los instrumentos medievales se utilizaron principalmente en la música…","Profana",["Gregoriana","Religiosa","Polifónica sacra"],"En la iglesia el instrumento más utilizado fue el órgano."),
+Q("Entre los instrumentos de percusión medievales están…","Platillos, campanillas, triángulos y tambores",["Laúd y arpa","Violas","Chirimías y cornamusas"],"Eran muy variados."),
+Q("Las flautas dulces, chirimías, cornamusas y trompetas son instrumentos de…","Viento",["Cuerda","Percusión","Teclado"],"Entre los de viento medievales."),
+Q("El laúd, el arpa, el salterio y la lira son instrumentos de…","Cuerda pulsada",["Cuerda frotada","Viento","Percusión"],"Los trovadores se acompañaban con ellos."),
+]},
+];
+
+// Tests largos por apartado (páginas 10, 11, 12, 16 y 17)
+const TOPICS=[
+{name:"p. 10 · Música en el Medievo",qs:[
+Q("¿Qué siglos abarca la Edad Media?","Del siglo V al XV",["Del siglo I al V","Del siglo X al XX","Del siglo XV al XVIII"],"Es un largo periodo en el que surge el canto gregoriano."),
+Q("¿Por qué es fundamental el canto gregoriano?","Para entender la evolución de la música occidental",["Porque fue el primer instrumento","Porque se cantaba en las plazas","Porque lo inventaron los trovadores"],"Surge en la Edad Media."),
+Q("El canto gregoriano se llama así en honor a…","El papa Gregorio el Magno",["El rey Gregorio I","Guido d'Arezzo","Alfonso X el Sabio"],"Gregorio el Magno (540-604)."),
+Q("¿A qué se dedicó Gregorio el Magno durante años?","A recopilar cantos religiosos y compilarlos en un libro",["A inventar instrumentos","A viajar contando cuentos","A construir catedrales"],"Por eso el canto lleva su nombre."),
+Q("¿En qué idioma se canta el gregoriano?","Latín",["Francés","Galaicoportugués","Inglés"],"Es una de sus características."),
+Q("«A capela» significa…","Sin acompañamiento instrumental",["Con laúd","Con órgano","Con tambores"],"El gregoriano se canta solo con voces."),
+Q("¿Qué temática tiene el canto gregoriano?","Religiosa",["De amor","De guerra","De fiesta"],"Se cantaba en la Iglesia."),
+Q("La textura del canto gregoriano es…","Monódica o monofónica (una sola línea melódica)",["Polifónica","Armónica con acordes","De tres voces"],"Una sola melodía."),
+Q("¿Cómo es el ritmo del canto gregoriano?","Libre",["Marcado","Muy bailable","Siempre en compás de 4/4"],"Sin ritmo marcado."),
+Q("¿Quiénes son los autores del canto gregoriano?","Desconocidos",["Los trovadores","Gregorio el Magno en persona","Leonín y Perotín"],"Los trovadores sí solían firmar sus canciones."),
+Q("¿Dónde se cantaba el canto gregoriano?","Principalmente en la Iglesia y los monasterios",["En las fiestas del pueblo","En la corte durante bailes","En los mercados"],"Era música religiosa."),
+Q("La música profana era la que se hacía…","Fuera de la Iglesia",["Dentro de la Iglesia","Solo en latín","Solo con órgano"],"Fiestas, ceremonias, cortejar…"),
+Q("¿Para qué se tocaba y bailaba la música profana?","Para fiestas, ceremonias y cortejar a una dama con canciones de amor",["Solo para rezar","Solo para la misa","Solo para la guerra"],"Se tocaba en la puerta de un castillo, por ejemplo."),
+Q("¿Dónde se desarrolló principalmente la música profana?","En Francia",["En Alemania","En Italia","En Inglaterra"],"Gracias a trovadores y troveros."),
+Q("¿En qué siglos fueron importantes los trovadores y troveros?","XII y XIII",["V y VI","IX y X","XV y XVI"],"Fue una época de música profana."),
+Q("Los trovadores y troveros eran…","Gente culta, incluso reyes",["Solo monjes","Solo campesinos","Solo soldados"],"Ejemplo: Ricardo Corazón de León."),
+Q("¿Qué rey fue trovador?","Ricardo Corazón de León",["Alfonso X","Gregorio el Magno","Guido d'Arezzo"],"Lo cita el libro."),
+Q("¿Quiénes solían interpretar la música de trovadores y troveros?","Los juglares y los ministriles",["Los monjes","Los papas","Los reyes"],"Los trovadores la componían."),
+Q("¿De qué trataban sus canciones?","Del amor, la guerra…",["De temas religiosos solamente","De matemáticas","De cocina"],"Es casi lo contrario al canto religioso."),
+Q("¿En qué lengua cantaban los trovadores y troveros?","En su propia lengua, no en latín",["En latín","En griego","Solo en francés antiguo"],"Eso los diferencia del gregoriano."),
+Q("¿Cómo eran sus ritmos?","Marcados",["Libres","Sin ritmo","Siempre lentos"],"Frente al ritmo libre del gregoriano."),
+Q("¿Cómo cantaban los trovadores?","«A solo» y acompañándose de instrumentos",["A capela","A coro, sin instrumentos","A cuatro voces"],"Y solían poner su autoría."),
+Q("¿Qué diferencia hay entre gregoriano y trovadores?","El gregoriano es en latín y a capela; los trovadores cantan en su lengua con instrumentos",["No hay ninguna diferencia","El gregoriano usa instrumentos y los trovadores no","Los dos son en latín"],"Casi lo contrario."),
+]},
+{name:"p. 11 · Cantigas y polifonía",qs:[
+Q("¿Cuántas cantigas reunió Alfonso X el Sabio?","Más de 420",["Unas 42","Más de 4.200","Exactamente 100"],"Incluso compuso algunas."),
+Q("¿En qué años vivió Alfonso X el Sabio?","1221-1284",["540-604","992-1050","1100-1190"],"Era rey y músico."),
+Q("Una cantiga es…","Una composición poético-musical en lengua galaicoportuguesa",["Una pieza gregoriana en latín","Una forma polifónica","Un instrumento"],"Aunque trate temas religiosos, es música profana."),
+Q("¿En qué lengua están las cantigas?","Galaicoportugués",["Latín","Provenzal","Castellano moderno"],"Es su rasgo más característico."),
+Q("Las cantigas deben considerarse música…","Profana, aunque su texto sea religioso",["Religiosa","Gregoriana","Polifónica"],"Por eso no se cantan en la liturgia."),
+Q("¿Qué narraban las cantigas?","Los milagros que se producían por intercesión de la Virgen María",["Las hazañas de los reyes","Los viajes de los trovadores","El amor entre damas y caballeros"],"Son las Cantigas de Santa María."),
+Q("La estructura de las cantigas se basa en…","La alternancia de estribillo y estrofa",["Una melodía sola que no se repite","Tres voces superpuestas","Un ritmo libre"],"Es su rasgo estructural."),
+Q("La polifonía es…","Una textura musical que consiste en componer música a varias voces que suenan simultáneamente",["Una sola melodía sin acompañamiento","Una lengua medieval","Un instrumento de viento"],"Fue una innovación fundamental."),
+Q("¿Qué innovación fue fundamental en la Edad Media?","La aparición o invención de la polifonía",["La invención del piano","La invención de la guitarra","La aparición del jazz"],"Surgió en torno a Notre Dame."),
+Q("¿Quiénes fueron los primeros en componer música polifónica?","Leonín y Perotín",["Alfonso X y Ricardo Corazón de León","Gregorio el Magno y Guido d'Arezzo","Los juglares"],"Lo hicieron en la catedral de Notre Dame."),
+Q("¿Dónde trabajaron Leonín y Perotín?","En la catedral de Notre Dame",["En Burgos","En León","En Santiago"],"Durante los siglos XII y XIII."),
+Q("¿En qué siglos se desarrolló su trabajo?","XII y XIII",["V y VI","IX y X","XV y XVI"],"Fueron los primeros polifonistas."),
+Q("¿Cómo se llamó la primera forma polifónica?","Organum",["Cantiga","Estrofa","Tetragrama"],"Organum, como se ve en la partitura."),
+Q("En el organum se tomaban melodías…","Del gregoriano y se ponían otras encima",["De las cantigas","De los trovadores","De los instrumentos"],"Así nació la polifonía."),
+Q("Al principio, en el organum, las melodías…","Se movían todas al mismo ritmo",["Cada una tenía ritmo propio","Eran siempre más lentas","No sonaban a la vez"],"Pronto cada melodía tomó vida propia."),
+Q("Con el tiempo, en el organum…","Cada melodía tomó vida propia",["Todas se unieron en una","Dejaron de usarse voces","Se abandonó el gregoriano"],"Cada voz adquirió su propio ritmo."),
+Q("La monodía se diferencia de la polifonía en que…","La monodía tiene una sola melodía y la polifonía varias a la vez",["La monodía es más moderna","La polifonía no tiene voces","La monodía usa órgano"],"Gregoriano = monódico; organum = polifónico."),
+Q("Las cantigas son del rey…","Alfonso X el Sabio",["Ricardo Corazón de León","Gregorio el Magno","Leonín"],"Reunió más de 420."),
+]},
+{name:"p. 12 · Guido d'Arezzo y la verticalidad",qs:[
+Q("¿Cuándo vivió Guido d'Arezzo?","992-1050",["540-604","1221-1284","1100-1170"],"Hizo dos importantes aportaciones al lenguaje musical."),
+Q("¿Cuántas aportaciones al lenguaje musical hizo Guido d'Arezzo?","Dos",["Una","Tres","Cinco"],"Tetragrama y nombre de las notas."),
+Q("Una de sus aportaciones fue ser el primero en escribir la música sobre…","Cuatro líneas (tetragrama)",["Cinco líneas","Tres líneas","Dos líneas"],"El tetragrama tiene 4 líneas."),
+Q("El tetragrama es…","Un sistema de 4 líneas para escribir música",["Un instrumento","Un sistema de 5 líneas","Un tipo de acorde"],"Tetra = cuatro."),
+Q("Su otra aportación fue inventar…","El nombre de las notas (Ut-re-mi-fa-sol-la-si)",["El órgano","La polifonía","La cantiga"],"Aparece en la imagen de la página."),
+Q("¿Cuál es el nombre de las notas que inventó, según el libro?","Ut-re-mi-fa-sol-la-si",["Do-re-mi-fa-sol-la-si-do","A-B-C-D-E-F-G","Uno-dos-tres-cuatro-cinco"],"Aparece en la imagen de la página."),
+Q("La idea de «acercarse» a Dios es una metáfora de…","Mirar hacia lo más alto",["Mirar hacia lo más bajo","Viajar a Roma","Cantar en voz baja"],"Llevó a crear obras que reflejaran verticalidad o altura."),
+Q("¿Qué idea reflejaron los artistas en sus obras?","Verticalidad o altura",["Horizontalidad","Pequeñez","Desorden"],"Estaba ligada a la idea de acercarse a Dios."),
+Q("En el Románico las estructuras serán habitualmente…","De una planta",["De varias plantas muy altas","Siempre circulares","Siempre de madera"],"En el Gótico serán más altas."),
+Q("En el Gótico, los edificios religiosos…","Se levantan cada vez más altos",["Son de una sola planta","Son más bajos","Se hacen de madera"],"Notre Dame, Burgos, León…"),
+Q("¿Qué catedrales se citan como góticas?","Notre Dame, Burgos y León",["Santiago y Toledo","Sevilla y Granada","Roma y Milán"],"Son ejemplos de la altura gótica."),
+Q("¿Cómo se refleja la verticalidad en la música?","Los músicos componen colocando melodías unas encima de otras",["Los músicos cantan más fuerte","Se cantan los textos más rápido","Se usan solo instrumentos graves"],"En estilo polifónico, a varias voces."),
+Q("¿Qué estilo musical corresponde a la verticalidad gótica?","La polifonía",["La monodía gregoriana","La música sin ritmo","El silencio"],"Varias voces superpuestas."),
+Q("«Vox principalis» y «vox organalis» son…","Las dos voces de un organum (partitura de la página)",["Dos instrumentos","Dos cantigas","Dos catedrales"],"Se ven en la partitura de la página."),
+]},
+{name:"p. 16 · Instrumentos medievales",qs:[
+Q("Los instrumentos en la Edad Media se utilizaron principalmente en…","La música profana",["La música gregoriana","La música religiosa","Ninguna"],"En la iglesia el más usado fue el órgano."),
+Q("Los trovadores se acompañaban de…","Instrumentos de cuerda pulsada",["Solo percusión","Solo trompetas","Orquestas"],"Para adornar la línea vocal."),
+Q("Instrumentos de cuerda pulsada medievales:","Laúd, arpa, salterio o lira",["Violas","Chirimías","Triángulos"],"Improvisaban melodías para adornar la voz."),
+Q("¿Para qué usaban los trovadores los instrumentos de cuerda pulsada?","Para improvisar melodías que adornaban la línea vocal",["Para sustituir la voz","Para marcar el ritmo del baile","Para hacer sonar notas largas"],"Adornaban la voz."),
+Q("Las violas eran instrumentos de…","Cuerda frotada",["Cuerda pulsada","Viento","Percusión"],"Muchas veces se utilizaban para hacer notas sostenidas."),
+Q("¿Para qué se utilizaban las violas?","Para hacer notas sostenidas en las que se apoyaba la voz",["Para improvisar adornos","Para marcar el ritmo","Para anunciar al rey"],"La voz se apoyaba en esas notas largas."),
+Q("El laúd es un instrumento de…","Cuerda pulsada",["Cuerda frotada","Viento","Percusión"],"Usado por los trovadores."),
+Q("El arpa es un instrumento de…","Cuerda pulsada",["Cuerda frotada","Viento","Percusión"],"Se pulsan sus cuerdas."),
+Q("La lira y el salterio son instrumentos de…","Cuerda pulsada",["Viento","Percusión","Cuerda frotada"],"Figura 1.2: lira."),
+Q("Los platillos, campanillas, triángulos y tambores son…","Instrumentos de percusión",["Instrumentos de viento","Instrumentos de cuerda","Instrumentos de teclado"],"Eran muy variados."),
+Q("Los instrumentos de percusión medievales eran…","Muy variados",["Escasos","Solo tambores","Solo triángulos"],"Platillos diversos, campanillas, triángulos, tambores de todo tipo."),
+Q("¿Qué instrumentos de viento se empleaban?","Flautas dulces, chirimías, cornamusas y trompetas",["Laúdes y arpas","Violas y liras","Campanillas y triángulos"],"Entre los instrumentos de viento."),
+Q("Las flautas dulces son instrumentos de…","Viento",["Cuerda","Percusión","Teclado"],"Eran frecuentes en la Edad Media."),
+Q("Las chirimías eran…","Antecesoras del moderno oboe, con lengüeta doble",["Antecesoras de la gaita","Tipos de laúd","Instrumentos de cuerda"],"Son de viento."),
+Q("Las cornamusas son…","Similares a las gaitas",["Antecesoras del oboe","Una especie de lira","Un tipo de tambor"],"Figura 1.4: cornamusa."),
+Q("Las trompetas son instrumentos de…","Viento",["Cuerda pulsada","Percusión","Cuerda frotada"],"Aparecen entre los instrumentos de viento."),
+Q("¿Cuál era el instrumento más utilizado en la iglesia?","El órgano",["El laúd","La lira","La viola"],"Figura 1.5: órgano."),
+Q("¿Qué instrumento se usaba sobre todo en la iglesia?","El órgano",["El arpa","El tambor","La chirimía"],"El resto se usaba en la música profana."),
+Q("¿Cuál NO es un instrumento de cuerda?","La cornamusa",["El laúd","El arpa","La lira"],"La cornamusa es de viento."),
+Q("¿Cuál NO es un instrumento de viento?","El triángulo",["La flauta dulce","La chirimía","La trompeta"],"El triángulo es de percusión."),
+Q("¿Cuál NO es un instrumento de percusión?","La viola",["Los platillos","Las campanillas","Los tambores"],"La viola es de cuerda frotada."),
+Q("El instrumento medieval parecido a la gaita es…","La cornamusa",["La chirimía","La lira","La viola"],"Es un instrumento de viento."),
+Q("La Figura 1.2 muestra…","Una lira",["Un órgano","Una cornamusa","Un laúd"],"Es un instrumento de cuerda pulsada."),
+]},
+{name:"p. 17 · El acorde",qs:[
+Q("El término «acorde» está ligado a…","La armonía",["La melodía únicamente","El ritmo","El texto de las canciones"],"El fundamento de la armonía es el acorde."),
+Q("La armonía en música es…","Todo lo relacionado con la organización de sonidos simultáneos",["La organización de sonidos uno tras otro","El estudio de los instrumentos","El estudio de las letras"],"Sonidos que suenan al mismo tiempo."),
+Q("La armonía sirve de…","Acompañamiento a la melodía, enriqueciéndola",["Texto de la canción","Sustituto del ritmo","Instrumento musical"],"Contribuye a configurar su carácter."),
+Q("¿Cuál es el fundamento de la armonía?","El acorde",["La melodía","El silencio","La letra"],"Es la base de la armonía."),
+Q("Un acorde es…","Un conjunto de tres o más sonidos diferentes que suenan simultáneamente",["Una sola nota","Dos notas sucesivas","Una melodía"],"Definición del libro."),
+Q("¿Cuántos sonidos diferentes tiene como mínimo un acorde?","Tres",["Uno","Dos","Cuatro"],"Tres o más sonidos."),
+Q("Un acorde perfecto se construye con…","Un intervalo de 3.ª y otro de 5.ª sobre una nota dada",["Un intervalo de 2.ª","Un intervalo de 4.ª y otro de 6.ª","Solo un intervalo de 8.ª"],"Tiene tres sonidos diferentes."),
+Q("¿Cuántos sonidos tiene un acorde perfecto?","Tres",["Dos","Cuatro","Cinco"],"Nota base, 3.ª y 5.ª."),
+Q("¿De qué notas está formado el acorde de do?","Do, mi, sol",["Do, re, mi","Do, fa, sol","Do, mi, la"],"Do + 3.ª (mi) + 5.ª (sol)."),
+Q("Un intervalo es…","La distancia en altura que hay entre dos notas",["La duración de una nota","El volumen de un sonido","El ritmo de un compás"],"Puede ser armónico o melódico."),
+Q("Los intervalos pueden ser…","Armónicos o melódicos",["Largos o cortos","Rápidos o lentos","Mayores o menores únicamente"],"Según suenen a la vez o seguidos."),
+Q("Para nombrar un intervalo se cuenta…","Según el orden de la escala, desde la primera nota a la última (ambas inclusive)",["Solo las notas intermedias","Solo la primera nota","Las líneas del pentagrama"],"Por ejemplo: fa, sol, la, si, do' es una 5.ª."),
+Q("El intervalo entre fa y do' es de…","Quinta (5.ª)",["Tercera (3.ª)","Cuarta (4.ª)","Segunda (2.ª)"],"fa(1), sol(2), la(3), si(4), do'(5)."),
+Q("El intervalo entre do y mi es de…","Tercera (3.ª)",["Quinta (5.ª)","Segunda (2.ª)","Cuarta (4.ª)"],"do(1), re(2), mi(3)."),
+Q("El intervalo entre do y sol es de…","Quinta (5.ª)",["Tercera (3.ª)","Cuarta (4.ª)","Segunda (2.ª)"],"do(1), re(2), mi(3), fa(4), sol(5)."),
+Q("El intervalo entre re y fa es de…","Tercera (3.ª)",["Segunda (2.ª)","Cuarta (4.ª)","Quinta (5.ª)"],"re(1), mi(2), fa(3)."),
+Q("El intervalo entre re y la es de…","Quinta (5.ª)",["Tercera (3.ª)","Cuarta (4.ª)","Segunda (2.ª)"],"re(1), mi(2), fa(3), sol(4), la(5)."),
+Q("El intervalo entre sol y si es de…","Tercera (3.ª)",["Segunda (2.ª)","Cuarta (4.ª)","Quinta (5.ª)"],"sol(1), la(2), si(3)."),
+Q("El intervalo entre mi y si es de…","Quinta (5.ª)",["Tercera (3.ª)","Cuarta (4.ª)","Segunda (2.ª)"],"mi(1), fa(2), sol(3), la(4), si(5)."),
+Q("El acorde perfecto que se construye sobre sol está formado por…","Sol, si, re",["Sol, la, si","Sol, do, re","Sol, si, mi"],"Sol + 3.ª (si) + 5.ª (re)."),
+Q("El acorde perfecto que se construye sobre fa está formado por…","Fa, la, do",["Fa, sol, la","Fa, si, do","Fa, la, mi"],"Fa + 3.ª (la) + 5.ª (do)."),
+Q("Las mismas notas de un acorde perfecto pueden…","Repetirse a diferente altura",["Cambiar de nombre","Cantarse en latín","Tocar solo una vez"],"Así se forman acordes con más sonidos, aunque básicamente sea el mismo."),
+Q("Un acorde con más de tres sonidos, por repetir notas a diferente altura, sigue siendo…","Básicamente el mismo acorde",["Un acorde distinto","Una melodía","Un intervalo de 8.ª"],"Se emplean las mismas tres notas diferentes."),
+Q("¿Cuándo se habla de intervalo melódico y cuándo de armónico?","Melódico: notas sucesivas; armónico: notas simultáneas",["Melódico: notas simultáneas; armónico: sucesivas","Melódico: solo 3.ª; armónico: solo 5.ª","No hay diferencia"],"Se ve en el ejemplo de la página 17."),
+Q("¿Qué instrumento se menciona como ejemplo de «cómo se toca ese acorde»?","La guitarra",["El piano","La flauta","El órgano"],"Figura 1.6."),
+]},
+];
+
+const CARDS=[
+["Edad Media","Largo periodo que abarca los siglos V al XV. Surge el canto gregoriano, fundamental para entender la evolución de la música occidental.","1. Música en el Medievo (p. 10)"],
+["Canto gregoriano","Llamado así en honor al papa Gregorio el Magno (540-604), que recopiló cantos religiosos y los compiló en un libro.","1. Música en el Medievo (p. 10)"],
+["Características del gregoriano","Latín · a capela (sin instrumentos) · temática religiosa · textura monódica o monofónica (una sola línea melódica) · ritmo libre · autores desconocidos.","1. Música en el Medievo (p. 10)"],
+["Música profana","La que se hacía fuera de la Iglesia: en fiestas, ceremonias, para cortejar a una dama con canciones de amor…","1. Música en el Medievo (p. 10)"],
+["Trovadores y troveros","Se desarrollaron principalmente en Francia (siglos XII y XIII). Gente culta, incluso reyes (Ricardo Corazón de León).","1. Música en el Medievo (p. 10)"],
+["Juglares y ministriles","Solían interpretar la música de los trovadores y troveros.","1. Música en el Medievo (p. 10)"],
+["Características de trovadores y troveros","Temática de amor y guerra · lengua propia (no latín) · ritmos marcados · cantan «a solo» · con instrumentos · ponen su autoría.","1. Música en el Medievo (p. 10)"],
+["Gregoriano vs trovadores","Casi opuestos: el gregoriano es religioso, en latín, a capela y de autores desconocidos; los trovadores cantan al amor y a la guerra, en su lengua, con instrumentos y firmando sus obras.","1. Música en el Medievo (p. 10)"],
+["Alfonso X el Sabio","(1221-1284) Preparó una colección de más de 420 cantigas e incluso compuso algunas.","2. Cantigas y polifonía (p. 11)"],
+["Cantiga","Composición poético-musical en lengua galaicoportuguesa. Aunque su texto sea religioso, es música profana.","2. Cantigas y polifonía (p. 11)"],
+["Cantigas de Santa María","Narraban los milagros que se producían por intercesión de la Virgen María. Estructura: alternancia de estribillo y estrofa.","2. Cantigas y polifonía (p. 11)"],
+["Polifonía","Textura musical que consiste en componer música a varias voces que suenan simultáneamente. Innovación fundamental de la Edad Media.","2. Cantigas y polifonía (p. 11)"],
+["Leonín y Perotín","Primeros en componer música polifónica. Trabajaron en la catedral de Notre Dame durante los siglos XII y XIII.","2. Cantigas y polifonía (p. 11)"],
+["Organum","Primera forma polifónica: sobre melodías del gregoriano se pusieron otras encima. Al principio todas al mismo ritmo; pronto cada melodía tomó vida propia.","2. Cantigas y polifonía (p. 11)"],
+["Guido d'Arezzo","(992-1050) Hizo dos aportaciones: fue el primero en escribir la música sobre 4 líneas (tetragrama) e inventó el nombre de las notas.","3. Guido d'Arezzo (p. 12)"],
+["Nombre de las notas","Ut-re-mi-fa-sol-la-si, inventados por Guido d'Arezzo.","3. Guido d'Arezzo (p. 12)"],
+["Tetragrama","Sistema de 4 líneas para escribir la música, introducido por Guido d'Arezzo.","3. Guido d'Arezzo (p. 12)"],
+["Románico y Gótico","Románico: estructuras habitualmente de una planta. Gótico: edificios religiosos cada vez más altos (Notre Dame, Burgos, León).","3. Guido d'Arezzo (p. 12)"],
+["Verticalidad en la música","Reflejo de la altura gótica: los músicos componen colocando melodías unas encima de otras (polifonía).","3. Guido d'Arezzo (p. 12)"],
+["Instrumentos medievales","Se utilizaron principalmente en la música profana. En la iglesia, el instrumento más utilizado fue el órgano.","4. Instrumentos medievales (p. 16)"],
+["Cuerda pulsada","Laúd, arpa, salterio y lira. Los trovadores se acompañaban con ellos, improvisando melodías para adornar la línea vocal.","4. Instrumentos medievales (p. 16)"],
+["Cuerda frotada","Violas. Muchas veces se utilizaban para hacer notas sostenidas en las que se apoyaba la voz.","4. Instrumentos medievales (p. 16)"],
+["Percusión medieval","Muy variada: platillos diversos, campanillas, triángulos, tambores de todo tipo.","4. Instrumentos medievales (p. 16)"],
+["Viento medieval","Flautas dulces, chirimías (antecesoras del oboe, de lengüeta doble), cornamusas (similares a las gaitas) y trompetas.","4. Instrumentos medievales (p. 16)"],
+["Órgano","Instrumento más utilizado en la iglesia durante la Edad Media.","4. Instrumentos medievales (p. 16)"],
+["Armonía","Todo lo relacionado con la organización de sonidos simultáneos. Acompaña a la melodía, la enriquece y contribuye a configurar su carácter.","5. El acorde (p. 17)"],
+["Acorde","Conjunto de tres o más sonidos diferentes que suenan simultáneamente. Es el fundamento de la armonía.","5. El acorde (p. 17)"],
+["Acorde perfecto","Se construye con un intervalo de 3.ª y otro de 5.ª sobre una nota dada. Tiene tres sonidos diferentes. Ej.: acorde de do = do, mi, sol.","5. El acorde (p. 17)"],
+["Intervalo","Distancia en altura entre dos notas. Puede ser armónico o melódico. Se cuenta según el orden de la escala desde la primera nota a la última (ambas inclusive).","5. El acorde (p. 17)"],
+["Ejemplo de intervalo","fa, sol, la, si, do' → intervalo de 5.ª.","5. El acorde (p. 17)"],
+["Acordes con más notas","Se pueden formar acordes con más sonidos repitiendo notas a diferente altura; básicamente sigue siendo el mismo acorde.","5. El acorde (p. 17)"],
+["Tercera y quinta","Do–mi: 3.ª · Do–sol: 5.ª · Re–fa: 3.ª · Re–la: 5.ª · Sol–si: 3.ª · Mi–si: 5.ª.","5. El acorde (p. 17)"],
+];
+
+const DEV=[
+{q:"Explica qué es el canto gregoriano y cuáles son sus características.",
+ ans:"El canto gregoriano surge en la Edad Media (siglos V al XV) y es fundamental para entender la evolución de la música occidental. Se llama así en honor al papa Gregorio el Magno (540-604), que recopiló cantos religiosos y los compiló en un libro. Se canta en latín, a capela (sin acompañamiento instrumental), tiene temática religiosa, textura monódica o monofónica (una sola línea melódica), ritmo libre y autores desconocidos.",
+ kw:[["edad media"],["gregorio"],["latin"],["capela","sin acompanamiento"],["religiosa"],["monodica","monofonica","una sola"],["ritmo libre","libre"],["desconocidos"]]},
+{q:"¿Qué es la música profana? Explica el papel de los trovadores y troveros.",
+ ans:"Música profana es la que se hacía fuera de la Iglesia: en fiestas, ceremonias, para cortejar a una dama con canciones de amor, etc. Se desarrolló principalmente en Francia gracias a los trovadores y troveros, en los siglos XII y XIII. Eran gente culta, incluso reyes (Ricardo Corazón de León), y su música solían interpretarla juglares y ministriles.",
+ kw:[["fuera de la iglesia"],["fiestas","ceremonias","cortejar"],["francia"],["trovadores"],["troveros"],["xii","xiii"],["reyes","ricardo"],["juglares","ministriles"]]},
+{q:"Compara la música de los trovadores y troveros con el canto gregoriano.",
+ ans:"El canto gregoriano es religioso, en latín, a capela, de ritmo libre y de autores desconocidos. La música de trovadores y troveros es casi lo contrario: trata sobre el amor, la guerra…; está en su propia lengua, no en latín; con ritmos marcados; cantada «a solo» y acompañada de instrumentos; y ponen su autoría en las canciones.",
+ kw:[["gregoriano"],["latin"],["religios"],["amor","guerra"],["lengua propia","propia lengua"],["ritmos marcados","marcados"],["a solo","solo"],["instrumentos"],["autoria"]]},
+{q:"¿Qué es una cantiga? Habla de Alfonso X el Sabio y de las Cantigas de Santa María.",
+ ans:"Una cantiga es una composición poético-musical en lengua galaicoportuguesa. Alfonso X el Sabio (1221-1284) preparó una colección de más de 420 cantigas e incluso compuso algunas. Narraban los milagros que se producían por intercesión de la Virgen María. Su estructura se basa en la alternancia de estribillo y estrofa. Aunque su texto sea religioso, debe considerarse música profana.",
+ kw:[["composicion poetico-musical","poetico","poetico-musical"],["galaicoportugues"],["alfonso x"],["420"],["milagros"],["virgen"],["estribillo","estrofa"],["profana"]]},
+{q:"Explica qué es la polifonía y quiénes fueron los primeros en componerla.",
+ ans:"La polifonía es una textura musical que consiste en componer música a varias voces que suenan simultáneamente. Fue una innovación fundamental de la Edad Media. Leonín y Perotín fueron los primeros en componer música polifónica, en la catedral de Notre Dame durante los siglos XII y XIII.",
+ kw:[["textura"],["varias voces"],["simultaneamente","a la vez"],["leonin"],["perotin"],["notre dame"],["xii","xiii"]]},
+{q:"¿Qué es el organum? Explica cómo era y cómo evolucionó.",
+ ans:"El organum fue la primera forma polifónica. Se cogían melodías del gregoriano y se ponían otras encima. Al principio todas se movían al mismo ritmo, pero pronto cada melodía tomó vida propia.",
+ kw:[["primera forma polifonica","primera"],["gregoriano"],["encima"],["mismo ritmo"],["vida propia"]]},
+{q:"Explica las dos aportaciones de Guido d'Arezzo al lenguaje musical.",
+ ans:"Guido d'Arezzo (992-1050) fue el primero en escribir la música sobre cuatro líneas (tetragrama) e inventó el nombre de las notas musicales (Ut-re-mi-fa-sol-la-si).",
+ kw:[["guido"],["cuatro lineas","4 lineas","tetragrama"],["primero"],["nombre de las notas","nombre"],["ut-re-mi","ut re mi","ut"]]},
+{q:"Explica la relación entre la arquitectura (Románico y Gótico) y la polifonía.",
+ ans:"En la Edad Media la idea de «acercarse» a Dios (mirar hacia lo más alto) llevó a los artistas a crear obras que reflejaran verticalidad o altura. En el Románico las estructuras serán habitualmente de una planta; en el Gótico los edificios religiosos se levantan cada vez más altos (Notre Dame, Burgos, León). En la música esto se refleja en que los músicos componen colocando melodías unas encima de otras, en estilo polifónico o a varias voces.",
+ kw:[["acercarse a dios","dios"],["verticalidad","altura"],["romanico"],["una planta"],["gotico"],["altos","mas altos"],["melodias unas encima","encima"],["polifonico","varias voces"]]},
+{q:"Explica los instrumentos que se utilizaban en la Edad Media y su clasificación.",
+ ans:"Se utilizaron principalmente en la música profana. Cuerda pulsada: laúd, arpa, salterio y lira (los trovadores se acompañaban improvisando melodías para adornar la voz). Cuerda frotada: violas (notas sostenidas en las que se apoyaba la voz). Percusión: platillos, campanillas, triángulos y tambores. Viento: flautas dulces, chirimías (antecesoras del oboe), cornamusas (similares a las gaitas) y trompetas. En la iglesia, el instrumento más utilizado fue el órgano.",
+ kw:[["musica profana","profana"],["cuerda pulsada"],["laud","arpa","lira","salterio"],["cuerda frotada","violas"],["percusion"],["platillos","tambores","triangulos"],["viento"],["chirimias","cornamusas"],["organo"]]},
+{q:"¿Qué es un acorde y qué es un acorde perfecto? Explica qué es un intervalo y pon ejemplos.",
+ ans:"Un acorde es un conjunto de tres o más sonidos diferentes que suenan simultáneamente; es el fundamento de la armonía. El acorde perfecto se construye con un intervalo de 3.ª y otro de 5.ª sobre una nota dada, por lo que tiene tres sonidos diferentes (el acorde de do es do-mi-sol). Un intervalo es la distancia en altura entre dos notas; puede ser armónico o melódico, y se cuenta según el orden de la escala desde la primera nota a la última (ambas inclusive): fa, sol, la, si, do' es una 5.ª. Se pueden formar acordes con más sonidos repitiendo notas a diferente altura.",
+ kw:[["tres o mas sonidos","tres sonidos"],["simultaneamente"],["armonia"],["perfecto"],["3","tercera"],["5","quinta"],["do-mi-sol","do mi sol","do, mi, sol"],["intervalo"],["distancia"],["armonico","melodico"],["inclusive"]]},
+];
+
+/* ============ UTILIDADES ============ */
+const $=s=>document.querySelector(s);
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let store={};
+try{store=JSON.parse(localStorage.getItem("estudioMus")||"{}")}catch(e){}
+store.tests=store.tests||{};store.known=store.known||{};
+const save=()=>{try{localStorage.setItem("estudioMus",JSON.stringify(store))}catch(e){}};
+
+const app=$("#app");
+function view(v){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  ({tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  window.scrollTo(0,0);
+}
+$("#nav").onclick=e=>{if(e.target.dataset.v)view(e.target.dataset.v)};
+
+/* ============ TESTS ============ */
+let T=null;
+function viewTests(){
+  const best=(k,n)=>{const r=store.tests[k];return r?`Mejor: ${r.best}/${r.n||n}`:"Sin hacer"};
+  app.innerHTML=`<div class="card"><b>Elige un test</b>
+    <p class="mut">Si fallas, te mostramos la respuesta correcta y por qué.</p>
+    <label class="row"><input type="checkbox" id="exam"> <span><b>Modo examen</b>: sin feedback hasta el final (la corrección con explicaciones sale al terminar)</span></label>
+  </div>
+  <h3>Por apartados (largos)</h3>
+  <div class="grid">${TOPICS.map((m,i)=>`<div class="card model" data-m="t${i}"><b>📚 ${esc(m.name)}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("mt"+i,m.qs.length)}</div></div>`).join("")}</div>
+  <h3>Modelos de examen</h3>
+  <div class="grid">${MODELS.map((m,i)=>`<div class="card model" data-m="${i}"><b>📝 ${m.name}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("m"+i,m.qs.length)}</div></div>`).join("")}
+  <div class="card model" data-m="mix"><b>🎲 Mixto</b><div class="mut">20 preguntas al azar de todos los tests</div></div>
+  <div class="card model" data-m="fails"><b>🔁 Repasar fallos</b><div class="mut">${(store.fails||[]).length} preguntas falladas guardadas</div></div></div>`;
+  app.onclick=e=>{const c=e.target.closest(".model");if(!c)return;startTest(c.dataset.m,$("#exam").checked)};
+}
+function startTest(m,exam){
+  let qs,name;
+  const all=[...MODELS,...TOPICS].flatMap(x=>x.qs);
+  if(m==="mix"){qs=shuffle(all).slice(0,20);name="Mixto"}
+  else if(m==="fails"){qs=all.filter(q=>(store.fails||[]).includes(q.q));name="Repaso de fallos";if(!qs.length){alert("¡No tienes fallos guardados! 🎉");return}}
+  else if(m[0]==="t"){const t=TOPICS[+m.slice(1)];qs=t.qs.slice();name=t.name}
+  else{qs=MODELS[+m].qs.slice();name=MODELS[+m].name}
+  qs=shuffle(qs).map(q=>({...q,opts:shuffle([q.ok,...q.bad])}));
+  T={m,name,exam,qs,i:0,ans:[],locked:false};
+  renderQ();
+}
+function renderQ(){
+  const q=T.qs[T.i],n=T.qs.length;
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">${T.name}${T.exam?" · modo examen":""}</span><span class="sp"></span><span class="mut">${T.i+1}/${n}</span></div>
+  <div class="bar"><i style="width:${T.i/n*100}%"></i></div>
+  <h3 style="margin:0 0 10px">${esc(q.q)}</h3>
+  <div id="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+  <div id="fb"></div>
+  <div class="row" style="margin-top:14px"><button class="btn ghost" id="quit">Salir</button><span class="sp"></span><button class="btn" id="next" hidden></button></div></div>`;
+  T.locked=false;
+  $("#quit").onclick=()=>{if(confirm("¿Salir del test? Se perderá el progreso."))viewTests()};
+  $("#opts").onclick=e=>{const b=e.target.closest(".opt");if(!b||T.locked&&!T.exam)return;pick(+b.dataset.k)};
+  $("#next").onclick=()=>{if(T.i+1<n){T.i++;renderQ()}else finish()};
+}
+function pick(k){
+  const q=T.qs[T.i];T.ans[T.i]=k;
+  const next=$("#next");next.hidden=false;next.textContent=T.i+1<T.qs.length?"Siguiente →":"Ver resultado";
+  const btns=[...document.querySelectorAll(".opt")];
+  if(T.exam){btns.forEach((b,j)=>b.classList.toggle("sel",j===k));return}
+  T.locked=true;
+  const good=q.opts[k]===q.ok;
+  btns.forEach((b,j)=>{b.disabled=true;if(q.opts[j]===q.ok)b.classList.add("ok");else if(j===k)b.classList.add("ko")});
+  $("#fb").innerHTML=good
+   ?`<div class="fb ok"><b>✅ ¡Correcto!</b><br>${esc(q.why)}</div>`
+   :`<div class="fb ko"><b>❌ Has fallado.</b> La respuesta correcta es:<br><b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
+}
+function finish(){
+  const n=T.qs.length;
+  const wrong=T.qs.filter((q,i)=>q.opts[T.ans[i]]!==q.ok);
+  const sc=n-wrong.length;
+  store.fails=(store.fails||[]).filter(f=>!T.qs.some(q=>q.q===f));
+  wrong.forEach(q=>store.fails.push(q.q));
+  const key="m"+T.m;const r=store.tests[key]||{best:0,tries:0};
+  r.tries++;r.best=Math.max(r.best,sc);r.last=sc;r.n=n;store.tests[key]=r;
+  store.hist=(store.hist||[]).concat({name:T.name,sc,n,d:new Date().toLocaleDateString("es-ES")}).slice(-30);
+  save();
+  const nota=(sc/n*10).toFixed(1);
+  app.innerHTML=`<div class="card" style="text-align:center"><span class="tag">${T.name}</span>
+   <div class="score">${sc}/${n} · ${nota}</div>
+   <p>${sc===n?"🏆 ¡Perfecto!":sc/n>=.5?"👍 ¡Aprobado! Repasa los fallos:":"💪 A repasar un poco más:"}</p>
+   <div class="row" style="justify-content:center"><button class="btn" id="again">Repetir</button><button class="btn ghost" id="back">Menú</button></div></div>
+   ${wrong.length?`<h3>Tus fallos (${wrong.length})</h3>`+wrong.map(q=>`<div class="card"><b>${esc(q.q)}</b>
+     <div class="fb ko" style="margin-top:8px">Tu respuesta: ${esc(q.opts[T.ans[T.qs.indexOf(q)]]??"(en blanco)")}</div>
+     <div class="fb ok" style="margin-top:8px"><b>Correcta:</b> ${esc(q.ok)}<br><b>Porque:</b> ${esc(q.why)}</div></div>`).join(""):""}`;
+  $("#again").onclick=()=>startTest(T.m,T.exam);
+  $("#back").onclick=viewTests;
+}
+
+/* ============ TARJETAS ============ */
+let C={sec:"Todas",pool:[],i:0,onlyReview:false};
+function viewCards(){
+  const secs=["Todas",...new Set(CARDS.map(c=>c[2]))];
+  const pool=()=>CARDS.map((c,id)=>({c,id})).filter(x=>(C.sec==="Todas"||x.c[2]===C.sec)&&(!C.onlyReview||!store.known[x.id]));
+  C.pool=pool();if(C.i>=C.pool.length)C.i=0;
+  const cur=C.pool[C.i];
+  const knownN=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="chips">${secs.map(s=>`<button class="chip ${s===C.sec?"on":""}" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+  <div class="row"><label class="mut"><input type="checkbox" id="rev" ${C.onlyReview?"checked":""}> Solo las que aún no sé</label><span class="sp"></span><span class="mut">Dominadas: ${knownN}/${CARDS.length}</span></div>
+  ${cur?`<div class="flash"><div class="flip" id="flip"><div class="face front">${esc(cur.c[0])}<div class="mut" style="font-weight:400;font-size:.8rem;margin-top:10px">toca para girar</div></div><div class="face back">${esc(cur.c[1])}</div></div></div>
+  <div class="row"><button class="btn ghost" id="prev">←</button><span class="mut">${C.i+1}/${C.pool.length}</span><button class="btn ghost" id="nx">→</button><span class="sp"></span>
+   <button class="btn ghost" id="rv">🔁 Repasar</button><button class="btn" id="kn">✅ Me la sé</button></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="sh">🔀 Barajar</button></div>`
+  :`<div class="card">🎉 No quedan tarjetas pendientes en esta selección.</div>`}`;
+  app.onclick=e=>{const ch=e.target.closest(".chip");if(ch){C.sec=ch.dataset.s;C.i=0;viewCards()}};
+  $("#rev").onchange=e=>{C.onlyReview=e.target.checked;C.i=0;viewCards()};
+  if(!cur)return;
+  $("#flip").onclick=()=>$("#flip").classList.toggle("on");
+  const go=d=>{C.i=(C.i+d+C.pool.length)%C.pool.length;viewCards()};
+  $("#prev").onclick=()=>go(-1);$("#nx").onclick=()=>go(1);
+  $("#kn").onclick=()=>{store.known[cur.id]=true;save();C.pool=pool();if(!C.onlyReview)C.i=(C.i+1)%C.pool.length;viewCards()};
+  $("#rv").onclick=()=>{store.known[cur.id]=false;save();go(1)};
+  $("#sh").onclick=()=>{C.i=Math.floor(Math.random()*C.pool.length);viewCards()};
+}
+
+/* ============ DESARROLLO ============ */
+let D={i:0,checked:false};
+function viewDev(){
+  const d=DEV[D.i];
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">Pregunta de desarrollo</span><span class="sp"></span><span class="mut">${D.i+1}/${DEV.length}</span></div>
+  <h3 style="margin:8px 0">${esc(d.q)}</h3>
+  <textarea id="txt" placeholder="Escribe aquí tu respuesta…">${esc(store["dev"+D.i]||"")}</textarea>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="p">←</button><button class="btn ghost" id="n">→</button><span class="sp"></span><button class="btn" id="chk">Comprobar</button></div>
+  <div id="res"></div></div>`;
+  $("#txt").oninput=e=>{store["dev"+D.i]=e.target.value;save()};
+  $("#p").onclick=()=>{D.i=(D.i+DEV.length-1)%DEV.length;viewDev()};
+  $("#n").onclick=()=>{D.i=(D.i+1)%DEV.length;viewDev()};
+  $("#chk").onclick=()=>{
+    const t=norm($("#txt").value);
+    const hits=d.kw.map(g=>g.some(w=>t.includes(norm(w))));
+    const ok=hits.filter(Boolean).length;
+    $("#res").innerHTML=`<p><b>Conceptos clave detectados: ${ok}/${d.kw.length}</b></p>
+    <div>${d.kw.map((g,i)=>`<span class="kw ${hits[i]?"has":"no"}">${hits[i]?"✓":"✗"} ${esc(g[0])}</span>`).join("")}</div>
+    <p class="mut">Es una detección automática por palabras: si lo explicaste con otras palabras, compara con la respuesta modelo.</p>
+    <div class="model-ans"><b>Respuesta modelo</b>\n${esc(d.ans)}</div>`;
+  };
+}
+
+/* ============ PROGRESO ============ */
+function viewStats(){
+  const k=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="grid">
+   <div class="card"><span class="tag">Tarjetas dominadas</span><div class="score">${k}/${CARDS.length}</div></div>
+   <div class="card"><span class="tag">Preguntas por repasar</span><div class="score">${(store.fails||[]).length}</div></div></div>
+  <div class="card"><b>Tests por apartado</b>${TOPICS.map((m,i)=>{const r=store.tests["mt"+i];return `<p>${esc(m.name)}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
+  <div class="card"><b>Modelos de test</b>${MODELS.map((m,i)=>{const r=store.tests["m"+i];return `<p>${m.name}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
+  <div class="card"><b>Últimos intentos</b>${(store.hist||[]).slice().reverse().slice(0,10).map(h=>`<p class="mut">${h.d} · ${esc(h.name)} · ${h.sc}/${h.n}</p>`).join("")||'<p class="mut">Todavía no hay intentos.</p>'}</div>
+  <button class="btn ghost" id="rst">Borrar progreso</button>`;
+  $("#rst").onclick=()=>{if(confirm("¿Borrar todo el progreso?")){store={tests:{},known:{}};save();viewStats()}};
+}
+view("tests");
+</script>
+</body>
+</html>
