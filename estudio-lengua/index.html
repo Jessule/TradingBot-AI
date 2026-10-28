@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estudio Lengua Castellana</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#141a35;--mut:#5b6280;--line:#e1e5f0;--acc:#00a9c0;--acc2:#007d93;--ok:#1b9a55;--okbg:#e4f6ec;--ko:#d6403a;--kobg:#fdeceb;--warn:#fff4dc;--shadow:0 2px 10px rgba(20,26,53,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1226;--card:#1a1f3d;--ink:#eef0fa;--mut:#a2a8c8;--line:#2c3260;--acc:#27c8dd;--acc2:#27c8dd;--ok:#4cd68a;--okbg:#12362a;--ko:#ff7a73;--kobg:#3b1c24;--warn:#3a3118;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:20px 16px 8px;max-width:900px;margin:auto}
+h1{margin:0;font-size:1.5rem}
+header p{margin:2px 0 0;color:var(--mut);font-size:.95rem}
+nav{display:flex;gap:6px;max-width:900px;margin:12px auto 0;padding:0 16px;flex-wrap:wrap}
+nav button{flex:1;min-width:120px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:900px;margin:16px auto 60px;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.btn{padding:10px 16px;border-radius:10px;border:1px solid var(--acc);background:var(--acc);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--acc2)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+.mut{color:var(--mut);font-size:.9rem}
+.tag{display:inline-block;font-size:.75rem;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.04em}
+/* tests */
+.model{cursor:pointer;text-align:center}
+.model:hover{border-color:var(--acc)}
+.model b{font-size:1.1rem}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt.sel{border-color:var(--acc);background:var(--bg)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ko{border-color:var(--ko);background:var(--kobg)}
+.opt:disabled{cursor:default}
+.fb{margin-top:12px;padding:12px 14px;border-radius:10px;border-left:5px solid}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.ko{background:var(--kobg);border-color:var(--ko)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0 14px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.score{font-size:2.4rem;font-weight:800}
+/* flashcards */
+.flash{perspective:1000px;margin:12px 0}
+.flip{position:relative;height:260px;transform-style:preserve-3d;transition:transform .5s;cursor:pointer}
+.flip.on{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow);overflow:auto}
+.front{background:var(--card);font-size:1.4rem;font-weight:700}
+.back{background:#141a35;color:#fff;transform:rotateY(180deg);font-size:1.1rem}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{padding:5px 11px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;font:inherit;font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+/* desarrollo */
+textarea{width:100%;min-height:140px;padding:12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
+.kw{display:inline-block;margin:3px 4px 3px 0;padding:3px 10px;border-radius:14px;font-size:.85rem;border:1px solid var(--line)}
+.kw.has{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.kw.no{background:var(--kobg);border-color:var(--ko);color:var(--ko)}
+.model-ans{background:var(--warn);padding:12px 14px;border-radius:10px;margin-top:10px;white-space:pre-line}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 Tema 1 · El texto, la palabra y los géneros literarios</h1>
+  <p>Lengua Castellana y Literatura — tarjetas, tests tipo test y preguntas de desarrollo</p>
+</header>
+<nav id="nav">
+  <button data-v="tests" class="on">📝 Tests</button>
+  <button data-v="cards">🃏 Tarjetas</button>
+  <button data-v="dev">✍️ Desarrollo</button>
+  <button data-v="stats">📊 Progreso</button>
+</nav>
+<main id="app"></main>
+
+<script>
+/* ============ DATOS ============ */
+// Q(pregunta, respuesta correcta, [3 incorrectas], explicación)
+const Q=(q,ok,bad,why)=>({q,ok,bad,why});
+
+const MODELS=[
+{name:"Modelo 1",qs:[
+Q("El texto es…","La unidad máxima de comunicación, formada por uno o más enunciados con sentido completo",["La unidad mínima con significado","Una palabra con tilde","Una oración sin verbo"],"Un texto debe tener coherencia, adecuación y cohesión."),
+Q("¿Cuáles son las propiedades del texto?","Coherencia, adecuación y cohesión",["Rima, métrica y estrofa","Narración, descripción y diálogo","Lexema, morfema y raíz"],"Le dan unidad y sentido y permiten interpretarlo correctamente."),
+Q("Un texto es coherente cuando…","Está ordenado y todas sus partes están ligadas entre sí y con el tema principal",["Usa palabras muy cultas","Tiene muchos conectores","Es muy largo"],"La coherencia también implica no contradecirse."),
+Q("¿Cuál NO es un motivo de la adecuación?","La extensión del texto",["La finalidad","Las personas que lo reciben","El lugar"],"Los tres motivos son: finalidad, personas que lo reciben y lugar."),
+Q("Los mecanismos de cohesión son…","Conectores, elipsis, repetición y mecanismos referenciales",["Rima, acento y pausa","Prefijos, sufijos y desinencias","Tragedia, comedia y drama"],"Ayudan a percibir la unidad y coherencia del texto."),
+Q("«Sin embargo» es un conector…","De contraste",["Aditivo","Consecutivo","De orden"],"También: antes bien, en cambio."),
+Q("La palabra es…","Un conjunto de sonidos asociado a un significado, que en la escritura aparece entre dos espacios en blanco",["Un conjunto de sílabas sin significado","Una frase corta","Un enunciado completo"],"Pueden ser variables o invariables."),
+Q("¿Cuál es una palabra invariable?","Una preposición",["Un nombre","Un adjetivo","Un verbo"],"Adverbios, preposiciones, interjecciones y conjunciones."),
+Q("«Sietemesina» es una palabra…","Parasintética",["Simple","Derivada únicamente","Compuesta únicamente"],"Se forma por composición y derivación a la vez."),
+Q("Los sinónimos son palabras con…","Significado igual o parecido (alto-elevado)",["Significados contrarios","Significado general que incluye otros","Sentido figurado"],"Los antónimos tienen significados contrarios."),
+Q("Los géneros literarios tradicionales son…","Narrativo, lírico y teatral o dramático",["Épico, oda y elegía","Tragedia, comedia y drama","Novela, cuento y leyenda"],"A partir del siglo XVIII se incluyó también el didáctico."),
+Q("Los versos de ocho o menos sílabas son de…","Arte menor",["Arte mayor","Verso libre","Rima consonante"],"Los de más de ocho sílabas son de arte mayor."),
+]},
+{name:"Modelo 2",qs:[
+Q("En relación consigo mismo, un texto es coherente si…","Todos sus enunciados se vinculan entre sí y no hay contradicciones",["Está escrito en verso","Usa palabras cultas","Tiene muchos adjetivos"],"También siguen un orden determinado (temporal, de importancia…)."),
+Q("En relación con el mundo, un texto es coherente si…","Lo que dice responde a la experiencia o al conocimiento que tenemos de la realidad",["Es muy breve","Tiene rima","Usa conectores"],"No sería coherente decir que un caballo vuela."),
+Q("¿Por qué las fábulas de Esopo adquieren coherencia?","Porque son textos de ficción, donde los animales pueden hablar",["Porque son muy largas","Porque están en verso","Porque son textos científicos"],"Algunas incoherencias adquieren sentido en la literatura."),
+Q("Sería inadecuado emplear palabras muy informales…","Al solicitar un cambio de examen (por la finalidad)",["En una conversación entre amigos","En un chat","En una felicitación"],"Es un ejemplo del motivo «finalidad»."),
+Q("Sería inadecuado utilizar un lenguaje literario…","En una conversación de amigos (por las personas que lo reciben)",["En un poema","En una novela","En una obra de teatro"],"Ejemplo de adecuación a los receptores."),
+Q("En un concierto sería inadecuado utilizar el móvil. ¿Qué motivo de adecuación es?","El lugar",["La finalidad","Las personas","El tema"],"Los tres motivos son finalidad, personas y lugar."),
+Q("«Además» es un conector…","Aditivo",["De contraste","De orden","De rectificación"],"También: asimismo, también, encima, incluso."),
+Q("«Por tanto» es un conector…","Consecutivo",["Aditivo","De contraste","Ejemplificativo"],"También: por consiguiente, de ahí que, pues."),
+Q("«Es decir» es un conector…","Explicativo",["De orden","Consecutivo","De rectificación"],"También: o sea, esto es, a saber."),
+Q("«Mejor dicho» es un conector…","De rectificación",["Explicativo","De contraste","Aditivo"],"También: más bien."),
+Q("«Por ejemplo» es un conector…","Ejemplificativo",["De orden","Aditivo","Consecutivo"],"También: así."),
+Q("«En primer lugar» es un conector…","De orden",["Aditivo","De contraste","Explicativo"],"También: en segundo lugar, después, por fin."),
+]},
+{name:"Modelo 3",qs:[
+Q("La elipsis consiste en…","Suprimir partes del texto que el receptor conoce",["Repetir palabras","Sustituir por pronombres","Añadir conectores"],"Da cohesión y evita repeticiones."),
+Q("«Yo pasaré las vacaciones en la playa, y ella, en la montaña». ¿Qué se sobreentiende en la segunda parte?","«pasará las vacaciones»",["«yo pasaré»","«en la playa»","«ella y yo»"],"Es un ejemplo de elipsis."),
+Q("La repetición de palabras cohesiona el texto porque…","Transmite la sensación de que se habla siempre del mismo tema",["Evita usar pronombres","Elimina el sentido","Cambia de tema"],"También ayudan los sinónimos, antónimos y el campo semántico."),
+Q("«Me gusta ese profesor. Él nos enseña danza». ¿Qué mecanismo referencial es «él»?","Un pronombre que sustituye a un sustantivo",["Un determinante posesivo","Una elipsis","Un conector"],"Mecanismo referencial."),
+Q("«La periodista parecía inquieta y miraba su reloj». «Su» es…","Un determinante posesivo",["Un pronombre personal","Un conector","Una elipsis"],"Se refiere a la persona de la que se está hablando."),
+Q("«Lisboa» y «la capital de Portugal» son…","Palabras que se refieren a una misma realidad",["Conectores","Antónimos","Siglas"],"Mecanismo referencial."),
+Q("Las palabras variables son…","Nombres, pronombres, determinantes, adjetivos y verbos",["Adverbios y preposiciones","Conjunciones e interjecciones","Solo los verbos"],"Modifican su terminación (género, número, persona, tiempo y modo)."),
+Q("El lexema o raíz es…","La parte de la palabra que contiene el significado fundamental",["La terminación","El prefijo","El sufijo"],"Los morfemas se añaden al lexema."),
+Q("Los morfemas flexivos o desinencias…","Aparecen al final de la palabra y aportan información (género, número…)",["Aparecen antes del lexema","Forman palabras nuevas","Son la raíz"],"Ejemplos: ciervo, tortugas, hablo, comían, respetase."),
+Q("En «imposible», «im-» es…","Un prefijo (morfema derivativo)",["Un sufijo","Una desinencia","Un lexema"],"Los prefijos aparecen antes del lexema."),
+Q("En «carpintera», «-era» es…","Un sufijo (morfema derivativo)",["Un prefijo","Una desinencia","Un lexema"],"Los sufijos aparecen después del lexema."),
+Q("Los pasos del análisis morfológico son…","Localizar el lexema, señalar los derivativos e identificar los flexivos",["Contar sílabas, rima y acento","Buscar conectores","Identificar el narrador"],"Orden: lexema, derivativos, flexivos."),
+]},
+{name:"Modelo 4",qs:[
+Q("Las palabras simples o primitivas…","Contienen un solo lexema (ratón, papel)",["Tienen dos lexemas","Llevan prefijos o sufijos","Se forman por siglas"],"Pueden llevar morfemas flexivos."),
+Q("Las palabras compuestas…","Están formadas por dos o más voces (sacapuntas, limpiaparabrisas)",["Llevan un solo lexema","Llevan solo sufijos","Son siglas"],"Composición = unión de palabras."),
+Q("Las palabras derivadas se forman…","Añadiendo prefijos o sufijos al lexema (pescadera, inútil)",["Uniendo dos palabras","Con las iniciales","Cortando palabras"],"Derivación = afijos."),
+Q("«Vivir > vivienda» muestra un sufijo que convierte un verbo en…","Un nombre",["Un adjetivo","Un adverbio","Un verbo"],"Los sufijos pueden cambiar la categoría."),
+Q("«Sincero > sinceramente» convierte un adjetivo en…","Un adverbio",["Un nombre","Un verbo","Una preposición"],"El sufijo -mente forma adverbios."),
+Q("Las siglas se forman con…","Las letras iniciales de varias palabras (UE, ONG)",["Fragmentos de palabras","Recortes de palabras","Prefijos grecolatinos"],"Se escriben con mayúsculas, sin puntos ni espacios."),
+Q("Un acrónimo es…","La unión de fragmentos de dos o más palabras (informática) o una sigla que se pronuncia como una palabra (sida)",["Un recorte de palabra","Un sinónimo","Un prefijo"],"Llevan tilde si lo indican las reglas de acentuación."),
+Q("Los acortamientos son…","Recortes de palabras (profe, bici, foto, bus)",["Siglas","Acrónimos","Composiciones cultas"],"Las abreviaturas suprimen letras en la escritura (Dra., D.)."),
+Q("«Biblioteca» es un ejemplo de…","Composición culta (biblio + teca)",["Sigla","Acrónimo","Acortamiento"],"Raíces de origen latino o griego."),
+Q("El prefijo/raíz grecolatina «tele-» significa…","A distancia",["Grande","Nervio","Vida"],"Mega = grande, neuro = nervio, bio = vida."),
+Q("La raíz grecolatina «-algia» significa…","Dolor",["Voz","Escritura","Dolencia"],"-patía = dolencia; -fono = voz; -grafía = escritura."),
+Q("Los antónimos se forman con prefijos como…","a-, i-, in-, im-, des-, anti-",["-ísimo, -ero","mega-, tele-","bio-, neuro-"],"Ejemplos: anormal, ilegal, informal, imposible, descontento, antiestético."),
+]},
+{name:"Modelo 5",qs:[
+Q("Un hiperónimo es…","Una palabra con significado general que incluye a otras más concretas (hipónimos)",["Una palabra con significado contrario","Una palabra de significado parecido","Una palabra con doble sentido"],"Ejemplo: calzado incluye zapato, sandalia, bota…"),
+Q("El significado denotativo es…","El significado literal de una palabra",["Las valoraciones asociadas a ella","El significado de la sigla","El significado de la rima"],"El connotativo hace referencia a contenidos y valoraciones."),
+Q("El significado connotativo de «león» es…","La valentía",["Animal carnívoro","Mamífero felino","Animal de la sabana"],"El denotativo es «animal carnívoro…»."),
+Q("El género narrativo está formado por obras en las que…","Un narrador cuenta lo que les ocurre a unos personajes en un tiempo y un espacio",["Un actor representa en escena","El autor expresa sentimientos en verso","Se expone un tema"],"Primero en verso (épica) y después en prosa."),
+Q("La epopeya es…","Un poema extenso de la Antigüedad que narra hazañas de héroes con intervención de los dioses",["Un poema breve popular","Un poema medieval","Un relato muy breve"],"Ejemplos: la Ilíada, la Odisea, la Eneida."),
+Q("El cantar de gesta es…","Un poema épico medieval que narra las hazañas de un héroe (Cantar de Mio Cid)",["Un poema extenso de la Antigüedad","Un poema amoroso","Una obra de teatro"],"Es de la Edad Media."),
+Q("Los romances son…","Poemas narrativos breves popularizados en España a partir del siglo XV",["Poemas épicos de la Antigüedad","Novelas de caballerías","Obras de teatro"],"Algunos surgieron al descomponerse los cantares de gesta."),
+Q("El microrrelato es…","Una narración muy breve que no sobrepasa las veinte líneas",["Una narración extensa","Una narración de extensión intermedia","Un poema"],"Variedad actual del cuento."),
+Q("Si un cuento tiene intención didáctica o moralizadora, se llama…","Apólogo",["Leyenda","Novela corta","Epopeya"],"El cuento es una narración breve de ficción en prosa."),
+Q("La sátira es una composición lírica en la que…","Se censuran vicios o defectos de forma humorística",["Se llora la muerte de un ser querido","Se canta a las cosas cotidianas","Se pone el amor en boca de pastores"],"Ejemplo: Quevedo."),
+Q("La elegía expresa…","El sentimiento dolorido por la muerte de un ser querido",["Vicios individuales","Amor entre pastores","Cosas cotidianas"],"Ejemplo: Miguel Hernández."),
+Q("La tragedia es una obra dramática que tiene…","Desenlace trágico, con personajes nobles que luchan contra un destino adverso",["Desenlace feliz","Personajes populares","Tono humorístico"],"La comedia tiene desenlace feliz."),
+]},
+];
+
+// Tests largos por apartado
+const TOPICS=[
+{name:"2.1-2.2 · El texto y la coherencia",qs:[
+Q("El texto es…","La unidad máxima de comunicación",["La unidad mínima de comunicación","Una palabra con sentido","Una oración sin verbo"],"Está compuesto de uno o más enunciados relacionados entre sí y con sentido completo."),
+Q("Un texto está compuesto por…","Uno o más enunciados relacionados entre sí y con un sentido completo",["Solo una palabra","Solo oraciones sueltas","Solo diálogos"],"Es la unidad máxima de comunicación."),
+Q("¿Qué propiedades debe tener un texto?","Coherencia, adecuación y cohesión",["Rima, ritmo y medida","Lexema, raíz y morfema","Principio, nudo y desenlace"],"Le dan unidad y sentido."),
+Q("¿Para qué sirven las propiedades del texto?","Para darle unidad y sentido y permitir interpretarlo correctamente",["Para hacerlo más largo","Para que rime","Para clasificarlo por géneros"],"Son coherencia, adecuación y cohesión."),
+Q("¿Cuál es una clase de texto según la intención del autor?","Prescriptivo",["Lírico","Dramático","Épico"],"Narrativo, descriptivo, dialogado, expositivo, argumentativo y prescriptivo."),
+Q("Las clases de textos según la intención del autor son…","Narrativo, descriptivo, dialogado, expositivo, argumentativo y prescriptivo",["Narrativo, lírico y teatral","Tragedia, comedia y drama","Sátira, oda y elegía"],"Son seis."),
+Q("¿Cuántas clases de textos según la intención del autor se citan?","Seis",["Tres","Cuatro","Ocho"],"Narrativo, descriptivo, dialogado, expositivo, argumentativo y prescriptivo."),
+Q("Un texto es coherente cuando…","Está ordenado y todas sus partes están ligadas entre sí y con el tema principal",["Tiene muchos conectores","Está en verso","Es muy extenso"],"La coherencia se ve en la relación consigo mismo y con el mundo."),
+Q("La coherencia se puede ver en la relación que guarda el texto con…","Sí mismo y con el mundo al que hace referencia",["El autor y el editor","La rima y la métrica","Los prefijos y sufijos"],"Dos planos de la coherencia."),
+Q("En relación consigo mismo, ¿qué pasa en un texto coherente con sus enunciados?","Todos se vinculan entre sí y tienen que ver con el tema general",["Cada uno habla de un tema distinto","Se contradicen","No tienen orden"],"Primera condición."),
+Q("En un texto coherente, cada enunciado…","Se relaciona con el que lo precede y con el que lo sigue de manera lógica",["Es independiente del resto","Se contradice con el anterior","No se relaciona con ninguno"],"Condición de coherencia."),
+Q("En un texto coherente no hay…","Contradicciones entre los enunciados",["Verbos","Sustantivos","Conectores"],"Condición de coherencia."),
+Q("Un texto coherente sigue un orden…","Determinado (temporal, de importancia…)",["Aleatorio","Siempre alfabético","Siempre contrario al tiempo"],"Orden temporal o de importancia."),
+Q("En relación con el mundo, un texto es coherente si…","Lo que dice responde a la experiencia o al conocimiento que tenemos de la realidad",["Es una ficción","Tiene rima","Es largo"],"No sería coherente decir que un caballo vuela."),
+Q("¿Qué ejemplo NO sería coherente con el mundo?","Un anciano de noventa años gana una carrera de velocidad olímpica",["Un caballo corre rápido","Un niño estudia","Un anciano pasea"],"Y tampoco que un caballo vuela."),
+Q("¿Qué ejemplo NO sería coherente con el mundo?","Un caballo vuela",["Un caballo galopa","Un caballo come hierba","Un caballo bebe agua"],"No responde a nuestra experiencia."),
+Q("En literatura, ciertas incoherencias adquieren sentido…","Si se interpretan en determinadas circunstancias o desde otra perspectiva",["Nunca","Solo en poesía lírica","Solo en teatro"],"Ejemplo: una fábula de Esopo."),
+Q("¿Por qué una fábula de Esopo es coherente a pesar de que los animales hablen?","Porque adquiere coherencia en un texto de ficción",["Porque los animales hablan de verdad","Porque es un texto científico","Porque es un texto prescriptivo"],"Según nuestro conocimiento del mundo sería incongruente."),
+Q("Una fábula de Esopo, según nuestro conocimiento del mundo, sería…","Un texto incongruente, ya que un animal ni piensa ni habla",["Un texto muy real","Un texto científico","Un texto adecuado"],"Pero adquiere coherencia en un texto de ficción."),
+]},
+{name:"2.3-2.4 · Adecuación y cohesión",qs:[
+Q("Un texto es adecuado cuando…","Se emite teniendo en cuenta las circunstancias en las que se produce",["Es muy corto","Tiene rima","Tiene muchos adjetivos"],"Depende de la finalidad, las personas que lo reciben y el lugar."),
+Q("¿Cuáles son los tres motivos de la adecuación?","Finalidad, personas que lo reciben y lugar",["Tema, tono y extensión","Orden, rima y ritmo","Autor, editor y lector"],"Los tres dependen de las circunstancias."),
+Q("Sería inadecuado emplear palabras muy informales al solicitar un cambio de examen. ¿Qué motivo es?","La finalidad",["Las personas que lo reciben","El lugar","El orden"],"Ejemplo del libro."),
+Q("Sería inadecuado utilizar un lenguaje literario en una conversación de amigos. ¿Qué motivo es?","Las personas que lo reciben",["La finalidad","El lugar","El tema"],"Ejemplo del libro."),
+Q("En un concierto sería inadecuado utilizar el móvil. ¿Qué motivo es?","El lugar",["La finalidad","Las personas","El tema"],"Ejemplo del libro."),
+Q("La cohesión es…","La propiedad del texto que ayuda a percibir su unidad y su coherencia",["La propiedad de ser adecuado","La propiedad de rimar","La propiedad de ser corto"],"Se logra con mecanismos de cohesión."),
+Q("¿Cuáles son los mecanismos de cohesión?","Conectores textuales, elipsis, repetición y mecanismos referenciales",["Rima, ritmo y estrofa","Sinónimos y antónimos únicamente","Lexemas y morfemas"],"Son cuatro."),
+Q("Los conectores textuales son…","Palabras del texto que indican la relación de unos enunciados con otros",["Palabras que riman","Las partes de una palabra","Los signos de puntuación"],"Hay varios tipos."),
+Q("«En primer lugar», «después» y «por fin» son conectores…","De orden",["Aditivos","Explicativos","De contraste"],"Ordenan las ideas."),
+Q("«Además», «asimismo», «también», «encima» e «incluso» son conectores…","Aditivos",["De orden","De contraste","Consecutivos"],"Suman información."),
+Q("«O sea», «esto es», «es decir» y «a saber» son conectores…","Explicativos",["Aditivos","De rectificación","De orden"],"Explican lo dicho."),
+Q("«Sin embargo», «antes bien» y «en cambio» son conectores…","De contraste",["Aditivos","Explicativos","Consecutivos"],"Oponen ideas."),
+Q("«Por tanto», «por consiguiente», «de ahí que» y «pues» son conectores…","Consecutivos",["De contraste","Aditivos","De orden"],"Indican consecuencia."),
+Q("«Así» y «por ejemplo» son conectores…","Ejemplificativos",["Consecutivos","De contraste","De rectificación"],"Introducen ejemplos."),
+Q("«Mejor dicho» y «más bien» son conectores…","De rectificación",["Explicativos","Consecutivos","Aditivos"],"Corrigen lo dicho."),
+Q("La elipsis consiste en…","Suprimir partes del texto que el receptor conoce",["Repetir palabras","Añadir conectores","Sustituir por sinónimos"],"Hace presentes realidades sin nombrarlas."),
+Q("¿Para qué sirve la elipsis?","Para dar cohesión y evitar repeticiones que harían la lectura muy pesada",["Para alargar el texto","Para cambiar de tema","Para rimar"],"Hace presentes realidades sin nombrarlas."),
+Q("«Yo pasaré las vacaciones de verano en la playa, y ella, en la montaña». La parte que se sobreentiende es…","«pasará las vacaciones»",["«yo pasaré»","«en la playa»","«de verano»"],"Ejemplo de elipsis."),
+Q("La repetición de palabras cohesiona el texto porque…","Transmite la sensación de que se está hablando siempre del mismo tema",["Evita el tema","Cambia de registro","Elimina el sentido"],"También contribuyen palabras de un mismo campo semántico, sinónimos y antónimos."),
+Q("¿Qué más contribuye a la cohesión por repetición?","Palabras del mismo campo semántico (hiperónimo e hipónimos), sinónimos y antónimos",["Conectores únicamente","Siglas","Prefijos"],"Palabras de un mismo campo semántico o de experiencia."),
+Q("Los mecanismos referenciales son…","Expresiones que se refieren a los mismos individuos, objetos, acontecimientos o acciones",["Palabras que riman","Signos de puntuación","Los prefijos"],"Contribuyen a cohesionar."),
+Q("«Lisboa» y «la capital de Portugal» son un ejemplo de…","Palabras que se refieren a una misma realidad",["Pronombres","Determinantes posesivos","Conectores"],"Mecanismo referencial."),
+Q("«Me gusta ese profesor. Él nos enseña danza moderna». «Él» es…","Un pronombre que sustituye a un sustantivo",["Un determinante posesivo","Un conector","Una sigla"],"Mecanismo referencial."),
+Q("«La periodista parecía inquieta y miraba su reloj». «Su» es…","Un determinante posesivo que se refiere a la persona de la que se habla",["Un pronombre","Un conector","Una elipsis"],"Mecanismo referencial."),
+]},
+{name:"3.1 · Constituyentes de la palabra",qs:[
+Q("La palabra es…","Un conjunto de sonidos asociado a un significado, que en la escritura aparece entre dos espacios en blanco",["Un conjunto de oraciones","Una sílaba con tilde","Un enunciado completo"],"Pueden ser invariables o variables."),
+Q("Las palabras invariables…","Mantienen siempre fija su forma",["Cambian de género","Cambian de tiempo","Cambian de persona"],"Adverbios, preposiciones, interjecciones y conjunciones."),
+Q("Son palabras invariables…","Adverbios, preposiciones, interjecciones y conjunciones",["Nombres y adjetivos","Verbos y pronombres","Determinantes y adjetivos"],"No modifican su forma."),
+Q("Las palabras variables…","Pueden modificar su terminación para expresar cambios de género, número, persona, tiempo y modo",["Mantienen siempre su forma","Son siempre adverbios","Son siempre preposiciones"],"Nombres, pronombres, determinantes, adjetivos y verbos."),
+Q("Son palabras variables…","Nombres, pronombres, determinantes, adjetivos y verbos",["Adverbios y conjunciones","Preposiciones e interjecciones","Adverbios y preposiciones"],"Modifican su terminación."),
+Q("¿Cuál es una palabra invariable?","Una conjunción",["Un nombre","Un verbo","Un adjetivo"],"Las conjunciones no cambian."),
+Q("¿Cuál es una palabra variable?","Un adjetivo",["Un adverbio","Una preposición","Una interjección"],"Los adjetivos varían en género y número."),
+Q("La estructura de las palabras variables incluye…","Lexema o raíz y morfemas",["Sílaba y tilde","Prefijo y rima","Verso y estrofa"],"Los morfemas pueden ser flexivos o derivativos."),
+Q("El lexema o raíz es…","La parte de la palabra que contiene el significado fundamental",["Una terminación","Un prefijo","Un sufijo"],"Si está formada por dos raíces, tenemos una palabra compuesta."),
+Q("Una palabra formada por dos raíces es…","Una palabra compuesta (claroscuro)",["Una palabra simple","Una sigla","Una desinencia"],"Ejemplo: claroscuro."),
+Q("El lexema de «claridad» es…","clar-",["-idad","cla-","-dad"],"Clar-o, clar-idad, a-clar-ar."),
+Q("Los morfemas flexivos o desinencias…","Aparecen al final de la palabra y aportan información de género, número, persona, tiempo o modo",["Aparecen antes del lexema","Forman palabras nuevas","Son la raíz"],"Ejemplos: cierv-o, tortuga-s, habl-o, com-ían, respet-ase."),
+Q("«Ciervo»: la desinencia «-o» aporta información de…","Género",["Número","Persona","Tiempo"],"Cierv-o."),
+Q("«Tortugas»: la desinencia «-s» aporta información de…","Número",["Género","Persona","Modo"],"Tortuga-s."),
+Q("«Hablo»: la desinencia «-o» aporta información de…","Persona",["Género","Número","Modo"],"Habl-o."),
+Q("«Comían»: la desinencia «-ían» aporta información de…","Tiempo",["Género","Persona","Modo"],"Com-ían."),
+Q("«Respetase»: la desinencia «-ase» aporta información de…","Modo",["Género","Número","Tiempo"],"Respet-ase."),
+Q("Los morfemas derivativos son…","Prefijos y sufijos",["Desinencias","Lexemas","Siglas"],"Se añaden al lexema para formar palabras derivadas."),
+Q("Los prefijos aparecen…","Antes del lexema",["Después del lexema","Al final de la palabra","En medio del lexema"],"Ej.: re-tomar, ante-poner, im-posible, pre-juzgar."),
+Q("Los sufijos aparecen…","Después del lexema",["Antes del lexema","En la raíz","Solo en verbos"],"Ej.: carpint-era, ecológ-ico, seman-al, alt-ísima, flaut-ista."),
+Q("«Re-» en «retomar» es…","Un prefijo",["Un sufijo","Una desinencia","Un lexema"],"Aparece antes del lexema."),
+Q("«-ista» en «flautista» es…","Un sufijo",["Un prefijo","Una desinencia","Un lexema"],"Aparece después del lexema."),
+Q("¿Cuál es el primer paso del análisis morfológico?","Localizar el lexema o raíz",["Señalar los sufijos","Identificar los morfemas flexivos","Contar las sílabas"],"Después: señalar derivativos; por último, flexivos."),
+Q("¿Cuál es el segundo paso del análisis morfológico?","Señalar los morfemas derivativos (prefijos y sufijos)",["Localizar el lexema","Identificar los flexivos","Poner tilde"],"Los prefijos o sufijos que la componen."),
+Q("¿Cuál es el tercer paso del análisis morfológico?","Identificar si hay morfemas flexivos",["Localizar el lexema","Señalar los derivativos","Dividir en sílabas"],"Se hace al final."),
+]},
+{name:"3.2 · Formación de palabras",qs:[
+Q("En castellano podemos formar palabras nuevas a partir de otras simples mediante…","Composición y derivación",["Rima y métrica","Conectores y elipsis","Narración y descripción"],"También con siglas, acrónimos y otras abreviaciones."),
+Q("Las palabras simples o primitivas contienen…","Un solo lexema, al que pueden acompañar morfemas flexivos",["Dos lexemas","Prefijos y sufijos obligatoriamente","Solo siglas"],"Ejemplos: ratón, pájaro, mesas, coches, papel."),
+Q("¿Cuál es una palabra simple?","Ratón",["Sacapuntas","Pescadera","Anteponer"],"Un solo lexema."),
+Q("Las palabras compuestas están formadas por…","Dos o más voces",["Un lexema y un sufijo","Un prefijo y un lexema","Las iniciales de varias palabras"],"Ejemplos: sacapuntas, limpiaparabrisas."),
+Q("¿Cuál es una palabra compuesta?","Limpiaparabrisas",["Pescadera","Inútil","Valenciana"],"Dos o más voces."),
+Q("Las palabras derivadas se forman…","Añadiendo prefijos o sufijos al lexema",["Uniendo dos palabras","Con las iniciales","Recortando"],"Ejemplos: pescadera, anteponer, inútil, valenciana."),
+Q("¿Cuál es una palabra derivada?","Valenciana",["Ratón","Sacapuntas","Papel"],"Valenci- + -ana."),
+Q("Los sufijos…","Alteran el significado de la voz originaria y algunos pueden cambiar su categoría",["Nunca cambian la categoría","Siempre forman verbos","Solo forman adverbios"],"Pueden formar nombres, adjetivos, verbos y adverbios."),
+Q("«Vivir > vivienda»: el sufijo forma un…","Nombre",["Adjetivo","Verbo","Adverbio"],"Verbo → nombre."),
+Q("«Alto > altura»: el sufijo forma un…","Nombre",["Adjetivo","Verbo","Adverbio"],"Adjetivo → nombre."),
+Q("«Vapor > vaporoso»: el sufijo forma un…","Adjetivo",["Nombre","Verbo","Adverbio"],"Nombre → adjetivo."),
+Q("«Amarillo > amarillear»: el sufijo forma un…","Verbo",["Nombre","Adjetivo","Adverbio"],"Adjetivo → verbo."),
+Q("«Sincero > sinceramente»: el sufijo forma un…","Adverbio",["Nombre","Adjetivo","Verbo"],"Adjetivo → adverbio."),
+Q("Las palabras parasintéticas…","Se forman al mismo tiempo por composición y derivación (sietemesina, picapedrero)",["Solo por derivación","Solo por composición","Por siglas"],"Combinan ambos procedimientos."),
+Q("¿Cuál es una palabra parasintética?","Picapedrero",["Pescadera","Limpiaparabrisas","Ratón"],"Composición + derivación."),
+Q("Las siglas se forman habitualmente con…","Las letras iniciales de varias palabras que designan una realidad (UE)",["Fragmentos de palabras","Recortes de palabras","Prefijos y sufijos"],"UE = Unión Europea."),
+Q("Las siglas se escriben…","Con mayúsculas, sin puntos ni espacios, y no se separan a final de línea",["Con minúsculas y puntos","Con mayúsculas y puntos","Con guiones"],"Ejemplos: BCE, ONG."),
+Q("Los acrónimos son…","La unión de fragmentos de dos o más palabras (informática), o siglas que se pronuncian como una palabra (sida)",["Recortes de una palabra","Las iniciales deletreadas","Prefijos de origen griego"],"Pueden ser nombres propios (Unicef)."),
+Q("¿Cuál es un acrónimo?","Informática",["BCE","Profe","Dra."],"Información + automática."),
+Q("Los acrónimos llevan tilde…","Si lo indican las reglas generales de acentuación",["Nunca","Siempre","Solo en nombres propios"],"Si son nombres propios, la inicial va con mayúscula."),
+Q("Los acortamientos se forman…","Mediante un recorte de las palabras (profe, bici, foto, bus, quimio)",["Suprimiendo letras con punto","Con las iniciales","Uniendo dos raíces"],"Son otras abreviaciones."),
+Q("Las abreviaturas se forman…","Por supresión de letras en la escritura (Dra., D.)",["Recortando la palabra al hablar","Con las iniciales","Uniendo dos palabras"],"Se escriben con punto."),
+Q("Las abreviaturas se escriben…","Con punto; la palabra siguiente no necesita mayúscula, salvo nombre propio o inicio de enunciado",["Sin punto y con mayúscula","Con guion","Con mayúsculas sin punto"],"Llevan tilde si la palabra que se abrevia la lleva (pág., admón.)."),
+Q("En la composición culta, las palabras se forman con…","Raíces de origen latino o griego",["Siglas","Recortes","Palabras inventadas"],"Se colocan al principio o al final: biblio + teca → biblioteca."),
+Q("La raíz «biblio-» significa…","Libro",["Lugar","Voz","Dolor"],"-teca = lugar en que se guarda algo."),
+Q("La raíz «mega-» significa…","Grande",["A distancia","Nervio","Vida"],"Ej.: megáfono."),
+Q("La raíz «neuro-» significa…","Nervio",["Vida","Grande","Voz"],"Ej.: neuralgia."),
+Q("La raíz «bio-» significa…","Vida",["Nervio","Grande","Dolencia"],"Ej.: biografía."),
+Q("La raíz «-fono» significa…","Voz",["Escritura","Dolor","Dolencia"],"Ej.: teléfono, megáfono."),
+Q("La raíz «-grafía» significa…","Escritura",["Voz","Dolor","Dolencia"],"Ej.: biografía."),
+Q("La raíz «-patía» significa…","Dolencia",["Dolor","Escritura","Voz"],"Ej.: cardiopatía."),
+]},
+{name:"3.3 · El significado de las palabras",qs:[
+Q("Los sinónimos son…","Palabras con significado igual o parecido",["Palabras con significado contrario","Palabras con significado general","Palabras con doble sentido"],"Ejemplos: alto-elevado; narrar-contar."),
+Q("¿Cuál es una pareja de sinónimos?","Alto - elevado",["Padres - hijos","Día - noche","Blanco - negro"],"Narrar - contar también."),
+Q("Los antónimos son…","Palabras con significados contrarios",["Palabras con el mismo significado","Palabras de significado general","Palabras que riman"],"Ejemplos: padres-hijos; lejos-cerca; día-noche; blanco-negro."),
+Q("¿Cuál es una pareja de antónimos?","Lejos - cerca",["Alto - elevado","Narrar - contar","Calzado - zapato"],"Significados contrarios."),
+Q("¿Con qué prefijos se pueden formar antónimos?","a-, i-, in-, im-, des-, anti-",["bio-, tele-","-ero, -ista","mega-, neuro-"],"Ejemplos: anormal, ilegal, informal, imposible, descontento, antiestético."),
+Q("«Anormal» es el antónimo de «normal» formado con el prefijo…","a-",["des-","in-","anti-"],"Anormal."),
+Q("«Ilegal» es el antónimo de «legal» formado con el prefijo…","i-",["a-","des-","anti-"],"Ilegal."),
+Q("«Informal» es el antónimo de «formal» formado con el prefijo…","in-",["i-","des-","anti-"],"Informal."),
+Q("«Imposible» es el antónimo de «posible» formado con el prefijo…","im-",["in-","des-","a-"],"Imposible."),
+Q("«Descontento» es el antónimo de «contento» formado con el prefijo…","des-",["in-","im-","anti-"],"Descontento."),
+Q("«Antiestético» es el antónimo de «estético» formado con el prefijo…","anti-",["a-","i-","des-"],"Antiestético."),
+Q("Los hiperónimos son…","Palabras con significado general que incluye a otras más concretas (hipónimos)",["Palabras con significado contrario","Palabras con significado parecido","Palabras que riman"],"Ejemplo: calzado incluye a zapato, sandalia, bota…"),
+Q("«Calzado» es un…","Hiperónimo",["Hipónimo","Sinónimo","Antónimo"],"Incluye hipónimos como zapato, zapatillas, sandalia, bota, botín."),
+Q("«Sandalia» es un…","Hipónimo de «calzado»",["Hiperónimo de «calzado»","Sinónimo de «calzado»","Antónimo de «calzado»"],"Significado más concreto."),
+Q("El hiperónimo y sus hipónimos constituyen…","Un campo semántico",["Una familia léxica","Una estrofa","Un lexema"],"Palabras relacionadas por su significado."),
+Q("El significado denotativo es…","El significado literal de la palabra",["Los contenidos y valoraciones que sugiere","Una sigla","El significado de las rimas"],"El connotativo es el que sugiere contenidos y valoraciones."),
+Q("El significado connotativo es…","Los contenidos y valoraciones que la palabra sugiere",["El significado literal","El de los sufijos","El de las siglas"],"Cada hablante puede asociar contenidos a una palabra."),
+Q("El significado denotativo de «león» es…","«Animal carnívoro…»",["La valentía","La fuerza del rey","El peligro"],"Es su significado literal."),
+Q("El significado connotativo de «león» hace referencia a…","La cualidad humana de la valentía",["Un animal carnívoro","Un mamífero","Un felino de África"],"Connotación."),
+]},
+{name:"4.1-4.2 · Géneros literarios y narrativo",qs:[
+Q("Los géneros literarios son…","Los grupos en los que se clasifican las obras literarias por su función y estructura",["Los tipos de rima","Los tipos de palabras","Los tipos de estrofas"],"Tradicionalmente son tres."),
+Q("¿Cuántos géneros literarios se distinguían tradicionalmente?","Tres",["Dos","Cuatro","Cinco"],"Narrativo, lírico y teatral o dramático."),
+Q("Los tres géneros tradicionales son…","Narrativo, lírico y teatral o dramático",["Épico, oda y elegía","Tragedia, comedia y drama","Cuento, novela y leyenda"],"Más tarde se incluyó el didáctico."),
+Q("¿Desde cuándo se incluye también el género didáctico?","A partir del siglo XVIII",["A partir del siglo X","A partir del siglo XV","A partir del siglo XX"],"Lo incluyeron los autores."),
+Q("El género narrativo está constituido por obras en las que…","Un narrador cuenta lo que les ocurre a unos personajes en un tiempo y en un espacio",["El escritor expresa sentimientos","Los actores representan en escena","Se explican conceptos"],"En un principio, se manifestó en verso."),
+Q("El género narrativo en un principio se manifestó…","En verso",["En prosa","En teatro","En canción"],"Es lo que hoy conocemos como épica."),
+Q("La épica agrupa narraciones sobre…","Las hazañas históricas o legendarias de los héroes nacionales",["Sentimientos amorosos","Asuntos cotidianos","Obras humorísticas"],"Ej.: Os Lusíadas de Luis de Camoens (siglo XVI)."),
+Q("¿Quién escribió «Os Lusíadas»?","Luis de Camoens",["Homero","Virgilio","Quevedo"],"Fue en el siglo XVI, en Portugal."),
+Q("Los subgéneros de la épica son…","Epopeya, cantar de gesta y romances",["Novela, cuento y leyenda","Tragedia, comedia y drama","Sátira, oda y elegía"],"Es la narrativa en verso."),
+Q("La epopeya es…","Un poema extenso de la Antigüedad que narra acontecimientos protagonizados por héroes, con intervención de los dioses",["Un poema breve medieval","Un poema popular breve","Una narración breve en prosa"],"Ej.: Ilíada y Odisea (Homero); Eneida (Virgilio)."),
+Q("¿Quién escribió la «Ilíada» y la «Odisea»?","Homero",["Virgilio","Camoens","Quevedo"],"Son epopeyas griegas."),
+Q("¿Quién escribió la «Eneida»?","Virgilio",["Homero","Camoens","Garcilaso"],"Es una epopeya latina."),
+Q("El cantar de gesta es…","Un poema épico compuesto en la Edad Media en el que se cantaban las hazañas de un héroe",["Un poema extenso de la Antigüedad","Un poema amoroso","Una obra de teatro"],"En castellano se conserva el Cantar de Mio Cid."),
+Q("¿Qué cantar de gesta se conserva en castellano?","El Cantar de Mio Cid",["La Ilíada","La Odisea","Os Lusíadas"],"Es un poema épico medieval."),
+Q("Los romances son…","Poemas narrativos breves popularizados en España a partir del siglo XV",["Poemas épicos de la Antigüedad","Novelas de caballerías","Obras de teatro"],"Temática variada: históricos, líricos, novelescos…"),
+Q("Algunos romances históricos surgieron…","Al descomponerse en distintos fragmentos los cantares de gesta",["De las epopeyas griegas","De las novelas","De las obras de teatro"],"Fragmentos de los cantares de gesta."),
+Q("La narrativa en prosa incluye…","Novela, cuento, microrrelato, novela corta y leyenda",["Epopeya, cantar de gesta y romances","Sátira, oda y elegía","Tragedia, comedia y drama"],"Es la narración en prosa."),
+Q("La novela es…","Una narración extensa de ficción en prosa",["Una narración breve de ficción","Una narración muy breve","Una narración en verso"],"El cuento es breve."),
+Q("El cuento es…","Una narración breve de ficción, normalmente en prosa",["Una narración extensa","Un poema épico","Un relato de extensión intermedia"],"Si tiene intención didáctica o moralizadora, se llama apólogo."),
+Q("Un cuento con intención didáctica o moralizadora se llama…","Apólogo",["Leyenda","Microrrelato","Novela corta"],"El cuento es una narración breve de ficción."),
+Q("El microrrelato es…","Una narración muy breve que no sobrepasa las veinte líneas",["Una narración extensa","Un poema épico","Un cuento largo"],"Variedad actual del cuento."),
+Q("La novela corta es…","Una narración de ficción en prosa de extensión intermedia entre el cuento y la novela",["Una narración muy breve","Una narración extensa","Un poema épico"],"Término medio."),
+Q("La leyenda es…","Un relato de carácter extraordinario inventado por la tradición",["Una narración muy breve","Un poema épico","Una novela de ciencia ficción"],"Se transmite por tradición."),
+]},
+{name:"4.3 · El género lírico y la métrica",qs:[
+Q("El género lírico agrupa obras…","Escritas generalmente en verso, en las que el escritor expresa sentimientos y emociones mediante un lenguaje cuidado",["En prosa que cuentan hechos","Dialogadas para ser representadas","Que explican temas"],"Se subdivide en sátira, oda, elegía y égloga."),
+Q("¿Cuáles son los subgéneros líricos del libro?","Sátira, oda, elegía y égloga",["Tragedia, comedia y drama","Epopeya, cantar de gesta y romance","Novela, cuento y leyenda"],"Son cuatro."),
+Q("La sátira es…","Una composición en la que se censuran vicios o defectos, individuales o colectivos, de forma humorística",["Una composición que llora a un difunto","Una composición que canta lo cotidiano","Una composición pastoril"],"Ejemplo: Quevedo."),
+Q("La oda es…","Una composición en la que se expresan sentimientos como el amor y la tristeza, o se canta a las cosas cotidianas en tonos muy diversos",["Una composición que censura vicios","Una composición sobre la muerte de un ser querido","Una composición amorosa de pastores"],"Ejemplo: Manuel Machado."),
+Q("La elegía es…","Una composición en la que se expresa el sentimiento dolorido por la muerte de un ser querido",["Una composición humorística","Una composición pastoril","Una composición que canta lo cotidiano"],"Ejemplo: Miguel Hernández."),
+Q("La égloga es…","Una composición en la que se pone el sentimiento amoroso en boca de unos pastores, en una naturaleza idealizada",["Una composición que censura vicios","Una composición sobre la muerte","Una composición épica"],"Ejemplo: Garcilaso de la Vega."),
+Q("¿Quién escribió el ejemplo de sátira del libro?","Francisco de Quevedo",["Garcilaso de la Vega","Miguel Hernández","Manuel Machado"],"«Toda esta vida es hurtar…»."),
+Q("¿Quién escribió el ejemplo de elegía del libro?","Miguel Hernández",["Quevedo","Garcilaso","Manuel Machado"],"«Tanto dolor se agrupa en mi costado…»."),
+Q("¿Quién escribió el ejemplo de égloga del libro?","Garcilaso de la Vega",["Quevedo","Miguel Hernández","Manuel Machado"],"«El dulce lamentar de dos pastores…»."),
+Q("La métrica estudia…","Los recursos utilizados por el autor de una obra lírica para conseguir ritmo y musicalidad",["Los personajes de un relato","El argumento de una obra","El origen de las palabras"],"Destacan la medida silábica, la rima, los acentos y las pausas."),
+Q("¿Cuáles son los recursos principales de la métrica?","La medida silábica de los versos, la rima, los acentos y las pausas",["Los personajes, el espacio y el tiempo","Los prefijos y sufijos","Los conectores y la elipsis"],"Con ellos se consigue ritmo."),
+Q("Los versos se clasifican por…","Su número de sílabas",["Su rima","El poeta","El tema"],"Bisílabos, trisílabos, pentasílabos…"),
+Q("Los versos de más de ocho sílabas son de…","Arte mayor",["Arte menor","Verso libre","Rima asonante"],"Los de ocho o menos son de arte menor."),
+Q("Los versos de ocho sílabas o menos son de…","Arte menor",["Arte mayor","Verso libre","Rima consonante"],"Los de más de ocho son de arte mayor."),
+Q("Para realizar el cómputo silábico se cuentan…","Las sílabas reales",["Las sílabas gramaticales","Solo las vocales","Las palabras"],"Hay que tener en cuenta sinalefas, acento, diéresis y sinéresis."),
+Q("La sinalefa se produce cuando…","Una palabra del interior de un verso termina en vocal y la siguiente empieza por vocal: forman una sola sílaba métrica",["Un diptongo se pronuncia en dos sílabas","Un hiato se pronuncia en una sílaba","La última palabra es esdrújula"],"Ejemplo: «Dichoso el humilde estado»."),
+Q("Si la última palabra del verso es aguda…","Se suma una sílaba",["Se resta una sílaba","No se cuenta","Se cuenta como esdrújula"],"«de dolor» = 4 sílabas."),
+Q("Si la última palabra del verso es esdrújula…","Se cuenta una sílaba menos",["Se suma una sílaba","No se cuenta","Se cuenta como aguda"],"«solo las lágrimas» = 7 sílabas."),
+Q("La diéresis es la licencia que permite…","Pronunciar en dos sílabas un diptongo («ruido» = 3 sílabas)",["Pronunciar en una sílaba un hiato","Unir dos vocales de palabras distintas","Sumar una sílaba"],"Licencia métrica."),
+Q("La sinéresis es la licencia que permite…","Pronunciar en una sola sílaba un hiato («cae la nieve en remolino» = 8 sílabas)",["Pronunciar en dos sílabas un diptongo","Unir dos palabras","Sumar una sílaba"],"Licencia métrica."),
+Q("La rima es…","La identidad o semejanza de sonidos al final de dos o más versos a partir de la última vocal tónica",["La medida de un verso","El ritmo de un verso","La pausa final"],"Puede ser asonante o consonante."),
+Q("En la rima asonante coinciden…","Solo las vocales (inquieto / pecho)",["Vocales y consonantes","Solo las consonantes","Ninguna letra"],"Se repiten las vocales a partir de la última tónica."),
+Q("En la rima consonante coinciden…","Las vocales y las consonantes (sola / ola)",["Solo las vocales","Solo las consonantes","Ninguna letra"],"Más completa que la asonante."),
+Q("«Inquieto» y «pecho» tienen rima…","Asonante",["Consonante","Libre","Sin rima"],"Coinciden las vocales a partir de la última tónica (e-o)."),
+Q("«Sola» y «ola» tienen rima…","Consonante",["Asonante","Libre","Sin rima"],"Coinciden vocales y consonantes."),
+Q("La estrofa es…","Un conjunto de versos que forman una estructura fija en la medida silábica y en la rima, y que se repite a lo largo del poema",["Un verso suelto","Un conjunto de palabras","Una pausa"],"Se describe con un esquema métrico."),
+Q("En el esquema métrico, los números expresan…","La medida de los versos",["La rima","La pausa","El acento"],"Las letras representan la rima."),
+Q("En el esquema métrico, las letras minúsculas señalan…","Versos de arte menor",["Versos de arte mayor","Versos sin rima","Versos esdrújulos"],"Las mayúsculas señalan versos de arte mayor."),
+Q("En el esquema métrico, las letras mayúsculas señalan…","Versos de arte mayor",["Versos de arte menor","Versos sin rima","Versos agudos"],"Las minúsculas señalan versos de arte menor."),
+Q("Cuando un verso no rima con ningún otro, en el esquema se indica con…","Una raya",["Una letra mayúscula","Una letra minúscula","Un número"],"Versos que tienen la misma rima se marcan con la misma letra."),
+]},
+{name:"4.4 · El género teatral o dramático",qs:[
+Q("El género teatral o dramático está formado por…","Obras dialogadas concebidas para ser representadas en la escena por actores",["Obras en las que un narrador cuenta hechos","Obras en verso que expresan sentimientos","Obras que explican un tema"],"Se divide en géneros mayores y menores."),
+Q("Los géneros teatrales mayores son…","Tragedia, comedia y drama",["Auto sacramental, entremés y sainete","Sátira, oda y elegía","Novela, cuento y leyenda"],"Los menores son auto sacramental, entremés y sainete."),
+Q("Los géneros teatrales menores son…","Auto sacramental, entremés y sainete",["Tragedia, comedia y drama","Sátira, oda y elegía","Epopeya, cantar de gesta y romance"],"Son piezas breves."),
+Q("La tragedia es…","Una obra dramática en la que los personajes (reyes, príncipes, nobles…) luchan contra un destino adverso y terminan siendo víctimas",["Una obra alegre con desenlace feliz","Una obra breve cómica","Una obra de personajes populares"],"Tiene un desenlace trágico."),
+Q("En la tragedia se desarrollan…","Asuntos filosófico-morales, grandes conflictos de poder y fuertes pasiones humanas",["Asuntos cotidianos y humorísticos","Asuntos religiosos únicamente","Asuntos populares"],"Con personajes nobles."),
+Q("¿Cuál es el desenlace de una tragedia?","Trágico",["Feliz","Cómico","No tiene"],"Los personajes terminan siendo víctimas."),
+Q("La comedia es…","Una obra dramática de carácter alegre y humorístico que pretende provocar la risa del espectador",["Una obra trágica","Una obra religiosa","Una obra de héroes nobles"],"Tiene un desenlace feliz."),
+Q("¿Cuál es el desenlace de una comedia?","Feliz",["Trágico","Triste","Violento"],"Pretende provocar la risa."),
+Q("El drama es…","Una obra dramática en la que los conflictos y pasiones tienen un tono menos elevado que en la tragedia",["Una obra alegre","Una obra de dioses","Una obra religiosa breve"],"Los personajes no son necesariamente reyes ni nobles."),
+Q("En el drama, los personajes…","No son necesariamente reyes ni nobles, ni están guiados solo por la fatalidad",["Son siempre reyes","Son siempre dioses","Son siempre animales"],"Su final es también trágico."),
+Q("¿Cuál es el final del drama?","Trágico",["Feliz","Cómico","Alegórico"],"Puede incluir elementos cómicos."),
+Q("Si un drama incluye elementos cómicos se llama…","Tragicomedia",["Entremés","Sainete","Auto sacramental"],"Mezcla de tragedia y comedia."),
+Q("El auto sacramental es…","Una breve pieza teatral de carácter alegórico y tema religioso",["Una pieza cómica sobre temas populares","Una obra cómica que pinta ambientes populares","Una obra de reyes"],"Género menor."),
+Q("El entremés es…","Una pieza teatral breve de carácter cómico, sobre un asunto popular, que originariamente se representaba en los entreactos de las obras principales",["Una pieza religiosa alegórica","Una obra cómica en tres actos","Un poema épico"],"Género menor."),
+Q("¿Dónde se representaba originariamente el entremés?","En los entreactos de las obras principales",["Al principio de la obra","Al final de la obra","En las iglesias"],"Son breves y cómicos."),
+Q("El sainete es…","Una obra cómica breve que pinta ambientes y personajes populares, en prosa o en verso, de forma burlesca y satírica",["Una pieza religiosa alegórica","Una obra trágica extensa","Un poema narrativo"],"Género menor."),
+Q("¿Cuál es un género teatral mayor?","Comedia",["Entremés","Sainete","Auto sacramental"],"Mayores: tragedia, comedia y drama."),
+Q("¿Cuál es un género teatral menor?","Sainete",["Tragedia","Comedia","Drama"],"Menores: auto sacramental, entremés y sainete."),
+Q("¿Qué obra breve tiene tema religioso y carácter alegórico?","Auto sacramental",["Entremés","Sainete","Comedia"],"Es un género menor."),
+Q("¿Qué obra breve cómica pinta ambientes y personajes populares?","Sainete",["Auto sacramental","Tragedia","Drama"],"Es burlesca y satírica."),
+]},
+];
+
+const CARDS=[
+["Texto","Unidad máxima de comunicación. Compuesto de uno o más enunciados relacionados entre sí y con un sentido completo.","2. El texto"],
+["Propiedades del texto","Coherencia, adecuación y cohesión: le dan unidad y sentido y permiten interpretarlo correctamente.","2. El texto"],
+["Clases de textos (intención del autor)","Narrativo · Descriptivo · Dialogado · Expositivo · Argumentativo · Prescriptivo.","2. El texto"],
+["Coherencia","Un texto es coherente si está ordenado y todas sus partes están ligadas entre sí y con el tema principal. En relación consigo mismo: enunciados vinculados, relación lógica, sin contradicciones y con un orden. En relación con el mundo: responde a nuestra experiencia.","2. El texto"],
+["Adecuación","Se emite teniendo en cuenta las circunstancias: finalidad (no usar palabras informales para pedir un cambio de examen), personas que lo reciben (no lenguaje literario con amigos) y lugar (no usar el móvil en un concierto).","2. El texto"],
+["Cohesión","Propiedad que ayuda a percibir su unidad y coherencia. Mecanismos: conectores textuales, elipsis, repetición y mecanismos referenciales.","2. El texto"],
+["Conectores (1)","De orden: en primer lugar, después, por fin · Aditivos: además, asimismo, también, encima, incluso · Explicativos: o sea, esto es, es decir, a saber.","2. El texto"],
+["Conectores (2)","De contraste: sin embargo, antes bien, en cambio · Consecutivos: por tanto, por consiguiente, de ahí que, pues · Ejemplificativos: así, por ejemplo · De rectificación: mejor dicho, más bien.","2. El texto"],
+["Elipsis","Suprimir partes del texto que el receptor conoce. Da cohesión y evita repeticiones. Ej.: «Yo pasaré las vacaciones en la playa, y ella, en la montaña» (= pasará las vacaciones).","2. El texto"],
+["Repetición","Cohesiona porque transmite la sensación de hablar siempre del mismo tema. También: campo semántico (hiperónimo e hipónimos), sinónimos y antónimos.","2. El texto"],
+["Mecanismos referenciales","Expresiones que se refieren a lo mismo: palabras que se refieren a una misma realidad (Lisboa / la capital de Portugal), pronombres que sustituyen a sustantivos (él) y determinantes posesivos (su).","2. El texto"],
+["Palabra","Conjunto de sonidos asociado a un significado, que en la escritura aparece entre dos espacios en blanco.","3. La palabra"],
+["Invariables y variables","Invariables: adverbios, preposiciones, interjecciones y conjunciones (no cambian). Variables: nombres, pronombres, determinantes, adjetivos y verbos (cambian de género, número, persona, tiempo y modo).","3. La palabra"],
+["Lexema y morfemas","Lexema o raíz: significado fundamental (dos raíces = palabra compuesta). Morfemas: flexivos (desinencias, al final: género, número, persona, tiempo, modo) y derivativos (prefijos antes del lexema, sufijos después).","3. La palabra"],
+["Análisis morfológico","1) Localizar el lexema. 2) Señalar los morfemas derivativos (prefijos y sufijos). 3) Identificar si hay morfemas flexivos.","3. La palabra"],
+["Palabras simples, compuestas y derivadas","Simples: un solo lexema (ratón). Compuestas: dos o más voces (sacapuntas). Derivadas: prefijos o sufijos (pescadera, inútil). Parasintéticas: composición y derivación a la vez (sietemesina, picapedrero).","3. La palabra"],
+["Sufijos y categoría","Los sufijos pueden cambiar la categoría: nombre (vivir > vivienda), adjetivo (vapor > vaporoso), verbo (amarillo > amarillear), adverbio (sincero > sinceramente).","3. La palabra"],
+["Siglas","Letras iniciales de varias palabras (UE). Se escriben con mayúsculas, sin puntos ni espacios y no se separan a final de línea (BCE, ONG).","3. La palabra"],
+["Acrónimos","Unión de fragmentos de dos o más palabras (informática) o siglas que se pronuncian como una palabra (sida). Llevan tilde si lo indican las reglas de acentuación; si son nombres propios, inicial mayúscula (Unicef).","3. La palabra"],
+["Acortamientos y abreviaturas","Acortamientos: recortes de palabras (profe, bici, foto, bus). Abreviaturas: supresión de letras en la escritura (Dra., D.); se escriben con punto y llevan tilde si la palabra abreviada la lleva (pág.).","3. La palabra"],
+["Composición culta","Raíces de origen griego o latino: biblio (libro) + teca (lugar) → biblioteca. mega- (grande), tele- (a distancia), neuro- (nervio), bio- (vida), -fono (voz), -grafía (escritura), -algia (dolor), -patía (dolencia).","3. La palabra"],
+["Sinónimos y antónimos","Sinónimos: significado igual o parecido (alto-elevado). Antónimos: significados contrarios (día-noche); se forman con a-, i-, in-, im-, des-, anti-.","3. La palabra"],
+["Hiperónimos e hipónimos","Hiperónimo: significado general que incluye otros más concretos (calzado). Hipónimos: zapato, zapatillas, sandalia, bota, botín. Constituyen un campo semántico.","3. La palabra"],
+["Denotación y connotación","Denotativo: significado literal (león = animal carnívoro…). Connotativo: contenidos y valoraciones que sugiere (león = valentía).","3. La palabra"],
+["Géneros literarios","Grupos en los que se clasifican las obras literarias por su función y estructura. Tradicionalmente: narrativo, lírico y teatral o dramático. Desde el siglo XVIII también el didáctico.","4. Géneros literarios"],
+["Género narrativo","Un narrador cuenta lo que les ocurre a unos personajes en un tiempo y un espacio. Primero en verso (épica), después en prosa.","4. Géneros literarios"],
+["Épica: epopeya","Poema extenso de la Antigüedad con héroes de importancia histórica y dioses. Ej.: Ilíada y Odisea (Homero), Eneida (Virgilio).","4. Géneros literarios"],
+["Épica: cantar de gesta y romances","Cantar de gesta: poema épico medieval sobre las hazañas de un héroe (Cantar de Mio Cid). Romances: poemas narrativos breves, populares en España desde el siglo XV.","4. Géneros literarios"],
+["Narrativa en prosa","Novela (extensa) · Cuento (breve; si es didáctico, apólogo) · Microrrelato (hasta veinte líneas) · Novela corta (intermedia) · Leyenda (relato extraordinario de la tradición).","4. Géneros literarios"],
+["Género lírico","Obras escritas generalmente en verso en las que se expresan sentimientos y emociones con un lenguaje cuidado.","4. Géneros literarios"],
+["Subgéneros líricos","Sátira: censura vicios con humor (Quevedo) · Oda: amor, tristeza o cosas cotidianas (Manuel Machado) · Elegía: dolor por la muerte de un ser querido (Miguel Hernández) · Égloga: amor en boca de pastores (Garcilaso).","4. Géneros literarios"],
+["Métrica","Estudia los recursos para conseguir ritmo y musicalidad: medida silábica, rima, acentos y pausas. Arte mayor: más de 8 sílabas; arte menor: 8 o menos.","4. Géneros literarios"],
+["Cómputo silábico","Sinalefa: vocal final + vocal inicial = una sílaba. Acento: aguda suma una sílaba; esdrújula resta una. Diéresis: diptongo en dos sílabas. Sinéresis: hiato en una sílaba.","4. Géneros literarios"],
+["Rima","Identidad o semejanza de sonidos al final de dos o más versos desde la última vocal tónica. Asonante: solo vocales (inquieto/pecho). Consonante: vocales y consonantes (sola/ola).","4. Géneros literarios"],
+["Estrofa y esquema métrico","Estrofa: conjunto de versos con estructura fija en medida y rima. Esquema: números = medida; letras = rima (minúscula: arte menor; mayúscula: arte mayor); raya = verso suelto.","4. Géneros literarios"],
+["Género teatral o dramático","Obras dialogadas concebidas para ser representadas en escena por actores. Mayores: tragedia, comedia, drama. Menores: auto sacramental, entremés, sainete.","4. Géneros literarios"],
+["Tragedia, comedia y drama","Tragedia: nobles contra un destino adverso, final trágico. Comedia: alegre, provoca risa, final feliz. Drama: tono menos elevado, final trágico; con elementos cómicos = tragicomedia.","4. Géneros literarios"],
+["Géneros teatrales menores","Auto sacramental: breve, alegórico y religioso. Entremés: breve y cómico, en los entreactos. Sainete: cómico breve, ambientes populares, burlesco y satírico.","4. Géneros literarios"],
+];
+
+const DEV=[
+{q:"Define texto y explica sus tres propiedades.",
+ ans:"El texto es la unidad máxima de comunicación, compuesto de uno o más enunciados relacionados entre sí y con un sentido completo. Debe tener tres propiedades: coherencia (está ordenado y todas sus partes están ligadas entre sí y con el tema, sin contradicciones, y responde al conocimiento del mundo), adecuación (se emite teniendo en cuenta la finalidad, las personas que lo reciben y el lugar) y cohesión (ayuda a percibir su unidad y coherencia mediante conectores, elipsis, repetición y mecanismos referenciales).",
+ kw:[["unidad maxima"],["enunciados"],["coherencia"],["adecuacion"],["cohesion"],["finalidad"],["personas","receptor"],["lugar"]]},
+{q:"Explica qué es la coherencia y pon ejemplos de textos coherentes e incoherentes.",
+ ans:"Un texto es coherente cuando está ordenado y todas sus partes están ligadas entre sí y con el tema principal. En relación consigo mismo: sus enunciados se vinculan con el tema general, cada uno se relaciona con el anterior y el siguiente de manera lógica, no hay contradicciones y siguen un orden (temporal, de importancia…). En relación con el mundo: lo que dice responde a la experiencia o conocimiento que tenemos; no sería coherente decir que un caballo vuela. En literatura, algunas incoherencias adquieren sentido, como en las fábulas de Esopo.",
+ kw:[["ordenado"],["ligadas","vinculan"],["tema"],["contradicciones"],["orden"],["mundo","experiencia"],["caballo"],["esopo","fabula"]]},
+{q:"Explica qué es la adecuación y cita sus tres motivos con un ejemplo de cada uno.",
+ ans:"Un texto es adecuado cuando se emite teniendo en cuenta las circunstancias en las que se produce. Depende de tres motivos: la finalidad (inadecuado emplear palabras muy informales al solicitar un cambio de examen), las personas que lo reciben (inadecuado utilizar un lenguaje literario en una conversación de amigos) y el lugar (en un concierto sería inadecuado utilizar el móvil).",
+ kw:[["circunstancias"],["finalidad"],["examen","informales"],["personas"],["amigos","literario"],["lugar"],["concierto","movil"]]},
+{q:"¿Qué es la cohesión? Explica sus mecanismos (conectores, elipsis, repetición y referenciales).",
+ ans:"La cohesión ayuda a percibir la unidad y coherencia del texto. Mecanismos: conectores textuales (palabras que indican la relación entre enunciados: de orden, aditivos, explicativos, de contraste, consecutivos, ejemplificativos y de rectificación); elipsis (suprimir partes del texto que el receptor conoce); repetición de palabras (sensación de hablar del mismo tema; campo semántico, sinónimos y antónimos); y mecanismos referenciales (expresiones que se refieren a lo mismo: palabras que designan una misma realidad, pronombres y determinantes posesivos).",
+ kw:[["unidad"],["conectores"],["orden","aditivos","contraste","consecutivos"],["elipsis"],["suprimir","suprime"],["repeticion"],["campo semantico","sinonimos"],["referenciales"],["pronombres","posesivos"]]},
+{q:"Explica los tipos de conectores textuales y pon ejemplos.",
+ ans:"De orden (en primer lugar, después, por fin), aditivos (además, asimismo, también, incluso), explicativos (o sea, es decir, a saber), de contraste (sin embargo, en cambio, antes bien), consecutivos (por tanto, por consiguiente, de ahí que, pues), ejemplificativos (así, por ejemplo) y de rectificación (mejor dicho, más bien).",
+ kw:[["orden"],["aditivos"],["explicativos"],["contraste"],["consecutivos"],["ejemplificativos"],["rectificacion"],["sin embargo","por tanto","ademas"]]},
+{q:"Explica la estructura de las palabras variables (lexema y morfemas) con ejemplos y los pasos del análisis morfológico.",
+ ans:"Las palabras variables constan de lexema o raíz (significado fundamental; con dos raíces, palabra compuesta) y morfemas. Los morfemas flexivos o desinencias aparecen al final y aportan información de género (cierv-o), número (tortuga-s), persona (habl-o), tiempo (com-ían) y modo (respet-ase). Los derivativos son prefijos (antes del lexema: re-tomar, im-posible) y sufijos (después: carpint-era, flaut-ista). Pasos: 1) localizar el lexema; 2) señalar los morfemas derivativos; 3) identificar los flexivos.",
+ kw:[["lexema","raiz"],["morfemas"],["flexivos","desinencias"],["genero","numero","persona","tiempo","modo"],["derivativos"],["prefijos"],["sufijos"],["pasos","localizar"]]},
+{q:"Explica los mecanismos de formación de palabras: composición, derivación, parasíntesis, siglas, acrónimos y abreviaciones.",
+ ans:"Simples o primitivas: un solo lexema (ratón). Compuestas: dos o más voces (sacapuntas). Derivadas: se añaden prefijos o sufijos al lexema (pescadera, inútil); los sufijos pueden cambiar la categoría. Parasintéticas: composición y derivación a la vez (sietemesina). Siglas: iniciales de varias palabras (UE), con mayúsculas y sin puntos. Acrónimos: unión de fragmentos de palabras (informática) o siglas que se pronuncian como una palabra (sida). Otras abreviaciones: acortamientos (profe, bici) y abreviaturas (Dra.). Composición culta: raíces griegas o latinas (biblioteca, teléfono).",
+ kw:[["simples","primitivas"],["compuestas"],["derivadas"],["parasinteticas"],["siglas"],["acronimos"],["acortamientos"],["abreviaturas"],["grecolatinas","griegas","latinas","composicion culta"]]},
+{q:"Explica el significado de las palabras: sinónimos, antónimos, hiperónimos e hipónimos, denotación y connotación.",
+ ans:"Sinónimos: significado igual o parecido (alto-elevado). Antónimos: significados contrarios (día-noche); se forman con prefijos como a-, i-, in-, im-, des-, anti-. Hiperónimos: significado general que incluye a otras palabras más concretas, los hipónimos (calzado: zapato, sandalia, bota); forman un campo semántico. Denotación: significado literal (león: animal carnívoro). Connotación: contenidos y valoraciones que la palabra sugiere (león: la valentía).",
+ kw:[["sinonimos"],["antonimos"],["contrarios"],["prefijos"],["hiperonimo"],["hiponimos"],["campo semantico"],["denotativo","literal"],["connotativo","valentia"]]},
+{q:"Explica el género narrativo: subgéneros en verso y en prosa con ejemplos.",
+ ans:"El género narrativo está formado por obras en las que un narrador cuenta lo que les ocurre a unos personajes en un tiempo y en un espacio. En verso (épica): epopeya (poema extenso de la Antigüedad; Ilíada, Odisea, Eneida), cantar de gesta (poema épico medieval; Cantar de Mio Cid) y romances (poemas narrativos breves desde el siglo XV). En prosa: novela, cuento (si es didáctico, apólogo), microrrelato (hasta veinte líneas), novela corta y leyenda.",
+ kw:[["narrador"],["personajes"],["epica"],["epopeya","iliada","odisea"],["cantar de gesta","mio cid"],["romances"],["novela"],["cuento"],["microrrelato"],["leyenda"]]},
+{q:"Explica el género lírico: subgéneros y recursos de la métrica (medida, rima y estrofa).",
+ ans:"El género lírico agrupa obras generalmente en verso en las que el autor expresa sentimientos y emociones. Subgéneros: sátira (censura vicios con humor), oda (amor, tristeza o cosas cotidianas), elegía (dolor por la muerte de un ser querido) y égloga (amor en boca de pastores). La métrica estudia el ritmo: medida silábica (arte menor, 8 o menos; arte mayor, más de 8; con sinalefa, acento, diéresis y sinéresis), rima (asonante: vocales; consonante: vocales y consonantes) y estrofa (conjunto de versos con estructura fija, descrita con un esquema métrico).",
+ kw:[["sentimientos","emociones"],["satira"],["oda"],["elegia"],["egloga"],["metrica"],["arte menor","arte mayor"],["sinalefa"],["rima"],["asonante","consonante"],["estrofa"]]},
+{q:"Explica el género teatral: géneros mayores y menores.",
+ ans:"El género teatral o dramático está formado por obras dialogadas concebidas para ser representadas por actores. Mayores: tragedia (personajes nobles que luchan contra un destino adverso, desenlace trágico), comedia (alegre y humorística, desenlace feliz) y drama (conflictos de tono menos elevado, final trágico; si incluye elementos cómicos, tragicomedia). Menores: auto sacramental (breve, alegórico y religioso), entremés (breve y cómico, en los entreactos) y sainete (cómico breve, ambientes populares, burlesco y satírico).",
+ kw:[["dialogadas","actores","representadas"],["tragedia"],["comedia"],["drama"],["tragicomedia"],["auto sacramental"],["entremes"],["sainete"],["mayores","menores"]]},
+];
+
+/* ============ UTILIDADES ============ */
+const $=s=>document.querySelector(s);
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let store={};
+try{store=JSON.parse(localStorage.getItem("estudioLen")||"{}")}catch(e){}
+store.tests=store.tests||{};store.known=store.known||{};
+const save=()=>{try{localStorage.setItem("estudioLen",JSON.stringify(store))}catch(e){}};
+
+const app=$("#app");
+function view(v){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  ({tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  window.scrollTo(0,0);
+}
+$("#nav").onclick=e=>{if(e.target.dataset.v)view(e.target.dataset.v)};
+
+/* ============ TESTS ============ */
+let T=null;
+function viewTests(){
+  const best=(k,n)=>{const r=store.tests[k];return r?`Mejor: ${r.best}/${r.n||n}`:"Sin hacer"};
+  app.innerHTML=`<div class="card"><b>Elige un test</b>
+    <p class="mut">Si fallas, te mostramos la respuesta correcta y por qué.</p>
+    <label class="row"><input type="checkbox" id="exam"> <span><b>Modo examen</b>: sin feedback hasta el final (la corrección con explicaciones sale al terminar)</span></label>
+  </div>
+  <h3>Por apartados (largos)</h3>
+  <div class="grid">${TOPICS.map((m,i)=>`<div class="card model" data-m="t${i}"><b>📚 ${esc(m.name)}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("mt"+i,m.qs.length)}</div></div>`).join("")}</div>
+  <h3>Modelos de examen</h3>
+  <div class="grid">${MODELS.map((m,i)=>`<div class="card model" data-m="${i}"><b>📝 ${m.name}</b><div class="mut">${m.qs.length} preguntas</div><div class="mut">${best("m"+i,m.qs.length)}</div></div>`).join("")}
+  <div class="card model" data-m="mix"><b>🎲 Mixto</b><div class="mut">20 preguntas al azar de todos los tests</div></div>
+  <div class="card model" data-m="fails"><b>🔁 Repasar fallos</b><div class="mut">${(store.fails||[]).length} preguntas falladas guardadas</div></div></div>`;
+  app.onclick=e=>{const c=e.target.closest(".model");if(!c)return;startTest(c.dataset.m,$("#exam").checked)};
+}
+function startTest(m,exam){
+  let qs,name;
+  const all=[...MODELS,...TOPICS].flatMap(x=>x.qs);
+  if(m==="mix"){qs=shuffle(all).slice(0,20);name="Mixto"}
+  else if(m==="fails"){qs=all.filter(q=>(store.fails||[]).includes(q.q));name="Repaso de fallos";if(!qs.length){alert("¡No tienes fallos guardados! 🎉");return}}
+  else if(m[0]==="t"){const t=TOPICS[+m.slice(1)];qs=t.qs.slice();name=t.name}
+  else{qs=MODELS[+m].qs.slice();name=MODELS[+m].name}
+  qs=shuffle(qs).map(q=>({...q,opts:shuffle([q.ok,...q.bad])}));
+  T={m,name,exam,qs,i:0,ans:[],locked:false};
+  renderQ();
+}
+function renderQ(){
+  const q=T.qs[T.i],n=T.qs.length;
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">${T.name}${T.exam?" · modo examen":""}</span><span class="sp"></span><span class="mut">${T.i+1}/${n}</span></div>
+  <div class="bar"><i style="width:${T.i/n*100}%"></i></div>
+  <h3 style="margin:0 0 10px">${esc(q.q)}</h3>
+  <div id="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+  <div id="fb"></div>
+  <div class="row" style="margin-top:14px"><button class="btn ghost" id="quit">Salir</button><span class="sp"></span><button class="btn" id="next" hidden></button></div></div>`;
+  T.locked=false;
+  $("#quit").onclick=()=>{if(confirm("¿Salir del test? Se perderá el progreso."))viewTests()};
+  $("#opts").onclick=e=>{const b=e.target.closest(".opt");if(!b||T.locked&&!T.exam)return;pick(+b.dataset.k)};
+  $("#next").onclick=()=>{if(T.i+1<n){T.i++;renderQ()}else finish()};
+}
+function pick(k){
+  const q=T.qs[T.i];T.ans[T.i]=k;
+  const next=$("#next");next.hidden=false;next.textContent=T.i+1<T.qs.length?"Siguiente →":"Ver resultado";
+  const btns=[...document.querySelectorAll(".opt")];
+  if(T.exam){btns.forEach((b,j)=>b.classList.toggle("sel",j===k));return}
+  T.locked=true;
+  const good=q.opts[k]===q.ok;
+  btns.forEach((b,j)=>{b.disabled=true;if(q.opts[j]===q.ok)b.classList.add("ok");else if(j===k)b.classList.add("ko")});
+  $("#fb").innerHTML=good
+   ?`<div class="fb ok"><b>✅ ¡Correcto!</b><br>${esc(q.why)}</div>`
+   :`<div class="fb ko"><b>❌ Has fallado.</b> La respuesta correcta es:<br><b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
+}
+function finish(){
+  const n=T.qs.length;
+  const wrong=T.qs.filter((q,i)=>q.opts[T.ans[i]]!==q.ok);
+  const sc=n-wrong.length;
+  store.fails=(store.fails||[]).filter(f=>!T.qs.some(q=>q.q===f));
+  wrong.forEach(q=>store.fails.push(q.q));
+  const key="m"+T.m;const r=store.tests[key]||{best:0,tries:0};
+  r.tries++;r.best=Math.max(r.best,sc);r.last=sc;r.n=n;store.tests[key]=r;
+  store.hist=(store.hist||[]).concat({name:T.name,sc,n,d:new Date().toLocaleDateString("es-ES")}).slice(-30);
+  save();
+  const nota=(sc/n*10).toFixed(1);
+  app.innerHTML=`<div class="card" style="text-align:center"><span class="tag">${T.name}</span>
+   <div class="score">${sc}/${n} · ${nota}</div>
+   <p>${sc===n?"🏆 ¡Perfecto!":sc/n>=.5?"👍 ¡Aprobado! Repasa los fallos:":"💪 A repasar un poco más:"}</p>
+   <div class="row" style="justify-content:center"><button class="btn" id="again">Repetir</button><button class="btn ghost" id="back">Menú</button></div></div>
+   ${wrong.length?`<h3>Tus fallos (${wrong.length})</h3>`+wrong.map(q=>`<div class="card"><b>${esc(q.q)}</b>
+     <div class="fb ko" style="margin-top:8px">Tu respuesta: ${esc(q.opts[T.ans[T.qs.indexOf(q)]]??"(en blanco)")}</div>
+     <div class="fb ok" style="margin-top:8px"><b>Correcta:</b> ${esc(q.ok)}<br><b>Porque:</b> ${esc(q.why)}</div></div>`).join(""):""}`;
+  $("#again").onclick=()=>startTest(T.m,T.exam);
+  $("#back").onclick=viewTests;
+}
+
+/* ============ TARJETAS ============ */
+let C={sec:"Todas",pool:[],i:0,onlyReview:false};
+function viewCards(){
+  const secs=["Todas",...new Set(CARDS.map(c=>c[2]))];
+  const pool=()=>CARDS.map((c,id)=>({c,id})).filter(x=>(C.sec==="Todas"||x.c[2]===C.sec)&&(!C.onlyReview||!store.known[x.id]));
+  C.pool=pool();if(C.i>=C.pool.length)C.i=0;
+  const cur=C.pool[C.i];
+  const knownN=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="chips">${secs.map(s=>`<button class="chip ${s===C.sec?"on":""}" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+  <div class="row"><label class="mut"><input type="checkbox" id="rev" ${C.onlyReview?"checked":""}> Solo las que aún no sé</label><span class="sp"></span><span class="mut">Dominadas: ${knownN}/${CARDS.length}</span></div>
+  ${cur?`<div class="flash"><div class="flip" id="flip"><div class="face front">${esc(cur.c[0])}<div class="mut" style="font-weight:400;font-size:.8rem;margin-top:10px">toca para girar</div></div><div class="face back">${esc(cur.c[1])}</div></div></div>
+  <div class="row"><button class="btn ghost" id="prev">←</button><span class="mut">${C.i+1}/${C.pool.length}</span><button class="btn ghost" id="nx">→</button><span class="sp"></span>
+   <button class="btn ghost" id="rv">🔁 Repasar</button><button class="btn" id="kn">✅ Me la sé</button></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="sh">🔀 Barajar</button></div>`
+  :`<div class="card">🎉 No quedan tarjetas pendientes en esta selección.</div>`}`;
+  app.onclick=e=>{const ch=e.target.closest(".chip");if(ch){C.sec=ch.dataset.s;C.i=0;viewCards()}};
+  $("#rev").onchange=e=>{C.onlyReview=e.target.checked;C.i=0;viewCards()};
+  if(!cur)return;
+  $("#flip").onclick=()=>$("#flip").classList.toggle("on");
+  const go=d=>{C.i=(C.i+d+C.pool.length)%C.pool.length;viewCards()};
+  $("#prev").onclick=()=>go(-1);$("#nx").onclick=()=>go(1);
+  $("#kn").onclick=()=>{store.known[cur.id]=true;save();C.pool=pool();if(!C.onlyReview)C.i=(C.i+1)%C.pool.length;viewCards()};
+  $("#rv").onclick=()=>{store.known[cur.id]=false;save();go(1)};
+  $("#sh").onclick=()=>{C.i=Math.floor(Math.random()*C.pool.length);viewCards()};
+}
+
+/* ============ DESARROLLO ============ */
+let D={i:0,checked:false};
+function viewDev(){
+  const d=DEV[D.i];
+  app.innerHTML=`<div class="card"><div class="row"><span class="tag">Pregunta de desarrollo</span><span class="sp"></span><span class="mut">${D.i+1}/${DEV.length}</span></div>
+  <h3 style="margin:8px 0">${esc(d.q)}</h3>
+  <textarea id="txt" placeholder="Escribe aquí tu respuesta…">${esc(store["dev"+D.i]||"")}</textarea>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" id="p">←</button><button class="btn ghost" id="n">→</button><span class="sp"></span><button class="btn" id="chk">Comprobar</button></div>
+  <div id="res"></div></div>`;
+  $("#txt").oninput=e=>{store["dev"+D.i]=e.target.value;save()};
+  $("#p").onclick=()=>{D.i=(D.i+DEV.length-1)%DEV.length;viewDev()};
+  $("#n").onclick=()=>{D.i=(D.i+1)%DEV.length;viewDev()};
+  $("#chk").onclick=()=>{
+    const t=norm($("#txt").value);
+    const hits=d.kw.map(g=>g.some(w=>t.includes(norm(w))));
+    const ok=hits.filter(Boolean).length;
+    $("#res").innerHTML=`<p><b>Conceptos clave detectados: ${ok}/${d.kw.length}</b></p>
+    <div>${d.kw.map((g,i)=>`<span class="kw ${hits[i]?"has":"no"}">${hits[i]?"✓":"✗"} ${esc(g[0])}</span>`).join("")}</div>
+    <p class="mut">Es una detección automática por palabras: si lo explicaste con otras palabras, compara con la respuesta modelo.</p>
+    <div class="model-ans"><b>Respuesta modelo</b>\n${esc(d.ans)}</div>`;
+  };
+}
+
+/* ============ PROGRESO ============ */
+function viewStats(){
+  const k=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="grid">
+   <div class="card"><span class="tag">Tarjetas dominadas</span><div class="score">${k}/${CARDS.length}</div></div>
+   <div class="card"><span class="tag">Preguntas por repasar</span><div class="score">${(store.fails||[]).length}</div></div></div>
+  <div class="card"><b>Tests por apartado</b>${TOPICS.map((m,i)=>{const r=store.tests["mt"+i];return `<p>${esc(m.name)}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
+  <div class="card"><b>Modelos de test</b>${MODELS.map((m,i)=>{const r=store.tests["m"+i];return `<p>${m.name}: ${r?`mejor ${r.best}/${r.n} · último ${r.last}/${r.n} · ${r.tries} intento(s)`:"sin hacer"}</p>`}).join("")}</div>
+  <div class="card"><b>Últimos intentos</b>${(store.hist||[]).slice().reverse().slice(0,10).map(h=>`<p class="mut">${h.d} · ${esc(h.name)} · ${h.sc}/${h.n}</p>`).join("")||'<p class="mut">Todavía no hay intentos.</p>'}</div>
+  <button class="btn ghost" id="rst">Borrar progreso</button>`;
+  $("#rst").onclick=()=>{if(confirm("¿Borrar todo el progreso?")){store={tests:{},known:{}};save();viewStats()}};
+}
+view("tests");
+</script>
+</body>
+</html>
