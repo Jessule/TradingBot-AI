@@ -732,7 +732,7 @@ function viewCards(){
   $("#flip").onclick=()=>{SFX.flip();$("#flip").classList.toggle("on")};
   const mv=d=>{C.i=(C.i+d+pool.length)%pool.length;viewCards()};
   $("#prev").onclick=()=>mv(-1);$("#nx").onclick=()=>mv(1);
-  $("#kn").onclick=()=>{if(!store.known[cur.id])addXP(3);store.known[cur.id]=true;save();SFX.known();const r=$(".flash").getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,24);$(".flash").classList.add("fly");setTimeout(()=>{if(!C.onlyReview)C.i=(C.i+1)%pool.length;viewCards()},reduce?0:380)};
+  $("#kn").onclick=()=>{if(!store.known[cur.id])addXP(3);store.known[cur.id]=true;save();SFX.known();const r=$(".flash").getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,24);$(".flash").classList.add("fly");setTimeout(()=>{if(!$(".flash"))return;if(!C.onlyReview)C.i=(C.i+1)%pool.length;viewCards()},reduce?0:380)};
   $("#rv").onclick=()=>{store.known[cur.id]=false;save();mv(1)};
   $("#sh").onclick=()=>{C.i=Math.floor(Math.random()*pool.length);viewCards()};
 }
