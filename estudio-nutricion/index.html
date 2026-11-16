@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Estudio Nutrición y Alimentación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0a0d12;--surface:#111620;--surface2:#161c28;--border:#1e2a3a;
+  --accent:#00d4a0;--accent-dim:rgba(0,212,160,.12);--accent-line:rgba(0,212,160,.3);
+  --red:#ff4d6a;--red-dim:rgba(255,77,106,.12);--yellow:#f5c542;--yellow-dim:rgba(245,197,66,.1);--purple:#9d7bff;
+  --text:#e8edf5;--text2:#7a8fa8;--text3:#3d5068;
+  --font:'Space Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(1200px 600px at 50% -10%,rgba(0,212,160,.06),transparent),var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.5;min-height:100vh}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.02rem;letter-spacing:-.4px;min-width:0}
+.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.orb{width:14px;height:14px;border-radius:50%;flex-shrink:0;background:radial-gradient(circle at 30% 30%,#6ffdd6,var(--accent));box-shadow:0 0 14px var(--accent)}
+.wallet{display:flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid var(--accent-line);padding:5px 12px;border-radius:30px;flex-shrink:0}
+.wallet .amt{font-family:var(--mono);font-weight:700;color:var(--accent)}
+.wallet .lbl{font-size:.62rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.nav{display:flex;gap:6px;padding:10px 16px;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--bg);scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav button{flex-shrink:0;background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:8px 14px;font-weight:600;font-size:.82rem;cursor:pointer;transition:all .15s}
+.nav button:hover{border-color:var(--accent);color:var(--accent)}
+.nav button.on{background:var(--accent-dim);border-color:var(--accent-line);color:var(--accent)}
+main{max-width:920px;margin:0 auto;padding:20px 16px 80px}
+h2{font-size:1.2rem;font-weight:700;letter-spacing:-.3px;margin:22px 0 10px}
+.mut{color:var(--text2);font-size:.9rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.sp{flex:1}
+/* hero */
+.hero{text-align:center;padding:30px 0 10px}
+.hero h1{font-size:clamp(1.9rem,6vw,2.6rem);font-weight:700;letter-spacing:-1px;line-height:1.1}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text2);max-width:480px;margin:12px auto 0;font-size:.95rem}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:24px 0 10px}
+.big-btn{border:none;cursor:pointer;font-weight:700;padding:15px 28px;border-radius:14px;font-size:1.02rem;transition:transform .12s,box-shadow .2s}
+.big-btn.play{background:linear-gradient(135deg,var(--accent),#06b386);color:#04150f;box-shadow:0 8px 30px rgba(0,212,160,.35)}
+.big-btn.alt{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.big-btn:active{transform:scale(.96)}
+.big-btn:disabled{opacity:.4;cursor:default}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.pill{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:8px 14px;text-align:center;min-width:92px}
+.pill .l{font-size:.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.pill .v{font-family:var(--mono);font-weight:700;font-size:1.1rem}
+.pill .v.g{color:var(--accent)}.pill .v.y{color:var(--yellow)}.pill .v.r{color:var(--red)}.pill .v.p{color:var(--purple)}
+.lvl{max-width:420px;margin:18px auto 0}
+.bar{height:6px;border-radius:6px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--yellow));border-radius:6px;transition:width .3s}
+/* mission cards */
+.mission{cursor:pointer;text-align:left;transition:border-color .15s,transform .12s,box-shadow .2s;display:flex;flex-direction:column;gap:6px}
+.mission:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-line),0 8px 24px rgba(0,212,160,.08);transform:translateY(-2px)}
+.mission b{font-size:.95rem;line-height:1.25}
+.mission .meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.72rem;color:var(--text2)}
+.mission .best{color:var(--accent)}
+.opts{display:flex;flex-direction:column;gap:8px;margin:6px 0 0}
+.toggle{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;font-size:.88rem}
+.toggle input{accent-color:var(--accent);margin-top:4px;width:16px;height:16px}
+/* play */
+.hud{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.exit{background:var(--red-dim);border:1px solid rgba(255,77,106,.35);color:var(--red);border-radius:10px;padding:8px 14px;font-weight:700;font-size:.8rem;cursor:pointer}
+.timebar{height:5px;border-radius:5px;background:var(--surface2);overflow:hidden;margin-bottom:16px}
+.timebar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--yellow))}
+.timebar i.low{background:var(--red)}
+.q{font-size:clamp(1.05rem,3.4vw,1.3rem);font-weight:600;letter-spacing:-.2px;line-height:1.35;margin-bottom:14px;text-wrap:balance}
+.opt{position:relative;display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px 14px;margin-bottom:9px;cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+.opt .k{font-family:var(--mono);font-weight:700;font-size:.78rem;color:var(--text2);background:var(--bg);border:1px solid var(--border);border-radius:7px;min-width:26px;height:26px;display:grid;place-items:center;flex-shrink:0}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateX(2px)}
+.opt.sel{border-color:var(--purple);background:rgba(157,123,255,.1)}
+.opt.ok{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 18px rgba(0,212,160,.2)}
+.opt.ok .k{color:#04150f;background:var(--accent);border-color:var(--accent)}
+.opt.ko{border-color:var(--red);background:var(--red-dim);animation:shake .35s}
+.opt.ko .k{color:#fff;background:var(--red);border-color:var(--red)}
+.opt:disabled{cursor:default;color:var(--text)}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.fb{margin-top:6px;padding:13px 14px;border-radius:12px;border:1px solid;font-size:.93rem}
+.fb.ok{background:var(--accent-dim);border-color:var(--accent-line)}
+.fb.ko{background:var(--red-dim);border-color:rgba(255,77,106,.35)}
+.fb b.t{font-family:var(--mono);font-size:.78rem;text-transform:uppercase;letter-spacing:1px}
+.fb.ok b.t{color:var(--accent)}.fb.ko b.t{color:var(--red)}
+.pop{position:fixed;pointer-events:none;font-family:var(--mono);font-weight:700;color:var(--accent);text-shadow:0 0 10px rgba(0,212,160,.6);animation:floatUp .9s ease-out forwards;z-index:50}
+@keyframes floatUp{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-46px) scale(1.3)}}
+/* result */
+.res{text-align:center;padding:10px 0}
+.ring{width:150px;height:150px;margin:6px auto}
+.ring text{font-family:var(--mono);font-weight:700}
+.stars{font-size:1.6rem;letter-spacing:6px;margin:6px 0}
+.rev{text-align:left;margin-top:12px}
+.rev .tit{font-weight:600;margin-bottom:8px}
+/* cards */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:20px;padding:6px 12px;font-size:.8rem;font-weight:600;cursor:pointer}
+.chip.on{background:var(--accent-dim);border-color:var(--accent-line);color:var(--accent)}
+.flash{perspective:1200px;margin:14px 0}
+.flip{position:relative;height:280px;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.8,.3,1);cursor:pointer}
+.flip.on{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid var(--border);overflow:auto}
+.front{background:linear-gradient(160deg,var(--surface2),var(--surface));font-size:clamp(1.2rem,4vw,1.6rem);font-weight:700;letter-spacing:-.4px;box-shadow:0 0 0 1px var(--accent-line) inset}
+.back{background:linear-gradient(160deg,#0f2a26,var(--surface));transform:rotateY(180deg);font-size:1.02rem;line-height:1.55;border-color:var(--accent-line)}
+.hint{font-family:var(--mono);font-size:.68rem;color:var(--text3);margin-top:12px;font-weight:500;letter-spacing:1px;text-transform:uppercase}
+.sec{font-family:var(--mono);font-size:.66rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-weight:700}
+/* dev */
+textarea{width:100%;min-height:150px;padding:13px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font:inherit;resize:vertical}
+textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-dim)}
+.kw{display:inline-block;margin:3px 5px 3px 0;padding:4px 11px;border-radius:14px;font-size:.82rem;font-weight:600;border:1px solid var(--border)}
+.kw.has{background:var(--accent-dim);border-color:var(--accent-line);color:var(--accent)}
+.kw.no{background:var(--red-dim);border-color:rgba(255,77,106,.35);color:var(--red)}
+.model-ans{background:var(--yellow-dim);border:1px solid rgba(245,197,66,.3);padding:13px 14px;border-radius:12px;margin-top:12px;white-space:pre-line;font-size:.93rem}
+.mini{background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:9px 14px;font-weight:600;font-size:.85rem;cursor:pointer}
+.mini:hover{border-color:var(--accent);color:var(--accent)}
+.hist p{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.8rem;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:480px){.big-btn{padding:14px 22px}.flip{height:300px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><div class="orb"></div><span id="brand"></span></div>
+  <div class="wallet"><span class="lbl" id="lvl">Nv 1</span><span class="amt" id="xp">0 XP</span></div>
+</div>
+<nav class="nav" id="nav">
+  <button data-v="home" class="on">Inicio</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
+</nav>
+<main id="app"></main>
+
+<script>
+const APP={title:"Estudio Nutrición y Alimentación",short:"Nutrición y alimentación",h1:"Nutrición <span>y alimentación</span>",sub:"Biología y Geología · Unidad 2. Tests, tarjetas y preguntas de desarrollo. Gana XP, sube de nivel y mantén la racha.",key:"estudioNut"};
+// Q(pregunta, respuesta correcta, [3 incorrectas], explicación)
+const Q=(q,ok,bad,why)=>({q,ok,bad,why});
+
+const MODELS=[
+{name:"Modelo 1",qs:[
+Q("¿Qué es la nutrición?","El conjunto de procesos que nos permiten obtener la materia y energía necesarias para realizar las funciones vitales y crecer o regenerar estructuras",["La ingestión de alimentos","La elección de la dieta","El conjunto de aparatos digestivos"],"La alimentación es solo la ingestión de alimentos: ¡no hay que confundirlas!"),
+Q("¿Qué aparato transforma los alimentos en nutrientes?","El aparato digestivo",["El aparato respiratorio","El aparato excretor","El aparato circulatorio"],"Lo hace mediante la digestión y la absorción, y los nutrientes pasan a la sangre."),
+Q("Los nutrientes con función reguladora son principalmente…","Las vitaminas y las sales minerales",["Los glúcidos y los lípidos","Las proteínas y el agua","La fibra y el calcio"],"Regulan los procesos metabólicos."),
+Q("Los macronutrientes son…","Proteínas, glúcidos, lípidos y agua",["Vitaminas y sales minerales","Fibra y vitaminas","Solo los lípidos"],"Se necesitan en grandes cantidades."),
+Q("El agua pertenece a los nutrientes…","Inorgánicos",["Orgánicos","Reguladores únicamente","Micronutrientes"],"Junto con los minerales."),
+Q("Cada gramo de hidratos de carbono aporta…","4 kilocalorías",["9 kilocalorías","1 kilocaloría","4 kilojulios"],"Igual que cada gramo de proteínas. Los lípidos aportan 9 kcal por gramo."),
+Q("¿Cuánta energía aporta cada gramo de lípidos?","9 kilocalorías",["4 kilocalorías","1 kilocaloría","2 kilocalorías"],"Los lípidos son el nutriente más energético."),
+Q("La TMB (tasa metabólica basal) es…","El gasto energético necesario para mantener el cuerpo durante un día en reposo",["La energía de los alimentos","El gasto de una carrera","La cantidad de proteínas diarias"],"Se calcula con las ecuaciones de Harris-Benedict."),
+Q("Una ración es…","Una medida aproximada de la cantidad que se ingiere de un alimento o recomendación dietética",["El conjunto de alimentos que se ingieren regularmente","La energía de un alimento","Un nutriente"],"La dieta es el conjunto de alimentos y bebidas que ingerimos regularmente."),
+Q("¿Cuál de estos grupos NO aparece en el plato para comer saludable de Harvard?","Bollería y bebidas azucaradas",["Frutas","Vegetales","Granos integrales"],"El plato incluye vegetales, frutas, granos integrales, proteína saludable, aceites saludables y agua; y recomienda evitar las bebidas azucaradas."),
+Q("La dieta mediterránea se caracteriza por…","Verduras, aceite de oliva, pescado, cereales y legumbres",["Mucha carne roja","Muchos fritos","Muchas bebidas azucaradas"],"Consumo de carnes rojas mucho menor."),
+Q("La alergia alimentaria es…","Una reacción adversa mediada por el sistema inmunitario, que percibe la proteína del alimento como patógena",["La incapacidad de digerir un alimento","Una intoxicación por pesticidas","Una falta de vitaminas"],"La intolerancia no está mediada por el sistema inmune."),
+]},
+{name:"Modelo 2",qs:[
+Q("La alimentación es…","La ingestión de alimentos",["Todos los procesos para obtener materia y energía","La respiración celular","La absorción de nutrientes"],"La nutrición es más amplia."),
+Q("¿Cuál de estos procesos NO forma parte de la nutrición?","Elegir un menú en un restaurante",["Respiración celular","Transporte de nutrientes","Eliminación de desechos"],"Es parte de la alimentación, no de la nutrición."),
+Q("¿Qué hace el aparato respiratorio?","Intercambio de gases: toma oxígeno y expulsa dióxido de carbono",["Transforma alimentos","Elimina desechos de la sangre","Transporta nutrientes"],"El oxígeno pasa a la sangre."),
+Q("El aparato excretor se encarga de…","Eliminar de la sangre los productos de desecho de la actividad celular y expulsarlos",["Absorber nutrientes","Digerir alimentos","Transportar oxígeno"],"Los expulsa al medio exterior."),
+Q("El aparato circulatorio transporta mediante…","La sangre, nutrientes y oxígeno hasta las células, y retira desechos y CO₂",["La linfa únicamente","El aire","Los alimentos"],"El sistema linfático colabora en el transporte de sustancias."),
+Q("¿Dónde tiene lugar la respiración celular?","En las mitocondrias",["En el núcleo","En los ribosomas","En el aparato de Golgi"],"El O₂ y las moléculas de glucosa se combinan para producir energía."),
+Q("En la respiración celular se combinan…","Oxígeno y glucosa para producir energía",["Agua y sales","Proteínas y fibra","Vitaminas y minerales"],"Se liberan además H₂O y CO₂."),
+Q("La nutrición heterótrofa consiste en…","Obtener los nutrientes de la materia orgánica presente en los alimentos",["Fabricar nutrientes con la luz","Obtener energía solo del agua","No necesitar alimentos"],"Los humanos son heterótrofos."),
+Q("Los nutrientes son…","Compuestos presentes en los alimentos, necesarios para el correcto funcionamiento del organismo",["Sustancias sin función nutritiva","Aparatos del cuerpo","Tipos de dieta"],"Los «no nutrientes» no tienen función nutritiva y pueden ser perjudiciales."),
+Q("La obtención de nutrientes se produce mediante…","La digestión",["La respiración","La excreción","La circulación"],"Luego pasan a la sangre por absorción."),
+Q("Las clasificaciones de nutrientes se hacen según…","Su función, la cantidad que necesitamos y su composición",["Su color","Su precio","Su sabor"],"Tres criterios."),
+Q("Los nutrientes con función constructora o estructural son…","Calcio, proteínas, agua y algunos lípidos",["Vitaminas y sales minerales","Glúcidos y lípidos únicamente","Fibra y azúcares"],"Crean y reparan estructuras corporales."),
+]},
+{name:"Modelo 3",qs:[
+Q("Los micronutrientes son…","Vitaminas y sales minerales",["Proteínas y lípidos","Agua y glúcidos","Fibra y agua"],"Se necesitan en pequeñas cantidades."),
+Q("Los nutrientes con función energética son principalmente…","Glúcidos y lípidos",["Vitaminas y minerales","Proteínas y agua","Fibra y sales"],"Aportan la energía para realizar las funciones vitales."),
+Q("Una función del agua es…","Disolver y transportar sustancias, catalizar reacciones y regular la temperatura corporal",["Aportar energía","Formar anticuerpos","Transportar gases"],"También tiene función estructural."),
+Q("Los minerales como sodio, potasio y calcio regulan…","La contracción muscular y la transmisión del impulso nervioso",["La digestión","La temperatura","La formación de grasas"],"El calcio y el fósforo forman parte de los huesos."),
+Q("La glucosa, la sacarosa y el almidón son…","Hidratos de carbono que proporcionan energía",["Lípidos","Proteínas","Vitaminas"],"La fibra tiene función reguladora."),
+Q("La fibra está formada por…","Celulosa y tiene función reguladora",["Proteínas","Lípidos","Almidón"],"Es un hidrato de carbono."),
+Q("Las enzimas son proteínas con función…","Reguladora",["Defensiva","Energética","De transporte de gases"],"Los anticuerpos son defensivos."),
+Q("Los anticuerpos son proteínas con función…","Defensiva",["Reguladora","Estructural","Energética"],"Protegen frente a patógenos."),
+Q("La hemoglobina es una proteína que…","Transporta gases",["Cataliza reacciones","Defiende","Aporta energía"],"Está en los glóbulos rojos."),
+Q("El colesterol y los fosfolípidos…","Forman membranas celulares",["Aportan energía directamente","Transportan oxígeno","Son vitaminas"],"Son lípidos."),
+Q("Las vitaminas hidrosolubles son…","C y B",["A, D, E y K","A y B","Solo la D"],"Se disuelven en agua."),
+Q("Las vitaminas liposolubles son…","A, D, E y K",["C y B","B y C","A y C"],"Se disuelven en grasas."),
+]},
+{name:"Modelo 4",qs:[
+Q("El hierro se encuentra sobre todo en…","Hígado, carnes, pescados, legumbres, frutos secos y verduras",["Sal yodada","Lácteos","Aceite de oliva"],"El yodo en la sal yodada y el calcio en los lácteos."),
+Q("El calcio se obtiene principalmente de…","Productos lácteos",["Sal yodada","Hígado","Aceites vegetales"],"Es un mineral."),
+Q("El yodo se encuentra en…","La sal yodada, pescado, mariscos, algas y verduras",["Lácteos","Legumbres únicamente","Aceites"],"Mineral."),
+Q("Los hidratos de carbono se obtienen de…","Fruta, miel, cereales, pan, pasta, legumbres y patatas",["Aceites","Carne roja","Hígado"],"También de azúcares y zumos."),
+Q("Las proteínas animales están en…","Carne, pescado, huevos, vísceras, leche y otros productos lácteos",["Legumbres y soja","Aceites","Frutas"],"Las vegetales en legumbres, soja y frutos secos."),
+Q("Las proteínas de origen vegetal están en…","Legumbres, soja y frutos secos",["Carne y pescado","Huevos","Mantequilla"],"Alternativa a las animales."),
+Q("Las grasas saturadas se encuentran en…","Mantequilla, margarina, pastelería, galletas, carnes rojas, huevos y marisco",["Aceite de oliva","Frutas","Verduras"],"Las insaturadas en aceites vegetales."),
+Q("Las grasas insaturadas se encuentran en…","Aceites vegetales como el de oliva",["Mantequilla","Pastelería","Carnes rojas"],"Son más saludables."),
+Q("La fibra se encuentra sobre todo en…","Alimentos vegetales: verduras, frutas, legumbres, cereales y frutos secos",["Carnes","Huevos","Lácteos"],"Tiene función reguladora."),
+Q("Las fuentes alimentarias de un nutriente son…","Los alimentos que contienen una mayor cantidad de ese nutriente",["Los alimentos sin nutrientes","Los alimentos procesados","Las bebidas"],"Son distintas de los no nutrientes."),
+Q("Los «no nutrientes» son…","Sustancias sin función nutritiva que pueden ser perjudiciales",["Los micronutrientes","Las vitaminas","Los minerales"],"No aportan nada al organismo."),
+Q("El agua se obtiene de…","Bebidas (agua, zumos, leche, sopas) y alimentos como frutas y verduras",["Solo del agua del grifo","Solo de la carne","Solo de los cereales"],"Está en muchos alimentos."),
+]},
+{name:"Modelo 5",qs:[
+Q("1 kilojulio (kJ) equivale a…","1000 julios",["100 julios","10 julios","4,186 julios"],"1 kJ = 1000 J."),
+Q("1 kilocaloría (kcal) equivale a…","1000 calorías",["100 calorías","10 calorías","4,186 calorías"],"1 kcal = 1000 cal."),
+Q("1 caloría equivale a…","4,186 julios",["0,24 julios","1000 julios","1 julio"],"1 cal = 4,186 J; 1 J = 0,24 cal."),
+Q("Una caloría es…","La energía necesaria para aumentar la temperatura de un gramo de agua un grado centígrado",["La energía de un gramo de grasa","La unidad de masa","La energía de una ración"],"Definición de caloría."),
+Q("Si se lleva una vida sedentaria, las calorías diarias necesarias son…","TMB × 1,2",["TMB × 1,5","TMB × 1,725","TMB × 2"],"Actividad moderada ×1,5; mucho ejercicio ×1,725."),
+Q("Si se hace ejercicio regular y moderado, las calorías diarias son…","TMB × 1,5",["TMB × 1,2","TMB × 1,725","TMB × 1"],"Factor de corrección por actividad."),
+Q("Si se hace mucho ejercicio, las calorías diarias son…","TMB × 1,725",["TMB × 1,2","TMB × 1,5","TMB × 3"],"Según la frecuencia y la intensidad."),
+Q("El gasto energético total es…","TMB + actividad física + digestión y absorción de nutrientes",["Solo la TMB","TMB − actividad física","Actividad física × digestión"],"Tres componentes."),
+Q("Las necesidades energéticas dependen de…","La constitución, el sexo, la edad y la actividad física",["Solo del peso","Solo de la edad","Solo de la dieta"],"Por eso varían de unas personas a otras."),
+Q("Un hombre de 15 años, 60 kg y 170 cm: su TMB es (Harris-Benedict)…","1592,5 kcal",["1200 kcal","1911 kcal","1269 kcal"],"(10·60) + (6,25·170) − (5·15) + 5 = 600 + 1062,5 − 75 + 5."),
+Q("Una mujer de 14 años, 50 kg y 160 cm: su TMB es…","1269 kcal",["1592,5 kcal","1500 kcal","1900 kcal"],"(10·50) + (6,25·160) − (5·14) − 161 = 500 + 1000 − 70 − 161."),
+Q("Una porción de 20 g de lípidos aporta…","180 kcal",["80 kcal","20 kcal","90 kcal"],"20 g × 9 kcal/g."),
+]},
+];
+
+// Tests largos por apartado
+const TOPICS=[
+{name:"1 · La nutrición en humanos",qs:[
+Q("La nutrición es…","El conjunto de procesos que nos permiten obtener la materia y energía necesarias para realizar las funciones vitales y crecer o regenerar estructuras",["La ingestión de alimentos","La digestión únicamente","La elección de una dieta"],"No hay que confundirla con la alimentación."),
+Q("La alimentación es…","La ingestión de alimentos",["El conjunto de procesos de obtención de energía","La respiración celular","La eliminación de desechos"],"Es solo una parte de la nutrición."),
+Q("¿Cuál de estos procesos forma parte de la nutrición?","Transporte de nutrientes y oxígeno a las células",["Elegir qué comer","Comprar alimentos","Cocinar"],"Los procesos son obtención, transporte, respiración celular y eliminación de desechos."),
+Q("¿Qué procesos incluye la nutrición?","Obtención de nutrientes y oxígeno, transporte, respiración celular y eliminación de desechos y CO₂",["Solo la digestión","Solo la respiración","Solo la excreción"],"Cuatro procesos."),
+Q("La respiración celular tiene lugar en…","Las mitocondrias",["El núcleo","Los lisosomas","La membrana"],"Es un proceso de la nutrición."),
+Q("¿Qué se elimina en la nutrición?","Desechos celulares y dióxido de carbono",["Solo agua","Solo oxígeno","Nada"],"Lo hacen los aparatos excretor y respiratorio."),
+Q("El aparato digestivo se encarga de…","Transformar los alimentos en nutrientes y de que estos pasen a la sangre",["Intercambiar gases","Eliminar desechos","Transportar sangre"],"Mediante los procesos de digestión y absorción."),
+Q("Los procesos del aparato digestivo son…","Digestión y absorción",["Respiración y excreción","Circulación y transporte","Filtración y secreción"],"Digestión: transformar; absorción: pasar a la sangre."),
+Q("El aparato respiratorio se encarga de…","El intercambio de gases",["Digerir","Filtrar la sangre","Transportar nutrientes"],"Toma oxígeno y expulsa CO₂."),
+Q("El oxígeno toma el aire y pasa…","A la sangre",["A la orina","Al estómago","Al hígado"],"Gracias al aparato respiratorio."),
+Q("El dióxido de carbono que expulsa el aparato respiratorio se produce en…","La respiración celular",["La digestión","La absorción","La excreción renal"],"Es un desecho de la respiración celular."),
+Q("El aparato excretor se encarga de…","Eliminar de la sangre los productos de desecho de la actividad celular y expulsarlos al exterior",["Transformar alimentos","Intercambiar gases","Transportar oxígeno"],"Elimina los desechos."),
+Q("El aparato circulatorio se encarga, mediante la sangre, de…","Transportar nutrientes y oxígeno hasta las células y retirar de ellas desechos y CO₂",["Digerir alimentos","Intercambiar gases en el pulmón","Producir energía"],"Es el sistema de transporte."),
+Q("El sistema linfático…","Colabora con el aparato circulatorio en el transporte de sustancias",["Digiere los alimentos","Intercambia gases","Elimina desechos"],"Colabora, no sustituye."),
+Q("¿Qué aparato transporta nutrientes a todas las células?","El circulatorio",["El digestivo","El respiratorio","El excretor"],"A través de la sangre."),
+Q("¿Qué aparato incorpora el oxígeno al organismo?","El respiratorio",["El digestivo","El excretor","El linfático"],"Intercambio de gases."),
+]},
+{name:"2.0-2.2 · Nutrientes: función y cantidad",qs:[
+Q("La nutrición heterótrofa consiste en…","Obtener los nutrientes de la materia orgánica presente en los alimentos",["Fabricar nutrientes con la luz solar","No ingerir nada","Obtener energía solo del agua"],"Los humanos obtienen los nutrientes de los alimentos."),
+Q("Los nutrientes son…","Compuestos presentes en los alimentos, necesarios para el correcto funcionamiento del organismo",["Sustancias sin función","Tipos de aparatos","Tipos de dietas"],"Se obtienen con la digestión."),
+Q("La obtención de nutrientes se logra mediante…","La digestión",["La respiración","La excreción","La circulación"],"Proceso del aparato digestivo."),
+Q("¿Según qué criterios se clasifican los nutrientes?","Su función, la cantidad que necesitamos y su composición química",["Su color","Su sabor","Su origen geográfico"],"Tres criterios."),
+Q("Según su función, los nutrientes se dividen en…","Constructores (estructurales), energéticos y reguladores",["Macronutrientes y micronutrientes","Orgánicos e inorgánicos","Animales y vegetales"],"Body-building, energy-producing y body-regulating."),
+Q("Los nutrientes con función estructural (constructora)…","Crean y reparan estructuras corporales (calcio, proteínas, agua, algunos lípidos)",["Aportan energía","Regulan procesos metabólicos","Son solo vitaminas"],"Su función es estructural."),
+Q("¿Cuáles son nutrientes con función estructural?","Calcio, proteínas, agua y algunos lípidos",["Vitaminas","Sales minerales únicamente","Glúcidos únicamente"],"Constructores."),
+Q("Los nutrientes con función energética…","Aportan la energía necesaria para las funciones vitales (glúcidos y lípidos principalmente)",["Regulan procesos","Reparan estructuras","Defienden"],"Función energética."),
+Q("¿Qué nutrientes tienen principalmente función energética?","Glúcidos y lípidos",["Vitaminas y sales","Proteínas y agua","Fibra y calcio"],"Aportan energía."),
+Q("Los nutrientes con función reguladora…","Regulan los procesos metabólicos (vitaminas y sales minerales principalmente)",["Aportan energía","Construyen huesos","Defienden"],"Función reguladora."),
+Q("¿Qué nutrientes tienen principalmente función reguladora?","Vitaminas y sales minerales",["Glúcidos y lípidos","Proteínas y agua","Agua y calcio"],"Reguladores."),
+Q("Según la cantidad que necesitamos, los nutrientes se dividen en…","Macronutrientes y micronutrientes",["Orgánicos e inorgánicos","Estructurales y energéticos","Animales y vegetales"],"Por cantidades."),
+Q("Los macronutrientes se necesitan en…","Grandes cantidades",["Pequeñas cantidades","Cantidades nulas","Cantidades variables"],"Proteínas, glúcidos, lípidos y agua."),
+Q("Los micronutrientes se necesitan en…","Pequeñas cantidades",["Grandes cantidades","Cantidades enormes","Ninguna cantidad"],"Vitaminas y sales minerales."),
+Q("¿Cuáles son macronutrientes?","Proteínas, glúcidos, lípidos y agua",["Vitaminas y sales minerales","Solo proteínas","Fibra y vitaminas"],"Se necesitan en grandes cantidades."),
+Q("¿Cuáles son micronutrientes?","Vitaminas y sales minerales",["Proteínas y lípidos","Glúcidos y agua","Agua y lípidos"],"Pequeñas cantidades."),
+]},
+{name:"2.3 · Nutrientes según su composición",qs:[
+Q("Según su composición, los nutrientes se dividen en…","Inorgánicos (agua y minerales) y orgánicos (hidratos de carbono, proteínas, lípidos y vitaminas)",["Macronutrientes y micronutrientes","Constructores y reguladores","Animales y vegetales"],"Es la principal grasa culinaria de la dieta atlántica."),
+Q("Son nutrientes inorgánicos…","El agua y los minerales",["Las proteínas y las vitaminas","Los lípidos y los glúcidos","La fibra y los azúcares"],"Los demás son orgánicos."),
+Q("Son nutrientes orgánicos…","Hidratos de carbono, proteínas, lípidos y vitaminas",["Agua y minerales","Agua y proteínas","Solo vitaminas"],"Compuestos de carbono."),
+Q("¿Cuál NO es una función del agua?","Aportar energía",["Disolver y transportar sustancias","Catalizar reacciones químicas","Regular la temperatura corporal"],"El agua tiene función estructural, transportadora y reguladora."),
+Q("El agua disuelve y transporta sustancias, cataliza reacciones, tiene función estructural y…","Regula la temperatura corporal",["Aporta energía","Defiende","Forma anticuerpos"],"Muchas funciones."),
+Q("Algunos minerales (sodio, potasio, calcio) regulan…","La contracción muscular o la transmisión del impulso nervioso",["La digestión","La temperatura","La formación de grasa"],"Función reguladora."),
+Q("El calcio y el fósforo forman parte de…","La estructura de los huesos",["Las enzimas","La hemoglobina","Los azúcares"],"Función estructural."),
+Q("Los azúcares como la glucosa, la sacarosa y el almidón proporcionan…","Energía",["Defensa","Estructura","Regulación"],"Son hidratos de carbono."),
+Q("La fibra está formada por…","Celulosa y tiene función reguladora",["Proteínas con función energética","Lípidos con función estructural","Vitaminas hidrosolubles"],"Es un hidrato de carbono."),
+Q("La mayoría de las proteínas tienen función…","Estructural",["Energética","Defensiva","Reguladora"],"Algunas son enzimas, anticuerpos o hemoglobina."),
+Q("Las enzimas son proteínas con función…","Reguladora",["Defensiva","De transporte de gases","Energética"],"Aceleran reacciones."),
+Q("Los anticuerpos son proteínas con función…","Defensiva",["Reguladora","Energética","Estructural"],"Defienden de patógenos."),
+Q("La hemoglobina es una proteína que…","Transporta gases",["Defiende","Aporta energía","Regula la temperatura"],"Transporta oxígeno."),
+Q("Las grasas proporcionan…","Energía",["Estructura únicamente","Defensa","Regulación únicamente"],"Son lípidos."),
+Q("El colesterol y los fosfolípidos…","Forman membranas celulares",["Aportan energía","Transportan gases","Son vitaminas"],"Lípidos estructurales."),
+Q("Algunos lípidos son…","Hormonas reguladoras",["Enzimas","Anticuerpos","Minerales"],"Función reguladora."),
+Q("Las vitaminas son…","Un amplio grupo de sustancias que regulan numerosos procesos",["Macronutrientes energéticos","Minerales","Tipos de grasa"],"Micronutrientes orgánicos."),
+Q("Las vitaminas solubles en agua son…","C y B",["A, D, E y K","A y D","K y E"],"Hidrosolubles."),
+Q("Las vitaminas liposolubles son…","A, D, E y K",["C y B","B y C","A y C"],"Se disuelven en grasa."),
+]},
+{name:"2.4 · Fuentes alimentarias de los nutrientes",qs:[
+Q("Las fuentes alimentarias de los nutrientes son…","Los alimentos que contienen una mayor cantidad de determinado nutriente",["Los alimentos sin nutrientes","Los alimentos procesados","Las bebidas"],"Definición."),
+Q("Los «no nutrientes» son…","Sustancias sin función nutritiva que pueden ser perjudiciales",["Vitaminas","Minerales","Macronutrientes"],"No aportan nutrición."),
+Q("El agua la obtenemos de…","Bebidas (agua, zumos, leche, sopas) y de alimentos como frutas y verduras",["Solo del agua del grifo","Solo de la carne","Solo de los cereales"],"Muchos alimentos la contienen."),
+Q("El hierro está en…","Hígado, carnes, pescados, legumbres, frutos secos y verduras",["Sal yodada","Lácteos","Aceites"],"Es un mineral."),
+Q("El yodo está en…","La sal yodada, pescado, mariscos, algas y verduras",["Lácteos","Carnes rojas únicamente","Aceites"],"Mineral."),
+Q("El calcio está en…","Los productos lácteos",["La sal yodada","El hígado","Los aceites"],"Mineral."),
+Q("Los hidratos de carbono están en…","Fruta, miel, zumos, azúcares, cereales y derivados (harina, pan, pasta), legumbres y patatas",["Aceites","Carnes","Pescados"],"Fuentes de energía."),
+Q("Las proteínas animales están en…","Carne, pescado, huevos, vísceras, leche y otros productos lácteos",["Legumbres, soja y frutos secos","Aceites","Frutas"],"Son de origen animal."),
+Q("Las proteínas vegetales están en…","Legumbres, soja y frutos secos",["Carne y pescado","Huevos","Lácteos"],"Son de origen vegetal."),
+Q("Las grasas saturadas están en…","Mantequilla, margarina, pastelería, galletas, carnes rojas, huevos y marisco",["Aceite de oliva","Frutas","Verduras"],"Se recomienda limitarlas."),
+Q("Las grasas insaturadas están en…","Aceites vegetales como el de oliva",["Mantequilla","Galletas","Carnes rojas"],"Más saludables."),
+Q("Las vitaminas están en…","Frutas y verduras; carnes, pescados, hígado, huevos y leche; frutos secos, legumbres y levaduras",["Solo en frutas","Solo en carne","Solo en lácteos"],"Muy variado."),
+Q("La fibra está sobre todo en…","Alimentos vegetales: verduras, hortalizas, frutas, legumbres, cereales y frutos secos",["Carnes","Huevos","Lácteos"],"Tiene función reguladora."),
+Q("¿Qué alimento es buena fuente de proteínas vegetales?","Las lentejas",["La mantequilla","El aceite de oliva","La miel"],"Legumbres."),
+Q("¿Qué alimento es buena fuente de calcio?","El yogur",["El aceite","La miel","El pan"],"Lácteos."),
+Q("¿Qué alimento es buena fuente de grasa insaturada?","El aceite de oliva",["La mantequilla","La bollería","La carne roja"],"Aceites vegetales."),
+]},
+{name:"3 · Aporte de energía",qs:[
+Q("El valor energético de un alimento es proporcional a…","La cantidad de energía que aportan sus nutrientes durante la respiración celular",["Su peso","Su precio","Su sabor"],"Se obtiene de los nutrientes."),
+Q("La energía liberada por los alimentos se mide en…","Kilocalorías o kilojulios",["Gramos","Litros","Metros"],"Unidades de energía."),
+Q("La respiración celular tiene lugar en…","Las mitocondrias",["El núcleo","Los ribosomas","El citoplasma únicamente"],"Con O₂ y glucosa."),
+Q("En la respiración celular se combinan…","El oxígeno y las moléculas de glucosa para producir energía",["Agua y sal","Proteínas y fibra","Minerales y vitaminas"],"Se producen también H₂O y CO₂."),
+Q("En la respiración celular, además de energía, se producen…","H₂O y CO₂",["O₂ y glucosa","Proteínas","Vitaminas"],"Desechos."),
+Q("Cada gramo de hidratos de carbono proporciona…","4 kilocalorías",["9 kilocalorías","2 kilocalorías","1 kilocaloría"],"Igual que las proteínas."),
+Q("Cada gramo de proteínas proporciona…","4 kilocalorías",["9 kilocalorías","2 kilocalorías","1 kilocaloría"],"Igual que los hidratos."),
+Q("Cada gramo de lípidos proporciona…","9 kilocalorías",["4 kilocalorías","2 kilocalorías","1 kilocaloría"],"Más del doble."),
+Q("Una caloría es…","La energía necesaria para aumentar la temperatura de un gramo de agua un grado centígrado",["La energía de un gramo de grasa","Una unidad de masa","Una unidad de volumen"],"Definición."),
+Q("1 kJ equivale a…","1000 J",["100 J","10 J","4,186 J"],"Kilo = mil."),
+Q("1 kcal equivale a…","1000 cal",["100 cal","10 cal","4,186 cal"],"Kilo = mil."),
+Q("1 cal equivale a…","4,186 J",["0,24 J","1000 J","1 J"],"Equivalencia."),
+Q("1 J equivale a…","0,24 cal",["4,186 cal","1000 cal","1 cal"],"Equivalencia."),
+Q("La tasa metabólica basal (TMB) es…","El gasto energético necesario para mantener el cuerpo durante un día en reposo, sin actividad",["La energía de la comida","El gasto al correr","El número de comidas"],"Se calcula con Harris-Benedict."),
+Q("La TMB de un hombre se calcula como…","(10 × kg) + (6,25 × cm) − (5 × edad) + 5",["(10 × kg) + (6,25 × cm) − (5 × edad) − 161","10 × kg × 1,2","(6,25 × kg) + (10 × cm)"],"Para la mujer se resta 161."),
+Q("La TMB de una mujer se calcula como…","(10 × kg) + (6,25 × cm) − (5 × edad) − 161",["(10 × kg) + (6,25 × cm) − (5 × edad) + 5","10 × kg × 1,5","(5 × kg) + (10 × cm)"],"Para el hombre se suma 5."),
+Q("Calorías diarias en vida sedentaria:","TMB × 1,2",["TMB × 1,5","TMB × 1,725","TMB × 2"],"Factor de corrección."),
+Q("Calorías diarias con ejercicio moderado regular:","TMB × 1,5",["TMB × 1,2","TMB × 1,725","TMB × 1"],"Factor de corrección."),
+Q("Calorías diarias con mucho ejercicio:","TMB × 1,725",["TMB × 1,2","TMB × 1,5","TMB × 3"],"Factor de corrección."),
+Q("Las necesidades energéticas dependen de…","La constitución, el sexo, la edad y la actividad física",["Solo el peso","Solo la edad","Solo la dieta"],"Varían entre personas."),
+Q("El gasto energético total es…","TMB + actividad física + digestión y absorción de nutrientes",["TMB únicamente","TMB − actividad","Actividad × digestión"],"Tres componentes."),
+Q("Hombre de 15 años, 60 kg, 170 cm. TMB:","1592,5 kcal",["1269 kcal","1911 kcal","1200 kcal"],"600 + 1062,5 − 75 + 5."),
+Q("El hombre anterior con vida sedentaria necesita (aprox.)…","1911 kcal (1592,5 × 1,2)",["1592,5 kcal","2389 kcal","1269 kcal"],"TMB × 1,2."),
+Q("Mujer de 14 años, 50 kg, 160 cm. TMB:","1269 kcal",["1592,5 kcal","1100 kcal","1500 kcal"],"500 + 1000 − 70 − 161."),
+Q("La mujer anterior con ejercicio moderado necesita (aprox.)…","1903,5 kcal (1269 × 1,5)",["1269 kcal","1522,8 kcal","2189 kcal"],"TMB × 1,5."),
+Q("30 g de proteínas aportan…","120 kcal",["30 kcal","270 kcal","60 kcal"],"30 × 4."),
+Q("10 g de grasa aportan…","90 kcal",["40 kcal","10 kcal","100 kcal"],"10 × 9."),
+]},
+{name:"4 · Alimentarse: dieta y raciones",qs:[
+Q("La dieta es…","El conjunto de alimentos y bebidas que ingerimos regularmente",["Un régimen para adelgazar únicamente","La energía de un alimento","Un nutriente"],"En el sentido general."),
+Q("Una ración o porción es…","Una medida aproximada (y a veces poco exacta) empleada para referirse a la cantidad que se ingiere de un alimento o como recomendación dietética",["El conjunto de alimentos regulares","Un nutriente","Una dieta completa"],"También es una medida culinaria."),
+Q("Una tarrina de yogur suele contener…","125 mL",["200-250 mL","20-30 mL","500 mL"],"Medida aproximada."),
+Q("Un vaso puede contener…","200-250 mL de líquido",["125 mL","20-30 mL","1 L"],"Como leche o agua."),
+Q("Una cucharada sopera contiene…","20-30 mL",["125 mL","200-250 mL","1 mL"],"Medida aproximada."),
+Q("Un puñado de frutos secos pueden ser…","20 g",["60 g","10 g","150 g"],"Medida aproximada."),
+Q("Una pizca (porción pequeña) de mantequilla pueden ser…","10 g",["20 g","60 g","150 g"],"Medida aproximada."),
+Q("Un trozo de queso equivale a…","60 g",["10 g","20 g","150 g"],"Medida aproximada."),
+Q("Un plato de legumbres equivale a…","60 g en crudo (10 cucharadas en cocido)",["150 g en crudo","20 g en crudo","10 g en crudo"],"Medida aproximada."),
+Q("Una ración en plato de pasta equivale a…","70 g en crudo",["50 g","150 g","20 g"],"Medida aproximada."),
+Q("Una ración en plato de arroz equivale a…","50 g en crudo",["70 g","150 g","20 g"],"Medida aproximada."),
+Q("Un bol de cereales puede ser…","60-80 g",["20 g","150 g","10 g"],"150 g si el contenido son verduras de ensalada."),
+Q("Dos manos de verduras equivalen a…","150 g",["20 g","60 g","10 g"],"Zanahorias, brócoli o tomate."),
+Q("Un filete equivale a…","110-120 g",["20 g","60 g","30 g"],"Medida aproximada."),
+Q("Una rebanada de pan equivale a…","Unos 30 g",["150 g","10 g","60 g"],"O un trozo de 3 dedos de ancho."),
+Q("2 o 3 sardinas serían, aproximadamente…","100 g",["20 g","60 g","150 g"],"Una ración de pescado."),
+Q("La alimentación saludable es…","La que nos aporta los nutrientes y energía necesarios para las funciones vitales, manteniéndonos sanos y asegurando un desarrollo óptimo",["La que solo adelgaza","La que tiene más grasa","La más barata"],"Definición."),
+Q("Una alimentación suficiente…","Cubre las necesidades de energía",["Contiene todos los nutrientes","Es agradable","Es sostenible"],"En función de las etapas de la vida."),
+Q("Una alimentación completa…","Contiene todos los nutrientes que precisa el organismo, en cantidades adecuadas",["Cubre la energía","Es segura","Es social"],"Todos los nutrientes."),
+Q("Una alimentación equilibrada…","Tiene amplia variedad de alimentos de buena calidad nutricional, frescos y de origen principalmente vegetal",["Es la más barata","Es solo carne","Es solo ensalada"],"Escasa o nula presencia de alimentos de baja calidad."),
+Q("Una alimentación segura…","No resulta nociva: no supera los límites de seguridad de contaminantes",["Es agradable","Es barata","Es sostenible"],"Contaminantes físicos, químicos o biológicos."),
+Q("Una alimentación armónica…","Tiene una proporción equilibrada de los macronutrientes",["Es placentera","Es social","Es adaptada"],"Proporción de macronutrientes."),
+Q("Una alimentación satisfactoria…","Es agradable y sensorialmente placentera",["Es segura","Es sostenible","Es completa"],"Se disfruta."),
+Q("Una alimentación adaptada…","Se ajusta a las características individuales, sociales, culturales y del entorno",["Cubre la energía","Es armónica","Es segura"],"Se adapta a cada persona."),
+Q("Una alimentación social y asequible…","Permite la interacción social y la convivencia y es económicamente viable",["Es segura","Es satisfactoria","Es armónica"],"Social y asequible."),
+Q("Una alimentación sostenible…","Contribuye lo menos posible al cambio climático y prioriza los productos autóctonos",["Es agradable","Es completa","Es armónica"],"Sostenible."),
+]},
+{name:"5-6 · Recomendaciones y sostenibilidad",qs:[
+Q("El plato para comer saludable (Harvard) incluye…","Vegetales, frutas, granos integrales, proteína saludable, aceites saludables y agua",["Solo vegetales","Carne y bollería","Refrescos y zumos"],"Y mantenerse activo."),
+Q("Según el plato de Harvard, ¿qué bebida es la recomendada?","El agua (también té o café con poco o nada de azúcar)",["Los refrescos","El zumo en abundancia","La leche en gran cantidad"],"Evita las bebidas azucaradas."),
+Q("Según el plato de Harvard, la leche y los lácteos…","Se limitan a 1-2 porciones al día",["Se toman sin límite","Se evitan siempre","Se toman 10 al día"],"El jugo: 1 vaso pequeño al día."),
+Q("Las patatas, según el plato de Harvard…","No cuentan como vegetales",["Cuentan como vegetales","Son proteína saludable","Son granos integrales"],"Mientras más vegetales y variedad, mejor."),
+Q("En el plato de Harvard conviene limitar…","Las carnes rojas y el queso",["El pescado","Las legumbres","Los frutos secos"],"Evitar carnes procesadas."),
+Q("En los granos conviene elegir…","Integrales (pan de trigo integral, pasta integral, arroz integral)",["Refinados","Solo azúcar","Bollería"],"Limitar arroz blanco y pan blanco."),
+Q("Las grasas recomendadas en el plato de Harvard son…","Aceites saludables como el de oliva o canola",["La margarina","Las grasas trans","La mantequilla en abundancia"],"Evitar las grasas trans."),
+Q("«¡Manténgase activo!» en el plato de Harvard recomienda…","Hacer actividad física",["Comer más","Dormir más","Comer menos"],"Parte de la recomendación."),
+Q("Las dietas sostenibles son…","Las que generan un menor impacto ambiental, además de tener en cuenta los criterios de nutrición y salud",["Las más baratas","Las más calóricas","Las que no tienen verduras"],"Por ejemplo, la mediterránea y la atlántica."),
+Q("La dieta mediterránea incluye…","Verduras, aceite de oliva, pescado, cereales, legumbres, patatas, frutas, yogur, leches fermentadas y agua",["Carne roja en abundancia","Bollería","Refrescos"],"Base vegetal."),
+Q("En la dieta mediterránea las recetas tienen como base…","Cereales, legumbres o patatas con abundantes verduras y pocas proteínas",["Carnes rojas","Fritos","Bollería"],"Pasta, arroz, lentejas, alubias…"),
+Q("En la dieta mediterránea, las principales fuentes de proteínas son…","Pescado, aves de corral, huevos y productos lácteos",["Cerdo y ternera","Solo legumbres","Embutidos"],"El consumo de carnes rojas es mucho menor."),
+Q("En la dieta mediterránea las comidas se acompañan de…","Ensaladas con verduras y hortalizas y se finalizan con fruta de temporada",["Postres de pastelería","Refrescos","Fritos"],"Típico."),
+Q("En la dieta mediterránea se usa el aceite de oliva y condimentos como…","Ajo, perejil, limón, orégano o pimienta, que disminuyen la necesidad de usar sal",["Azúcar","Mantequilla","Salsas industriales"],"Menos sal."),
+Q("La dieta atlántica incluye…","Pescados, mariscos, patatas, legumbres, frutas y hortalizas (repollo, berzas, grelos…)",["Solo carne roja","Solo cereales","Bollería"],"Típica del norte."),
+Q("En la dieta atlántica la principal grasa culinaria es…","El aceite de oliva",["La mantequilla","La margarina","La manteca"],"Es la principal grasa culinaria de la dieta atlántica."),
+Q("En la dieta atlántica hay un elevado consumo de…","Huevos y lácteos, y mayor consumo de pescados y mariscos que de carnes",["Carnes rojas","Dulces","Refrescos"],"Moderado consumo de carnes."),
+Q("Una dieta sostenible y saludable tiene en cuenta…","La procedencia y la temporalidad de los alimentos",["Solo el precio","Solo el sabor","Solo la marca"],"Favorece los productos del entorno cercano."),
+Q("Son alimentos de invierno…","La calabaza, las alcachofas y la lubina",["La sandía","El atún","El melón"],"De verano: sandía y atún."),
+Q("Son alimentos de verano…","La sandía y el atún",["La calabaza","Las alcachofas","La lubina"],"De invierno: calabaza, alcachofas, lubina."),
+Q("En una dieta sostenible, como fuente de lípidos y proteínas se usan…","Alimentos de origen vegetal (aceite de oliva, aguacate, avena, frutos secos, legumbres)",["Carnes rojas","Embutidos","Fritos"],"Menor impacto ambiental."),
+Q("En una dieta sostenible se limita el consumo de…","Bebidas azucaradas, aperitivos salados y envasados en plástico",["Verduras","Legumbres","Frutas"],"Para reducir impacto y mejorar la salud."),
+Q("Una técnica culinaria saludable y sostenible es…","Favorecer el consumo en crudo y reducir la sal y el azúcar usando hierbas, ajo, limón o canela",["Freír siempre","Usar mucha sal","Usar mucho azúcar"],"Menor consumo de energía."),
+]},
+{name:"7 · Dieta y salud",qs:[
+Q("Los efectos positivos de la dieta sobre la salud son…","Ayudan a prevenir o curar enfermedades",["Causan enfermedades","No tienen efecto","Siempre engordan"],"La dieta influye en la salud."),
+Q("Los efectos negativos de la dieta son…","Enfermedades por falta o exceso de nutriente o energía, y presencia de sustancias que pueden causar daños",["Prevenir enfermedades","Curar enfermedades","Mejorar el rendimiento"],"Dos tipos."),
+Q("La seguridad alimentaria es…","El acceso de todas las personas, en todo momento, a alimentos nutricionalmente adecuados e inocuos en cantidad y calidad suficientes para llevar una vida activa y sana",["Lavarse las manos","Comer solo en casa","Cocinar con aceite"],"Definición."),
+Q("La malnutrición incluye…","Desnutrición, sobrenutrición y enfermedades carenciales",["Solo la obesidad","Solo la desnutrición","Solo las alergias"],"Tres tipos."),
+Q("La desnutrición es…","Una ingesta inadecuada de alimentos que deriva en falta de energía",["Una ingesta excesiva de alimentos","Una alergia","Una intolerancia"],"El cuerpo usa las reservas de glúcidos, lípidos y proteínas."),
+Q("En la desnutrición el cuerpo utiliza…","Las reservas de glúcidos, lípidos y proteínas",["Solo las vitaminas","Solo el agua","Solo los minerales"],"Por falta de energía."),
+Q("Ejemplos de desnutrición:","Raquitismo y kwashiorkor",["Obesidad","Anemia","Bocio"],"Enfermedades por falta de energía y nutrientes."),
+Q("La sobrenutrición es…","Una ingesta excesiva de alimentos, nutrientes y energía que acaban almacenándose y provocando efectos negativos",["Falta de alimentos","Una alergia","Una intolerancia"],"Por ejemplo, la obesidad."),
+Q("Un ejemplo de sobrenutrición es…","La obesidad",["El raquitismo","El bocio","La anemia"],"Exceso."),
+Q("Las enfermedades carenciales se deben a…","Una dieta poco variada o insuficiente en la que faltan determinados nutrientes",["Una dieta excesiva","Una alergia","Una infección"],"Avitaminosis, anemia, bocio."),
+Q("Ejemplos de enfermedades carenciales:","Avitaminosis, anemia y bocio",["Obesidad","Raquitismo","Kwashiorkor"],"Por falta de nutrientes concretos."),
+Q("La alergia alimentaria es…","Una reacción adversa mediada por el sistema inmunitario, que percibe la proteína del alimento como una sustancia patógena",["La incapacidad de digerir un alimento","Una intoxicación","Una carencia"],"Distinta de la intolerancia."),
+Q("La intolerancia alimentaria es…","Una reacción adversa por la incapacidad del organismo de digerir o absorber correctamente un alimento; no está mediada por el sistema inmune",["Una reacción del sistema inmunitario","Una infección","Una carencia"],"Distinta de la alergia."),
+Q("¿Qué diferencia a la alergia de la intolerancia?","La alergia está mediada por el sistema inmunitario; la intolerancia no",["Nada","La intolerancia está mediada por el sistema inmunitario","La alergia es siempre más leve"],"No son lo mismo."),
+Q("La higiene alimentaria (food safety) son…","Las medidas para garantizar el buen estado de los alimentos evitando sustancias que causan enfermedades",["Una dieta","Una ración","Un nutriente"],"Definición."),
+Q("Los contaminantes pueden ser…","Biológicos, químicos y físicos",["Solo químicos","Solo físicos","Solo biológicos"],"Tres tipos."),
+Q("Son contaminantes biológicos…","Patógenos y toxinas (Salmonella, Anisakis, Taenia solium, toxina de Aspergillus)",["Aditivos y pesticidas","Vidrio y metal","Mercurio"],"Seres vivos o sus toxinas."),
+Q("Son contaminantes químicos…","Aditivos, pesticidas y metales pesados (mercurio)",["Salmonella","Vidrio","Madera"],"Sustancias químicas."),
+Q("Son contaminantes físicos…","Vidrio, metal, madera, plásticos y microplásticos",["Salmonella","Pesticidas","Mercurio"],"Objetos o fragmentos."),
+Q("La Salmonella es un contaminante…","Biológico",["Químico","Físico","No contaminante"],"Es una bacteria."),
+Q("El mercurio es un contaminante…","Químico (metal pesado)",["Biológico","Físico","No contaminante"],"Se halla en algunos pescados."),
+Q("Los restos de vidrio en un alimento son un contaminante…","Físico",["Biológico","Químico","No contaminante"],"Objeto físico."),
+]},
+];
+
+const CARDS=[
+["Nutrición","Conjunto de procesos que nos permiten obtener la materia y energía necesarias para realizar las funciones vitales y crecer o regenerar estructuras.","1. Nutrición en humanos"],
+["Alimentación","Ingestión de alimentos. ¡No confundir con la nutrición!","1. Nutrición en humanos"],
+["Procesos de la nutrición","Obtención de nutrientes y oxígeno · transporte a las células · respiración celular (mitocondrias) · eliminación de desechos celulares y CO₂.","1. Nutrición en humanos"],
+["Aparato digestivo","Transforma los alimentos en nutrientes y hace que pasen a la sangre mediante digestión y absorción.","1. Nutrición en humanos"],
+["Aparato respiratorio","Intercambio de gases: toma oxígeno del aire, que pasa a la sangre, y expulsa el CO₂ producido en la respiración celular.","1. Nutrición en humanos"],
+["Aparato excretor","Elimina de la sangre los productos de desecho de la actividad celular y los expulsa al medio exterior.","1. Nutrición en humanos"],
+["Aparato circulatorio y sistema linfático","Circulatorio: transporta con la sangre nutrientes y oxígeno hasta las células y retira desechos y CO₂. Linfático: colabora en el transporte de sustancias.","1. Nutrición en humanos"],
+["Nutrición heterótrofa y nutrientes","Heterótrofa: se obtienen los nutrientes de la materia orgánica de los alimentos. Nutrientes: compuestos de los alimentos necesarios para el funcionamiento del organismo. Se obtienen con la digestión.","2. Nutrientes"],
+["Nutrientes según su función","Constructora/estructural: calcio, proteínas, agua, algunos lípidos · Energética: glúcidos y lípidos · Reguladora: vitaminas y sales minerales.","2. Nutrientes"],
+["Macronutrientes y micronutrientes","Macro (grandes cantidades): proteínas, glúcidos, lípidos y agua. Micro (pequeñas cantidades): vitaminas y sales minerales.","2. Nutrientes"],
+["Nutrientes inorgánicos","Agua: disuelve y transporta, cataliza reacciones, estructural y regula la temperatura. Minerales: sodio, potasio y calcio regulan la contracción muscular y el impulso nervioso; calcio y fósforo forman los huesos.","2. Nutrientes"],
+["Hidratos de carbono","Azúcares (glucosa, sacarosa) y almidón: energía. Fibra (celulosa): función reguladora.","2. Nutrientes"],
+["Proteínas","Mayoría estructural · enzimas: reguladora · anticuerpos: defensiva · hemoglobina: transporta gases.","2. Nutrientes"],
+["Lípidos","Grasas: energía. Colesterol y fosfolípidos: forman membranas celulares. Algunos son hormonas reguladoras.","2. Nutrientes"],
+["Vitaminas","Grupo amplio de sustancias que regulan numerosos procesos. Hidrosolubles: C y B. Liposolubles: A, D, E y K.","2. Nutrientes"],
+["Fuentes: agua y minerales","Agua: bebidas y frutas/verduras. Hierro: hígado, carnes, pescados, legumbres, frutos secos y verduras. Yodo: sal yodada, pescado, mariscos, algas. Calcio: lácteos.","2. Nutrientes"],
+["Fuentes: hidratos y proteínas","Hidratos: fruta, miel, zumos, azúcares, cereales y derivados, legumbres, patatas. Proteínas animales: carne, pescado, huevos, vísceras, lácteos. Vegetales: legumbres, soja, frutos secos.","2. Nutrientes"],
+["Fuentes: lípidos, vitaminas y fibra","Saturadas: mantequilla, margarina, pastelería, galletas, carnes rojas, huevos, marisco. Insaturadas: aceites vegetales (oliva). Vitaminas: frutas, verduras, carnes, pescados, hígado, huevos, leche, frutos secos. Fibra: alimentos vegetales.","2. Nutrientes"],
+["No nutrientes","Sustancias sin función nutritiva que pueden ser perjudiciales.","2. Nutrientes"],
+["Valor energético","Proporcional a la energía que aportan sus nutrientes en la respiración celular (mitocondrias: O₂ + glucosa → energía + H₂O + CO₂).","3. Energía"],
+["Energía por gramo","Hidratos de carbono: 4 kcal/g · Proteínas: 4 kcal/g · Lípidos: 9 kcal/g.","3. Energía"],
+["Unidades de energía","1 kJ = 1000 J · 1 kcal = 1000 cal · 1 cal = 4,186 J · 1 J = 0,24 cal. Una caloría eleva 1 °C la temperatura de 1 g de agua.","3. Energía"],
+["TMB","Metabolismo (tasa) basal: gasto energético para mantener el cuerpo un día en reposo. Hombres: (10·kg)+(6,25·cm)−(5·edad)+5. Mujeres: (10·kg)+(6,25·cm)−(5·edad)−161.","3. Energía"],
+["Calorías diarias","Sedentaria: TMB × 1,2 · Ejercicio moderado: TMB × 1,5 · Mucho ejercicio: TMB × 1,725.","3. Energía"],
+["Gasto energético total","TMB + actividad física + digestión y absorción de nutrientes. Las necesidades dependen de la constitución, el sexo, la edad y la actividad física.","3. Energía"],
+["Dieta y ración","Dieta: conjunto de alimentos y bebidas que ingerimos regularmente. Ración o porción: medida aproximada de la cantidad de un alimento, recomendación dietética o medida culinaria.","4. Alimentarse"],
+["Medidas de líquidos","Tarrina de yogur: 125 mL · vaso: 200-250 mL · cucharada sopera: 20-30 mL.","4. Alimentarse"],
+["Medidas de sólidos","Puñado de frutos secos: 20 g · pizca de mantequilla: 10 g · trozo de queso: 60 g · pasta: 70 g (crudo) · arroz: 50 g (crudo) · legumbres: 60 g (crudo) · dos manos de verduras: 150 g · filete: 110-120 g · rebanada de pan: 30 g.","4. Alimentarse"],
+["Alimentación saludable","La que aporta los nutrientes y energía necesarios para las funciones vitales, manteniéndonos sanos y asegurando un desarrollo óptimo.","4. Alimentarse"],
+["La alimentación saludable debe ser…","Suficiente · Completa · Equilibrada · Segura · Armónica · Satisfactoria · Adaptada · Social y asequible · Sostenible.","4. Alimentarse"],
+["Plato para comer saludable (Harvard)","Vegetales · frutas · granos integrales · proteína saludable · aceites saludables · agua · mantenerse activo. Limitar lácteos (1-2/día), jugo (1 vaso), carnes rojas y queso; evitar bebidas azucaradas y carnes procesadas.","5. Recomendaciones"],
+["Dietas sostenibles","Las que generan un menor impacto ambiental y tienen en cuenta los criterios de nutrición y salud (dieta mediterránea y atlántica).","6. Sostenibilidad"],
+["Dieta mediterránea","Cereales, legumbres o patatas con abundantes verduras y pocas proteínas; proteínas de pescado, aves, huevos y lácteos; poca carne roja; ensaladas y fruta de temporada; aceite de oliva y condimentos (menos sal).","6. Sostenibilidad"],
+["Dieta atlántica","Aceite de oliva como grasa principal · alimentos vegetales (pan, patatas, legumbres, frutas, verduras: repollo, berzas, grelos) · mucho huevo y lácteos · moderada carne · mayor consumo de pescados y mariscos.","6. Sostenibilidad"],
+["Dieta sostenible y saludable","Tener en cuenta procedencia y temporalidad · lípidos y proteínas de origen vegetal · limitar bebidas azucaradas, aperitivos salados y envasados en plástico · técnicas culinarias saludables (crudo, menos sal y azúcar).","6. Sostenibilidad"],
+["Efectos de la dieta sobre la salud","Positivos: ayudan a prevenir o curar enfermedades. Negativos: enfermedades por falta o exceso de nutriente/energía y presencia de sustancias que pueden causar daños.","7. Dieta y salud"],
+["Seguridad alimentaria","Acceso de todas las personas, en todo momento, a alimentos nutricionalmente adecuados e inocuos, en cantidad y calidad suficientes para una vida activa y sana.","7. Dieta y salud"],
+["Malnutrición","Desnutrición (falta de energía; raquitismo, kwashiorkor) · Sobrenutrición (exceso; obesidad) · Enfermedades carenciales (faltan nutrientes; avitaminosis, anemia, bocio).","7. Dieta y salud"],
+["Alergia e intolerancia","Alergia: reacción mediada por el sistema inmunitario, que percibe la proteína del alimento como patógena. Intolerancia: incapacidad de digerir o absorber un alimento; no está mediada por el sistema inmune.","7. Dieta y salud"],
+["Higiene alimentaria (food safety)","Medidas para garantizar el buen estado de los alimentos, evitando sustancias que causan enfermedades.","7. Dieta y salud"],
+["Contaminantes","Biológicos: patógenos y toxinas (Salmonella, Anisakis, Taenia solium, Aspergillus) · Químicos: aditivos, pesticidas, metales pesados (mercurio) · Físicos: vidrio, metal, madera, plásticos y microplásticos.","7. Dieta y salud"],
+];
+
+const DEV=[
+{q:"Diferencia nutrición y alimentación y explica los procesos que incluye la nutrición.",
+ ans:"La nutrición es el conjunto de procesos que nos permiten obtener la materia y energía necesarias para realizar las funciones vitales y crecer o regenerar estructuras. La alimentación es solo la ingestión de alimentos. La nutrición incluye: obtención de nutrientes y oxígeno, transporte a las células, respiración celular (mitocondrias) y eliminación de desechos celulares y dióxido de carbono.",
+ kw:[["nutricion"],["alimentacion","ingestion"],["materia","energia"],["funciones vitales"],["obtencion"],["transporte"],["respiracion celular"],["mitocondrias"],["eliminacion","desechos"]]},
+{q:"Explica la función de los aparatos que participan en la nutrición (digestivo, respiratorio, circulatorio, excretor) y del sistema linfático.",
+ ans:"Digestivo: transforma los alimentos en nutrientes y hace que pasen a la sangre mediante digestión y absorción. Respiratorio: intercambio de gases (toma oxígeno y expulsa CO₂). Circulatorio: transporta mediante la sangre nutrientes y oxígeno hasta las células y retira desechos y CO₂. Excretor: elimina de la sangre los desechos y los expulsa. Linfático: colabora con el circulatorio en el transporte de sustancias.",
+ kw:[["digestivo"],["digestion","absorcion"],["respiratorio"],["intercambio de gases","oxigeno"],["circulatorio"],["sangre"],["excretor"],["desechos"],["linfatico"]]},
+{q:"Clasifica los nutrientes según su función y según la cantidad que necesitamos. Pon ejemplos.",
+ ans:"Según su función: constructores o estructurales (calcio, proteínas, agua, algunos lípidos), energéticos (glúcidos y lípidos) y reguladores (vitaminas y sales minerales). Según la cantidad: macronutrientes, que se necesitan en grandes cantidades (proteínas, glúcidos, lípidos y agua), y micronutrientes, en pequeñas cantidades (vitaminas y sales minerales).",
+ kw:[["estructural","constructor"],["energetic"],["regulador"],["calcio","proteinas"],["glucidos","lipidos"],["vitaminas","sales minerales"],["macronutrientes"],["micronutrientes"],["grandes cantidades"],["pequenas cantidades"]]},
+{q:"Explica los nutrientes según su composición (inorgánicos y orgánicos) y sus funciones.",
+ ans:"Inorgánicos: agua (disuelve y transporta sustancias, cataliza reacciones, estructural, regula la temperatura) y minerales (sodio, potasio y calcio regulan la contracción muscular y el impulso nervioso; calcio y fósforo forman los huesos). Orgánicos: hidratos de carbono (azúcares y almidón dan energía; la fibra, de celulosa, regula), proteínas (estructurales; enzimas reguladoras; anticuerpos defensivos; hemoglobina transporta gases), lípidos (grasas dan energía; colesterol y fosfolípidos forman membranas; algunos son hormonas) y vitaminas (regulan procesos; hidrosolubles C y B; liposolubles A, D, E y K).",
+ kw:[["inorganicos"],["agua"],["minerales"],["organicos"],["hidratos de carbono"],["fibra","celulosa"],["proteinas"],["enzimas","anticuerpos","hemoglobina"],["lipidos"],["colesterol","fosfolipidos"],["vitaminas"],["hidrosolubles","liposolubles"]]},
+{q:"Cita las fuentes alimentarias de los distintos nutrientes. ¿Qué son los «no nutrientes»?",
+ ans:"Agua: bebidas y frutas y verduras. Minerales: hierro en hígado, carnes, pescados, legumbres, frutos secos y verduras; yodo en sal yodada, pescado, mariscos y algas; calcio en lácteos. Hidratos de carbono: fruta, miel, cereales, pan, pasta, legumbres y patatas. Proteínas animales: carne, pescado, huevos, lácteos; vegetales: legumbres, soja y frutos secos. Lípidos: saturados (mantequilla, pastelería, carnes rojas) e insaturados (aceite de oliva). Vitaminas: frutas, verduras, carnes, pescados, huevos, leche. Fibra: alimentos vegetales. Los no nutrientes son sustancias sin función nutritiva que pueden ser perjudiciales.",
+ kw:[["agua"],["hierro","yodo","calcio"],["hidratos"],["cereales","pan","pasta"],["proteinas animales","carne","pescado"],["legumbres","soja"],["saturadas"],["insaturadas","aceite de oliva"],["fibra"],["no nutrientes"],["perjudiciales"]]},
+{q:"Explica cómo se obtiene la energía de los alimentos: respiración celular, valor energético y unidades.",
+ ans:"El valor energético de un alimento es proporcional a la energía que aportan sus nutrientes durante la respiración celular, que tiene lugar en las mitocondrias, donde el O₂ y las moléculas de glucosa se combinan para producir energía (y H₂O y CO₂). Cada gramo de hidratos de carbono o proteínas aporta 4 kcal y cada gramo de lípidos 9 kcal. La energía se mide en kilocalorías o kilojulios (1 kcal = 1000 cal; 1 cal = 4,186 J).",
+ kw:[["valor energetico"],["respiracion celular"],["mitocondrias"],["oxigeno","glucosa"],["4 kcal","4 kilocalorias"],["9 kcal","9 kilocalorias"],["kilocalorias","kilojulios"],["4,186","4.186"]]},
+{q:"¿Qué es la TMB? Calcula las calorías diarias de un chico de 15 años, 60 kg y 170 cm con vida sedentaria.",
+ ans:"La TMB (tasa metabólica basal) es el gasto energético necesario para mantener el cuerpo durante un día en reposo, sin actividad. Para hombres: TMB = (10 × kg) + (6,25 × cm) − (5 × edad) + 5 = 600 + 1062,5 − 75 + 5 = 1592,5 kcal. Con vida sedentaria se multiplica por 1,2: 1592,5 × 1,2 = 1911 kcal diarias.",
+ kw:[["tmb","tasa metabolica basal"],["reposo"],["harris"],["1592"],["1,2","1.2"],["1911"]]},
+{q:"Explica el gasto energético total y de qué dependen las necesidades energéticas.",
+ ans:"El gasto energético total es la suma de la tasa metabólica basal, la actividad física y la digestión y absorción de nutrientes. Las necesidades energéticas dependen de la constitución, el sexo, la edad y la actividad física.",
+ kw:[["tasa metabolica","tmb"],["actividad fisica"],["digestion","absorcion"],["constitucion"],["sexo"],["edad"]]},
+{q:"Define dieta, ración y alimentación saludable. ¿Qué características debe tener una alimentación saludable?",
+ ans:"Dieta: conjunto de alimentos y bebidas que ingerimos regularmente. Ración: medida aproximada de la cantidad de un alimento que se ingiere, como recomendación dietética o medida culinaria. Alimentación saludable: la que aporta los nutrientes y la energía necesarios para las funciones vitales, manteniéndonos sanos y asegurando un desarrollo óptimo. Debe ser suficiente, completa, equilibrada, segura, armónica, satisfactoria, adaptada, social y asequible, y sostenible.",
+ kw:[["dieta"],["racion"],["saludable"],["suficiente"],["completa"],["equilibrada"],["segura"],["armonica"],["satisfactoria"],["adaptada"],["social","asequible"],["sostenible"]]},
+{q:"Explica las recomendaciones del plato para comer saludable de Harvard.",
+ ans:"Incluye vegetales (cuantos más y más variedad, mejor; las patatas no cuentan), frutas de todos los colores, granos integrales (limitar los refinados), proteína saludable (pescado, aves, legumbres y frutos secos; limitar carnes rojas y queso y evitar carnes procesadas), aceites saludables (oliva) y agua (evitar bebidas azucaradas; lácteos 1-2 porciones y jugo un vaso pequeño al día). Además, mantenerse activo.",
+ kw:[["vegetales"],["frutas"],["granos integrales","integrales"],["proteina"],["aceites"],["agua"],["activo"],["bebidas azucaradas","azucaradas"]]},
+{q:"¿Qué es una dieta sostenible? Explica la dieta mediterránea, la atlántica y cómo hacer una dieta sostenible y saludable.",
+ ans:"Una dieta sostenible genera un menor impacto ambiental, además de tener en cuenta los criterios de nutrición y salud. Dieta mediterránea: base de cereales, legumbres o patatas con abundantes verduras y pocas proteínas (pescado, aves, huevos, lácteos), poca carne roja, ensaladas, fruta de temporada, aceite de oliva y condimentos. Dieta atlántica: aceite de oliva, alimentos vegetales (pan, patatas, legumbres, frutas, verduras), muchos huevos y lácteos, poca carne y más pescados y mariscos. Una dieta sostenible y saludable tiene en cuenta la procedencia y temporalidad, usa lípidos y proteínas de origen vegetal, limita bebidas azucaradas, aperitivos salados y envases de plástico, y usa técnicas culinarias saludables.",
+ kw:[["impacto ambiental"],["mediterranea"],["cereales","legumbres"],["aceite de oliva"],["atlantica"],["pescados","mariscos"],["temporalidad","temporada"],["origen vegetal"],["bebidas azucaradas"],["tecnicas culinarias","crudo"]]},
+{q:"Explica los tipos de malnutrición y la diferencia entre alergia e intolerancia alimentaria.",
+ ans:"Malnutrición: desnutrición (ingesta inadecuada que deriva en falta de energía; raquitismo, kwashiorkor), sobrenutrición (ingesta excesiva que se almacena y daña la salud; obesidad) y enfermedades carenciales (dieta poco variada o insuficiente en la que faltan nutrientes; avitaminosis, anemia, bocio). Alergia: reacción adversa mediada por el sistema inmunitario, que percibe la proteína de un alimento como patógena. Intolerancia: incapacidad del organismo de digerir o absorber un alimento; no está mediada por el sistema inmune.",
+ kw:[["desnutricion"],["raquitismo","kwashiorkor"],["sobrenutricion"],["obesidad"],["carenciales","carencia"],["avitaminosis","anemia","bocio"],["alergia"],["sistema inmunitario","sistema inmune"],["intolerancia"],["digerir","absorber"]]},
+{q:"¿Qué es la higiene alimentaria? Explica los tipos de contaminantes con ejemplos.",
+ ans:"La higiene alimentaria (food safety) son las medidas para garantizar el buen estado de los alimentos evitando la presencia de sustancias que causan enfermedades. Los contaminantes pueden ser biológicos (patógenos y toxinas: Salmonella, Anisakis, Taenia solium, toxina de Aspergillus), químicos (aditivos, pesticidas y metales pesados como el mercurio) y físicos (vidrio, metal, madera, plásticos y microplásticos).",
+ kw:[["higiene alimentaria","food safety"],["buen estado"],["biologicos"],["patogenos","toxinas"],["salmonella","anisakis"],["quimicos"],["pesticidas","aditivos","mercurio"],["fisicos"],["vidrio","plasticos","microplasticos"]]},
+];
+
+
+
+/* ============ UTILIDADES ============ */
+const $=s=>document.querySelector(s);
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KEY=APP.key;
+let store={};
+try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;store.answered=store.answered||0;store.correct=store.correct||0;store.bestStreak=store.bestStreak||0;store.fails=store.fails||[];store.hist=store.hist||[];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+const LVL=150;
+const level=()=>Math.floor(store.xp/LVL)+1;
+function paintWallet(){$("#xp").textContent=store.xp+" XP";$("#lvl").textContent="Nv "+level()}
+function addXP(n){store.xp+=n;save();paintWallet()}
+const ALLQ=()=>[...MODELS,...TOPICS].flatMap(x=>x.qs);
+document.title=APP.title;$("#brand").textContent=APP.short;
+const app=$("#app");
+let timer=null;
+const stopTimer=()=>{if(timer){clearInterval(timer);timer=null}};
+
+function go(v){
+  stopTimer();
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  ({home:viewHome,tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  window.scrollTo(0,0);
+}
+$("#nav").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.v)};
+paintWallet();
+
+/* ============ INICIO ============ */
+function viewHome(){
+  const acc=store.answered?Math.round(store.correct/store.answered*100)+"%":"—";
+  const into=store.xp%LVL;
+  app.innerHTML=`<div class="hero"><h1>${APP.h1}</h1><p>${APP.sub}</p>
+   <div class="actions"><button class="big-btn play" id="h-play">Jugar test mixto</button><button class="big-btn alt" id="h-cards">Tarjetas</button></div>
+   <div class="lvl"><div class="row mut" style="justify-content:space-between;margin-bottom:6px"><span>Nivel ${level()}</span><span style="font-family:var(--mono)">${into}/${LVL} XP</span></div><div class="bar"><i style="width:${into/LVL*100}%"></i></div></div>
+   <div class="stats"><div class="pill"><div class="l">XP total</div><div class="v g">${store.xp}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${store.bestStreak}</div></div><div class="pill"><div class="l">Precisión</div><div class="v p">${acc}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.fails.length}</div></div></div></div>`;
+  $("#h-play").onclick=()=>startTest("mix",false,false);
+  $("#h-cards").onclick=()=>go("cards");
+}
+
+/* ============ TESTS ============ */
+let T=null;
+function viewTests(){
+  const best=(k,n)=>{const r=store.tests[k];return r?`<span class="best">★ ${r.best}/${r.n||n}</span>`:`<span>sin jugar</span>`};
+  const mission=(id,icon,name,n,k)=>`<button class="card mission" data-m="${id}"><b>${icon} ${esc(name)}</b><div class="meta"><span>${n} preguntas</span>${best(k,n)}</div></button>`;
+  app.innerHTML=`<h2 style="margin-top:0">Elige tu misión</h2>
+   <div class="opts"><label class="toggle"><input type="checkbox" id="exam"><span><b>Modo examen</b><br><span class="mut">Sin feedback hasta el final; la corrección con explicaciones sale al terminar.</span></span></label>
+   <label class="toggle"><input type="checkbox" id="reto"><span><b>Reto contrarreloj</b><br><span class="mut">20 segundos por pregunta. Si se acaba el tiempo, cuenta como fallo.</span></span></label></div>
+   <h2>Por apartados</h2><div class="grid">${TOPICS.map((m,i)=>mission("t"+i,"📚",m.name,m.qs.length,"mt"+i)).join("")}</div>
+   <h2>Modelos de examen</h2><div class="grid">${MODELS.map((m,i)=>mission(String(i),"📝",m.name,m.qs.length,"m"+i)).join("")}
+   <button class="card mission" data-m="mix"><b>🎲 Mixto</b><div class="meta"><span>20 al azar</span><span>de todos</span></div></button>
+   <button class="card mission" data-m="fails"><b>🔁 Repasar fallos</b><div class="meta"><span>${store.fails.length} guardadas</span><span></span></div></button></div>`;
+  app.onclick=e=>{const c=e.target.closest(".mission");if(c)startTest(c.dataset.m,$("#exam").checked,$("#reto").checked)};
+}
+function startTest(m,exam,reto){
+  const all=ALLQ();let qs,name,key;
+  if(m==="mix"){qs=shuffle(all).slice(0,20);name="Mixto";key="mix"}
+  else if(m==="fails"){qs=all.filter(q=>store.fails.includes(q.q));name="Repaso de fallos";key="fails";if(!qs.length){app.innerHTML=`<div class="card res"><div class="stars">🎉</div><b>No tienes fallos guardados.</b><p class="mut">Juega un test y vuelve aquí.</p><div class="actions"><button class="big-btn play" id="b">Ver tests</button></div></div>`;$("#b").onclick=()=>go("tests");return}}
+  else if(m[0]==="t"){const t=TOPICS[+m.slice(1)];qs=t.qs.slice();name=t.name;key="mt"+m.slice(1)}
+  else{qs=MODELS[+m].qs.slice();name=MODELS[+m].name;key="m"+m}
+  qs=shuffle(qs).map(q=>({...q,opts:shuffle([q.ok,...q.bad])}));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v==="tests"));
+  T={key,name,exam,reto,qs,i:0,ans:[],locked:false,streak:0,best:0,xp:0};
+  renderQ();
+}
+function hud(){return `<div class="hud"><div class="pill"><div class="l">Pregunta</div><div class="v">${T.i+1}/${T.qs.length}</div></div>
+ <div class="pill"><div class="l">Racha</div><div class="v y" id="h-s">${T.exam?"—":"🔥 "+T.streak}</div></div>
+ <div class="pill"><div class="l">XP</div><div class="v g" id="h-x">${T.exam?"—":"+"+T.xp}</div></div><span class="sp"></span><button class="exit" id="quit">Salir</button></div>`}
+function renderQ(){
+  stopTimer();
+  const q=T.qs[T.i],n=T.qs.length;T.locked=false;
+  app.innerHTML=`${hud()}<div class="timebar"><i id="tf" style="width:${T.reto?100:(T.i/n*100)}%"></i></div>
+  <div class="card"><div class="sec">${esc(T.name)}${T.exam?" · examen":""}${T.reto?" · reto":""}</div><div class="q">${esc(q.q)}</div>
+  <div id="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="k">${"ABCD"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+  <div id="fb"></div><div class="row" style="margin-top:12px"><span class="sp"></span><button class="big-btn play" id="next" hidden style="padding:12px 22px;font-size:.95rem"></button></div></div>`;
+  $("#quit").onclick=()=>{stopTimer();go("tests")};
+  $("#opts").onclick=e=>{const b=e.target.closest(".opt");if(b)pick(+b.dataset.k,b)};
+  $("#next").onclick=nextQ;
+  if(T.reto){T.t0=Date.now();timer=setInterval(()=>{const f=Math.max(0,1-(Date.now()-T.t0)/20000);const el=$("#tf");if(!el){stopTimer();return}el.style.width=f*100+"%";el.classList.toggle("low",f<.3);if(f<=0){stopTimer();timeout()}},100)}
+}
+function nextQ(){if(T.i+1<T.qs.length){T.i++;renderQ()}else finish()}
+function showNext(){const nx=$("#next");nx.hidden=false;nx.textContent=T.i+1<T.qs.length?"Siguiente →":"Ver resultado"}
+function reveal(q,k){
+  T.locked=true;stopTimer();
+  document.querySelectorAll(".opt").forEach((b,j)=>{b.disabled=true;b.classList.remove("sel");if(q.opts[j]===q.ok)b.classList.add("ok");else if(j===k)b.classList.add("ko")});
+}
+function timeout(){
+  const q=T.qs[T.i];
+  if(T.exam){nextQ();return}
+  T.ans[T.i]=undefined;T.streak=0;reveal(q,-1);
+  $("#fb").innerHTML=`<div class="fb ko"><b class="t">Tiempo agotado</b><br>Respuesta correcta: <b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
+  $("#h-s").textContent="🔥 0";showNext();
+}
+function pick(k,btn){
+  const q=T.qs[T.i];
+  if(T.exam){T.ans[T.i]=k;document.querySelectorAll(".opt").forEach((b,j)=>b.classList.toggle("sel",j===k));showNext();return}
+  if(T.locked)return;
+  T.ans[T.i]=k;reveal(q,k);
+  const good=q.opts[k]===q.ok;
+  if(good){
+    T.streak++;T.best=Math.max(T.best,T.streak);
+    const g=10+Math.min(T.streak-1,5)*2;T.xp+=g;addXP(g);
+    const r=btn.getBoundingClientRect();const p=document.createElement("div");p.className="pop";p.textContent="+"+g+(T.streak>1?" 🔥":"");p.style.left=r.left+r.width/2-20+"px";p.style.top=r.top+"px";document.body.appendChild(p);setTimeout(()=>p.remove(),900);
+    $("#fb").innerHTML=`<div class="fb ok"><b class="t">¡Correcto!</b><br>${esc(q.why)}</div>`;
+  }else{
+    T.streak=0;
+    $("#fb").innerHTML=`<div class="fb ko"><b class="t">Fallo</b> · la correcta es:<br><b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
+  }
+  $("#h-s").textContent="🔥 "+T.streak;$("#h-x").textContent="+"+T.xp;showNext();
+}
+document.addEventListener("keydown",e=>{
+  if(!T||!$("#opts")||e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT")return;
+  if("1234".includes(e.key)){const b=document.querySelectorAll(".opt")[+e.key-1];if(b&&!b.disabled)b.click()}
+  else if(e.key==="Enter"){const nx=$("#next");if(nx&&!nx.hidden)nx.click()}
+});
+function finish(){
+  stopTimer();
+  const n=T.qs.length;
+  const wrong=T.qs.filter((q,i)=>q.opts[T.ans[i]]!==q.ok);
+  const sc=n-wrong.length;
+  let gain=T.xp;
+  if(T.exam){gain=sc*10;addXP(gain)}
+  if(sc===n&&n>=10){gain+=50;addXP(50)}
+  store.fails=store.fails.filter(f=>!T.qs.some(q=>q.q===f));wrong.forEach(q=>store.fails.push(q.q));
+  const r=store.tests[T.key]||{best:0,tries:0};r.tries++;r.best=Math.max(r.best,sc);r.last=sc;r.n=n;store.tests[T.key]=r;
+  store.answered+=n;store.correct+=sc;store.bestStreak=Math.max(store.bestStreak,T.best);
+  store.hist=store.hist.concat({name:T.name,sc,n,d:new Date().toLocaleDateString("es-ES")}).slice(-30);
+  save();paintWallet();
+  const pct=sc/n,nota=(pct*10).toFixed(1),stars=pct>=.9?3:pct>=.7?2:pct>=.5?1:0;
+  const C=2*Math.PI*60,col=pct>=.7?"var(--accent)":pct>=.5?"var(--yellow)":"var(--red)";
+  app.innerHTML=`<div class="card res"><div class="sec">${esc(T.name)}</div>
+   <svg class="ring" viewBox="0 0 150 150"><circle cx="75" cy="75" r="60" fill="none" stroke="var(--surface2)" stroke-width="12"/><circle cx="75" cy="75" r="60" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*pct} ${C}" transform="rotate(-90 75 75)"/><text x="75" y="72" text-anchor="middle" font-size="30" fill="var(--text)">${nota}</text><text x="75" y="96" text-anchor="middle" font-size="12" fill="var(--text2)">${sc}/${n}</text></svg>
+   <div class="stars">${"★".repeat(stars)}<span style="color:var(--text3)">${"★".repeat(3-stars)}</span></div>
+   <div class="stats"><div class="pill"><div class="l">XP ganada</div><div class="v g">+${gain}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${T.exam?"—":T.best}</div></div><div class="pill"><div class="l">Nivel</div><div class="v p">${level()}</div></div></div>
+   <p class="mut" style="margin-top:12px">${sc===n?"¡Perfecto! Bonus de +50 XP.":pct>=.5?"Aprobado. Repasa los fallos de abajo.":"A repasar un poco más. Tú puedes."}</p>
+   <div class="actions"><button class="big-btn play" id="again">Jugar otra vez</button><button class="big-btn alt" id="back">Menú</button></div></div>
+   ${wrong.length?`<h2>Tus fallos (${wrong.length})</h2>`+wrong.map(q=>`<div class="card rev" style="margin-bottom:10px"><div class="tit">${esc(q.q)}</div>
+     <div class="fb ko">Tu respuesta: ${esc(q.opts[T.ans[T.qs.indexOf(q)]]??"(sin responder)")}</div>
+     <div class="fb ok" style="margin-top:8px"><b class="t">Correcta</b><br><b>${esc(q.ok)}</b><br><span class="mut">${esc(q.why)}</span></div></div>`).join(""):""}`;
+  const m=T.key;$("#again").onclick=()=>startTest(m.startsWith("mt")?"t"+m.slice(2):m.startsWith("m")&&m!=="mix"?m.slice(1):m,T.exam,T.reto);
+  $("#back").onclick=()=>go("tests");
+}
+
+/* ============ TARJETAS ============ */
+let C={sec:"Todas",i:0,onlyReview:false};
+function viewCards(){
+  const secs=["Todas",...new Set(CARDS.map(c=>c[2]))];
+  const pool=CARDS.map((c,id)=>({c,id})).filter(x=>(C.sec==="Todas"||x.c[2]===C.sec)&&(!C.onlyReview||!store.known[x.id]));
+  if(C.i>=pool.length)C.i=0;
+  const cur=pool[C.i];
+  const kn=Object.values(store.known).filter(Boolean).length;
+  app.innerHTML=`<div class="chips">${secs.map(s=>`<button class="chip ${s===C.sec?"on":""}" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+  <div class="row"><label class="mut" style="cursor:pointer"><input type="checkbox" id="rev" ${C.onlyReview?"checked":""} style="accent-color:var(--accent)"> Solo las que aún no sé</label><span class="sp"></span><div class="pill"><div class="l">Dominadas</div><div class="v g">${kn}/${CARDS.length}</div></div></div>
+  ${cur?`<div class="flash"><div class="flip" id="flip"><div class="face front"><div class="sec">${esc(cur.c[2])}</div>${esc(cur.c[0])}<div class="hint">toca para girar</div></div><div class="face back">${esc(cur.c[1])}</div></div></div>
+  <div class="row"><button class="mini" id="prev">←</button><span class="mut" style="font-family:var(--mono)">${C.i+1}/${pool.length}</span><button class="mini" id="nx">→</button><span class="sp"></span><button class="mini" id="rv">🔁 Repasar</button><button class="big-btn play" id="kn" style="padding:10px 18px;font-size:.9rem">✓ Me la sé</button></div>
+  <div class="row" style="margin-top:10px"><button class="mini" id="sh">🔀 Aleatoria</button></div>`:`<div class="card res"><div class="stars">🎉</div>No quedan tarjetas pendientes en esta selección.</div>`}`;
+  app.onclick=e=>{const ch=e.target.closest(".chip");if(ch){C.sec=ch.dataset.s;C.i=0;viewCards()}};
+  $("#rev").onchange=e=>{C.onlyReview=e.target.checked;C.i=0;viewCards()};
+  if(!cur)return;
+  $("#flip").onclick=()=>$("#flip").classList.toggle("on");
+  const mv=d=>{C.i=(C.i+d+pool.length)%pool.length;viewCards()};
+  $("#prev").onclick=()=>mv(-1);$("#nx").onclick=()=>mv(1);
+  $("#kn").onclick=()=>{if(!store.known[cur.id])addXP(3);store.known[cur.id]=true;save();if(!C.onlyReview)C.i=(C.i+1)%pool.length;viewCards()};
+  $("#rv").onclick=()=>{store.known[cur.id]=false;save();mv(1)};
+  $("#sh").onclick=()=>{C.i=Math.floor(Math.random()*pool.length);viewCards()};
+}
+
+/* ============ DESARROLLO ============ */
+let D={i:0};
+function viewDev(){
+  const d=DEV[D.i];
+  app.innerHTML=`<div class="card"><div class="row"><div class="sec" style="margin:0">Pregunta de desarrollo</div><span class="sp"></span><span class="mut" style="font-family:var(--mono)">${D.i+1}/${DEV.length}</span></div>
+  <div class="q" style="margin-top:10px">${esc(d.q)}</div>
+  <textarea id="txt" placeholder="Escribe aquí tu respuesta…">${esc(store["dev"+D.i]||"")}</textarea>
+  <div class="row" style="margin-top:12px"><button class="mini" id="p">←</button><button class="mini" id="n">→</button><span class="sp"></span><button class="big-btn play" id="chk" style="padding:11px 22px;font-size:.95rem">Comprobar</button></div>
+  <div id="res"></div></div>`;
+  $("#txt").oninput=e=>{store["dev"+D.i]=e.target.value;save()};
+  $("#p").onclick=()=>{D.i=(D.i+DEV.length-1)%DEV.length;viewDev()};
+  $("#n").onclick=()=>{D.i=(D.i+1)%DEV.length;viewDev()};
+  $("#chk").onclick=()=>{
+    const t=norm($("#txt").value);
+    const hits=d.kw.map(g=>g.some(w=>t.includes(norm(w))));
+    const ok=hits.filter(Boolean).length;
+    const k="devdone"+D.i;if(ok>=Math.ceil(d.kw.length*.6)&&!store[k]){store[k]=1;addXP(15)}
+    $("#res").innerHTML=`<p style="margin-top:14px"><b style="font-family:var(--mono)">Conceptos clave: ${ok}/${d.kw.length}</b></p><div>${d.kw.map((g,i)=>`<span class="kw ${hits[i]?"has":"no"}">${hits[i]?"✓":"✗"} ${esc(g[0])}</span>`).join("")}</div>
+    <p class="mut" style="margin-top:8px">Detección automática por palabras: si lo explicaste con otras, compara con el modelo.${ok>=Math.ceil(d.kw.length*.6)?" (+15 XP la primera vez)":""}</p>
+    <div class="model-ans"><b>Respuesta modelo</b>\n${esc(d.ans)}</div>`;
+  };
+}
+
+/* ============ PROGRESO ============ */
+function viewStats(){
+  const k=Object.values(store.known).filter(Boolean).length;
+  const acc=store.answered?Math.round(store.correct/store.answered*100)+"%":"—";
+  const row=(name,key,n)=>{const r=store.tests[key];const p=r?r.best/(r.n||n)*100:0;return `<div style="margin-bottom:12px"><div class="row mut" style="justify-content:space-between;margin-bottom:4px"><span style="color:var(--text)">${esc(name)}</span><span style="font-family:var(--mono)">${r?`★ ${r.best}/${r.n} · ${r.tries}x`:"sin jugar"}</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`};
+  app.innerHTML=`<div class="stats" style="margin-top:0"><div class="pill"><div class="l">Nivel</div><div class="v p">${level()}</div></div><div class="pill"><div class="l">XP</div><div class="v g">${store.xp}</div></div><div class="pill"><div class="l">Precisión</div><div class="v y">${acc}</div></div><div class="pill"><div class="l">Tarjetas</div><div class="v g">${k}/${CARDS.length}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.fails.length}</div></div></div>
+  <h2>Por apartados</h2><div class="card">${TOPICS.map((m,i)=>row(m.name,"mt"+i,m.qs.length)).join("")}</div>
+  <h2>Modelos de examen</h2><div class="card">${MODELS.map((m,i)=>row(m.name,"m"+i,m.qs.length)).join("")}</div>
+  <h2>Últimos intentos</h2><div class="card hist">${store.hist.slice().reverse().slice(0,10).map(h=>`<p><span>${h.d} · ${esc(h.name)}</span><span>${h.sc}/${h.n}</span></p>`).join("")||'<span class="mut">Todavía no hay intentos.</span>'}</div>
+  <div class="row" style="margin-top:16px"><button class="mini" id="rst" style="color:var(--red)">Borrar progreso</button><span class="mut" id="rstmsg"></span></div>`;
+  let armed=false;$("#rst").onclick=()=>{if(!armed){armed=true;$("#rst").textContent="¿Seguro? Pulsa otra vez";return}store={tests:{},known:{},xp:0,answered:0,correct:0,bestStreak:0,fails:[],hist:[]};save();paintWallet();viewStats()};
+}
+go("home");
+</script>
+</body>
+</html>
