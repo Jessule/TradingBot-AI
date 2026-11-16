@@ -118,15 +118,56 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
 .mini{background:transparent;border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:9px 14px;font-weight:600;font-size:.85rem;cursor:pointer}
 .mini:hover{border-color:var(--accent);color:var(--accent)}
 .hist p{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.8rem;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border)}
+
+/* ===== FX ===== */
+.bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bgfx i{position:absolute;width:46vmax;height:46vmax;border-radius:50%;filter:blur(90px);opacity:.14;animation:drift 22s ease-in-out infinite alternate}
+.bgfx i:nth-child(1){background:var(--accent);left:-12vmax;top:-12vmax}
+.bgfx i:nth-child(2){background:var(--purple);right:-16vmax;top:30vh;animation-duration:28s;animation-delay:-8s}
+.bgfx i:nth-child(3){background:#1e6fff;left:20vw;bottom:-26vmax;animation-duration:34s;animation-delay:-14s;opacity:.1}
+@keyframes drift{to{transform:translate(8vmax,6vmax) scale(1.15)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:55}
+#app>*{animation:rise .38s cubic-bezier(.2,.8,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.opt{animation:rise .4s cubic-bezier(.2,.8,.3,1) both}
+.opt:nth-child(2){animation-delay:.05s}.opt:nth-child(3){animation-delay:.1s}.opt:nth-child(4){animation-delay:.15s}
+.opt.ok{animation:pulseOk .7s}
+@keyframes pulseOk{0%{box-shadow:0 0 0 0 rgba(0,212,160,.7)}100%{box-shadow:0 0 0 20px rgba(0,212,160,0)}}
+.shake{animation:shake .38s!important}
+.bump{animation:bump .45s}
+@keyframes bump{40%{transform:scale(1.22)}}
+.hero h1 span{background:linear-gradient(90deg,#00d4a0,#6ffdd6,#9d7bff,#00d4a0);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite}
+@keyframes shimmer{to{background-position:220% 0}}
+.big-btn.play{position:relative;overflow:hidden}
+.big-btn.play::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);transform:translateX(-120%);animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{60%,100%{transform:translateX(120%)}}
+.big-btn:hover{transform:translateY(-2px)}
+.banner{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:60}
+.banner div{font-family:var(--mono);font-weight:700;font-size:clamp(2rem,11vw,4.2rem);color:var(--accent);text-shadow:0 0 30px var(--accent);animation:banner 1.5s ease-out forwards;text-align:center;line-height:1.1}
+.banner small{display:block;font-size:.3em;color:var(--yellow);text-shadow:none;letter-spacing:3px;margin-top:8px}
+@keyframes banner{0%{opacity:0;transform:scale(.4)}18%{opacity:1;transform:scale(1.18)}65%{opacity:1;transform:scale(1)}100%{opacity:0;transform:translateY(-34px) scale(1.06)}}
+.star{display:inline-block;animation:starpop .55s cubic-bezier(.2,1.5,.4,1) both;color:var(--yellow);text-shadow:0 0 14px rgba(245,197,66,.6)}
+@keyframes starpop{0%{transform:scale(0) rotate(-120deg);opacity:0}100%{transform:scale(1);opacity:1}}
+.fly{animation:fly .4s ease-in forwards!important}
+@keyframes fly{to{transform:translateX(110%) rotate(14deg);opacity:0}}
+.timebar i.low{animation:blink .5s infinite alternate}
+@keyframes blink{to{opacity:.45}}
+.snd{background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:38px;height:34px;cursor:pointer;font-size:1rem}
+.snd:hover{border-color:var(--accent)}
+.flame{display:inline-block;animation:flick .9s ease-in-out infinite alternate}
+@keyframes flick{to{transform:scale(1.18) rotate(-6deg)}}
+.orb{animation:orbpulse 2.4s ease-in-out infinite}
+@keyframes orbpulse{50%{box-shadow:0 0 22px var(--accent),0 0 6px #6ffdd6}}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:480px){.big-btn{padding:14px 22px}.flip{height:300px}}
 </style>
 </head>
 <body>
+<div class="bgfx"><i></i><i></i><i></i></div>
 <div class="topbar">
   <div class="brand"><div class="orb"></div><span id="brand"></span></div>
-  <div class="wallet"><span class="lbl" id="lvl">Nv 1</span><span class="amt" id="xp">0 XP</span></div>
+  <div class="row" style="gap:8px;flex-wrap:nowrap"><button class="snd" id="snd" aria-label="Activar o silenciar sonido">🔊</button><div class="wallet"><span class="lbl" id="lvl">Nv 1</span><span class="amt" id="xp">0 XP</span></div></div>
 </div>
 <nav class="nav" id="nav">
   <button data-v="home" class="on">Inicio</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
@@ -489,6 +530,41 @@ const $=s=>document.querySelector(s);
 const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ============ SONIDO Y EFECTOS ============ */
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let AC=null;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==="suspended")AC.resume();return AC}
+function tone(f,d,type,v,delay,slide){const c=ac();if(!c||store.mute)return;const t=c.currentTime+(delay||0);const o=c.createOscillator(),g=c.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v||.12,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.03)}
+function noise(d,v,fq){const c=ac();if(!c||store.mute)return;const n=Math.floor(c.sampleRate*d),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=b;f.type="bandpass";f.frequency.value=fq;g.gain.value=v;s.connect(f);f.connect(g);g.connect(c.destination);s.start()}
+const SFX={
+  click(){tone(660,.05,"square",.04)},
+  ok(s){const b=523*Math.pow(2,Math.min(s,8)/12);[1,1.26,1.5].forEach((m,i)=>tone(b*m,.16,"triangle",.13,i*.065))},
+  ko(){tone(230,.3,"sawtooth",.1,0,110);tone(170,.34,"square",.06,.08,70)},
+  tick(){tone(950,.04,"square",.035)},
+  flip(){noise(.14,.07,2600)},
+  star(i){tone(784*Math.pow(2,i/6),.2,"triangle",.13)},
+  win(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,.24,"triangle",.13,i*.1))},
+  lose(){[392,349,294].forEach((f,i)=>tone(f,.32,"sine",.11,i*.18))},
+  level(){[392,523,659,784,1047,1319].forEach((f,i)=>tone(f,.22,"square",.06,i*.08));tone(1568,.6,"triangle",.12,.52)},
+  known(){tone(880,.08,"sine",.11);tone(1320,.16,"sine",.11,.08)},
+  combo(){tone(1047,.12,"square",.06);tone(1568,.22,"square",.06,.1)}
+};
+const cv=document.createElement("canvas");cv.id="fx";document.body.appendChild(cv);
+const cx=cv.getContext("2d");let P=[],raf=0;
+const COL=["#00d4a0","#6ffdd6","#f5c542","#9d7bff","#ff4d6a","#ffffff"];
+function fit(){cv.width=innerWidth;cv.height=innerHeight}fit();addEventListener("resize",fit);
+function burst(x,y,n){if(reduce)return;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=2+Math.random()*6;P.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3,g:.18,l:55+Math.random()*30,s:4+Math.random()*5,c:COL[i%COL.length],r:Math.random()*6,vr:(Math.random()-.5)*.4})}run()}
+function confetti(n){if(reduce)return;for(let i=0;i<n;i++)P.push({x:Math.random()*innerWidth,y:-10-Math.random()*240,vx:(Math.random()-.5)*3,vy:2+Math.random()*3.5,g:.05,l:150+Math.random()*90,s:5+Math.random()*6,c:COL[i%COL.length],r:Math.random()*6,vr:(Math.random()-.5)*.3});run()}
+function run(){if(!raf)raf=requestAnimationFrame(frame)}
+function frame(){cx.clearRect(0,0,cv.width,cv.height);P=P.filter(p=>p.l>0&&p.y<innerHeight+20);for(const p of P){p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.vx*=.995;p.r+=p.vr;p.l--;cx.save();cx.globalAlpha=Math.min(1,p.l/30);cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);cx.restore()}raf=P.length?requestAnimationFrame(frame):0;if(!raf)cx.clearRect(0,0,cv.width,cv.height)}
+let BQ=[],BB=false;
+function showBanner(t,sub){if(BQ.length<3)BQ.push([t,sub]);if(!BB)nextB()}
+function nextB(){const x=BQ.shift();if(!x){BB=false;return}BB=true;const b=document.createElement("div");b.className="banner";b.innerHTML="<div>"+x[0]+(x[1]?"<small>"+x[1]+"</small>":"")+"</div>";document.body.appendChild(b);setTimeout(()=>{b.remove();nextB()},1450)}
+function bumpEl(el){if(!el)return;el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump")}
+function countUp(el,a,b,ms,dec){if(!el)return;if(reduce){el.textContent=b.toFixed(dec);return}const t0=performance.now();(function st(t){const k=Math.min(1,(t-t0)/ms),e=1-Math.pow(1-k,3);el.textContent=(a+(b-a)*e).toFixed(dec);if(k<1)requestAnimationFrame(st)})(t0)}
+function shakeCard(){const c=document.querySelector("main .card");if(!c)return;c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake")}
+document.addEventListener("click",e=>{ac();if(e.target.closest(".mission,.big-btn,.chip,.mini,.exit,.nav button"))SFX.click()},true);
 const KEY=APP.key;
 let store={};
 try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
@@ -496,8 +572,12 @@ store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;sto
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 const LVL=150;
 const level=()=>Math.floor(store.xp/LVL)+1;
-function paintWallet(){$("#xp").textContent=store.xp+" XP";$("#lvl").textContent="Nv "+level()}
-function addXP(n){store.xp+=n;save();paintWallet()}
+let shown=store.xp;
+function paintWallet(anim){const el=$("#xp");$("#lvl").textContent="Nv "+level();if(!anim||reduce){shown=store.xp;el.textContent=store.xp+" XP";return}const from=shown,to=store.xp,t0=performance.now();bumpEl(el.parentNode);(function st(t){const k=Math.min(1,(t-t0)/450);shown=Math.round(from+(to-from)*k);el.textContent=shown+" XP";if(k<1)requestAnimationFrame(st)})(t0)}
+function levelUp(){SFX.level();showBanner("NIVEL "+level(),"¡SUBES DE NIVEL!");confetti(170)}
+function addXP(n){const l0=level();store.xp+=n;save();paintWallet(true);if(level()>l0)levelUp()}
+$("#snd").textContent=store.mute?"🔇":"🔊";
+$("#snd").onclick=()=>{store.mute=!store.mute;save();$("#snd").textContent=store.mute?"🔇":"🔊";if(!store.mute)SFX.click()};
 const ALLQ=()=>[...MODELS,...TOPICS].flatMap(x=>x.qs);
 document.title=APP.title;$("#brand").textContent=APP.short;
 const app=$("#app");
@@ -563,7 +643,7 @@ function renderQ(){
   $("#quit").onclick=()=>{stopTimer();go("tests")};
   $("#opts").onclick=e=>{const b=e.target.closest(".opt");if(b)pick(+b.dataset.k,b)};
   $("#next").onclick=nextQ;
-  if(T.reto){T.t0=Date.now();timer=setInterval(()=>{const f=Math.max(0,1-(Date.now()-T.t0)/20000);const el=$("#tf");if(!el){stopTimer();return}el.style.width=f*100+"%";el.classList.toggle("low",f<.3);if(f<=0){stopTimer();timeout()}},100)}
+  if(T.reto){T.t0=Date.now();timer=setInterval(()=>{const f=Math.max(0,1-(Date.now()-T.t0)/20000);const el=$("#tf");if(!el){stopTimer();return}el.style.width=f*100+"%";el.classList.toggle("low",f<.3);const sc=Math.ceil(f*20);if(sc<=5&&sc!==T.ls){T.ls=sc;SFX.tick()}if(f<=0){stopTimer();timeout()}},100)}
 }
 function nextQ(){if(T.i+1<T.qs.length){T.i++;renderQ()}else finish()}
 function showNext(){const nx=$("#next");nx.hidden=false;nx.textContent=T.i+1<T.qs.length?"Siguiente →":"Ver resultado"}
@@ -574,7 +654,7 @@ function reveal(q,k){
 function timeout(){
   const q=T.qs[T.i];
   if(T.exam){nextQ();return}
-  T.ans[T.i]=undefined;T.streak=0;reveal(q,-1);
+  T.ans[T.i]=undefined;T.streak=0;reveal(q,-1);SFX.ko();shakeCard();
   $("#fb").innerHTML=`<div class="fb ko"><b class="t">Tiempo agotado</b><br>Respuesta correcta: <b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
   $("#h-s").textContent="🔥 0";showNext();
 }
@@ -587,13 +667,14 @@ function pick(k,btn){
   if(good){
     T.streak++;T.best=Math.max(T.best,T.streak);
     const g=10+Math.min(T.streak-1,5)*2;T.xp+=g;addXP(g);
-    const r=btn.getBoundingClientRect();const p=document.createElement("div");p.className="pop";p.textContent="+"+g+(T.streak>1?" 🔥":"");p.style.left=r.left+r.width/2-20+"px";p.style.top=r.top+"px";document.body.appendChild(p);setTimeout(()=>p.remove(),900);
+    SFX.ok(T.streak);const r=btn.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,16);if([3,5,7,10,15,20].includes(T.streak)){showBanner("COMBO x"+T.streak,"🔥 EN RACHA");SFX.combo();burst(innerWidth/2,innerHeight/3,60)}
+    const p=document.createElement("div");p.className="pop";p.textContent="+"+g+(T.streak>1?" 🔥":"");p.style.left=r.left+r.width/2-20+"px";p.style.top=r.top+"px";document.body.appendChild(p);setTimeout(()=>p.remove(),900);
     $("#fb").innerHTML=`<div class="fb ok"><b class="t">¡Correcto!</b><br>${esc(q.why)}</div>`;
   }else{
-    T.streak=0;
+    T.streak=0;SFX.ko();if(navigator.vibrate)navigator.vibrate(120);shakeCard();
     $("#fb").innerHTML=`<div class="fb ko"><b class="t">Fallo</b> · la correcta es:<br><b>${esc(q.ok)}</b><br><br><b>¿Por qué?</b> ${esc(q.why)}</div>`;
   }
-  $("#h-s").textContent="🔥 "+T.streak;$("#h-x").textContent="+"+T.xp;showNext();
+  $("#h-s").textContent="🔥 "+T.streak;bumpEl($("#h-s"));bumpEl($("#h-x"));$("#h-x").textContent="+"+T.xp;showNext();
 }
 document.addEventListener("keydown",e=>{
   if(!T||!$("#opts")||e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT")return;
@@ -616,14 +697,18 @@ function finish(){
   const pct=sc/n,nota=(pct*10).toFixed(1),stars=pct>=.9?3:pct>=.7?2:pct>=.5?1:0;
   const C=2*Math.PI*60,col=pct>=.7?"var(--accent)":pct>=.5?"var(--yellow)":"var(--red)";
   app.innerHTML=`<div class="card res"><div class="sec">${esc(T.name)}</div>
-   <svg class="ring" viewBox="0 0 150 150"><circle cx="75" cy="75" r="60" fill="none" stroke="var(--surface2)" stroke-width="12"/><circle cx="75" cy="75" r="60" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*pct} ${C}" transform="rotate(-90 75 75)"/><text x="75" y="72" text-anchor="middle" font-size="30" fill="var(--text)">${nota}</text><text x="75" y="96" text-anchor="middle" font-size="12" fill="var(--text2)">${sc}/${n}</text></svg>
-   <div class="stars">${"★".repeat(stars)}<span style="color:var(--text3)">${"★".repeat(3-stars)}</span></div>
+   <svg class="ring" viewBox="0 0 150 150"><circle cx="75" cy="75" r="60" fill="none" stroke="var(--surface2)" stroke-width="12"/><circle id="arc" cx="75" cy="75" r="60" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 ${C}" style="transition:stroke-dasharray 1.2s cubic-bezier(.2,.8,.3,1)" transform="rotate(-90 75 75)"/><text x="75" y="72" text-anchor="middle" font-size="30" fill="var(--text)" id="nota">0.0</text><text x="75" y="96" text-anchor="middle" font-size="12" fill="var(--text2)">${sc}/${n}</text></svg>
+   <div class="stars">${[0,1,2].map(i=>`<span class="${i<stars?"star":""}" style="${i<stars?"animation-delay:"+(.5+i*.35)+"s":"color:var(--text3)"}">★</span>`).join("")}</div>
    <div class="stats"><div class="pill"><div class="l">XP ganada</div><div class="v g">+${gain}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${T.exam?"—":T.best}</div></div><div class="pill"><div class="l">Nivel</div><div class="v p">${level()}</div></div></div>
    <p class="mut" style="margin-top:12px">${sc===n?"¡Perfecto! Bonus de +50 XP.":pct>=.5?"Aprobado. Repasa los fallos de abajo.":"A repasar un poco más. Tú puedes."}</p>
    <div class="actions"><button class="big-btn play" id="again">Jugar otra vez</button><button class="big-btn alt" id="back">Menú</button></div></div>
    ${wrong.length?`<h2>Tus fallos (${wrong.length})</h2>`+wrong.map(q=>`<div class="card rev" style="margin-bottom:10px"><div class="tit">${esc(q.q)}</div>
      <div class="fb ko">Tu respuesta: ${esc(q.opts[T.ans[T.qs.indexOf(q)]]??"(sin responder)")}</div>
      <div class="fb ok" style="margin-top:8px"><b class="t">Correcta</b><br><b>${esc(q.ok)}</b><br><span class="mut">${esc(q.why)}</span></div></div>`).join(""):""}`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const arc=$("#arc");if(arc)arc.setAttribute("stroke-dasharray",(C*pct)+" "+C)}));
+  countUp($("#nota"),0,+nota,1100,1);
+  [0,1,2].forEach(i=>{if(i<stars)setTimeout(()=>SFX.star(i),520+i*350)});
+  if(pct>=.7){setTimeout(()=>{SFX.win();confetti(pct===1?280:150);if(pct===1)showBanner("¡PERFECTO!","+50 XP")},350)}else if(pct<.5)SFX.lose();
   const m=T.key;$("#again").onclick=()=>startTest(m.startsWith("mt")?"t"+m.slice(2):m.startsWith("m")&&m!=="mix"?m.slice(1):m,T.exam,T.reto);
   $("#back").onclick=()=>go("tests");
 }
@@ -644,10 +729,10 @@ function viewCards(){
   app.onclick=e=>{const ch=e.target.closest(".chip");if(ch){C.sec=ch.dataset.s;C.i=0;viewCards()}};
   $("#rev").onchange=e=>{C.onlyReview=e.target.checked;C.i=0;viewCards()};
   if(!cur)return;
-  $("#flip").onclick=()=>$("#flip").classList.toggle("on");
+  $("#flip").onclick=()=>{SFX.flip();$("#flip").classList.toggle("on")};
   const mv=d=>{C.i=(C.i+d+pool.length)%pool.length;viewCards()};
   $("#prev").onclick=()=>mv(-1);$("#nx").onclick=()=>mv(1);
-  $("#kn").onclick=()=>{if(!store.known[cur.id])addXP(3);store.known[cur.id]=true;save();if(!C.onlyReview)C.i=(C.i+1)%pool.length;viewCards()};
+  $("#kn").onclick=()=>{if(!store.known[cur.id])addXP(3);store.known[cur.id]=true;save();SFX.known();const r=$(".flash").getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,24);$(".flash").classList.add("fly");setTimeout(()=>{if(!C.onlyReview)C.i=(C.i+1)%pool.length;viewCards()},reduce?0:380)};
   $("#rv").onclick=()=>{store.known[cur.id]=false;save();mv(1)};
   $("#sh").onclick=()=>{C.i=Math.floor(Math.random()*pool.length);viewCards()};
 }
@@ -668,7 +753,7 @@ function viewDev(){
     const t=norm($("#txt").value);
     const hits=d.kw.map(g=>g.some(w=>t.includes(norm(w))));
     const ok=hits.filter(Boolean).length;
-    const k="devdone"+D.i;if(ok>=Math.ceil(d.kw.length*.6)&&!store[k]){store[k]=1;addXP(15)}
+    const k="devdone"+D.i;const pass=ok>=Math.ceil(d.kw.length*.6);if(pass&&!store[k]){store[k]=1;addXP(15)}if(pass){SFX.win();confetti(70)}
     $("#res").innerHTML=`<p style="margin-top:14px"><b style="font-family:var(--mono)">Conceptos clave: ${ok}/${d.kw.length}</b></p><div>${d.kw.map((g,i)=>`<span class="kw ${hits[i]?"has":"no"}">${hits[i]?"✓":"✗"} ${esc(g[0])}</span>`).join("")}</div>
     <p class="mut" style="margin-top:8px">Detección automática por palabras: si lo explicaste con otras, compara con el modelo.${ok>=Math.ceil(d.kw.length*.6)?" (+15 XP la primera vez)":""}</p>
     <div class="model-ans"><b>Respuesta modelo</b>\n${esc(d.ans)}</div>`;
