@@ -158,6 +158,32 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
 @keyframes flick{to{transform:scale(1.18) rotate(-6deg)}}
 .orb{animation:orbpulse 2.4s ease-in-out infinite}
 @keyframes orbpulse{50%{box-shadow:0 0 22px var(--accent),0 0 6px #6ffdd6}}
+
+/* ===== RESUMEN ===== */
+.emo{font-size:3.4rem;line-height:1;display:inline-block;animation:emobounce 1.8s ease-in-out infinite}
+@keyframes emobounce{50%{transform:translateY(-8px) rotate(-6deg) scale(1.08)}}
+.fl{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.fc{position:relative;min-height:96px;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;font-size:.93rem;line-height:1.4;transition:border-color .15s,transform .12s}
+.fc:hover{border-color:var(--accent);transform:translateY(-2px)}
+.fc .ff{font-weight:700;display:flex;gap:8px;align-items:center}
+.fc .ff::after{content:"toca";font-family:var(--mono);font-size:.6rem;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-left:auto}
+.fc .fb2{display:none}
+.fc.on{background:linear-gradient(160deg,#0f2a26,var(--surface));border-color:var(--accent-line);animation:flipin .4s}
+.fc.on .ff{display:none}.fc.on .fb2{display:block}
+@keyframes flipin{from{transform:rotateX(80deg);opacity:.2}to{transform:none;opacity:1}}
+.trick{background:linear-gradient(135deg,rgba(245,197,66,.1),var(--surface));border-color:rgba(245,197,66,.3);margin-top:16px;font-size:1rem}
+.ord{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.ordb{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .15s}
+.ordb:hover:not(:disabled){border-color:var(--purple)}
+.ordb.good{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);animation:pulseOk .6s}
+.ordb.bad{animation:shake .35s;border-color:var(--red)}
+.ordb .n{font-family:var(--mono);background:var(--accent);color:#04150f;border-radius:6px;padding:0 6px;margin-right:6px;font-size:.78rem}
+.vf{margin-bottom:10px}
+.vf .row{margin-top:10px}
+.vf .mini.right{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.vf .mini.wrong{background:var(--red-dim);border-color:var(--red);color:var(--red);animation:shake .35s}
+.vfb{margin-top:8px;font-size:.9rem}
+.sumdone{margin:20px 0 6px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:480px){.big-btn{padding:14px 22px}.flip{height:300px}}
@@ -170,7 +196,7 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
   <div class="row" style="gap:8px;flex-wrap:nowrap"><button class="snd" id="snd" aria-label="Activar o silenciar sonido">🔊</button><div class="wallet"><span class="lbl" id="lvl">Nv 1</span><span class="amt" id="xp">0 XP</span></div></div>
 </div>
 <nav class="nav" id="nav">
-  <button data-v="home" class="on">Inicio</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
+  <button data-v="home" class="on">Inicio</button><button data-v="sum">📖 Resumen</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
 </nav>
 <main id="app"></main>
 
@@ -575,6 +601,55 @@ const DEV=[
  kw:[["licencia"],["comercial"],["libre"],["freeware"],["copyleft"],["gnu","gpl"],["creative commons"],["cc by","atribucion"],["sa","compartir igual"],["nd","no derivadas"],["nc","no comercial"],["cc0","dominio publico"]]},
 ];
 
+// Resumen interactivo: un punto = una misión
+const SUMMARY=[
+{id:"p1",emoji:"🧩",title:"1. Lenguajes de programación",tag:"Bloques de colores vs. escribir código como un hacker",
+ points:[["¿Qué es un lenguaje?","Sirve para describir un conjunto de <b>acciones que deben ejecutar las máquinas</b>. Con él construimos programas."],["🎨 Visual","<b>Bloques gráficos</b> que se arrastran y ensamblan (Scratch, App Inventor, MakeCode, Blockly…). Sencillo e intuitivo, evita errores de escritura; difícil en proyectos grandes."],["⌨️ Textual","Como aprender un idioma: <b>vocabulario y sintaxis</b> (Python, C++, Java, Processing). Permite proyectos complejos y es más cercano al trabajo real; requiere más abstracción."],["Clasificación","Por cómo se ejecutan: <b>compilados o interpretados</b>. Por cómo resuelven problemas: <b>estructurados u orientados a objetos</b>."],["🔁 Código fuente → compilador → código objeto","El compilador <b>traduce</b> tu código fuente a lenguaje máquina (ceros y unos) que procesa la CPU."],["♻️ Sostenibilidad e inclusión","Sostenible: menor impacto ambiental (optimizar el código, uso eficiente de energía). Inclusivo: <b>accesible para todas las personas</b>."]],
+ trick:"El compilador es el traductor de la película: tú hablas «humano» (código fuente), la CPU solo entiende «binario» (código objeto).",
+ order:{q:"Ordena el viaje de tu código",items:["Escribes el código fuente","El compilador lo traduce","Se genera el código objeto (ceros y unos)","La CPU procesa las instrucciones"]},
+ quiz:[["Python es un lenguaje de programación visual.",false,"Python es textual; Scratch y App Inventor son visuales."],["La programación visual evita errores de escritura.",true,"Es una de sus ventajas."],["El código objeto es el que escribe el programador.",false,"Lo escribe en código fuente; el objeto es el resultado de compilar."]]},
+
+{id:"p2",emoji:"🧭",title:"2. Algoritmos y estructuras de control",tag:"Recetas paso a paso… sin ambigüedades",
+ points:[["¿Algoritmo?","Secuencia <b>ordenada de pasos</b> que resuelven un problema en un <b>tiempo finito</b>."],["3 reglas","Instrucciones <b>concretas</b> (sin ambigüedad) · <b>finitos</b> (terminan) · pasos <b>simples y ordenados</b>."],["🎭 Pseudocódigo","«Código falso» para humanos: no se ejecuta, pero ayuda a <b>detectar errores y depurar</b>."],["🖥️ Programa","La <b>traducción</b> de un algoritmo a un lenguaje que el ordenador entiende."],["🔷 Diagrama de flujo","Símbolos unidos por flechas que muestran la secuencia de acciones. Ayuda a comprobar y depurar."],["➡️ Secuencial","Instrucciones <b>una tras otra</b>, en el orden en que aparecen."],["🔀 Selectiva","Solo se ejecutan si se cumple o no una <b>condición</b> (¿Media ≥ 5? Sí/No)."],["🔁 Iterativa","Instrucciones que se <b>repiten</b> en bucles hasta cumplir algo."]],
+ trick:"Secuencial = lista de la compra (uno tras otro). Selectiva = bifurcación (¿Sí o No?). Iterativa = vuelta de carrusel (¡otra vez!).",
+ order:{q:"Ordena de la idea al programa final",items:["Tengo un problema","Diseño el algoritmo (pseudocódigo o diagrama)","Lo traduzco a un lenguaje: ¡es un programa!","El ordenador lo procesa"]},
+ quiz:[["Un algoritmo puede no terminar nunca.",false,"Los algoritmos deben ser finitos."],["El pseudocódigo se puede ejecutar en el ordenador.",false,"Está hecho para humanos, no para máquinas."],["Repetir exámenes hasta aprobar es una estructura iterativa.",true,"Se repiten instrucciones en un bucle."]]},
+
+{id:"p3",emoji:"🔎",title:"3. Detección de patrones y subalgoritmos",tag:"Ordenar y buscar como lo hace Google",
+ points:[["Ordenación","Colocar datos en orden <b>creciente o decreciente</b>."],["🐢 Por selección","Comparar de <b>dos en dos</b> desde la izquierda, el menor a la izquierda. Muchas comparaciones: poco eficiente."],["⚡ Ordenación rápida","Eliges un dato <b>al azar</b>: menores a la izquierda, mayores a la derecha; repites en cada grupo. Más eficiente."],["🕵️ Búsqueda secuencial","Mirar los datos <b>uno a uno</b>. Para listas desordenadas; poco eficiente."],["🎯 Búsqueda binaria","Lista <b>ordenada</b>: comparas con el <b>dato central</b> y descartas la mitad. ¡Menos comparaciones!"],["🧱 Subalgoritmos","Subrutinas, subprogramas o <b>procedimientos</b>: dividen el problema y hacen más fácil <b>depurar</b>."]],
+ trick:"Búsqueda binaria = adivina el número: «¿mayor o menor que la mitad?». ¡Cada pregunta descarta la mitad!",
+ order:{q:"Ordena los pasos de la búsqueda binaria",items:["Partir de una lista ordenada","Comparar con el dato central","Descartar la mitad que no sirve","Repetir con los datos que quedan","Encontrar el dato"]},
+ quiz:[["La búsqueda binaria funciona con listas desordenadas.",false,"Requiere que la lista esté ordenada."],["Los subalgoritmos se llaman también procedimientos.",true,"Y subrutinas o subprogramas."],["La ordenación rápida suele necesitar menos comparaciones que la de selección.",true,"Por eso es más eficiente."]]},
+
+{id:"p4",emoji:"📦",title:"4. Estructura de un programa y datos",tag:"Entra, procesa, sale… ¡y dale nombre a tus datos!",
+ points:[["Alto vs bajo nivel","Alto nivel: adecuados a los <b>humanos</b> (visuales o textuales). Bajo nivel: próximos al <b>hardware</b>."],["📥 Entrada","Instrucciones que <b>recogen datos</b> de un dispositivo (temperatura, luz…)."],["⚙️ Procesado","Instrucciones que <b>procesan</b> los datos recogidos (¿hace frío? ¿mucha luz?)."],["📤 Salida","Los <b>resultados</b> se envían a dispositivos de salida (ventilador, luz)."],["🏷️ Dato","<b>Identificador</b> (nombre) + <b>tipo</b> (numérico, booleano, string, array) + <b>valor</b> (contenido). Ej.: edad · numérico · 13."],["🛠️ PSeInt","Pseudolenguaje con diagramas de flujo; ayuda con sugerencias y autocompletado; ejecución <b>paso a paso</b>; comentarios con <b>//</b>."]],
+ trick:"Un programa es una batidora 🥤: metes fruta (entrada), se tritura (procesado) y sale el batido (salida).",
+ order:{q:"Ordena las secciones de un programa",items:["Entrada de datos","Procesado","Salida de datos (resultado)"]},
+ quiz:[["Un dato booleano solo puede ser verdadero o falso.",true,"Dos valores."],["En «edad = 13», el tipo es «13».",false,"El valor es 13; el tipo es numérico."],["Los comentarios se escriben detrás de //.",true,"No afectan al código."]]},
+
+{id:"p5",emoji:"💾",title:"5. Binario, ASCII, RGB y hexadecimal",tag:"Todo es 0 y 1… ¡hasta tu selfie!",
+ points:[["Bit y byte","<b>Bit</b> = 0 o 1. <b>Byte</b> = 8 bits → 2⁸ = <b>256</b> combinaciones."],["➗ Decimal → binario","Divide entre 2 una y otra vez; los <b>restos, de derecha a izquierda</b>, forman el binario. 33 → <b>100001</b>."],["✖️ Binario → decimal","Cada dígito × potencia de 2 (exp. 0 a la derecha) y sumas. 100001 = 32 + 1 = <b>33</b>."],["🔤 ASCII","A cada carácter, un número: imprimibles del <b>33 al 126</b>. La <b>D es 68</b> (1000100)."],["🎨 RGB","Cada píxel mezcla <b>rojo, verde y azul</b> de 0 a 255. (255,0,0) rojo · (255,255,0) amarillo · (255,255,255) blanco."],["🔢 Hexadecimal","<b>16 dígitos</b>: 0-9 y A-F (10=A … 15=F). Bits de <b>4 en 4</b>: 1101 1111 0010 = DF2."]],
+ trick:"Potencias de 2: 1, 2, 4, 8, 16, 32, 64, 128, 256. ¡Con ellas conviertes cualquier binario en segundos!",
+ order:{q:"Ordena los pasos para pasar 33 a binario",items:["Dividir 33 entre 2","Anotar el resto y seguir dividiendo el cociente","Parar cuando el cociente sea menor que 2","Leer el último cociente y los restos de derecha a izquierda: 100001"]},
+ quiz:[["Un byte son 8 bits.",true,"Permite 256 combinaciones."],["El píxel (255, 0, 0) es verde.",false,"Es rojo: R=255, G=0, B=0."],["El hexadecimal usa las letras A-F además de los números.",true,"A=10 … F=15."]]},
+
+{id:"p6",emoji:"🚦",title:"6. Operadores",tag:"AND, OR, NOT: la lógica del robot de limpieza",
+ points:[["Expresión booleana","Solo dos valores: <b>verdadero (1) o falso (0)</b>."],["Relacionales","Comparan valores numéricos: <b>&gt;</b> mayor que · <b>&lt;</b> menor que · <b>=</b> igual que."],["✅ AND (producto)","Resultado <b>1 solo si las dos entradas son 1</b>. 11→1; el resto→0."],["🔔 OR (suma)","Resultado 1 si <b>alguna</b> entrada es 1. Solo 00→0."],["🔄 NOT (negación)","Devuelve el <b>contrario</b>: 0→1 y 1→0."],["📋 Tabla de verdad","Recoge todos los resultados posibles de las entradas. Ej.: luces de cocina (C) y salón (S) del robot."]],
+ trick:"AND = «los dos o nada» (exigente). OR = «con uno me vale» (conformista). NOT = «el contrario» (rebelde).",
+ quiz:[["1 AND 0 vale 1.",false,"El AND solo da 1 si las dos entradas son 1."],["1 OR 0 vale 1.",true,"Basta con que una sea 1."],["NOT 1 vale 0.",true,"Es la negación."]]},
+
+{id:"p7",emoji:"📱",title:"7. Apps para móviles y eventos",tag:"Cuando tocas la pantalla, pasa algo",
+ points:[["¿App?","Software diseñado para cubrir una necesidad y que funciona en <b>dispositivos móviles</b>."],["🧱 App Inventor","Lenguaje <b>orientado a eventos</b> con IDE de bloques, creado por el <b>MIT y Google</b>, para apps <b>Android</b>."],["⚡ Evento","Una intervención del usuario sobre un elemento (pulsar un botón…). Se ejecutan las acciones programadas."],["Secuencial vs eventos","Secuencial: orden planificado. Eventos: el usuario decide cuándo; <b>ventaja</b>: no programar todos los escenarios; <b>inconveniente</b>: el flujo escapa a tu control."],["🔗 Dependencia","Un evento depende de otro (el botón 2 solo funciona si ya pulsaste el 1)."],["🖱️⌨️👆 Tipos","<b>Ratón</b>: clic, doble clic, arrastrar. <b>Teclado</b>: tecla, combinación, escribir. <b>Manuales</b>: tocar, deslizar, pellizcar (acercar/alejar dedos)."]],
+ trick:"Programación por eventos = timbre 🔔: no sabes cuándo sonará, pero sabes qué hacer cuando suene.",
+ order:{q:"Ordena lo que pasa al pulsar un botón en una app",items:["El usuario pulsa el botón (evento)","La app detecta el evento","Se ejecutan las acciones programadas","La interfaz muestra el resultado"]},
+ quiz:[["App Inventor se basa en la programación orientada a eventos.",true,"Y fue creado por el MIT y Google."],["Pellizcar la pantalla con dos dedos es un evento del teclado.",false,"Es un evento manual (táctil)."],["En la programación por eventos el flujo puede escapar al control del programador.",true,"Es su inconveniente."]]},
+
+{id:"p8",emoji:"📜",title:"8. Licencias de software",tag:"Lo que puedes (y no puedes) hacer con un programa",
+ points:[["Licencia","Autorización que da el autor a terceros para <b>usar su obra</b> (términos y condiciones)."],["💰 Comercial","De una empresa con <b>ánimo de lucro</b> (Microsoft Office, Windows 11)."],["🕊️ Libre","Puedes <b>usar, copiar, modificar y redistribuir</b>; código fuente disponible (LibreOffice, GIMP, Audacity). Va con <b>copyleft</b>."],["🆓 Freeware","<b>Gratis pero no libre</b> (Avast, Microsoft Edge, VLC)."],["GNU/GPL","El autor <b>conserva los derechos</b> y permite redistribuir y modificar <b>bajo la misma licencia</b>."],["🅒 CC BY / BY-SA","BY: reconoces al autor. BY-SA: además, <b>misma licencia</b> en la obra derivada."],["🅒 CC BY-ND / BY-NC","ND: <b>sin obras derivadas</b>. NC: <b>sin uso comercial</b>."],["🅒 CC0","Renuncian a los derechos: <b>dominio público</b>."]],
+ trick:"BY = «di quién lo hizo» · SA = «comparte igual» · ND = «no lo cambies» · NC = «no lo vendas».",
+ quiz:[["El software libre solo puede usarse, no modificarse.",false,"Puede usarse, copiarse, modificarse y redistribuirse."],["VLC es un ejemplo de freeware.",true,"Gratuito pero no libre, según el libro."],["CC0 cede la obra al dominio público.",true,"Los creadores renuncian a sus derechos."]]},
+];
+
 
 
 /* ============ UTILIDADES ============ */
@@ -620,7 +695,7 @@ document.addEventListener("click",e=>{ac();if(e.target.closest(".mission,.big-bt
 const KEY=APP.key;
 let store={};
 try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
-store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;store.answered=store.answered||0;store.correct=store.correct||0;store.bestStreak=store.bestStreak||0;store.fails=store.fails||[];store.hist=store.hist||[];
+store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;store.answered=store.answered||0;store.correct=store.correct||0;store.bestStreak=store.bestStreak||0;store.fails=store.fails||[];store.hist=store.hist||[];store.sum=store.sum||{};store.sx=store.sx||{};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 const LVL=150;
 const level=()=>Math.floor(store.xp/LVL)+1;
@@ -639,7 +714,7 @@ const stopTimer=()=>{if(timer){clearInterval(timer);timer=null}};
 function go(v){
   stopTimer();
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
-  ({home:viewHome,tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  if(v==="sum")SM.open=-1;({home:viewHome,sum:viewSummary,tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
   window.scrollTo(0,0);
 }
 $("#nav").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.v)};
@@ -650,11 +725,11 @@ function viewHome(){
   const acc=store.answered?Math.round(store.correct/store.answered*100)+"%":"—";
   const into=store.xp%LVL;
   app.innerHTML=`<div class="hero"><h1>${APP.h1}</h1><p>${APP.sub}</p>
-   <div class="actions"><button class="big-btn play" id="h-play">Jugar test mixto</button><button class="big-btn alt" id="h-cards">Tarjetas</button></div>
+   <div class="actions"><button class="big-btn play" id="h-play">Jugar test mixto</button><button class="big-btn alt" id="h-sum">📖 Resumen</button><button class="big-btn alt" id="h-cards">Tarjetas</button></div>
    <div class="lvl"><div class="row mut" style="justify-content:space-between;margin-bottom:6px"><span>Nivel ${level()}</span><span style="font-family:var(--mono)">${into}/${LVL} XP</span></div><div class="bar"><i style="width:${into/LVL*100}%"></i></div></div>
    <div class="stats"><div class="pill"><div class="l">XP total</div><div class="v g">${store.xp}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${store.bestStreak}</div></div><div class="pill"><div class="l">Precisión</div><div class="v p">${acc}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.fails.length}</div></div></div></div>`;
   $("#h-play").onclick=()=>startTest("mix",false,false);
-  $("#h-cards").onclick=()=>go("cards");
+  $("#h-cards").onclick=()=>go("cards");$("#h-sum").onclick=()=>go("sum");
 }
 
 /* ============ TESTS ============ */
@@ -665,7 +740,7 @@ function viewTests(){
   app.innerHTML=`<h2 style="margin-top:0">Elige tu misión</h2>
    <div class="opts"><label class="toggle"><input type="checkbox" id="exam"><span><b>Modo examen</b><br><span class="mut">Sin feedback hasta el final; la corrección con explicaciones sale al terminar.</span></span></label>
    <label class="toggle"><input type="checkbox" id="reto"><span><b>Reto contrarreloj</b><br><span class="mut">20 segundos por pregunta. Si se acaba el tiempo, cuenta como fallo.</span></span></label></div>
-   <h2>Por apartados</h2><div class="grid">${TOPICS.map((m,i)=>mission("t"+i,"📚",m.name,m.qs.length,"mt"+i)).join("")}</div>
+   ${TOPICS.length?`<h2>Por apartados</h2><div class="grid">${TOPICS.map((m,i)=>mission("t"+i,"📚",m.name,m.qs.length,"mt"+i)).join("")}</div>`:""}
    <h2>Modelos de examen</h2><div class="grid">${MODELS.map((m,i)=>mission(String(i),"📝",m.name,m.qs.length,"m"+i)).join("")}
    <button class="card mission" data-m="mix"><b>🎲 Mixto</b><div class="meta"><span>20 al azar</span><span>de todos</span></div></button>
    <button class="card mission" data-m="fails"><b>🔁 Repasar fallos</b><div class="meta"><span>${store.fails.length} guardadas</span><span></span></div></button></div>`;
@@ -818,11 +893,71 @@ function viewStats(){
   const acc=store.answered?Math.round(store.correct/store.answered*100)+"%":"—";
   const row=(name,key,n)=>{const r=store.tests[key];const p=r?r.best/(r.n||n)*100:0;return `<div style="margin-bottom:12px"><div class="row mut" style="justify-content:space-between;margin-bottom:4px"><span style="color:var(--text)">${esc(name)}</span><span style="font-family:var(--mono)">${r?`★ ${r.best}/${r.n} · ${r.tries}x`:"sin jugar"}</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`};
   app.innerHTML=`<div class="stats" style="margin-top:0"><div class="pill"><div class="l">Nivel</div><div class="v p">${level()}</div></div><div class="pill"><div class="l">XP</div><div class="v g">${store.xp}</div></div><div class="pill"><div class="l">Precisión</div><div class="v y">${acc}</div></div><div class="pill"><div class="l">Tarjetas</div><div class="v g">${k}/${CARDS.length}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.fails.length}</div></div></div>
-  <h2>Por apartados</h2><div class="card">${TOPICS.map((m,i)=>row(m.name,"mt"+i,m.qs.length)).join("")}</div>
+  ${TOPICS.length?`<h2>Por apartados</h2><div class="card">${TOPICS.map((m,i)=>row(m.name,"mt"+i,m.qs.length)).join("")}</div>`:""}
   <h2>Modelos de examen</h2><div class="card">${MODELS.map((m,i)=>row(m.name,"m"+i,m.qs.length)).join("")}</div>
   <h2>Últimos intentos</h2><div class="card hist">${store.hist.slice().reverse().slice(0,10).map(h=>`<p><span>${h.d} · ${esc(h.name)}</span><span>${h.sc}/${h.n}</span></p>`).join("")||'<span class="mut">Todavía no hay intentos.</span>'}</div>
   <div class="row" style="margin-top:16px"><button class="mini" id="rst" style="color:var(--red)">Borrar progreso</button><span class="mut" id="rstmsg"></span></div>`;
-  let armed=false;$("#rst").onclick=()=>{if(!armed){armed=true;$("#rst").textContent="¿Seguro? Pulsa otra vez";return}store={tests:{},known:{},xp:0,answered:0,correct:0,bestStreak:0,fails:[],hist:[]};save();paintWallet();viewStats()};
+  let armed=false;$("#rst").onclick=()=>{if(!armed){armed=true;$("#rst").textContent="¿Seguro? Pulsa otra vez";return}store={tests:{},known:{},xp:0,answered:0,correct:0,bestStreak:0,fails:[],hist:[],sum:{},sx:{}};save();paintWallet();viewStats()};
+}
+
+/* ============ RESUMEN INTERACTIVO ============ */
+let SM={open:-1};
+function viewSummary(){
+  if(typeof SUMMARY==="undefined"||!SUMMARY.length){app.innerHTML='<div class="card res">Aún no hay resumen para esta guía.</div>';return}
+  if(SM.open>=0)return openPoint(SM.open);
+  const done=SUMMARY.filter(s=>store.sum[s.id]).length,n=SUMMARY.length;
+  app.innerHTML=`<h2 style="margin-top:0">📖 Resumen interactivo</h2><p class="mut">Un punto = una misión: gira las tarjetas, aprende el truco, ordena los pasos y supera el mini-reto. Cada punto dominado da XP.</p>
+  <div class="row mut" style="justify-content:space-between;margin:12px 0 6px"><span>Progreso</span><span style="font-family:var(--mono)">${done}/${n} dominados</span></div><div class="bar" style="margin-bottom:16px"><i style="width:${done/n*100}%"></i></div>
+  <div class="grid">${SUMMARY.map((s,i)=>`<button class="card mission" data-i="${i}"><b>${s.emoji} ${esc(s.title)}</b><div class="mut" style="font-size:.84rem">${esc(s.tag)}</div><div class="meta"><span>${s.points.length} claves${s.order?" · ordena":""}</span><span class="best">${store.sum[s.id]?"✓ dominado":"★ por jugar"}</span></div></button>`).join("")}</div>`;
+  app.onclick=e=>{const c=e.target.closest(".mission");if(c){SM.open=+c.dataset.i;viewSummary()}};
+}
+function openPoint(i){
+  const s=SUMMARY[i],n=s.points.length;
+  const revealed=new Set();
+  const ord=s.order?shuffle(s.order.items.map((t,k)=>({t,k}))):null;
+  app.innerHTML=`<button class="mini" id="sback">← Todos los puntos</button>
+  <div class="card" style="margin-top:12px;text-align:center"><div class="emo">${s.emoji}</div><h2 style="margin:8px 0 4px">${esc(s.title)}</h2><p class="mut">${esc(s.tag)}</p></div>
+  <h2>Lo esencial <span class="mut" id="revc" style="font-family:var(--mono);font-size:.8rem">0/${n}</span></h2>
+  <div class="grid fl">${s.points.map((p,k)=>`<button class="fc" data-k="${k}"><span class="ff">${p[0]}</span><span class="fb2">${p[1]}</span></button>`).join("")}</div>
+  <div class="card trick"><div class="sec" style="color:var(--yellow)">💡 Truco para recordar</div>${s.trick}</div>
+  ${ord?`<h2>🧩 ${esc(s.order.q)}</h2><div class="card"><p class="mut" id="ordmsg">Toca los pasos en el orden correcto. Siguiente: paso 1.</p><div class="ord" id="ord">${ord.map(o=>`<button class="ordb" data-k="${o.k}">${esc(o.t)}</button>`).join("")}</div></div>`:""}
+  <h2>⚡ Mini-reto: ¿verdadero o falso?</h2>
+  ${s.quiz.map((q,k)=>`<div class="card vf" data-k="${k}"><div>${q[0]}</div><div class="row"><button class="mini" data-a="1">Verdadero</button><button class="mini" data-a="0">Falso</button></div><div class="vfb"></div></div>`).join("")}
+  <div class="actions sumdone"><button class="big-btn play" id="sdone">${store.sum[s.id]?"✓ Ya dominado · siguiente":"✓ ¡Dominado! (+10 XP)"}</button></div>`;
+  $("#sback").onclick=()=>{SM.open=-1;viewSummary()};
+  document.querySelectorAll(".fc").forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.k;SFX.flip();b.classList.toggle("on");
+    if(b.classList.contains("on"))revealed.add(k);
+    $("#revc").textContent=revealed.size+"/"+n;
+    if(revealed.size===n&&!store.sx["r"+s.id]){store.sx["r"+s.id]=1;addXP(5);showBanner("¡TODAS GIRADAS!","+5 XP");SFX.combo()}
+  });
+  if(ord){
+    let nxt=0;
+    $("#ord").onclick=e=>{
+      const b=e.target.closest(".ordb");if(!b||b.disabled)return;
+      if(+b.dataset.k===nxt){
+        nxt++;b.disabled=true;b.classList.add("good");b.innerHTML=`<span class="n">${nxt}</span>`+b.innerHTML;SFX.ok(nxt);
+        const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,10);
+        if(nxt===ord.length){$("#ordmsg").textContent="¡Orden perfecto! 🎉";SFX.win();confetti(90);if(!store.sx["o"+s.id]){store.sx["o"+s.id]=1;addXP(8)}}
+        else $("#ordmsg").textContent="¡Bien! Siguiente: paso "+(nxt+1)+".";
+      }else{b.classList.remove("bad");void b.offsetWidth;b.classList.add("bad");SFX.ko();$("#ordmsg").textContent="Ese no va ahora. Siguiente: paso "+(nxt+1)+"."}
+    };
+  }
+  document.querySelectorAll(".vf").forEach(card=>{
+    const q=s.quiz[+card.dataset.k];
+    card.onclick=e=>{
+      const b=e.target.closest("button[data-a]");if(!b||card.dataset.done)return;
+      card.dataset.done=1;const ans=b.dataset.a==="1",ok=ans===q[1];
+      card.querySelectorAll("button").forEach(x=>{x.disabled=true;if((x.dataset.a==="1")===q[1])x.classList.add("right");else if(x===b)x.classList.add("wrong")});
+      card.querySelector(".vfb").innerHTML=(ok?"<b style='color:var(--accent)'>¡Correcto!</b> ":"<b style='color:var(--red)'>Ojo:</b> ")+esc(q[2]);
+      if(ok){SFX.ok(2);const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top,12);const k="v"+s.id+card.dataset.k;if(!store.sx[k]){store.sx[k]=1;addXP(3)}}else SFX.ko();
+    };
+  });
+  $("#sdone").onclick=()=>{
+    if(!store.sum[s.id]){store.sum[s.id]=1;addXP(10);save();SFX.win();confetti(120);showBanner("¡PUNTO DOMINADO!","+10 XP")}
+    setTimeout(()=>{SM.open=(i+1<SUMMARY.length)?i+1:-1;viewSummary();window.scrollTo(0,0)},store.sum[s.id]&&!reduce?900:0);
+  };
+  window.scrollTo(0,0);
 }
 go("home");
 </script>

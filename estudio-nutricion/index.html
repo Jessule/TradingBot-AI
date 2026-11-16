@@ -158,6 +158,32 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
 @keyframes flick{to{transform:scale(1.18) rotate(-6deg)}}
 .orb{animation:orbpulse 2.4s ease-in-out infinite}
 @keyframes orbpulse{50%{box-shadow:0 0 22px var(--accent),0 0 6px #6ffdd6}}
+
+/* ===== RESUMEN ===== */
+.emo{font-size:3.4rem;line-height:1;display:inline-block;animation:emobounce 1.8s ease-in-out infinite}
+@keyframes emobounce{50%{transform:translateY(-8px) rotate(-6deg) scale(1.08)}}
+.fl{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.fc{position:relative;min-height:96px;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;font-size:.93rem;line-height:1.4;transition:border-color .15s,transform .12s}
+.fc:hover{border-color:var(--accent);transform:translateY(-2px)}
+.fc .ff{font-weight:700;display:flex;gap:8px;align-items:center}
+.fc .ff::after{content:"toca";font-family:var(--mono);font-size:.6rem;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-left:auto}
+.fc .fb2{display:none}
+.fc.on{background:linear-gradient(160deg,#0f2a26,var(--surface));border-color:var(--accent-line);animation:flipin .4s}
+.fc.on .ff{display:none}.fc.on .fb2{display:block}
+@keyframes flipin{from{transform:rotateX(80deg);opacity:.2}to{transform:none;opacity:1}}
+.trick{background:linear-gradient(135deg,rgba(245,197,66,.1),var(--surface));border-color:rgba(245,197,66,.3);margin-top:16px;font-size:1rem}
+.ord{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.ordb{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .15s}
+.ordb:hover:not(:disabled){border-color:var(--purple)}
+.ordb.good{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);animation:pulseOk .6s}
+.ordb.bad{animation:shake .35s;border-color:var(--red)}
+.ordb .n{font-family:var(--mono);background:var(--accent);color:#04150f;border-radius:6px;padding:0 6px;margin-right:6px;font-size:.78rem}
+.vf{margin-bottom:10px}
+.vf .row{margin-top:10px}
+.vf .mini.right{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.vf .mini.wrong{background:var(--red-dim);border-color:var(--red);color:var(--red);animation:shake .35s}
+.vfb{margin-top:8px;font-size:.9rem}
+.sumdone{margin:20px 0 6px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:480px){.big-btn{padding:14px 22px}.flip{height:300px}}
@@ -170,7 +196,7 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
   <div class="row" style="gap:8px;flex-wrap:nowrap"><button class="snd" id="snd" aria-label="Activar o silenciar sonido">🔊</button><div class="wallet"><span class="lbl" id="lvl">Nv 1</span><span class="amt" id="xp">0 XP</span></div></div>
 </div>
 <nav class="nav" id="nav">
-  <button data-v="home" class="on">Inicio</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
+  <button data-v="home" class="on">Inicio</button><button data-v="sum">📖 Resumen</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
 </nav>
 <main id="app"></main>
 
@@ -523,6 +549,59 @@ const DEV=[
  kw:[["higiene alimentaria","food safety"],["buen estado"],["biologicos"],["patogenos","toxinas"],["salmonella","anisakis"],["quimicos"],["pesticidas","aditivos","mercurio"],["fisicos"],["vidrio","plasticos","microplasticos"]]},
 ];
 
+// Resumen interactivo: un punto = una misión
+// points: [frente, reverso] · trick: truco · quiz: [afirmación, verdadera?, explicación] · order: juego de ordenar
+const SUMMARY=[
+{id:"n1",emoji:"🍽️",title:"1. Nutrición en humanos",tag:"Comer no es lo mismo que nutrirse: ¡es todo el viaje!",
+ points:[["¿Nutrición?","Conjunto de procesos que nos dan la <b>materia y energía</b> para vivir, crecer y regenerar estructuras."],["¿Alimentación?","Solo la <b>ingestión</b> de alimentos. ¡No confundir!"],["Los 4 procesos","Obtener nutrientes y O₂ · transportarlos a las células · <b>respiración celular</b> (mitocondrias) · eliminar desechos y CO₂."],["🍔 Digestivo","Convierte los alimentos en <b>nutrientes</b> (digestión) y los pasa a la sangre (absorción)."],["🫁 Respiratorio","<b>Intercambio de gases</b>: entra O₂, sale el CO₂ de la respiración celular."],["💧 Excretor","Filtra de la sangre los <b>desechos</b> de las células y los expulsa."],["❤️ Circulatorio y linfático","La <b>sangre</b> reparte nutrientes y O₂ y recoge desechos. El linfático colabora en el transporte."]],
+ trick:"Alimentarse es meter el bocadillo en la boca. Nutrirse es todo el viaje: ¡de la boca hasta la mitocondria!",
+ order:{q:"Ordena el viaje de un bocadillo",items:["Ingestión (alimentación)","Digestión","Absorción: pasa a la sangre","La sangre lo reparte a las células","Respiración celular en las mitocondrias","Eliminación de desechos y CO₂"]},
+ quiz:[["Alimentación y nutrición son exactamente lo mismo.",false,"La alimentación es solo ingerir; la nutrición incluye digestión, transporte, respiración celular y excreción."],["El aparato digestivo hace que los nutrientes pasen a la sangre.",true,"Mediante la digestión y la absorción."],["La respiración celular ocurre en el núcleo.",false,"Ocurre en las mitocondrias."]]},
+
+{id:"n2",emoji:"⚖️",title:"2. Nutrientes: función y cantidad",tag:"Ladrillos, gasolina y director de orquesta",
+ points:[["🧱 Constructores","Función <b>estructural</b>: crean y reparan estructuras. Calcio, proteínas, agua y algunos lípidos."],["⛽ Energéticos","Aportan la <b>energía</b> para las funciones vitales: sobre todo glúcidos y lípidos."],["🎻 Reguladores","Regulan los <b>procesos metabólicos</b>: sobre todo vitaminas y sales minerales."],["🍗 Macronutrientes","Se necesitan en <b>grandes cantidades</b>: proteínas, glúcidos, lípidos y agua."],["🔬 Micronutrientes","Se necesitan en <b>pequeñas cantidades</b>: vitaminas y sales minerales."],["Nutrición heterótrofa","Obtenemos los nutrientes de la <b>materia orgánica</b> de los alimentos, gracias a la digestión."]],
+ trick:"Constructores = ladrillos 🧱 · Energéticos = gasolina ⛽ · Reguladores = el director de orquesta 🎻. Macro = mucho; micro = poquito.",
+ quiz:[["Las vitaminas son macronutrientes.",false,"Son micronutrientes: se necesitan en pequeñas cantidades."],["Los glúcidos y lípidos tienen función energética.",true,"Son la «gasolina» del cuerpo."],["El agua es un macronutriente.",true,"Junto a proteínas, glúcidos y lípidos."]]},
+
+{id:"n3",emoji:"🧪",title:"3. Nutrientes según su composición",tag:"Inorgánicos vs orgánicos: ¡el duelo de la química!",
+ points:[["💧 Agua","Disuelve y transporta, cataliza reacciones, es estructural y <b>regula la temperatura</b>."],["🧂 Minerales","Sodio, potasio, calcio: regulan la <b>contracción muscular</b> y el impulso nervioso. Calcio y fósforo: <b>huesos</b>."],["🍞 Hidratos de carbono","Azúcares y almidón: <b>energía</b>. Fibra (celulosa): función reguladora."],["🥩 Proteínas","Mayoría <b>estructural</b>. Enzimas (regulan), anticuerpos (defienden), hemoglobina (transporta gases)."],["🥑 Lípidos","Grasas: energía. Colesterol y fosfolípidos: <b>membranas</b>. Algunos son hormonas."],["🍊 Vitaminas","Regulan muchos procesos. Hidrosolubles: <b>C y B</b>. Liposolubles: <b>A, D, E, K</b>."]],
+ trick:"Inorgánicos = agua y minerales. El resto (hidratos, proteínas, lípidos, vitaminas) es orgánico. Y «A-D-E-K» = las vitaminas que se disuelven en grasa… ¡como un ADEKuado desayuno con aceite!",
+ order:{q:"Ordena de inorgánico a orgánico (mira el orden del esquema)",items:["Agua","Minerales","Hidratos de carbono","Proteínas","Lípidos","Vitaminas"]},
+ quiz:[["La hemoglobina es una proteína que transporta gases.",true,"Está en los glóbulos rojos."],["Las vitaminas C y B son liposolubles.",false,"Son hidrosolubles; las liposolubles son A, D, E y K."],["La fibra está formada por celulosa y tiene función reguladora.",true,"Es un hidrato de carbono."]]},
+
+{id:"n4",emoji:"🥑",title:"4. Fuentes alimentarias",tag:"¿Dónde se esconde cada nutriente?",
+ points:[["💧 Agua","Bebidas (agua, zumos, leche, sopas) y <b>frutas y verduras</b>."],["🧂 Minerales","Hierro: hígado, carnes, pescados, legumbres, frutos secos. Yodo: <b>sal yodada</b>, pescado, algas. Calcio: <b>lácteos</b>."],["🍝 Hidratos","Fruta, miel, azúcares, <b>cereales</b> (pan, pasta), legumbres, patatas."],["🍗 Proteínas","Animales: carne, pescado, huevos, lácteos. Vegetales: <b>legumbres, soja, frutos secos</b>."],["🧈 Lípidos","Saturadas: mantequilla, pastelería, carnes rojas. Insaturadas: <b>aceite de oliva</b>."],["🥕 Vitaminas y fibra","Vitaminas: frutas, verduras, carnes, huevos, leche. Fibra: casi solo <b>alimentos vegetales</b>."],["🚫 No nutrientes","Sustancias sin función nutritiva que pueden ser <b>perjudiciales</b>."]],
+ trick:"Calcio → lácteos 🥛 · Yodo → sal yodada y mar 🐟 · Fibra → ¡solo plantas! 🌱 · Grasa buena → oliva 🫒.",
+ quiz:[["La fibra se encuentra sobre todo en alimentos vegetales.",true,"Verduras, frutas, legumbres, cereales y frutos secos."],["El calcio se obtiene sobre todo de la sal yodada.",false,"El calcio está en los lácteos; la sal yodada aporta yodo."],["Las grasas insaturadas están en los aceites vegetales como el de oliva.",true,"Son las más saludables."]]},
+
+{id:"n5",emoji:"⚡",title:"5. Aporte de energía",tag:"4-4-9: la regla de oro de las calorías",
+ points:[["🔥 Valor energético","Energía que aportan los nutrientes en la <b>respiración celular</b> (O₂ + glucosa → energía + H₂O + CO₂)."],["Energía por gramo","Hidratos <b>4 kcal</b> · Proteínas <b>4 kcal</b> · Lípidos <b>9 kcal</b>."],["Unidades","1 kJ = 1000 J · 1 kcal = 1000 cal · <b>1 cal = 4,186 J</b> · 1 J = 0,24 cal."],["😴 TMB","Gasto para mantener el cuerpo un día <b>en reposo</b>. H: 10·kg + 6,25·cm − 5·edad + 5. M: igual pero −161."],["🏃 Factores","Sedentaria <b>×1,2</b> · Moderado <b>×1,5</b> · Mucho ejercicio <b>×1,725</b>."],["Gasto total","<b>TMB + actividad física + digestión y absorción</b>. Depende de constitución, sexo, edad y actividad."]],
+ trick:"4-4-9: «Hidratos y Proteínas, cuatro y cuatro; la Grasa, nueve». ¡La grasa tiene más del doble de energía!",
+ order:{q:"Ordena los pasos para calcular tus calorías diarias",items:["Calcular la TMB con Harris-Benedict","Elegir el factor según tu actividad","Multiplicar TMB × factor","Obtener las kcal diarias necesarias"]},
+ quiz:[["Un gramo de lípidos aporta 9 kcal.",true,"Más del doble que hidratos o proteínas (4 kcal)."],["La TMB incluye la energía gastada al hacer deporte.",false,"La TMB es el gasto en reposo; el deporte se suma con el factor de actividad."],["1 caloría equivale a 4,186 julios.",true,"Y 1 J = 0,24 cal."]]},
+
+{id:"n6",emoji:"📏",title:"6. Alimentarse: dieta y raciones",tag:"¿Cuánto es «un puñado»? ¡Medidas reales!",
+ points:[["Dieta","Conjunto de alimentos y bebidas que ingerimos <b>regularmente</b>."],["Ración","Medida <b>aproximada</b> de la cantidad que se ingiere de un alimento."],["🥛 Líquidos","Yogur 125 mL · vaso 200-250 mL · cucharada sopera 20-30 mL."],["🥜 Sólidos (1)","Puñado de frutos secos 20 g · pizca de mantequilla 10 g · trozo de queso 60 g."],["🍝 Sólidos (2)","Pasta 70 g (crudo) · arroz 50 g (crudo) · legumbres 60 g (crudo) · dos manos de verdura 150 g · filete 110-120 g."],["Alimentación saludable","Aporta nutrientes y energía para las funciones vitales, nos mantiene sanos y asegura un <b>desarrollo óptimo</b>."],["Debe ser…","Suficiente · Completa · Equilibrada · Segura · Armónica · Satisfactoria · Adaptada · Social y asequible · Sostenible."]],
+ trick:"Las 9 características: «Si Cenas Equilibrado, Sigues Atlético, Sano, Activo, Saludable, Sonriente» → S-C-E-S-A-S-A-S-S.",
+ order:{q:"Ordena las medidas de menos a más gramos",items:["Pizca de mantequilla (10 g)","Puñado de frutos secos (20 g)","Trozo de queso (60 g)","Filete (110-120 g)","Dos manos de verdura (150 g)"]},
+ quiz:[["Un puñado de frutos secos son unos 20 g.",true,"Medida aproximada."],["Una ración de arroz son 150 g en crudo.",false,"Son unos 50 g en crudo."],["Una alimentación «segura» no supera los límites de contaminantes.",true,"Es una de sus características."]]},
+
+{id:"n7",emoji:"🥗",title:"7. Recomendaciones: el plato Harvard",tag:"Tu plato, dividido como un videojuego",
+ points:[["🥦 Vegetales","¡Cuantos más y más variados, mejor! Las <b>patatas no cuentan</b>."],["🍎 Frutas","Muchas y de <b>todos los colores</b>."],["🌾 Granos integrales","Pan, pasta y arroz <b>integrales</b>; limitar los refinados."],["🐟 Proteína saludable","Pescado, aves, legumbres, frutos secos. Limitar carnes rojas y queso; evitar procesadas."],["🫒 Aceites saludables","Oliva o canola. Evitar la margarina y las grasas trans."],["💧 Agua","Agua, té o café sin azúcar. Lácteos 1-2/día, jugo 1 vaso. <b>Sin bebidas azucaradas</b>."],["🏃 ¡Mantente activo!","Parte de la recomendación."]],
+ trick:"Medio plato de verduras y fruta, un cuarto de integrales, un cuarto de proteína, aceite de oliva y agua. ¡Como un menú de nivel 1!",
+ quiz:[["Las patatas cuentan como vegetales en el plato de Harvard.",false,"No cuentan como vegetales."],["Hay que evitar las bebidas azucaradas.",true,"Mejor agua, té o café sin azúcar."],["Los granos refinados (pan blanco) son los más recomendados.",false,"Se recomiendan los integrales."]]},
+
+{id:"n8",emoji:"🌍",title:"8. Alimentación y sostenibilidad",tag:"Comer bien… ¡y que el planeta también coma!",
+ points:[["♻️ Dieta sostenible","Genera <b>menor impacto ambiental</b> y cumple los criterios de nutrición y salud."],["🫒 Dieta mediterránea","Cereales, legumbres o patatas + muchas verduras y <b>pocas proteínas</b>; pescado, aves, huevos, lácteos; poca carne roja; fruta de temporada; aceite de oliva y especias (menos sal)."],["🐙 Dieta atlántica","Aceite de oliva · pan, patatas, legumbres, frutas y verduras (repollo, berzas, grelos) · mucho huevo y lácteos · <b>más pescado y marisco</b>."],["📅 Procedencia y temporada","Productos cercanos y de temporada. Invierno: calabaza, alcachofas, lubina. Verano: sandía, atún."],["🌱 Origen vegetal","Lípidos y proteínas de <b>origen vegetal</b>: oliva, aguacate, avena, frutos secos, legumbres."],["🚫 Limitar","Bebidas azucaradas, aperitivos salados y envasados en plástico."],["🍳 Cocinar mejor","Más crudo; menos sal y azúcar usando <b>hierbas, ajo, limón o canela</b>."]],
+ trick:"Come cerca, come de temporada, come más plantas y menos plástico. ¡Tu plato también tiene huella de carbono!",
+ quiz:[["La sandía y el atún son alimentos de verano.",true,"De invierno: calabaza, alcachofas y lubina."],["La dieta atlántica incluye mucho pescado y marisco.",true,"Y huevos, lácteos y patatas."],["Una dieta sostenible prioriza productos envasados en plástico.",false,"Se limitan los envasados en plástico."]]},
+
+{id:"n9",emoji:"🩺",title:"9. Dieta y salud",tag:"Demasiado, muy poco o contaminado: ¡cuidado!",
+ points:[["Efectos de la dieta","Positivos: previenen o curan enfermedades. Negativos: enfermedades por <b>falta o exceso</b> y sustancias dañinas."],["🛡️ Seguridad alimentaria","Acceso de <b>todas las personas, en todo momento</b>, a alimentos adecuados e inocuos en cantidad y calidad suficientes."],["📉 Desnutrición","Falta de energía: el cuerpo gasta sus reservas. Raquitismo, kwashiorkor."],["📈 Sobrenutrición","Exceso de energía y nutrientes que se almacenan. <b>Obesidad</b>."],["💊 Enfermedades carenciales","Dieta poco variada: faltan nutrientes. Avitaminosis, <b>anemia</b>, bocio."],["🤧 Alergia vs 🤢 intolerancia","Alergia: reacción del <b>sistema inmunitario</b> a una proteína. Intolerancia: no digerir o absorber bien el alimento; <b>no</b> es del sistema inmune."],["☣️ Contaminantes","Biológicos (Salmonella, Anisakis, toxinas) · Químicos (aditivos, pesticidas, mercurio) · Físicos (vidrio, metal, madera, microplásticos)."]],
+ trick:"Malnutrición = DES-nutrición (falta), SOBRE-nutrición (exceso) y CARENCIAS (faltan nutrientes concretos). Contaminantes: Bio-Quí-Fí = vivos, químicos, objetos.",
+ quiz:[["La alergia alimentaria está mediada por el sistema inmunitario.",true,"La intolerancia no."],["El mercurio es un contaminante biológico.",false,"Es un contaminante químico (metal pesado)."],["La obesidad es un ejemplo de sobrenutrición.",true,"Ingesta excesiva que se almacena."]]},
+];
+
 
 
 /* ============ UTILIDADES ============ */
@@ -568,7 +647,7 @@ document.addEventListener("click",e=>{ac();if(e.target.closest(".mission,.big-bt
 const KEY=APP.key;
 let store={};
 try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
-store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;store.answered=store.answered||0;store.correct=store.correct||0;store.bestStreak=store.bestStreak||0;store.fails=store.fails||[];store.hist=store.hist||[];
+store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;store.answered=store.answered||0;store.correct=store.correct||0;store.bestStreak=store.bestStreak||0;store.fails=store.fails||[];store.hist=store.hist||[];store.sum=store.sum||{};store.sx=store.sx||{};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 const LVL=150;
 const level=()=>Math.floor(store.xp/LVL)+1;
@@ -587,7 +666,7 @@ const stopTimer=()=>{if(timer){clearInterval(timer);timer=null}};
 function go(v){
   stopTimer();
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
-  ({home:viewHome,tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  if(v==="sum")SM.open=-1;({home:viewHome,sum:viewSummary,tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
   window.scrollTo(0,0);
 }
 $("#nav").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.v)};
@@ -598,11 +677,11 @@ function viewHome(){
   const acc=store.answered?Math.round(store.correct/store.answered*100)+"%":"—";
   const into=store.xp%LVL;
   app.innerHTML=`<div class="hero"><h1>${APP.h1}</h1><p>${APP.sub}</p>
-   <div class="actions"><button class="big-btn play" id="h-play">Jugar test mixto</button><button class="big-btn alt" id="h-cards">Tarjetas</button></div>
+   <div class="actions"><button class="big-btn play" id="h-play">Jugar test mixto</button><button class="big-btn alt" id="h-sum">📖 Resumen</button><button class="big-btn alt" id="h-cards">Tarjetas</button></div>
    <div class="lvl"><div class="row mut" style="justify-content:space-between;margin-bottom:6px"><span>Nivel ${level()}</span><span style="font-family:var(--mono)">${into}/${LVL} XP</span></div><div class="bar"><i style="width:${into/LVL*100}%"></i></div></div>
    <div class="stats"><div class="pill"><div class="l">XP total</div><div class="v g">${store.xp}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${store.bestStreak}</div></div><div class="pill"><div class="l">Precisión</div><div class="v p">${acc}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.fails.length}</div></div></div></div>`;
   $("#h-play").onclick=()=>startTest("mix",false,false);
-  $("#h-cards").onclick=()=>go("cards");
+  $("#h-cards").onclick=()=>go("cards");$("#h-sum").onclick=()=>go("sum");
 }
 
 /* ============ TESTS ============ */
@@ -613,7 +692,7 @@ function viewTests(){
   app.innerHTML=`<h2 style="margin-top:0">Elige tu misión</h2>
    <div class="opts"><label class="toggle"><input type="checkbox" id="exam"><span><b>Modo examen</b><br><span class="mut">Sin feedback hasta el final; la corrección con explicaciones sale al terminar.</span></span></label>
    <label class="toggle"><input type="checkbox" id="reto"><span><b>Reto contrarreloj</b><br><span class="mut">20 segundos por pregunta. Si se acaba el tiempo, cuenta como fallo.</span></span></label></div>
-   <h2>Por apartados</h2><div class="grid">${TOPICS.map((m,i)=>mission("t"+i,"📚",m.name,m.qs.length,"mt"+i)).join("")}</div>
+   ${TOPICS.length?`<h2>Por apartados</h2><div class="grid">${TOPICS.map((m,i)=>mission("t"+i,"📚",m.name,m.qs.length,"mt"+i)).join("")}</div>`:""}
    <h2>Modelos de examen</h2><div class="grid">${MODELS.map((m,i)=>mission(String(i),"📝",m.name,m.qs.length,"m"+i)).join("")}
    <button class="card mission" data-m="mix"><b>🎲 Mixto</b><div class="meta"><span>20 al azar</span><span>de todos</span></div></button>
    <button class="card mission" data-m="fails"><b>🔁 Repasar fallos</b><div class="meta"><span>${store.fails.length} guardadas</span><span></span></div></button></div>`;
@@ -766,11 +845,71 @@ function viewStats(){
   const acc=store.answered?Math.round(store.correct/store.answered*100)+"%":"—";
   const row=(name,key,n)=>{const r=store.tests[key];const p=r?r.best/(r.n||n)*100:0;return `<div style="margin-bottom:12px"><div class="row mut" style="justify-content:space-between;margin-bottom:4px"><span style="color:var(--text)">${esc(name)}</span><span style="font-family:var(--mono)">${r?`★ ${r.best}/${r.n} · ${r.tries}x`:"sin jugar"}</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`};
   app.innerHTML=`<div class="stats" style="margin-top:0"><div class="pill"><div class="l">Nivel</div><div class="v p">${level()}</div></div><div class="pill"><div class="l">XP</div><div class="v g">${store.xp}</div></div><div class="pill"><div class="l">Precisión</div><div class="v y">${acc}</div></div><div class="pill"><div class="l">Tarjetas</div><div class="v g">${k}/${CARDS.length}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.fails.length}</div></div></div>
-  <h2>Por apartados</h2><div class="card">${TOPICS.map((m,i)=>row(m.name,"mt"+i,m.qs.length)).join("")}</div>
+  ${TOPICS.length?`<h2>Por apartados</h2><div class="card">${TOPICS.map((m,i)=>row(m.name,"mt"+i,m.qs.length)).join("")}</div>`:""}
   <h2>Modelos de examen</h2><div class="card">${MODELS.map((m,i)=>row(m.name,"m"+i,m.qs.length)).join("")}</div>
   <h2>Últimos intentos</h2><div class="card hist">${store.hist.slice().reverse().slice(0,10).map(h=>`<p><span>${h.d} · ${esc(h.name)}</span><span>${h.sc}/${h.n}</span></p>`).join("")||'<span class="mut">Todavía no hay intentos.</span>'}</div>
   <div class="row" style="margin-top:16px"><button class="mini" id="rst" style="color:var(--red)">Borrar progreso</button><span class="mut" id="rstmsg"></span></div>`;
-  let armed=false;$("#rst").onclick=()=>{if(!armed){armed=true;$("#rst").textContent="¿Seguro? Pulsa otra vez";return}store={tests:{},known:{},xp:0,answered:0,correct:0,bestStreak:0,fails:[],hist:[]};save();paintWallet();viewStats()};
+  let armed=false;$("#rst").onclick=()=>{if(!armed){armed=true;$("#rst").textContent="¿Seguro? Pulsa otra vez";return}store={tests:{},known:{},xp:0,answered:0,correct:0,bestStreak:0,fails:[],hist:[],sum:{},sx:{}};save();paintWallet();viewStats()};
+}
+
+/* ============ RESUMEN INTERACTIVO ============ */
+let SM={open:-1};
+function viewSummary(){
+  if(typeof SUMMARY==="undefined"||!SUMMARY.length){app.innerHTML='<div class="card res">Aún no hay resumen para esta guía.</div>';return}
+  if(SM.open>=0)return openPoint(SM.open);
+  const done=SUMMARY.filter(s=>store.sum[s.id]).length,n=SUMMARY.length;
+  app.innerHTML=`<h2 style="margin-top:0">📖 Resumen interactivo</h2><p class="mut">Un punto = una misión: gira las tarjetas, aprende el truco, ordena los pasos y supera el mini-reto. Cada punto dominado da XP.</p>
+  <div class="row mut" style="justify-content:space-between;margin:12px 0 6px"><span>Progreso</span><span style="font-family:var(--mono)">${done}/${n} dominados</span></div><div class="bar" style="margin-bottom:16px"><i style="width:${done/n*100}%"></i></div>
+  <div class="grid">${SUMMARY.map((s,i)=>`<button class="card mission" data-i="${i}"><b>${s.emoji} ${esc(s.title)}</b><div class="mut" style="font-size:.84rem">${esc(s.tag)}</div><div class="meta"><span>${s.points.length} claves${s.order?" · ordena":""}</span><span class="best">${store.sum[s.id]?"✓ dominado":"★ por jugar"}</span></div></button>`).join("")}</div>`;
+  app.onclick=e=>{const c=e.target.closest(".mission");if(c){SM.open=+c.dataset.i;viewSummary()}};
+}
+function openPoint(i){
+  const s=SUMMARY[i],n=s.points.length;
+  const revealed=new Set();
+  const ord=s.order?shuffle(s.order.items.map((t,k)=>({t,k}))):null;
+  app.innerHTML=`<button class="mini" id="sback">← Todos los puntos</button>
+  <div class="card" style="margin-top:12px;text-align:center"><div class="emo">${s.emoji}</div><h2 style="margin:8px 0 4px">${esc(s.title)}</h2><p class="mut">${esc(s.tag)}</p></div>
+  <h2>Lo esencial <span class="mut" id="revc" style="font-family:var(--mono);font-size:.8rem">0/${n}</span></h2>
+  <div class="grid fl">${s.points.map((p,k)=>`<button class="fc" data-k="${k}"><span class="ff">${p[0]}</span><span class="fb2">${p[1]}</span></button>`).join("")}</div>
+  <div class="card trick"><div class="sec" style="color:var(--yellow)">💡 Truco para recordar</div>${s.trick}</div>
+  ${ord?`<h2>🧩 ${esc(s.order.q)}</h2><div class="card"><p class="mut" id="ordmsg">Toca los pasos en el orden correcto. Siguiente: paso 1.</p><div class="ord" id="ord">${ord.map(o=>`<button class="ordb" data-k="${o.k}">${esc(o.t)}</button>`).join("")}</div></div>`:""}
+  <h2>⚡ Mini-reto: ¿verdadero o falso?</h2>
+  ${s.quiz.map((q,k)=>`<div class="card vf" data-k="${k}"><div>${q[0]}</div><div class="row"><button class="mini" data-a="1">Verdadero</button><button class="mini" data-a="0">Falso</button></div><div class="vfb"></div></div>`).join("")}
+  <div class="actions sumdone"><button class="big-btn play" id="sdone">${store.sum[s.id]?"✓ Ya dominado · siguiente":"✓ ¡Dominado! (+10 XP)"}</button></div>`;
+  $("#sback").onclick=()=>{SM.open=-1;viewSummary()};
+  document.querySelectorAll(".fc").forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.k;SFX.flip();b.classList.toggle("on");
+    if(b.classList.contains("on"))revealed.add(k);
+    $("#revc").textContent=revealed.size+"/"+n;
+    if(revealed.size===n&&!store.sx["r"+s.id]){store.sx["r"+s.id]=1;addXP(5);showBanner("¡TODAS GIRADAS!","+5 XP");SFX.combo()}
+  });
+  if(ord){
+    let nxt=0;
+    $("#ord").onclick=e=>{
+      const b=e.target.closest(".ordb");if(!b||b.disabled)return;
+      if(+b.dataset.k===nxt){
+        nxt++;b.disabled=true;b.classList.add("good");b.innerHTML=`<span class="n">${nxt}</span>`+b.innerHTML;SFX.ok(nxt);
+        const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,10);
+        if(nxt===ord.length){$("#ordmsg").textContent="¡Orden perfecto! 🎉";SFX.win();confetti(90);if(!store.sx["o"+s.id]){store.sx["o"+s.id]=1;addXP(8)}}
+        else $("#ordmsg").textContent="¡Bien! Siguiente: paso "+(nxt+1)+".";
+      }else{b.classList.remove("bad");void b.offsetWidth;b.classList.add("bad");SFX.ko();$("#ordmsg").textContent="Ese no va ahora. Siguiente: paso "+(nxt+1)+"."}
+    };
+  }
+  document.querySelectorAll(".vf").forEach(card=>{
+    const q=s.quiz[+card.dataset.k];
+    card.onclick=e=>{
+      const b=e.target.closest("button[data-a]");if(!b||card.dataset.done)return;
+      card.dataset.done=1;const ans=b.dataset.a==="1",ok=ans===q[1];
+      card.querySelectorAll("button").forEach(x=>{x.disabled=true;if((x.dataset.a==="1")===q[1])x.classList.add("right");else if(x===b)x.classList.add("wrong")});
+      card.querySelector(".vfb").innerHTML=(ok?"<b style='color:var(--accent)'>¡Correcto!</b> ":"<b style='color:var(--red)'>Ojo:</b> ")+esc(q[2]);
+      if(ok){SFX.ok(2);const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top,12);const k="v"+s.id+card.dataset.k;if(!store.sx[k]){store.sx[k]=1;addXP(3)}}else SFX.ko();
+    };
+  });
+  $("#sdone").onclick=()=>{
+    if(!store.sum[s.id]){store.sum[s.id]=1;addXP(10);save();SFX.win();confetti(120);showBanner("¡PUNTO DOMINADO!","+10 XP")}
+    setTimeout(()=>{SM.open=(i+1<SUMMARY.length)?i+1:-1;viewSummary();window.scrollTo(0,0)},store.sum[s.id]&&!reduce?900:0);
+  };
+  window.scrollTo(0,0);
 }
 go("home");
 </script>
