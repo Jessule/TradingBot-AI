@@ -184,6 +184,23 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
 .vf .mini.wrong{background:var(--red-dim);border-color:var(--red);color:var(--red);animation:shake .35s}
 .vfb{margin-top:8px;font-size:.9rem}
 .sumdone{margin:20px 0 6px}
+
+/* ===== V/F ===== */
+.vfcard{position:relative;min-height:230px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;padding:26px 20px;touch-action:pan-y;transition:transform .25s,opacity .25s}
+.vfcard .big{font-size:3.2rem;line-height:1;animation:emobounce 1.8s ease-in-out infinite}
+.vfcard .st{font-size:clamp(1.15rem,4.2vw,1.55rem);font-weight:700;letter-spacing:-.3px;line-height:1.3;text-wrap:balance}
+.vfcard.out-r{transform:translateX(120%) rotate(12deg);opacity:0}
+.vfcard.out-l{transform:translateX(-120%) rotate(-12deg);opacity:0}
+.vfbtns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.vfbtn{border:none;border-radius:16px;padding:18px 10px;font-weight:700;font-size:1.1rem;cursor:pointer;transition:transform .12s,box-shadow .2s}
+.vfbtn:active{transform:scale(.95)}
+.vfbtn.t{background:linear-gradient(135deg,var(--accent),#06b386);color:#04150f;box-shadow:0 8px 24px rgba(0,212,160,.3)}
+.vfbtn.f{background:linear-gradient(135deg,var(--red),#d6334f);color:#fff;box-shadow:0 8px 24px rgba(255,77,106,.28)}
+.vfbtn:disabled{opacity:.4;box-shadow:none}
+.hearts{font-size:1.25rem;letter-spacing:2px}
+.vfexp{margin-top:12px;min-height:74px}
+.vfexp .fb{animation:rise .3s both}
+.kb{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-align:center;margin-top:10px;letter-spacing:1px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:480px){.big-btn{padding:14px 22px}.flip{height:300px}}
@@ -196,7 +213,7 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
   <div class="row" style="gap:8px;flex-wrap:nowrap"><button class="snd" id="snd" aria-label="Activar o silenciar sonido">🔊</button><div class="wallet"><span class="lbl" id="lvl">Nv 1</span><span class="amt" id="xp">0 XP</span></div></div>
 </div>
 <nav class="nav" id="nav">
-  <button data-v="home" class="on">Inicio</button><button data-v="sum">📖 Resumen</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
+  <button data-v="home" class="on">Inicio</button><button data-v="sum">📖 Resumen</button><button data-v="vf">⚡ V/F</button><button data-v="tests">Tests</button><button data-v="cards">Tarjetas</button><button data-v="dev">Desarrollo</button><button data-v="stats">Progreso</button>
 </nav>
 <main id="app"></main>
 
@@ -650,6 +667,48 @@ const SUMMARY=[
  quiz:[["El software libre solo puede usarse, no modificarse.",false,"Puede usarse, copiarse, modificarse y redistribuirse."],["VLC es un ejemplo de freeware.",true,"Gratuito pero no libre, según el libro."],["CC0 cede la obra al dominio público.",true,"Los creadores renuncian a sus derechos."]]},
 ];
 
+const VF=[
+["Scratch es un lenguaje de programación textual.",false,"¡Es VISUAL, de bloques! Python es el textual. 🧩","🧩"],
+["Python es un lenguaje textual.",true,"Como Java, C++ y Processing: se escribe con texto.","🐍"],
+["La programación visual evita errores de escritura.",true,"Arrastras bloques: no hay comas ni paréntesis que olvidar.","🎨"],
+["El código fuente lo escribe el programador.",true,"Fuente = el origen: lo que tú escribes.","⌨️"],
+["La CPU entiende directamente el código fuente.",false,"Solo entiende binario. El compilador lo traduce.","🤖"],
+["El compilador traduce el código fuente a lenguaje máquina.",true,"Fuente → compilador → objeto (ceros y unos).","🔁"],
+["El código objeto está hecho de ceros y unos.",true,"Es lenguaje máquina: binario.","💾"],
+["Un algoritmo puede no terminar nunca.",false,"Tiene que ser FINITO. Si no acaba, no es un algoritmo.","♾️"],
+["Un algoritmo es una secuencia ordenada de pasos.",true,"Como una receta de cocina. 🍳","🍳"],
+["El pseudocódigo se puede ejecutar en el ordenador.",false,"Es «código falso», para humanos. Sirve para pensar y depurar.","🎭"],
+["Un diagrama de flujo usa símbolos unidos por flechas.",true,"Rombo = pregunta Sí/No.","🔷"],
+["En la estructura secuencial las instrucciones van una tras otra.",true,"Como una lista de la compra.","➡️"],
+["La estructura selectiva decide según una condición.",true,"¿Sí o no? Como «si llueve, paraguas».","🔀"],
+["La estructura iterativa repite instrucciones.",true,"Bucle = carrusel: ¡otra vuelta! 🎠","🔁"],
+["«Repetir exámenes hasta aprobar» es una estructura selectiva.",false,"Es ITERATIVA: se repite en un bucle.","📝"],
+["La búsqueda binaria funciona con listas desordenadas.",false,"Necesita la lista ORDENADA para descartar la mitad.","🎯"],
+["La búsqueda binaria compara con el dato central.",true,"Como adivinar un número: «¿mayor o menor que la mitad?».","🎲"],
+["La búsqueda secuencial mira los datos uno a uno.",true,"Para listas desordenadas. Lenta si hay muchos.","🐢"],
+["Un subalgoritmo también se llama procedimiento.",true,"O subrutina o subprograma. ¡Un mini-algoritmo reutilizable!","🧱"],
+["Un programa tiene entrada, procesado y salida.",true,"Como una batidora: fruta → triturar → batido. 🥤","🥤"],
+["En «edad = 13», el valor es «edad».",false,"El identificador es «edad»; el valor es 13.","🏷️"],
+["Un dato booleano solo puede ser verdadero o falso.",true,"Dos valores: 1 o 0.","⚖️"],
+["Un byte tiene 8 bits.",true,"Y permite 256 combinaciones (2⁸).","🔢"],
+["33 en binario es 100001.",true,"32 + 1. ¡Dos unos y cuatro ceros en medio!","➗"],
+["La letra D en ASCII es el 68.",true,"1000100 en binario.","🔤"],
+["El píxel (255, 0, 0) es verde.",false,"Es ROJO: R=255, G=0, B=0.","🔴"],
+["El hexadecimal usa 16 dígitos: 0-9 y A-F.",true,"A=10, B=11… F=15.","🔠"],
+["Con AND, 1 y 0 dan 1.",false,"AND solo da 1 si LAS DOS son 1. Es el exigente. 🧐","✅"],
+["Con OR, 1 y 0 dan 1.",true,"OR = «con una me vale». El conformista. 😎","🔔"],
+["NOT 1 vale 0.",true,"NOT = el rebelde: siempre lo contrario.","🔄"],
+["App Inventor sirve para hacer apps de Android.",true,"Lo crearon el MIT y Google. Es de bloques.","📱"],
+["App Inventor es programación orientada a eventos.",true,"Pulsas un botón (evento) y pasa algo.","⚡"],
+["Pellizcar la pantalla con dos dedos es un evento del teclado.",false,"Es un evento manual (táctil).","👆"],
+["El software libre se puede modificar y redistribuir.",true,"LibreOffice, GIMP, Audacity… ¡libres de verdad!","🕊️"],
+["VLC es software libre según el libro.",false,"Lo pone como freeware: gratis pero no libre.","🔶"],
+["CC0 cede la obra al dominio público.",true,"Cero derechos reservados. 🅭","🅭"],
+["La licencia CC BY-NC permite usar la obra para vender.",false,"NC = No Comercial: ¡no lo vendas!","💸"],
+["La licencia CC BY-ND permite hacer obras derivadas.",false,"ND = No Derivadas: no lo cambies.","✋"],
+["La inclusión en software es hacerlo accesible para todos.",true,"Todas las personas y todas sus necesidades.","♿"],
+["Optimizar el código ayuda a la sostenibilidad.",true,"Menos energía = menos huella de carbono. 🌍","🌱"],
+];
 
 
 /* ============ UTILIDADES ============ */
@@ -695,7 +754,7 @@ document.addEventListener("click",e=>{ac();if(e.target.closest(".mission,.big-bt
 const KEY=APP.key;
 let store={};
 try{store=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
-store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;store.answered=store.answered||0;store.correct=store.correct||0;store.bestStreak=store.bestStreak||0;store.fails=store.fails||[];store.hist=store.hist||[];store.sum=store.sum||{};store.sx=store.sx||{};
+store.tests=store.tests||{};store.known=store.known||{};store.xp=store.xp||0;store.answered=store.answered||0;store.correct=store.correct||0;store.bestStreak=store.bestStreak||0;store.fails=store.fails||[];store.hist=store.hist||[];store.sum=store.sum||{};store.vfbest=store.vfbest||0;store.vffail=store.vffail||[];store.sx=store.sx||{};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 const LVL=150;
 const level=()=>Math.floor(store.xp/LVL)+1;
@@ -714,7 +773,7 @@ const stopTimer=()=>{if(timer){clearInterval(timer);timer=null}};
 function go(v){
   stopTimer();
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
-  if(v==="sum")SM.open=-1;({home:viewHome,sum:viewSummary,tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
+  if(v==="sum")SM.open=-1;({home:viewHome,sum:viewSummary,vf:viewVF,tests:viewTests,cards:viewCards,dev:viewDev,stats:viewStats})[v]();
   window.scrollTo(0,0);
 }
 $("#nav").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.v)};
@@ -725,11 +784,11 @@ function viewHome(){
   const acc=store.answered?Math.round(store.correct/store.answered*100)+"%":"—";
   const into=store.xp%LVL;
   app.innerHTML=`<div class="hero"><h1>${APP.h1}</h1><p>${APP.sub}</p>
-   <div class="actions"><button class="big-btn play" id="h-play">Jugar test mixto</button><button class="big-btn alt" id="h-sum">📖 Resumen</button><button class="big-btn alt" id="h-cards">Tarjetas</button></div>
+   <div class="actions"><button class="big-btn play" id="h-play">Jugar test mixto</button><button class="big-btn alt" id="h-sum">📖 Resumen</button><button class="big-btn alt" id="h-vf">⚡ V/F</button><button class="big-btn alt" id="h-cards">Tarjetas</button></div>
    <div class="lvl"><div class="row mut" style="justify-content:space-between;margin-bottom:6px"><span>Nivel ${level()}</span><span style="font-family:var(--mono)">${into}/${LVL} XP</span></div><div class="bar"><i style="width:${into/LVL*100}%"></i></div></div>
    <div class="stats"><div class="pill"><div class="l">XP total</div><div class="v g">${store.xp}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${store.bestStreak}</div></div><div class="pill"><div class="l">Precisión</div><div class="v p">${acc}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.fails.length}</div></div></div></div>`;
   $("#h-play").onclick=()=>startTest("mix",false,false);
-  $("#h-cards").onclick=()=>go("cards");$("#h-sum").onclick=()=>go("sum");
+  $("#h-cards").onclick=()=>go("cards");$("#h-sum").onclick=()=>go("sum");$("#h-vf").onclick=()=>go("vf");
 }
 
 /* ============ TESTS ============ */
@@ -897,7 +956,7 @@ function viewStats(){
   <h2>Modelos de examen</h2><div class="card">${MODELS.map((m,i)=>row(m.name,"m"+i,m.qs.length)).join("")}</div>
   <h2>Últimos intentos</h2><div class="card hist">${store.hist.slice().reverse().slice(0,10).map(h=>`<p><span>${h.d} · ${esc(h.name)}</span><span>${h.sc}/${h.n}</span></p>`).join("")||'<span class="mut">Todavía no hay intentos.</span>'}</div>
   <div class="row" style="margin-top:16px"><button class="mini" id="rst" style="color:var(--red)">Borrar progreso</button><span class="mut" id="rstmsg"></span></div>`;
-  let armed=false;$("#rst").onclick=()=>{if(!armed){armed=true;$("#rst").textContent="¿Seguro? Pulsa otra vez";return}store={tests:{},known:{},xp:0,answered:0,correct:0,bestStreak:0,fails:[],hist:[],sum:{},sx:{}};save();paintWallet();viewStats()};
+  let armed=false;$("#rst").onclick=()=>{if(!armed){armed=true;$("#rst").textContent="¿Seguro? Pulsa otra vez";return}store={tests:{},known:{},xp:0,answered:0,correct:0,bestStreak:0,fails:[],hist:[],sum:{},sx:{},vfbest:0,vffail:[]};save();paintWallet();viewStats()};
 }
 
 /* ============ RESUMEN INTERACTIVO ============ */
@@ -959,6 +1018,74 @@ function openPoint(i){
   };
   window.scrollTo(0,0);
 }
+
+/* ============ JUEGO V/F ============ */
+let V=null;
+function viewVF(){
+  if(typeof VF==="undefined"||!VF.length){app.innerHTML='<div class="card res">Aún no hay V/F.</div>';return}
+  app.innerHTML=`<div class="hero" style="padding-top:6px"><div class="emo">⚡</div><h1 style="font-size:clamp(1.7rem,6vw,2.3rem)">Verdadero <span>o falso</span></h1><p>Frases cortas, fáciles y un poco locas. Tienes 3 vidas ❤️❤️❤️: cada fallo te quita una. ¡Cada frase trae su truco para que no se te olvide!</p>
+  <div class="stats"><div class="pill"><div class="l">Récord</div><div class="v y">${store.vfbest}</div></div><div class="pill"><div class="l">Frases</div><div class="v g">${VF.length}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.vffail.length}</div></div></div>
+  <div class="actions"><button class="big-btn play" id="vgo">¡Jugar!</button><button class="big-btn alt" id="vrev" ${store.vffail.length?"":"disabled"}>🔁 Repasar fallos</button></div></div>`;
+  $("#vgo").onclick=()=>startVF(false);$("#vrev").onclick=()=>startVF(true);
+}
+function startVF(rev){
+  let pool=rev?VF.filter(v=>store.vffail.includes(v[0])):VF.slice();
+  V={q:shuffle(pool).slice(0,20),i:0,lives:3,score:0,streak:0,best:0,xp:0,rev,lock:false,miss:[]};
+  nextVF();
+}
+function hearts(){return "❤️".repeat(V.lives)+"🖤".repeat(3-V.lives)}
+function nextVF(){
+  if(V.i>=V.q.length||V.lives<=0)return endVF();
+  const c=V.q[V.i];V.lock=false;
+  app.innerHTML=`<div class="hud"><div class="pill"><div class="l">Frase</div><div class="v">${V.i+1}/${V.q.length}</div></div><div class="pill"><div class="l">Vidas</div><div class="v hearts" id="vl">${hearts()}</div></div><div class="pill"><div class="l">Racha</div><div class="v y" id="vs">🔥 ${V.streak}</div></div><span class="sp"></span><button class="exit" id="vq">Salir</button></div>
+  <div class="card vfcard" id="vc"><div class="big">${c[3]||"🤔"}</div><div class="st">${esc(c[0])}</div></div>
+  <div class="vfexp" id="vx"></div>
+  <div class="vfbtns" id="vb"><button class="vfbtn f" data-a="0">✗ Falso</button><button class="vfbtn t" data-a="1">✓ Verdadero</button></div>
+  <div class="kb">← FALSO · VERDADERO →</div>`;
+  $("#vq").onclick=()=>go("vf");
+  $("#vb").onclick=e=>{const b=e.target.closest("button[data-a]");if(b)answerVF(b.dataset.a==="1",b)};
+}
+function answerVF(ans,btn){
+  if(!V||V.lock)return;V.lock=true;
+  const c=V.q[V.i],ok=ans===c[1];
+  document.querySelectorAll(".vfbtn").forEach(b=>b.disabled=true);
+  const card=$("#vc");
+  if(ok){
+    V.score++;V.streak++;V.best=Math.max(V.best,V.streak);const g=5+Math.min(V.streak-1,5);V.xp+=g;addXP(g);SFX.ok(V.streak);
+    if(btn){const r=btn.getBoundingClientRect();burst(r.left+r.width/2,r.top,18)}
+    if([3,5,8,12].includes(V.streak)){showBanner("RACHA x"+V.streak,"🔥 IMPARABLE");SFX.combo()}
+    store.vffail=store.vffail.filter(f=>f!==c[0]);
+    $("#vx").innerHTML=`<div class="fb ok"><b class="t">¡Bien! +${g} XP</b><br>${esc(c[2])}</div>`;
+  }else{
+    V.lives--;V.streak=0;SFX.ko();if(navigator.vibrate)navigator.vibrate(120);
+    if(!store.vffail.includes(c[0]))store.vffail.push(c[0]);V.miss.push(c);
+    card.classList.remove("shake");void card.offsetWidth;card.classList.add("shake");
+    $("#vx").innerHTML=`<div class="fb ko"><b class="t">Era ${c[1]?"VERDADERO":"FALSO"}</b><br>${esc(c[2])}</div>`;
+  }
+  $("#vl").textContent=hearts();$("#vs").textContent="🔥 "+V.streak;bumpEl($("#vs"));save();
+  V.i++;
+  const wait=reduce?900:(ok?1500:2700);
+  const my=V;
+  setTimeout(()=>{if(V!==my||!$("#vc"))return;card.classList.add(ans?"out-r":"out-l");setTimeout(()=>{if(V===my)nextVF()},reduce?0:240)},wait);
+}
+function endVF(){
+  const total=V.q.length,sc=V.score,win=V.lives>0&&V.i>=total;
+  if(sc>store.vfbest){store.vfbest=sc}
+  let bonus=0;if(win&&V.miss.length===0){bonus=30;addXP(30)}
+  save();
+  if(win){SFX.win();confetti(sc===total?260:140)}else SFX.lose();
+  app.innerHTML=`<div class="card res"><div class="emo">${win?(V.miss.length?"🏆":"👑"):"💀"}</div><h2 style="margin:8px 0 4px">${win?(V.miss.length?"¡Ronda superada!":"¡PERFECTO!"):"Te quedaste sin vidas"}</h2>
+  <div class="stats"><div class="pill"><div class="l">Aciertos</div><div class="v g">${sc}/${V.i}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${V.best}</div></div><div class="pill"><div class="l">XP</div><div class="v p">+${V.xp+bonus}</div></div></div>
+  <p class="mut" style="margin-top:12px">${V.miss.length?"Estas son las que se te escaparon. Léelas y se te quedan:":"Sin ningún fallo. ¡Bonus +30 XP!"}</p>
+  <div class="actions"><button class="big-btn play" id="vagain">Otra ronda</button><button class="big-btn alt" id="vmenu">Menú V/F</button></div></div>
+  ${V.miss.map(c=>`<div class="card" style="margin-bottom:10px"><div class="tit" style="font-weight:600;margin-bottom:6px">${c[3]||"🤔"} ${esc(c[0])}</div><div class="fb ok"><b class="t">${c[1]?"VERDADERO":"FALSO"}</b><br>${esc(c[2])}</div></div>`).join("")}`;
+  $("#vagain").onclick=()=>startVF(V.rev);$("#vmenu").onclick=()=>go("vf");
+}
+document.addEventListener("keydown",e=>{
+  if(!V||!$("#vb")||e.target.tagName==="TEXTAREA")return;
+  if(e.key==="ArrowRight")answerVF(true,document.querySelector(".vfbtn.t"));
+  else if(e.key==="ArrowLeft")answerVF(false,document.querySelector(".vfbtn.f"));
+});
 go("home");
 </script>
 </body>
