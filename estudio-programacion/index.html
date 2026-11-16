@@ -212,6 +212,12 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
 .vfexp{min-height:110px}
 .vfexp .fb{font-size:.88rem}
 .vfbtns{margin-top:12px}.vfbtn{padding:15px 10px}
+
+.vfstack{position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.vfstack .vfcard{margin:0}
+.vfnext{position:absolute!important;inset:0;transform:scale(.94) translateY(14px);opacity:.55;pointer-events:none;z-index:0;transition:transform .15s,opacity .15s;filter:saturate(.7)}
+#vc{position:relative;z-index:1;background:var(--surface)}
+.flash{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:480px){.big-btn{padding:14px 22px}.flip{height:300px}}
@@ -920,13 +926,21 @@ function viewCards(){
   const kn=Object.values(store.known).filter(Boolean).length;
   app.innerHTML=`<div class="chips">${secs.map(s=>`<button class="chip ${s===C.sec?"on":""}" data-s="${esc(s)}">${esc(s)}</button>`).join("")}</div>
   <div class="row"><label class="mut" style="cursor:pointer"><input type="checkbox" id="rev" ${C.onlyReview?"checked":""} style="accent-color:var(--accent)"> Solo las que aún no sé</label><span class="sp"></span><div class="pill"><div class="l">Dominadas</div><div class="v g">${kn}/${CARDS.length}</div></div></div>
-  ${cur?`<div class="flash"><div class="flip" id="flip"><div class="face front"><div class="sec">${esc(cur.c[2])}</div>${esc(cur.c[0])}<div class="hint">toca para girar</div></div><div class="face back">${esc(cur.c[1])}</div></div></div>
+  ${cur?`<div class="flash"><div class="flip" id="flip"><div class="face front"><div class="sec">${esc(cur.c[2])}</div>${esc(cur.c[0])}<div class="hint">toca para girar · desliza ← repasar / me la sé →</div></div><div class="face back">${esc(cur.c[1])}</div></div></div>
   <div class="row"><button class="mini" id="prev">←</button><span class="mut" style="font-family:var(--mono)">${C.i+1}/${pool.length}</span><button class="mini" id="nx">→</button><span class="sp"></span><button class="mini" id="rv">🔁 Repasar</button><button class="big-btn play" id="kn" style="padding:10px 18px;font-size:.9rem">✓ Me la sé</button></div>
   <div class="row" style="margin-top:10px"><button class="mini" id="sh">🔀 Aleatoria</button></div>`:`<div class="card res"><div class="stars">🎉</div>No quedan tarjetas pendientes en esta selección.</div>`}`;
   app.onclick=e=>{const ch=e.target.closest(".chip");if(ch){C.sec=ch.dataset.s;C.i=0;viewCards()}};
   $("#rev").onchange=e=>{C.onlyReview=e.target.checked;C.i=0;viewCards()};
   if(!cur)return;
-  $("#flip").onclick=()=>{SFX.flip();$("#flip").classList.toggle("on")};
+  (function(){const z=$(".flash");let x0=null,dx=0,t0=0,moved=false;
+  z.onpointerdown=e=>{x0=e.clientX;dx=0;moved=false;t0=performance.now();z.setPointerCapture(e.pointerId);z.style.transition="none"};
+  z.onpointermove=e=>{if(x0===null)return;dx=e.clientX-x0;if(Math.abs(dx)>8)moved=true;z.style.transform=`translateX(${dx}px) rotate(${dx/22}deg)`;const k=Math.min(1,Math.abs(dx)/60);z.style.filter=dx>0?"drop-shadow(0 0 "+(22*k)+"px rgba(0,212,160,.6))":dx<0?"drop-shadow(0 0 "+(22*k)+"px rgba(255,77,106,.6))":""};
+  const end=()=>{if(x0===null)return;const d=dx,v=d/(performance.now()-t0+1);x0=null;
+    if(Math.abs(d)>60||(Math.abs(d)>25&&Math.abs(v)>.55)){z.style.filter="";d>0?$("#kn").click():$("#rv").click()}
+    else{z.style.transition="transform .22s,filter .22s";z.style.transform="";z.style.filter="";if(Math.abs(d)<=8){SFX.flip();$("#flip").classList.toggle("on")}}
+    setTimeout(()=>{moved=false},0)};
+  z.onpointerup=end;z.onpointercancel=end;
+})();
   const mv=d=>{C.i=(C.i+d+pool.length)%pool.length;viewCards()};
   $("#prev").onclick=()=>mv(-1);$("#nx").onclick=()=>mv(1);
   $("#kn").onclick=()=>{if(!store.known[cur.id])addXP(3);store.known[cur.id]=true;save();SFX.known();const r=$(".flash").getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,24);$(".flash").classList.add("fly");setTimeout(()=>{if(!$(".flash"))return;if(!C.onlyReview)C.i=(C.i+1)%pool.length;viewCards()},reduce?0:380)};
@@ -1069,7 +1083,7 @@ function startVF(mode){
   V={mode,q:pool,i:-1,lives:3,score:0,streak:0,best:0,xp:0,miss:[],lock:false,prev:null};
   app.innerHTML=`<div class="hud"><div class="pill"><div class="l">Frase</div><div class="v" id="vn">0/${pool.length}</div></div><div class="pill"><div class="l">${mode==="surv"?"Vidas":"Fallos"}</div><div class="v hearts" id="vl"></div></div><div class="pill"><div class="l">Racha</div><div class="v y" id="vs">🔥 0</div></div><div class="pill"><div class="l">Aciertos</div><div class="v g" id="vk">0</div></div><span class="sp"></span><button class="exit" id="vq">Salir</button></div>
   <div class="timebar"><i id="vp" style="width:0"></i></div>
-  <div class="card vfcard" id="vc"></div>
+  <div class="vfstack" id="vz"><div class="card vfcard vfnext" id="vn2"></div><div class="card vfcard" id="vc"></div></div>
   <div class="vfbtns"><button class="vfbtn f" id="bF">✗ Falso</button><button class="vfbtn t" id="bT">✓ Verdadero</button></div>
   <div class="kb">← FALSO · VERDADERO → · ¡desliza la tarjeta!</div>
   <div class="vfexp" id="vx"><div class="mut" style="text-align:center;font-size:.85rem">Aquí verás el truco de cada frase.</div></div>`;
@@ -1077,11 +1091,13 @@ function startVF(mode){
   setupSwipe();nextVF();
 }
 function setupSwipe(){
-  const c=$("#vc");let x0=null,dx=0,id=null;
-  c.onpointerdown=e=>{if(V.lock)return;x0=e.clientX;dx=0;id=e.pointerId;c.setPointerCapture(id);c.style.transition="none"};
-  c.onpointermove=e=>{if(x0===null)return;dx=e.clientX-x0;c.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;const k=Math.min(1,Math.abs(dx)/90);const t=c.querySelector(".tag.t"),f=c.querySelector(".tag.f");if(t)t.style.opacity=dx>0?k:0;if(f)f.style.opacity=dx<0?k:0;c.style.borderColor=dx>0?"rgba(0,212,160,"+k+")":dx<0?"rgba(255,77,106,"+k+")":"";};
-  const end=()=>{if(x0===null)return;const d=dx;x0=null;if(Math.abs(d)>85){answerVF(d>0)}else{c.style.transition="transform .25s,border-color .25s";c.style.transform="";c.style.borderColor="";c.querySelectorAll(".tag").forEach(t=>t.style.opacity=0)}};
-  c.onpointerup=end;c.onpointercancel=end;
+  const z=$("#vz"),c=$("#vc");let x0=null,dx=0,t0=0;
+  z.onpointerdown=e=>{if(V.lock)return;x0=e.clientX;dx=0;t0=performance.now();z.setPointerCapture(e.pointerId);c.style.transition="none"};
+  z.onpointermove=e=>{if(x0===null)return;dx=e.clientX-x0;c.style.transform=`translateX(${dx}px) rotate(${dx/16}deg)`;const k=Math.min(1,Math.abs(dx)/55);const t=c.querySelector(".tag.t"),f=c.querySelector(".tag.f");if(t)t.style.opacity=dx>0?k:0;if(f)f.style.opacity=dx<0?k:0;c.style.borderColor=dx>0?"rgba(0,212,160,"+k+")":dx<0?"rgba(255,77,106,"+k+")":"";c.style.boxShadow=dx>0?"0 0 "+(30*k)+"px rgba(0,212,160,.45)":dx<0?"0 0 "+(30*k)+"px rgba(255,77,106,.45)":"";$("#vn2").style.transform="scale("+(.94+.06*k)+") translateY("+(14-14*k)+"px)";$("#vn2").style.opacity=.55+.45*k};
+  const end=()=>{if(x0===null)return;const d=dx,v=d/(performance.now()-t0+1);x0=null;const n2=$("#vn2");n2.style.transform="";n2.style.opacity="";
+    if(Math.abs(d)>55||(Math.abs(d)>22&&Math.abs(v)>.55)){answerVF(d>0)}
+    else{c.style.transition="transform .22s,border-color .22s,box-shadow .22s";c.style.transform="";c.style.borderColor="";c.style.boxShadow="";c.querySelectorAll(".tag").forEach(t=>t.style.opacity=0)}};
+  z.onpointerup=end;z.onpointercancel=end;
 }
 function vfHud(){
   const n=V.q.length;$("#vn").textContent=Math.min(V.i+1,n)+"/"+n;$("#vp").style.width=(V.i/n*100)+"%";
@@ -1092,8 +1108,9 @@ function nextVF(){
   V.i++;
   if(V.i>=V.q.length||(V.mode==="surv"&&V.lives<=0))return endVF();
   const c=V.q[V.i],card=$("#vc");
-  card.style.transition="none";card.style.transform="";card.style.opacity="1";card.style.borderColor="";
+  card.style.transition="none";card.style.transform="";card.style.opacity="1";card.style.borderColor="";card.style.boxShadow="";
   card.innerHTML=`<div class="tag t">✓ VERDADERO</div><div class="tag f">✗ FALSO</div><div class="big">${c[3]||"🤔"}</div><div class="st">${esc(c[0])}</div>`;
+  const nx=V.q[V.i+1];$("#vn2").innerHTML=nx?`<div class="big">${nx[3]||"🤔"}</div><div class="st">${esc(nx[0])}</div>`:"";$("#vn2").style.visibility=nx?"visible":"hidden";
   card.classList.remove("popin");void card.offsetWidth;card.classList.add("popin");
   V.lock=false;vfHud();
 }
@@ -1112,9 +1129,9 @@ function answerVF(ans){
   }
   if(V.score%25===0&&ok)store.vfbest=Math.max(store.vfbest,V.best);
   vfHud();save();
-  card.style.transition=reduce?"none":"transform .2s ease-in,opacity .2s";
+  card.style.transition=reduce?"none":"transform .14s ease-in,opacity .14s";
   card.style.transform=`translateX(${ans?140:-140}%) rotate(${ans?22:-22}deg)`;card.style.opacity="0";
-  const my=V;setTimeout(()=>{if(V===my&&$("#vc"))nextVF()},reduce?0:210);
+  const my=V;setTimeout(()=>{if(V===my&&$("#vc"))nextVF()},reduce?0:140);
 }
 function endVF(){
   const total=V.i>V.q.length?V.q.length:V.i,sc=V.score,win=V.lives>0;
