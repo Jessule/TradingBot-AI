@@ -201,6 +201,17 @@ textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(
 .vfexp{margin-top:12px;min-height:74px}
 .vfexp .fb{animation:rise .3s both}
 .kb{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-align:center;margin-top:10px;letter-spacing:1px}
+
+.vfcard{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;overflow:hidden;min-height:240px;will-change:transform}
+.vfcard:active{cursor:grabbing}
+.vfcard.popin{animation:popin .22s cubic-bezier(.2,1.3,.4,1)}
+@keyframes popin{from{transform:scale(.88);opacity:.2}to{transform:none;opacity:1}}
+.vfcard .tag{position:absolute;top:14px;font-family:var(--mono);font-weight:700;font-size:.8rem;letter-spacing:1px;padding:5px 10px;border-radius:9px;opacity:0;pointer-events:none;border:2px solid}
+.vfcard .tag.t{left:14px;color:var(--accent);border-color:var(--accent);transform:rotate(-8deg)}
+.vfcard .tag.f{right:14px;color:var(--red);border-color:var(--red);transform:rotate(8deg)}
+.vfexp{min-height:110px}
+.vfexp .fb{font-size:.88rem}
+.vfbtns{margin-top:12px}.vfbtn{padding:15px 10px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:480px){.big-btn{padding:14px 22px}.flip{height:300px}}
@@ -783,72 +794,108 @@ function openPoint(i){
   window.scrollTo(0,0);
 }
 
-/* ============ JUEGO V/F ============ */
+/* ============ JUEGO V/F (desliza: derecha = verdadero, izquierda = falso) ============ */
+const EMO=["🤔","😎","🧠","⚡","🎯","🔥","🌟","🤓","🎲","🚀","💡","🧩","🦾","🧪","🎮"];
+function autoVF(){
+  const out=[];
+  ALLQ().forEach((q,ix)=>{
+    const stem=q.q.trim();
+    if(stem.length>125||q.ok.length>105)return;
+    const sep=/[…:.]$/.test(stem)?" ":" ➜ ";
+    const e=EMO[(ix*7)%EMO.length];
+    out.push([stem+sep+q.ok,true,q.why,e]);
+    const w=q.bad[ix%q.bad.length];
+    if(w&&w.length<=105)out.push([stem+sep+w,false,"Lo correcto: «"+q.ok+"». "+q.why,e]);
+  });
+  return out;
+}
+let _vfall=null;
+function allVF(){
+  if(_vfall)return _vfall;
+  const base=(typeof VF!=="undefined")?VF:[];const seen=new Set(base.map(x=>x[0]));const arr=base.slice();
+  autoVF().forEach(x=>{if(!seen.has(x[0])){seen.add(x[0]);arr.push(x)}});
+  return _vfall=arr;
+}
 let V=null;
 function viewVF(){
-  if(typeof VF==="undefined"||!VF.length){app.innerHTML='<div class="card res">Aún no hay V/F.</div>';return}
-  app.innerHTML=`<div class="hero" style="padding-top:6px"><div class="emo">⚡</div><h1 style="font-size:clamp(1.7rem,6vw,2.3rem)">Verdadero <span>o falso</span></h1><p>Frases cortas, fáciles y un poco locas. Tienes 3 vidas ❤️❤️❤️: cada fallo te quita una. ¡Cada frase trae su truco para que no se te olvide!</p>
-  <div class="stats"><div class="pill"><div class="l">Récord</div><div class="v y">${store.vfbest}</div></div><div class="pill"><div class="l">Frases</div><div class="v g">${VF.length}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.vffail.length}</div></div></div>
-  <div class="actions"><button class="big-btn play" id="vgo">¡Jugar!</button><button class="big-btn alt" id="vrev" ${store.vffail.length?"":"disabled"}>🔁 Repasar fallos</button></div></div>`;
-  $("#vgo").onclick=()=>startVF(false);$("#vrev").onclick=()=>startVF(true);
+  const N=allVF().length;
+  if(!N){app.innerHTML='<div class="card res">Aún no hay V/F.</div>';return}
+  app.innerHTML=`<div class="hero" style="padding-top:6px"><div class="emo">⚡</div><h1 style="font-size:clamp(1.7rem,6vw,2.3rem)">Verdadero <span>o falso</span></h1>
+  <p><b>Desliza la tarjeta</b>: a la <b style="color:var(--accent)">derecha = VERDADERO ✓</b> · a la <b style="color:var(--red)">izquierda = FALSO ✗</b>. Sin esperas: cada frase trae su truco para que no se te olvide.</p>
+  <div class="stats"><div class="pill"><div class="l">Frases</div><div class="v g">${N}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${store.vfbest}</div></div><div class="pill"><div class="l">Por repasar</div><div class="v r">${store.vffail.length}</div></div></div>
+  <div class="actions" style="flex-direction:column;align-items:center"><button class="big-btn play" id="vall">🏁 Todas de golpe (${N})</button><div class="row" style="justify-content:center"><button class="big-btn alt" id="v20">⚡ Ronda de 20</button><button class="big-btn alt" id="vsv">❤️ Supervivencia</button><button class="big-btn alt" id="vrev" ${store.vffail.length?"":"disabled"}>🔁 Mis fallos</button></div></div></div>`;
+  $("#vall").onclick=()=>startVF("all");$("#v20").onclick=()=>startVF("20");$("#vsv").onclick=()=>startVF("surv");$("#vrev").onclick=()=>startVF("rev");
 }
-function startVF(rev){
-  let pool=rev?VF.filter(v=>store.vffail.includes(v[0])):VF.slice();
-  V={q:shuffle(pool).slice(0,20),i:0,lives:3,score:0,streak:0,best:0,xp:0,rev,lock:false,miss:[]};
-  nextVF();
+function startVF(mode){
+  let pool=allVF().slice();
+  if(mode==="rev")pool=pool.filter(v=>store.vffail.includes(v[0]));
+  pool=shuffle(pool);if(mode==="20")pool=pool.slice(0,20);
+  V={mode,q:pool,i:-1,lives:3,score:0,streak:0,best:0,xp:0,miss:[],lock:false,prev:null};
+  app.innerHTML=`<div class="hud"><div class="pill"><div class="l">Frase</div><div class="v" id="vn">0/${pool.length}</div></div><div class="pill"><div class="l">${mode==="surv"?"Vidas":"Fallos"}</div><div class="v hearts" id="vl"></div></div><div class="pill"><div class="l">Racha</div><div class="v y" id="vs">🔥 0</div></div><div class="pill"><div class="l">Aciertos</div><div class="v g" id="vk">0</div></div><span class="sp"></span><button class="exit" id="vq">Salir</button></div>
+  <div class="timebar"><i id="vp" style="width:0"></i></div>
+  <div class="card vfcard" id="vc"></div>
+  <div class="vfbtns"><button class="vfbtn f" id="bF">✗ Falso</button><button class="vfbtn t" id="bT">✓ Verdadero</button></div>
+  <div class="kb">← FALSO · VERDADERO → · ¡desliza la tarjeta!</div>
+  <div class="vfexp" id="vx"><div class="mut" style="text-align:center;font-size:.85rem">Aquí verás el truco de cada frase.</div></div>`;
+  $("#vq").onclick=()=>go("vf");$("#bT").onclick=()=>answerVF(true);$("#bF").onclick=()=>answerVF(false);
+  setupSwipe();nextVF();
 }
-function hearts(){return "❤️".repeat(V.lives)+"🖤".repeat(3-V.lives)}
+function setupSwipe(){
+  const c=$("#vc");let x0=null,dx=0,id=null;
+  c.onpointerdown=e=>{if(V.lock)return;x0=e.clientX;dx=0;id=e.pointerId;c.setPointerCapture(id);c.style.transition="none"};
+  c.onpointermove=e=>{if(x0===null)return;dx=e.clientX-x0;c.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;const k=Math.min(1,Math.abs(dx)/90);const t=c.querySelector(".tag.t"),f=c.querySelector(".tag.f");if(t)t.style.opacity=dx>0?k:0;if(f)f.style.opacity=dx<0?k:0;c.style.borderColor=dx>0?"rgba(0,212,160,"+k+")":dx<0?"rgba(255,77,106,"+k+")":"";};
+  const end=()=>{if(x0===null)return;const d=dx;x0=null;if(Math.abs(d)>85){answerVF(d>0)}else{c.style.transition="transform .25s,border-color .25s";c.style.transform="";c.style.borderColor="";c.querySelectorAll(".tag").forEach(t=>t.style.opacity=0)}};
+  c.onpointerup=end;c.onpointercancel=end;
+}
+function vfHud(){
+  const n=V.q.length;$("#vn").textContent=Math.min(V.i+1,n)+"/"+n;$("#vp").style.width=(V.i/n*100)+"%";
+  $("#vl").textContent=V.mode==="surv"?"❤️".repeat(V.lives)+"🖤".repeat(3-V.lives):V.miss.length;
+  $("#vs").textContent="🔥 "+V.streak;$("#vk").textContent=V.score;
+}
 function nextVF(){
-  if(V.i>=V.q.length||V.lives<=0)return endVF();
-  const c=V.q[V.i];V.lock=false;
-  app.innerHTML=`<div class="hud"><div class="pill"><div class="l">Frase</div><div class="v">${V.i+1}/${V.q.length}</div></div><div class="pill"><div class="l">Vidas</div><div class="v hearts" id="vl">${hearts()}</div></div><div class="pill"><div class="l">Racha</div><div class="v y" id="vs">🔥 ${V.streak}</div></div><span class="sp"></span><button class="exit" id="vq">Salir</button></div>
-  <div class="card vfcard" id="vc"><div class="big">${c[3]||"🤔"}</div><div class="st">${esc(c[0])}</div></div>
-  <div class="vfexp" id="vx"></div>
-  <div class="vfbtns" id="vb"><button class="vfbtn f" data-a="0">✗ Falso</button><button class="vfbtn t" data-a="1">✓ Verdadero</button></div>
-  <div class="kb">← FALSO · VERDADERO →</div>`;
-  $("#vq").onclick=()=>go("vf");
-  $("#vb").onclick=e=>{const b=e.target.closest("button[data-a]");if(b)answerVF(b.dataset.a==="1",b)};
-}
-function answerVF(ans,btn){
-  if(!V||V.lock)return;V.lock=true;
-  const c=V.q[V.i],ok=ans===c[1];
-  document.querySelectorAll(".vfbtn").forEach(b=>b.disabled=true);
-  const card=$("#vc");
-  if(ok){
-    V.score++;V.streak++;V.best=Math.max(V.best,V.streak);const g=5+Math.min(V.streak-1,5);V.xp+=g;addXP(g);SFX.ok(V.streak);
-    if(btn){const r=btn.getBoundingClientRect();burst(r.left+r.width/2,r.top,18)}
-    if([3,5,8,12].includes(V.streak)){showBanner("RACHA x"+V.streak,"🔥 IMPARABLE");SFX.combo()}
-    store.vffail=store.vffail.filter(f=>f!==c[0]);
-    $("#vx").innerHTML=`<div class="fb ok"><b class="t">¡Bien! +${g} XP</b><br>${esc(c[2])}</div>`;
-  }else{
-    V.lives--;V.streak=0;SFX.ko();if(navigator.vibrate)navigator.vibrate(120);
-    if(!store.vffail.includes(c[0]))store.vffail.push(c[0]);V.miss.push(c);
-    card.classList.remove("shake");void card.offsetWidth;card.classList.add("shake");
-    $("#vx").innerHTML=`<div class="fb ko"><b class="t">Era ${c[1]?"VERDADERO":"FALSO"}</b><br>${esc(c[2])}</div>`;
-  }
-  $("#vl").textContent=hearts();$("#vs").textContent="🔥 "+V.streak;bumpEl($("#vs"));save();
   V.i++;
-  const wait=reduce?900:(ok?1500:2700);
-  const my=V;
-  setTimeout(()=>{if(V!==my||!$("#vc"))return;card.classList.add(ans?"out-r":"out-l");setTimeout(()=>{if(V===my)nextVF()},reduce?0:240)},wait);
+  if(V.i>=V.q.length||(V.mode==="surv"&&V.lives<=0))return endVF();
+  const c=V.q[V.i],card=$("#vc");
+  card.style.transition="none";card.style.transform="";card.style.opacity="1";card.style.borderColor="";
+  card.innerHTML=`<div class="tag t">✓ VERDADERO</div><div class="tag f">✗ FALSO</div><div class="big">${c[3]||"🤔"}</div><div class="st">${esc(c[0])}</div>`;
+  card.classList.remove("popin");void card.offsetWidth;card.classList.add("popin");
+  V.lock=false;vfHud();
+}
+function answerVF(ans){
+  if(!V||V.lock||V.i>=V.q.length)return;V.lock=true;
+  const c=V.q[V.i],ok=ans===c[1],card=$("#vc");
+  if(ok){
+    V.score++;V.streak++;V.best=Math.max(V.best,V.streak);const g=1+Math.floor(Math.min(V.streak,10)/2);V.xp+=g;addXP(g);SFX.ok(V.streak);
+    if(V.streak===5||V.streak%10===0){showBanner("RACHA x"+V.streak,"🔥 IMPARABLE");SFX.combo();burst(innerWidth/2,innerHeight/3,50)}
+    store.vffail=store.vffail.filter(f=>f!==c[0]);
+    $("#vx").innerHTML=`<div class="fb ok"><b class="t">✓ +${g} XP</b> <span class="mut">«${esc(c[0])}»</span><br>${esc(c[2])}</div>`;
+  }else{
+    V.lives--;V.streak=0;SFX.ko();if(navigator.vibrate)navigator.vibrate(90);
+    if(!store.vffail.includes(c[0]))store.vffail.push(c[0]);V.miss.push(c);
+    const vx=$("#vx");vx.innerHTML=`<div class="fb ko"><b class="t">✗ Era ${c[1]?"VERDADERO":"FALSO"}</b> <span class="mut">«${esc(c[0])}»</span><br>${esc(c[2])}</div>`;vx.classList.remove("shake");void vx.offsetWidth;vx.classList.add("shake");
+  }
+  if(V.score%25===0&&ok)store.vfbest=Math.max(store.vfbest,V.best);
+  vfHud();save();
+  card.style.transition=reduce?"none":"transform .2s ease-in,opacity .2s";
+  card.style.transform=`translateX(${ans?140:-140}%) rotate(${ans?22:-22}deg)`;card.style.opacity="0";
+  const my=V;setTimeout(()=>{if(V===my&&$("#vc"))nextVF()},reduce?0:210);
 }
 function endVF(){
-  const total=V.q.length,sc=V.score,win=V.lives>0&&V.i>=total;
-  if(sc>store.vfbest){store.vfbest=sc}
-  let bonus=0;if(win&&V.miss.length===0){bonus=30;addXP(30)}
-  save();
-  if(win){SFX.win();confetti(sc===total?260:140)}else SFX.lose();
-  app.innerHTML=`<div class="card res"><div class="emo">${win?(V.miss.length?"🏆":"👑"):"💀"}</div><h2 style="margin:8px 0 4px">${win?(V.miss.length?"¡Ronda superada!":"¡PERFECTO!"):"Te quedaste sin vidas"}</h2>
-  <div class="stats"><div class="pill"><div class="l">Aciertos</div><div class="v g">${sc}/${V.i}</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${V.best}</div></div><div class="pill"><div class="l">XP</div><div class="v p">+${V.xp+bonus}</div></div></div>
-  <p class="mut" style="margin-top:12px">${V.miss.length?"Estas son las que se te escaparon. Léelas y se te quedan:":"Sin ningún fallo. ¡Bonus +30 XP!"}</p>
-  <div class="actions"><button class="big-btn play" id="vagain">Otra ronda</button><button class="big-btn alt" id="vmenu">Menú V/F</button></div></div>
-  ${V.miss.map(c=>`<div class="card" style="margin-bottom:10px"><div class="tit" style="font-weight:600;margin-bottom:6px">${c[3]||"🤔"} ${esc(c[0])}</div><div class="fb ok"><b class="t">${c[1]?"VERDADERO":"FALSO"}</b><br>${esc(c[2])}</div></div>`).join("")}`;
-  $("#vagain").onclick=()=>startVF(V.rev);$("#vmenu").onclick=()=>go("vf");
+  const total=V.i>V.q.length?V.q.length:V.i,sc=V.score,win=V.lives>0;
+  store.vfbest=Math.max(store.vfbest,V.best);
+  let bonus=0;if(win&&V.miss.length===0&&total>=10){bonus=40;addXP(40)}
+  save();if(win){SFX.win();confetti(sc===total?260:140)}else SFX.lose();
+  const pct=total?Math.round(sc/total*100):0;
+  app.innerHTML=`<div class="card res"><div class="emo">${!win?"💀":V.miss.length?"🏆":"👑"}</div><h2 style="margin:8px 0 4px">${!win?"Te quedaste sin vidas":V.miss.length?"¡Ronda completada!":"¡PERFECTO!"}</h2>
+  <div class="stats"><div class="pill"><div class="l">Aciertos</div><div class="v g">${sc}/${total}</div></div><div class="pill"><div class="l">Precisión</div><div class="v p">${pct}%</div></div><div class="pill"><div class="l">Mejor racha</div><div class="v y">${V.best}</div></div><div class="pill"><div class="l">XP</div><div class="v g">+${V.xp+bonus}</div></div></div>
+  <p class="mut" style="margin-top:12px">${V.miss.length?"Las que se escaparon (se guardan en «Mis fallos»):":"Sin ningún fallo. ¡Bonus +40 XP!"}</p>
+  <div class="actions"><button class="big-btn play" id="vagain">Otra vez</button><button class="big-btn alt" id="vmenu">Menú V/F</button></div></div>
+  ${V.miss.slice(0,40).map(c=>`<div class="card" style="margin-bottom:10px"><div style="font-weight:600;margin-bottom:6px">${c[3]||"🤔"} ${esc(c[0])}</div><div class="fb ok"><b class="t">${c[1]?"VERDADERO":"FALSO"}</b><br>${esc(c[2])}</div></div>`).join("")}${V.miss.length>40?`<p class="mut">…y ${V.miss.length-40} más en «Mis fallos».</p>`:""}`;
+  const m=V.mode;$("#vagain").onclick=()=>startVF(m);$("#vmenu").onclick=()=>go("vf");
 }
 document.addEventListener("keydown",e=>{
-  if(!V||!$("#vb")||e.target.tagName==="TEXTAREA")return;
-  if(e.key==="ArrowRight")answerVF(true,document.querySelector(".vfbtn.t"));
-  else if(e.key==="ArrowLeft")answerVF(false,document.querySelector(".vfbtn.f"));
+  if(!V||!$("#vc")||e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT")return;
+  if(e.key==="ArrowRight")answerVF(true);else if(e.key==="ArrowLeft")answerVF(false);
 });
 go("home");
 </script>
